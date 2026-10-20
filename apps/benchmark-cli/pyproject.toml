@@ -1,0 +1,16 @@
+[project]
+name = "benchmark-cli"
+version = "0.1.0"
+description = "Empirical verification, progressive NASA FIRMS data fetcher, and publication figure generator for Flare-Chronos"
+requires-python = ">=3.11"
+dependencies = [
+    "numpy>=2.0.0",
+    "pandas>=2.2.0",
+    "pillow>=10.0.0",
+    "flare-chronos-core",
+    "firms-ingestion",
+]
+
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"

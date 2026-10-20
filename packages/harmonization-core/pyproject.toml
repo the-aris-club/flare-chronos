@@ -1,0 +1,13 @@
+[project]
+name = "flare-chronos-core"
+version = "0.1.0"
+description = "Deep scientific module for cross-sensor MODIS and VIIRS active fire physical harmonization"
+requires-python = ">=3.11"
+dependencies = [
+    "numpy>=2.0.0",
+    "pandas>=2.2.0",
+]
+
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
