@@ -239,5 +239,3 @@ Branches are auto-deleted after merge.
 ## License
 
 MIT. See `LICENSE`.
-EOF
-echo written
