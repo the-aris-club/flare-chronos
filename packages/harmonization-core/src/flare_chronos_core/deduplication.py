@@ -12,6 +12,7 @@ Solves Problem 4 of the NASA MODIS-VIIRS Harmonization Challenge:
 from __future__ import annotations
 
 import math
+from typing import Tuple
 
 from .domain import FireEpisode, HarmonizedDetection
 from .geometry_h3 import R_EARTH_KM

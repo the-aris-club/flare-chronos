@@ -196,10 +196,10 @@ def latlon_to_h3(lat: float, lon: float, resolution: int) -> str:
     Uses native h3-py when installed; otherwise computes a deterministic geodesic
     equal-area hexagonal lattice index formatted as a standard 15-character H3 hex string.
     """
-    if HAS_NATIVE_H3:
+    if HAS_NATIVE_H3 and _h3_lib is not None:
         if hasattr(_h3_lib, "latlng_to_cell"):
-            return str(_h3_lib.latlng_to_cell(lat, lon, resolution))
-        return str(_h3_lib.geo_to_h3(lat, lon, resolution))
+            return str(_h3_lib.latlng_to_cell(lat, lon, resolution))  # type: ignore[union-attr]
+        return str(_h3_lib.geo_to_h3(lat, lon, resolution))  # type: ignore[union-attr]
 
     # Deterministic equal-area hexagonal lattice projection (Snyder Equal-Area Hexagonal Grid)
     step_km = H3_RES7_STEP_KM if resolution == 7 else H3_RES8_STEP_KM
