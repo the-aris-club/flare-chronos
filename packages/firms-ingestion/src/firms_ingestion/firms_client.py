@@ -170,7 +170,7 @@ class FIRMSClient:
                 df = self.fetch_area_csv(spec)
                 summary[spec.cache_filename] = len(df)
                 time.sleep(pause_between_specs_sec)
-            except Exception as exc:
+            except Exception as exc:  # noqa: BLE001
                 summary[spec.cache_filename] = -1
                 print(f"[WARN] Failed {spec.cache_filename}: {exc}")
         return summary

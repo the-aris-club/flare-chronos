@@ -49,7 +49,7 @@ def _get_font(
         if Path(path).exists():
             try:
                 return ImageFont.truetype(path, size=size)
-            except Exception:
+            except Exception:  # noqa: BLE001, S110
                 pass
     return ImageFont.load_default()
 

@@ -2,13 +2,10 @@
 
 from __future__ import annotations
 
-import math
 import sys
 import unittest
 from datetime import UTC, datetime
 from pathlib import Path
-
-import numpy as np
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
@@ -17,13 +14,10 @@ sys.path.insert(0, str(ROOT / "packages" / "harmonization-core" / "src"))
 from flare_chronos_core import (
     AnomalyTier,
     BurningCalendarCell,
-    FireEpisode,
-    HarmonizedDetection,
     ThermalDetection,
     build_burning_activity_calendar,
     classify_sfai_tier,
     compute_effective_observation_effort,
-    compute_solar_zenith_angle,
     haversine_km,
     is_in_south_atlantic_anomaly,
     latlon_to_h3,
@@ -79,7 +73,7 @@ class TestCoreCoverage(unittest.TestCase):
             raw_confidence="high",
             raw_daynight="D",
         )
-        from flare_chronos_core import harmonize_detections, cluster_fire_episodes
+        from flare_chronos_core import cluster_fire_episodes, harmonize_detections
 
         harm = harmonize_detections([det])
         episodes = cluster_fire_episodes(harm)

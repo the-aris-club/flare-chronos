@@ -113,7 +113,7 @@ def main() -> None:
             print(
                 f"      - {row.get('data_id', 'unknown')}: {row.get('min_date', '')} -> {row.get('max_date', '')}"
             )
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001
         print(f"[WARN] Could not fetch data_availability: {exc}")
 
     print("\n[2/3] Fetching multi-epoch historical & NRT slices for Mekong & Amazon...")
@@ -134,7 +134,7 @@ def main() -> None:
             df_open = client.fetch_open_7d_feed(sensor_path, fname)
             summary[f"open7d__{fname}"] = len(df_open)
             print(f"      - open7d__{fname}: {len(df_open):,} rows")
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             summary[f"open7d__{fname}"] = -1
             print(f"      [WARN] open7d__{fname}: {exc}")
 

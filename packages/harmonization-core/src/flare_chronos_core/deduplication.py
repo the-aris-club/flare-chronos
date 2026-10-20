@@ -12,7 +12,6 @@ Solves Problem 4 of the NASA MODIS-VIIRS Harmonization Challenge:
 from __future__ import annotations
 
 import math
-from typing import Tuple
 
 from .domain import FireEpisode, HarmonizedDetection
 from .geometry_h3 import R_EARTH_KM
@@ -91,13 +90,13 @@ def cluster_fire_episodes(
 
     clusters: list[list[HarmonizedDetection]] = []
     # Spatial hash buckets (0.05 deg ~ 5.5 km grid) -> list of active clusters for O(1) neighbor lookup
-    spatial_buckets: dict[Tuple[int, int], list[list[HarmonizedDetection]]] = {}
+    spatial_buckets: dict[tuple[int, int], list[list[HarmonizedDetection]]] = {}
 
     for det in valid:
         t_cur = det.raw.acq_datetime_utc
         r_cur = math.sqrt(det.footprint.area_km2 / math.pi)
-        b_lat = int(math.floor(det.raw.latitude * 20.0))
-        b_lon = int(math.floor(det.raw.longitude * 20.0))
+        b_lat = math.floor(det.raw.latitude * 20.0)
+        b_lon = math.floor(det.raw.longitude * 20.0)
         matched_cluster = None
 
         # Search 3x3 neighboring 0.05-deg buckets

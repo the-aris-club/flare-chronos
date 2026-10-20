@@ -70,12 +70,16 @@ def compute_unified_detection_probability(
     # High-energy protons in the SAA trigger single-band 4um spikes at night without
     # corresponding 11um (T5) heating or sustained FRP (Schroeder et al., 2014).
     is_saa_false_alarm = False
-    if in_saa and harmonized_daynight == "N":
-        if (delta_t45 < 16.5 and det.frp_mw < 2.2) or (
-            base_prob < 0.45 and delta_t45 < 19.5
-        ):
-            is_saa_false_alarm = True
-            base_prob *= 0.12
+    if (
+        in_saa
+        and harmonized_daynight == "N"
+        and (
+            (delta_t45 < 16.5 and det.frp_mw < 2.2)
+            or (base_prob < 0.45 and delta_t45 < 19.5)
+        )
+    ):
+        is_saa_false_alarm = True
+        base_prob *= 0.12
 
     return round(base_prob, 4), is_saa_false_alarm
 
@@ -88,18 +92,14 @@ def is_static_or_non_veg_source(
     """Identify industrial gas flares, volcanoes, offshore platforms, or persistent H3 cells."""
     if det.fire_type is not None and det.fire_type in (1, 2, 3):
         return True
-    if h3_res8_cell in persistent_static_cells:
-        return True
-    return False
+    return h3_res8_cell in persistent_static_cells
 
 
 def has_aqua_nrt_geolocation_risk(det: ThermalDetection, scan_angle_deg: float) -> bool:
     """Flag Aqua NRT/RT/URT detections where orbital maneuvers can induce multi-km error."""
-    if (
+    return bool(
         det.platform == SatellitePlatform.AQUA
         and det.processing_mode
         in (ProcessingMode.NRT, ProcessingMode.RT, ProcessingMode.URT)
         and scan_angle_deg >= 30.0
-    ):
-        return True
-    return False
+    )
