@@ -10,9 +10,8 @@ Solves Problem 2 of the NASA MODIS-VIIRS Harmonization Challenge:
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 import math
-from typing import Dict, List, Tuple
+from dataclasses import dataclass
 
 import numpy as np
 
@@ -30,8 +29,8 @@ class CrossSensorCalibrationModel:
     day_count_multiplier_nadir: float
     night_count_multiplier_nadir: float
     scan_tail_kappa: float
-    modis_quantiles_mw: List[float]
-    viirs_quantiles_mw: List[float]
+    modis_quantiles_mw: list[float]
+    viirs_quantiles_mw: list[float]
     coincident_pair_count: int
     raw_r2: float
     harmonized_r2: float
@@ -56,12 +55,12 @@ def compute_frp_detection_limit(
     """
     cos_sza = max(0.0, math.cos(math.radians(min(90.0, sza_deg))))
     if sensor == SensorType.MODIS:
-        l0_mw = 3.70 + 4.50 * (cos_sza ** 0.75)
-        limit_mw = l0_mw * (footprint.area_km2 ** 1.04)
+        l0_mw = 3.70 + 4.50 * (cos_sza**0.75)
+        limit_mw = l0_mw * (footprint.area_km2**1.04)
     else:
-        l0_mw = 0.50 + 0.65 * (cos_sza ** 0.75)
+        l0_mw = 0.50 + 0.65 * (cos_sza**0.75)
         rel_area = footprint.area_km2 / 0.140625
-        limit_mw = l0_mw * (rel_area ** 0.94)
+        limit_mw = l0_mw * (rel_area**0.94)
     return round(limit_mw, 4)
 
 
@@ -97,7 +96,7 @@ def apply_two_stage_frp_calibration(
     sza_deg: float,
     harmonized_daynight: str,
     model: CrossSensorCalibrationModel | None = None,
-) -> Tuple[float, float, float, float]:
+) -> tuple[float, float, float, float]:
     """Apply Two-Stage Physics-Guided Calibration to a single Thermal Detection.
 
     Returns:
@@ -132,7 +131,7 @@ def apply_two_stage_frp_calibration(
         alpha, beta = cal.night_power_alpha, cal.night_power_beta
         base_count_mult = cal.night_count_multiplier_nadir
 
-    parametric_frp = alpha * (scan_corr_frp ** beta) + 0.35 * (frp_lim - 1.15)
+    parametric_frp = alpha * (scan_corr_frp**beta) + 0.35 * (frp_lim - 1.15)
     # Interpolate on empirical quantile mapping curve for smooth extreme-value preservation
     eqm_frp = float(
         np.interp(
@@ -146,7 +145,7 @@ def apply_two_stage_frp_calibration(
     viirs_eq_frp = 0.65 * parametric_frp + 0.35 * eqm_frp
 
     # Equivalent fire count expansion accounts for small fires missed inside large MODIS footprints
-    viirs_eq_count = base_count_mult * (footprint.area_km2 ** 0.38)
+    viirs_eq_count = base_count_mult * (footprint.area_km2**0.38)
 
     return (
         frp_lim,
@@ -182,7 +181,7 @@ def fit_coincident_aqua_snpp_model(
         log_m = np.log(m_sc)
         log_v = np.log(v_ref)
         slope, intercept = np.polyfit(log_m, log_v, 1)
-        pred = np.exp(intercept) * (m_sc ** slope)
+        pred = np.exp(intercept) * (m_sc**slope)
         loss = float(np.mean((pred - v_ref) ** 2))
         if loss < best_loss:
             best_loss = loss
@@ -197,23 +196,31 @@ def fit_coincident_aqua_snpp_model(
     m_quantiles = np.quantile(m_scan_corr, q_probs)
     v_quantiles = np.quantile(v_ref, q_probs)
 
-    parametric_pred = alpha * (m_scan_corr ** beta)
+    parametric_pred = alpha * (m_scan_corr**beta)
     eqm_pred = np.interp(m_scan_corr, m_quantiles, v_quantiles)
     harmonized_pred = 0.65 * parametric_pred + 0.35 * eqm_pred
 
     # Compute validation statistics (Before vs After Harmonization)
     ss_tot = float(np.sum((v_ref - np.mean(v_ref)) ** 2))
     raw_r2 = max(0.0, 1.0 - float(np.sum((v_ref - m_raw) ** 2)) / max(1e-6, ss_tot))
-    harm_r2 = max(0.0, 1.0 - float(np.sum((v_ref - harmonized_pred) ** 2)) / max(1e-6, ss_tot))
+    harm_r2 = max(
+        0.0, 1.0 - float(np.sum((v_ref - harmonized_pred) ** 2)) / max(1e-6, ss_tot)
+    )
 
     raw_rmse = float(np.sqrt(np.mean((v_ref - m_raw) ** 2)))
     harm_rmse = float(np.sqrt(np.mean((v_ref - harmonized_pred) ** 2)))
 
     # Two-sample empirical Kolmogorov-Smirnov statistic D_KS
-    grid_vals = np.linspace(min(float(np.min(m_raw)), float(np.min(v_ref))), float(np.percentile(v_ref, 99)), 200)
+    grid_vals = np.linspace(
+        min(float(np.min(m_raw)), float(np.min(v_ref))),
+        float(np.percentile(v_ref, 99)),
+        200,
+    )
     cdf_v = np.searchsorted(np.sort(v_ref), grid_vals, side="right") / len(v_ref)
     cdf_m_raw = np.searchsorted(np.sort(m_raw), grid_vals, side="right") / len(m_raw)
-    cdf_m_harm = np.searchsorted(np.sort(harmonized_pred), grid_vals, side="right") / len(harmonized_pred)
+    cdf_m_harm = np.searchsorted(
+        np.sort(harmonized_pred), grid_vals, side="right"
+    ) / len(harmonized_pred)
 
     ks_before = float(np.max(np.abs(cdf_v - cdf_m_raw)))
     ks_after = float(np.max(np.abs(cdf_v - cdf_m_harm)))
@@ -228,7 +235,7 @@ def fit_coincident_aqua_snpp_model(
         scan_tail_kappa=round(best_kappa, 4),
         modis_quantiles_mw=[round(float(x), 3) for x in m_quantiles],
         viirs_quantiles_mw=[round(float(x), 3) for x in v_quantiles],
-        coincident_pair_count=int(len(m_raw)),
+        coincident_pair_count=len(m_raw),
         raw_r2=round(raw_r2, 4),
         harmonized_r2=round(harm_r2, 4),
         raw_rmse_mw=round(raw_rmse, 3),

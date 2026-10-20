@@ -11,11 +11,9 @@ Solves Problem 4 of the NASA MODIS-VIIRS Harmonization Challenge:
 
 from __future__ import annotations
 
-from datetime import datetime
 import math
-from typing import Dict, List
 
-from .domain import FireEpisode, HarmonizedDetection, SatellitePlatform, SensorType
+from .domain import FireEpisode, HarmonizedDetection
 from .geometry_h3 import R_EARTH_KM
 
 
@@ -64,10 +62,10 @@ def compute_effective_observation_effort(year: int, latitude_deg: float) -> floa
 
 
 def cluster_fire_episodes(
-    detections: List[HarmonizedDetection],
+    detections: list[HarmonizedDetection],
     temporal_window_minutes: float = 95.0,
     min_probability: float = 0.20,
-) -> List[FireEpisode]:
+) -> list[FireEpisode]:
     """Deduplicate multi-satellite Thermal Detections into physical Fire Episodes.
 
     Two detections d_i, d_j belong to the same Fire Episode if:
@@ -90,9 +88,9 @@ def cluster_fire_episodes(
     # Sort chronologically by UTC acquisition timestamp
     valid.sort(key=lambda d: d.raw.acq_datetime_utc)
 
-    clusters: List[List[HarmonizedDetection]] = []
+    clusters: list[list[HarmonizedDetection]] = []
     # Spatial hash buckets (0.05 deg ~ 5.5 km grid) -> list of active clusters for O(1) neighbor lookup
-    spatial_buckets: Dict[Tuple[int, int], List[List[HarmonizedDetection]]] = {}
+    spatial_buckets: dict[Tuple[int, int], list[list[HarmonizedDetection]]] = {}
 
     for det in valid:
         t_cur = det.raw.acq_datetime_utc
@@ -110,10 +108,12 @@ def cluster_fire_episodes(
                 bucket = spatial_buckets.get(key)
                 if not bucket:
                     continue
-                still_active: List[List[HarmonizedDetection]] = []
+                still_active: list[list[HarmonizedDetection]] = []
                 for cl in bucket:
                     anchor = cl[-1]
-                    dt_min = (t_cur - anchor.raw.acq_datetime_utc).total_seconds() / 60.0
+                    dt_min = (
+                        t_cur - anchor.raw.acq_datetime_utc
+                    ).total_seconds() / 60.0
                     if dt_min > temporal_window_minutes:
                         continue
                     still_active.append(cl)
@@ -139,7 +139,7 @@ def cluster_fire_episodes(
             clusters.append(new_cl)
             spatial_buckets.setdefault((b_lat, b_lon), []).append(new_cl)
 
-    episodes: List[FireEpisode] = []
+    episodes: list[FireEpisode] = []
     for idx, cl in enumerate(clusters, start=1):
         # Weight centroid toward finest-resolution (smallest footprint area) detections
         inv_areas = [1.0 / max(0.10, d.footprint.area_km2) for d in cl]
@@ -159,10 +159,12 @@ def cluster_fire_episodes(
 
         # Group by distinct overpass platform to avoid summing redundant passes,
         # while summing sub-pixel VIIRS clusters captured on the SAME platform pass
-        by_platform_frp: Dict[str, float] = {}
+        by_platform_frp: dict[str, float] = {}
         for d in cl:
             plat_key = f"{d.raw.platform.value}_{d.raw.acq_datetime_utc.strftime('%Y%m%d%H%M')}"
-            by_platform_frp[plat_key] = by_platform_frp.get(plat_key, 0.0) + d.calibrated_viirs_eq_frp_mw
+            by_platform_frp[plat_key] = (
+                by_platform_frp.get(plat_key, 0.0) + d.calibrated_viirs_eq_frp_mw
+            )
 
         # Inverse-variance / footprint-weighted mean across distinct overpasses in the episode
         harmonized_frp = sum(by_platform_frp.values()) / max(1, len(by_platform_frp))

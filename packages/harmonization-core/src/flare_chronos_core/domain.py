@@ -8,7 +8,6 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Dict, List, Optional
 
 
 class SensorType(str, Enum):
@@ -52,13 +51,17 @@ class ThermalDetection:
     processing_mode: ProcessingMode
     scan_km: float
     track_km: float
-    bright_t4_k: float          # ~3.96 um (MODIS Ch21/22) or 3.74 um (VIIRS I4)
-    bright_t5_k: float          # ~11.0 um (MODIS Ch31) or 11.45 um (VIIRS I5)
-    frp_mw: float               # Instantaneous Fire Radiative Power (MW)
-    raw_confidence: str         # "0"-"100" for MODIS; "l"/"n"/"h" or "low"/"nominal"/"high" for VIIRS
-    raw_daynight: str           # "D" or "N"
+    bright_t4_k: float  # ~3.96 um (MODIS Ch21/22) or 3.74 um (VIIRS I4)
+    bright_t5_k: float  # ~11.0 um (MODIS Ch31) or 11.45 um (VIIRS I5)
+    frp_mw: float  # Instantaneous Fire Radiative Power (MW)
+    raw_confidence: (
+        str  # "0"-"100" for MODIS; "l"/"n"/"h" or "low"/"nominal"/"high" for VIIRS
+    )
+    raw_daynight: str  # "D" or "N"
     version_tag: str = "6.1"
-    fire_type: Optional[int] = None  # Standard MCD14ML/VNP14IMGML type: 0=veg, 1=volcano, 2=static, 3=offshore
+    fire_type: int | None = (
+        None  # Standard MCD14ML/VNP14IMGML type: 0=veg, 1=volcano, 2=static, 3=offshore
+    )
 
 
 @dataclass(frozen=True)
@@ -73,7 +76,7 @@ class InstantaneousFootprint:
     track_azimuth_deg: float
     semi_major_km: float
     semi_minor_km: float
-    aggregation_zone: int       # 0 for MODIS; 1, 2, or 3 for VIIRS 375m
+    aggregation_zone: int  # 0 for MODIS; 1, 2, or 3 for VIIRS 375m
     area_expansion_factor: float
 
 
@@ -84,7 +87,7 @@ class HarmonizedDetection:
     raw: ThermalDetection
     footprint: InstantaneousFootprint
     sza_deg: float
-    harmonized_daynight: str    # "D" iff SZA < 85.0 deg else "N"
+    harmonized_daynight: str  # "D" iff SZA < 85.0 deg else "N"
     daynight_reclassified: bool
     detection_probability: float
     is_saa_anomaly: bool
@@ -96,8 +99,8 @@ class HarmonizedDetection:
     calibrated_viirs_eq_count: float
     h3_res7_cell: str
     h3_res8_cell: str
-    h3_res7_weights: Dict[str, float] = field(default_factory=dict)
-    h3_res8_weights: Dict[str, float] = field(default_factory=dict)
+    h3_res7_weights: dict[str, float] = field(default_factory=dict)
+    h3_res8_weights: dict[str, float] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -112,7 +115,7 @@ class FireEpisode:
     h3_res7_cell: str
     h3_res8_cell: str
     harmonized_daynight: str
-    contributing_platforms: List[str]
+    contributing_platforms: list[str]
     raw_detection_count: int
     combined_probability: float
     max_footprint_area_km2: float
@@ -128,14 +131,14 @@ class BurningCalendarCell:
     """A single Year x Pentad cell in the Harmonized Burning Activity Calendar."""
 
     year: int
-    pentad: int                 # 1..73 (5-day standard climatological step)
+    pentad: int  # 1..73 (5-day standard climatological step)
     doy_start: int
     doy_end: int
     raw_detection_count: int
     deduplicated_episode_count: int
     effective_effort_omega: float
-    hfd_per_100km2_day: float   # Harmonized Fire Density (episodes / 100 km^2 / day)
-    hrf_mw_per_km2: float       # Harmonized Radiative Flux (MW / km^2)
+    hfd_per_100km2_day: float  # Harmonized Fire Density (episodes / 100 km^2 / day)
+    hrf_mw_per_km2: float  # Harmonized Radiative Flux (MW / km^2)
     raw_frp_mw_per_km2: float
-    sfai_zscore: float          # Standardized Fire Anomaly Index
+    sfai_zscore: float  # Standardized Fire Anomaly Index
     anomaly_tier: AnomalyTier

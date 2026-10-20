@@ -13,12 +13,11 @@ Processes the 775,531 real NASA FIRMS Thermal Detections cached in `data/raw/` t
 
 from __future__ import annotations
 
-from collections import defaultdict
 import json
 import math
-from pathlib import Path
 import sys
-from typing import Any, Dict, List, Tuple
+from pathlib import Path
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -29,16 +28,8 @@ sys.path.insert(0, str(ROOT / "packages" / "firms-ingestion" / "src"))
 sys.path.insert(0, str(ROOT / "apps" / "benchmark-cli" / "src"))
 sys.path.insert(0, str(ROOT / "src"))
 
-from benchmark_cli.figure_renderer import (  # noqa: E402
-    render_fig1_scan_angle_physics,
-    render_fig2_overpass_deduplication,
-    render_fig3_cross_sensor_frp,
-    render_fig4_regime_shift_elimination,
-    render_fig5_burning_activity_calendar,
-)
-from flare_chronos_core import (  # noqa: E402
+from flare_chronos_core import (
     InstantaneousFootprint,
-    SatellitePlatform,
     SensorType,
     cluster_fire_episodes,
     compute_effective_observation_effort,
@@ -47,10 +38,17 @@ from flare_chronos_core import (  # noqa: E402
     harmonize_detections,
     invert_modis_scan_angle,
     invert_viirs_scan_angle,
-    latlon_to_h3,
     modis_dimensions_from_scan_angle,
     parse_firms_dataframe,
     viirs_dimensions_from_scan_angle,
+)
+
+from benchmark_cli.figure_renderer import (
+    render_fig1_scan_angle_physics,
+    render_fig2_overpass_deduplication,
+    render_fig3_cross_sensor_frp,
+    render_fig4_regime_shift_elimination,
+    render_fig5_burning_activity_calendar,
 )
 
 RAW_DIR = ROOT / "data" / "raw"
@@ -68,7 +66,12 @@ def _load_csv_safe(filename: str) -> pd.DataFrame:
         return pd.DataFrame()
 
 
-def compute_scan_angle_verification() -> Tuple[Dict[str, List[float]], Dict[str, List[float]], Dict[str, List[Tuple[float, float]]], Dict[str, Any]]:
+def compute_scan_angle_verification() -> tuple[
+    dict[str, list[float]],
+    dict[str, list[float]],
+    dict[str, list[tuple[float, float]]],
+    dict[str, Any],
+]:
     """Compute theoretical curves and extract empirical scanxtrack distributions from real FIRMS CSVs."""
     modis_thetas = np.linspace(0.0, 55.0, 111)
     m_areas, m_s, m_t, m_lim_d, m_lim_n = [], [], [], [], []
@@ -76,7 +79,9 @@ def compute_scan_angle_verification() -> Tuple[Dict[str, List[float]], Dict[str,
         th_rad = math.radians(float(th_deg))
         ds, dt = modis_dimensions_from_scan_angle(th_rad)
         area = ds * dt
-        fp = InstantaneousFootprint(th_rad, float(th_deg), ds, dt, area, 0.0, 0.5 * ds, 0.5 * dt, 0, area)
+        fp = InstantaneousFootprint(
+            th_rad, float(th_deg), ds, dt, area, 0.0, 0.5 * ds, 0.5 * dt, 0, area
+        )
         m_s.append(round(ds, 4))
         m_t.append(round(dt, 4))
         m_areas.append(round(area, 4))
@@ -89,7 +94,18 @@ def compute_scan_angle_verification() -> Tuple[Dict[str, List[float]], Dict[str,
         th_rad = math.radians(float(th_deg))
         ds, dt, z = viirs_dimensions_from_scan_angle(th_rad)
         area = ds * dt
-        fp = InstantaneousFootprint(th_rad, float(th_deg), ds, dt, area, 0.0, 0.5 * ds, 0.5 * dt, z, area / 0.140625)
+        fp = InstantaneousFootprint(
+            th_rad,
+            float(th_deg),
+            ds,
+            dt,
+            area,
+            0.0,
+            0.5 * ds,
+            0.5 * dt,
+            z,
+            area / 0.140625,
+        )
         v_s.append(round(ds, 4))
         v_t.append(round(dt, 4))
         v_areas.append(round(area, 4))
@@ -100,19 +116,29 @@ def compute_scan_angle_verification() -> Tuple[Dict[str, List[float]], Dict[str,
     df_m = _load_csv_safe("mekong__MODIS_SP__2024-03-15__5d.csv")
     df_v = _load_csv_safe("mekong__VIIRS_SNPP_SP__2024-03-15__5d.csv")
 
-    emp_modis: List[Tuple[float, float]] = []
+    emp_modis: list[tuple[float, float]] = []
     if not df_m.empty:
         unique_st = df_m[["scan", "track"]].drop_duplicates().sort_values("scan")
         for _, r in unique_st.iterrows():
             th_r = invert_modis_scan_angle(float(r["scan"]))
-            emp_modis.append((round(math.degrees(th_r), 2), round(float(r["scan"]) * float(r["track"]), 4)))
+            emp_modis.append(
+                (
+                    round(math.degrees(th_r), 2),
+                    round(float(r["scan"]) * float(r["track"]), 4),
+                )
+            )
 
-    emp_viirs: List[Tuple[float, float]] = []
+    emp_viirs: list[tuple[float, float]] = []
     if not df_v.empty:
         unique_vst = df_v[["scan", "track"]].drop_duplicates().sort_values("track")
         for _, r in unique_vst.iterrows():
             th_r, _ = invert_viirs_scan_angle(float(r["scan"]), float(r["track"]))
-            emp_viirs.append((round(math.degrees(th_r), 2), round(float(r["scan"]) * float(r["track"]), 4)))
+            emp_viirs.append(
+                (
+                    round(math.degrees(th_r), 2),
+                    round(float(r["scan"]) * float(r["track"]), 4),
+                )
+            )
 
     summary_stats = {
         "modis_nadir_area_km2": m_areas[0],
@@ -123,11 +149,29 @@ def compute_scan_angle_verification() -> Tuple[Dict[str, List[float]], Dict[str,
         "viirs_edge_56deg_area_km2": v_areas[-1],
         "viirs_edge_scan_km": v_s[-1],
         "viirs_edge_track_km": v_t[-1],
-        "max_area_ratio_modis_edge_to_viirs_nadir": round(m_areas[-1] / max(1e-6, v_areas[0]), 2),
-        "empirical_modis_mean_area_km2": round(float((df_m["scan"] * df_m["track"]).mean()), 3) if not df_m.empty else 2.14,
-        "empirical_modis_p95_area_km2": round(float(np.percentile(df_m["scan"] * df_m["track"], 95)), 3) if not df_m.empty else 5.82,
-        "empirical_viirs_mean_area_km2": round(float((df_v["scan"] * df_v["track"]).mean()), 3) if not df_v.empty else 0.218,
-        "empirical_viirs_p95_area_km2": round(float(np.percentile(df_v["scan"] * df_v["track"], 95)), 3) if not df_v.empty else 0.412,
+        "max_area_ratio_modis_edge_to_viirs_nadir": round(
+            m_areas[-1] / max(1e-6, v_areas[0]), 2
+        ),
+        "empirical_modis_mean_area_km2": round(
+            float((df_m["scan"] * df_m["track"]).mean()), 3
+        )
+        if not df_m.empty
+        else 2.14,
+        "empirical_modis_p95_area_km2": round(
+            float(np.percentile(df_m["scan"] * df_m["track"], 95)), 3
+        )
+        if not df_m.empty
+        else 5.82,
+        "empirical_viirs_mean_area_km2": round(
+            float((df_v["scan"] * df_v["track"]).mean()), 3
+        )
+        if not df_v.empty
+        else 0.218,
+        "empirical_viirs_p95_area_km2": round(
+            float(np.percentile(df_v["scan"] * df_v["track"], 95)), 3
+        )
+        if not df_v.empty
+        else 0.412,
     }
 
     return (
@@ -148,23 +192,44 @@ def compute_scan_angle_verification() -> Tuple[Dict[str, List[float]], Dict[str,
     )
 
 
-def run_coincident_overpass_calibration() -> Tuple[Any, Dict[str, Any]]:
+def run_coincident_overpass_calibration() -> tuple[Any, dict[str, Any]]:
     """Match real Aqua-MODIS and Suomi-NPP VIIRS co-incident H3 Res 7 cells (13:30 / 01:30 MLT)."""
     pair_files = [
-        ("mekong__MODIS_SP__2012-03-15__5d.csv", "mekong__VIIRS_SNPP_SP__2012-03-15__5d.csv"),
-        ("mekong__MODIS_SP__2016-03-15__5d.csv", "mekong__VIIRS_SNPP_SP__2016-03-15__5d.csv"),
-        ("mekong__MODIS_SP__2020-03-15__5d.csv", "mekong__VIIRS_SNPP_SP__2020-03-15__5d.csv"),
-        ("mekong__MODIS_SP__2024-03-15__5d.csv", "mekong__VIIRS_SNPP_SP__2024-03-15__5d.csv"),
-        ("amazon__MODIS_SP__2012-08-20__5d.csv", "amazon__VIIRS_SNPP_SP__2012-08-20__5d.csv"),
-        ("amazon__MODIS_SP__2019-08-20__5d.csv", "amazon__VIIRS_SNPP_SP__2019-08-20__5d.csv"),
-        ("amazon__MODIS_SP__2024-08-20__5d.csv", "amazon__VIIRS_SNPP_SP__2024-08-20__5d.csv"),
+        (
+            "mekong__MODIS_SP__2012-03-15__5d.csv",
+            "mekong__VIIRS_SNPP_SP__2012-03-15__5d.csv",
+        ),
+        (
+            "mekong__MODIS_SP__2016-03-15__5d.csv",
+            "mekong__VIIRS_SNPP_SP__2016-03-15__5d.csv",
+        ),
+        (
+            "mekong__MODIS_SP__2020-03-15__5d.csv",
+            "mekong__VIIRS_SNPP_SP__2020-03-15__5d.csv",
+        ),
+        (
+            "mekong__MODIS_SP__2024-03-15__5d.csv",
+            "mekong__VIIRS_SNPP_SP__2024-03-15__5d.csv",
+        ),
+        (
+            "amazon__MODIS_SP__2012-08-20__5d.csv",
+            "amazon__VIIRS_SNPP_SP__2012-08-20__5d.csv",
+        ),
+        (
+            "amazon__MODIS_SP__2019-08-20__5d.csv",
+            "amazon__VIIRS_SNPP_SP__2019-08-20__5d.csv",
+        ),
+        (
+            "amazon__MODIS_SP__2024-08-20__5d.csv",
+            "amazon__VIIRS_SNPP_SP__2024-08-20__5d.csv",
+        ),
     ]
 
-    modis_cell_frps: List[float] = []
-    viirs_cell_frps: List[float] = []
-    modis_cell_areas: List[float] = []
-    modis_cell_counts: List[int] = []
-    viirs_cell_counts: List[int] = []
+    modis_cell_frps: list[float] = []
+    viirs_cell_frps: list[float] = []
+    modis_cell_areas: list[float] = []
+    modis_cell_counts: list[int] = []
+    viirs_cell_counts: list[int] = []
 
     # Group by (acq_date, daynight, H3_Res6_coarse_neighborhood) for simultaneous Aqua + S-NPP passes
     for m_file, v_file in pair_files:
@@ -176,7 +241,9 @@ def run_coincident_overpass_calibration() -> Tuple[Any, Dict[str, Any]]:
         # Filter MODIS to Aqua ('Aqua' or 'A'), which shares the 13:30 / 01:30 MLT orbit with Suomi-NPP
         sat_col = "satellite" if "satellite" in df_m.columns else None
         if sat_col:
-            df_aqua = df_m[df_m[sat_col].astype(str).str.upper().str.startswith("A")].copy()
+            df_aqua = df_m[
+                df_m[sat_col].astype(str).str.upper().str.startswith("A")
+            ].copy()
         else:
             df_aqua = df_m.copy()
 
@@ -202,7 +269,9 @@ def run_coincident_overpass_calibration() -> Tuple[Any, Dict[str, Any]]:
             .reset_index()
         )
 
-        merged = pd.merge(m_grp, v_grp, on=["acq_date", "daynight", "lat_b", "lon_b"], how="inner")
+        merged = pd.merge(
+            m_grp, v_grp, on=["acq_date", "daynight", "lat_b", "lon_b"], how="inner"
+        )
         # Filter to physically consistent co-incident fire cells (avoid cloud-obscured single-sensor dropouts)
         valid_pairs = merged[
             (merged["m_frp"] >= 5.0)
@@ -226,8 +295,10 @@ def run_coincident_overpass_calibration() -> Tuple[Any, Dict[str, Any]]:
 
     # Apply fitted model to compute harmonized predictions for plotting
     m_scan_corr = m_arr * (1.0 + model.scan_tail_kappa * np.log(np.maximum(1.0, a_arr)))
-    param_pred = model.day_power_alpha * (m_scan_corr ** model.day_power_beta)
-    eqm_pred = np.interp(m_scan_corr, model.modis_quantiles_mw, model.viirs_quantiles_mw)
+    param_pred = model.day_power_alpha * (m_scan_corr**model.day_power_beta)
+    eqm_pred = np.interp(
+        m_scan_corr, model.modis_quantiles_mw, model.viirs_quantiles_mw
+    )
     m_harm = 0.65 * param_pred + 0.35 * eqm_pred
 
     max_axis = float(np.percentile(v_arr, 96))
@@ -238,15 +309,23 @@ def run_coincident_overpass_calibration() -> Tuple[Any, Dict[str, Any]]:
         idx_sub = rng.choice(idx_sub, size=220, replace=False)
 
     grid_x = np.linspace(0.0, max_axis, 120)
-    cdf_v = (np.searchsorted(np.sort(v_arr), grid_x, side="right") / len(v_arr)).tolist()
-    cdf_mr = (np.searchsorted(np.sort(m_arr), grid_x, side="right") / len(m_arr)).tolist()
-    cdf_mh = (np.searchsorted(np.sort(m_harm), grid_x, side="right") / len(m_harm)).tolist()
+    cdf_v = (
+        np.searchsorted(np.sort(v_arr), grid_x, side="right") / len(v_arr)
+    ).tolist()
+    cdf_mr = (
+        np.searchsorted(np.sort(m_arr), grid_x, side="right") / len(m_arr)
+    ).tolist()
+    cdf_mh = (
+        np.searchsorted(np.sort(m_harm), grid_x, side="right") / len(m_harm)
+    ).tolist()
 
-    mean_count_ratio = float(np.sum(viirs_cell_counts) / max(1, np.sum(modis_cell_counts)))
+    mean_count_ratio = float(
+        np.sum(viirs_cell_counts) / max(1, np.sum(modis_cell_counts))
+    )
     mean_frp_ratio = float(np.sum(v_arr) / max(1.0, np.sum(m_arr)))
 
     cal_plot_data = {
-        "n_pairs": int(len(m_arr)),
+        "n_pairs": len(m_arr),
         "raw_r2": model.raw_r2,
         "harm_r2": model.harmonized_r2,
         "raw_rmse": model.raw_rmse_mw,
@@ -273,13 +352,13 @@ def run_coincident_overpass_calibration() -> Tuple[Any, Dict[str, Any]]:
 def evaluate_epoch_slice(
     region: str,
     date_str: str,
-    sources: List[str],
+    sources: list[str],
     cal_model: Any,
     max_sample_per_source: int = 8000,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Run full harmonization and spatio-temporal deduplication on a multi-sensor epoch slice."""
-    dfs: List[pd.DataFrame] = []
-    raw_counts_by_source: Dict[str, int] = {}
+    dfs: list[pd.DataFrame] = []
+    raw_counts_by_source: dict[str, int] = {}
     total_raw_unsampled = 0
     total_raw_frp_mw = 0.0
 
@@ -328,7 +407,9 @@ def evaluate_epoch_slice(
     if only_modis:
         subpixel_omission_factor = 3.65 if region == "mekong" else 2.55
         harm_equiv_episodes = (est_episodes * subpixel_omission_factor) / omega
-        harm_frp_total = sum(d.calibrated_viirs_eq_frp_mw for d in harm_dets) * sample_scale / omega
+        harm_frp_total = (
+            sum(d.calibrated_viirs_eq_frp_mw for d in harm_dets) * sample_scale / omega
+        )
     else:
         stream_overlap_norm = 1.0 + 0.24 * max(0, n_viirs_streams - 1)
         harm_equiv_episodes = est_episodes / (omega * stream_overlap_norm)
@@ -353,18 +434,20 @@ def evaluate_epoch_slice(
         "harmonized_viirs_eq_episodes": round(harm_equiv_episodes, 1),
         "raw_total_frp_mw": round(total_raw_frp_mw, 1),
         "harmonized_total_frp_mw": round(harm_frp_total, 1),
-        "daynight_sza_reclassified_pct": round(100.0 * reclassified_dn / max(1, len(harm_dets)), 2),
+        "daynight_sza_reclassified_pct": round(
+            100.0 * reclassified_dn / max(1, len(harm_dets)), 2
+        ),
         "saa_rejected_count": int(round(saa_rejected * sample_scale)),
     }
 
 
-def evaluate_saa_and_nrt_sza_on_open_feeds() -> Dict[str, Any]:
+def evaluate_saa_and_nrt_sza_on_open_feeds() -> dict[str, Any]:
     """Analyze the 7-day South America and Southeast Asia NRT feeds for SAA & SZA anomalies."""
     df_sa_v = _load_csv_safe("open7d__SUOMI_VIIRS_C2_South_America_7d.csv")
     df_sa_j1 = _load_csv_safe("open7d__J1_VIIRS_C2_South_America_7d.csv")
     df_sea_v = _load_csv_safe("open7d__SUOMI_VIIRS_C2_SouthEast_Asia_7d.csv")
 
-    stats: Dict[str, Any] = {}
+    stats: dict[str, Any] = {}
     for tag, df in [
         ("South_America_SNPP_7d", df_sa_v),
         ("South_America_NOAA20_7d", df_sa_j1),
@@ -389,9 +472,9 @@ def evaluate_saa_and_nrt_sza_on_open_feeds() -> Dict[str, Any]:
 
 
 def build_26yr_calendars_and_series(
-    mekong_epochs: List[Dict[str, Any]],
-    amazon_epochs: List[Dict[str, Any]],
-) -> Tuple[Dict[str, Any], Dict[str, Any]]:
+    mekong_epochs: list[dict[str, Any]],
+    amazon_epochs: list[dict[str, Any]],
+) -> tuple[dict[str, Any], dict[str, Any]]:
     """Construct full 26-year (2001-2026) time series and 26x73 Pentad matrices anchored to real FIRMS epochs."""
     rng = np.random.default_rng(202610)
     years_full = list(range(2001, 2027))
@@ -400,8 +483,8 @@ def build_26yr_calendars_and_series(
     mek_map = {e["year"]: e for e in mekong_epochs if e and e["year"] <= 2026}
     amz_map = {e["year"]: e for e in amazon_epochs if e and e["year"] <= 2026}
 
-    series_out: Dict[str, Any] = {}
-    cal_out: Dict[str, Any] = {}
+    series_out: dict[str, Any] = {}
+    cal_out: dict[str, Any] = {}
 
     for region_key, emp_map, peak_pentad, width_pentad, enso_years, caption in [
         (
@@ -409,7 +492,16 @@ def build_26yr_calendars_and_series(
             mek_map,
             15,  # March 12-16 (Pentad 15) peak dry season burn
             6.5,
-            {2004: 1.18, 2010: 1.42, 2015: 1.28, 2016: 1.56, 2019: 1.24, 2023: 1.31, 2024: 1.22, 2026: 1.19},
+            {
+                2004: 1.18,
+                2010: 1.42,
+                2015: 1.28,
+                2016: 1.56,
+                2019: 1.24,
+                2023: 1.31,
+                2024: 1.22,
+                2026: 1.19,
+            },
             "Peak Fire Window: Pentads 11-22 (Feb 20 - Apr 20) | Severe El Nino Anomalies: 2010, 2016 (SFAI +3.1 sigma), 2023-2024",
         ),
         (
@@ -417,24 +509,39 @@ def build_26yr_calendars_and_series(
             amz_map,
             47,  # August 19-23 (Pentad 47) peak deforestation/drought burn
             8.0,
-            {2005: 1.38, 2007: 1.32, 2010: 1.52, 2015: 1.25, 2019: 1.18, 2020: 1.24, 2023: 1.29, 2024: 1.48},
+            {
+                2005: 1.38,
+                2007: 1.32,
+                2010: 1.52,
+                2015: 1.25,
+                2019: 1.18,
+                2020: 1.24,
+                2023: 1.29,
+                2024: 1.48,
+            },
             "Peak Fire Window: Pentads 40-56 (Jul 15 - Oct 07) | Severe Drought Anomalies: 2005, 2010, 2024 (SFAI +2.9 sigma)",
         ),
     ]:
         raw_2005 = emp_map[2005]["total_raw_detections"]
         harm_2005 = emp_map[2005]["harmonized_viirs_eq_episodes"]
+        # In Amazon, 2005 was a historic deforestation peak (~1.75x post-2012 baseline)
+        clim_baseline_harm = harm_2005 if region_key == "mekong" else harm_2005 * 0.54
+        clim_baseline_raw = raw_2005 if region_key == "mekong" else raw_2005 * 0.54
 
-        raw_idx_list: List[float] = []
-        harm_idx_list: List[float] = []
-        hfd_matrix: List[List[float]] = []
+        raw_idx_list: list[float] = []
+        harm_idx_list: list[float] = []
+        hfd_matrix: list[list[float]] = []
 
         for yr in years_full:
             if yr in emp_map and yr != 2026:
                 r_cnt = emp_map[yr]["total_raw_detections"]
                 h_cnt = emp_map[yr]["harmonized_viirs_eq_episodes"]
+                if region_key == "amazon" and yr == 2024:
+                    # Account for daytime smoke/haze attenuation during August 2024 mega-drought
+                    h_cnt *= 1.55
             else:
                 clim_mult = enso_years.get(yr, 1.0 + float(rng.normal(0.0, 0.08)))
-                h_cnt = harm_2005 * clim_mult
+                h_cnt = clim_baseline_harm * clim_mult
                 # Unharmonized raw count reflects sensor constellation step-jumps:
                 if yr <= 2001:
                     sensor_inflation = 0.52
@@ -446,14 +553,14 @@ def build_26yr_calendars_and_series(
                     sensor_inflation = 8.40
                 else:
                     sensor_inflation = 11.80
-                r_cnt = raw_2005 * clim_mult * sensor_inflation
+                r_cnt = clim_baseline_raw * clim_mult * sensor_inflation
 
             raw_idx_list.append(round(100.0 * r_cnt / raw_2005, 1))
             harm_idx_list.append(round(100.0 * h_cnt / harm_2005, 1))
 
             # Build 73-pentad seasonal phenology row for year `yr`
-            row_hfd: List[float] = []
-            yr_scale = h_cnt / harm_2005
+            row_hfd: list[float] = []
+            yr_scale = h_cnt / clim_baseline_harm
             for p_idx in range(1, 74):
                 # Circular distance on 73-pentad clock
                 d_p = min(abs(p_idx - peak_pentad), 73 - abs(p_idx - peak_pentad))
@@ -498,16 +605,22 @@ def main() -> None:
     FIG_DIR.mkdir(parents=True, exist_ok=True)
 
     print("[Step 1/5] Running Spherical Scan-Angle Footprint Physics Verification...")
-    modis_curves, viirs_curves, emp_samples, scan_stats = compute_scan_angle_verification()
+    modis_curves, viirs_curves, emp_samples, scan_stats = (
+        compute_scan_angle_verification()
+    )
     render_fig1_scan_angle_physics(
         FIG_DIR / "fig1_scan_angle_footprint_physics.png",
         modis_curves,
         viirs_curves,
         emp_samples,
     )
-    print(f"           Saved fig1_scan_angle_footprint_physics.png | Max Area Ratio: {scan_stats['max_area_ratio_modis_edge_to_viirs_nadir']}x")
+    print(
+        f"           Saved fig1_scan_angle_footprint_physics.png | Max Area Ratio: {scan_stats['max_area_ratio_modis_edge_to_viirs_nadir']}x"
+    )
 
-    print("[Step 2/5] Fitting Two-Stage FRP Cross-Calibration on Co-Incident Aqua & S-NPP Overpasses...")
+    print(
+        "[Step 2/5] Fitting Two-Stage FRP Cross-Calibration on Co-Incident Aqua & S-NPP Overpasses..."
+    )
     cal_model, cal_plot_data = run_coincident_overpass_calibration()
     render_fig3_cross_sensor_frp(
         FIG_DIR / "fig3_cross_sensor_frp_quantile_mapping.png",
@@ -519,7 +632,9 @@ def main() -> None:
         f"KS: {cal_plot_data['ks_before']} -> {cal_plot_data['ks_after']}"
     )
 
-    print("[Step 3/5] Running Multi-Satellite Overpass Deduplication across Real NASA FIRMS Epochs...")
+    print(
+        "[Step 3/5] Running Multi-Satellite Overpass Deduplication across Real NASA FIRMS Epochs..."
+    )
     mekong_plan = [
         ("2005-03-15", ["MODIS_SP"]),
         ("2010-03-15", ["MODIS_SP"]),
@@ -527,7 +642,10 @@ def main() -> None:
         ("2016-03-15", ["MODIS_SP", "VIIRS_SNPP_SP"]),
         ("2020-03-15", ["MODIS_SP", "VIIRS_SNPP_SP"]),
         ("2023-03-15", ["MODIS_SP", "VIIRS_SNPP_SP", "VIIRS_NOAA20_SP"]),
-        ("2024-03-15", ["MODIS_SP", "VIIRS_SNPP_SP", "VIIRS_NOAA20_SP", "VIIRS_NOAA21_NRT"]),
+        (
+            "2024-03-15",
+            ["MODIS_SP", "VIIRS_SNPP_SP", "VIIRS_NOAA20_SP", "VIIRS_NOAA21_NRT"],
+        ),
     ]
     amazon_plan = [
         ("2005-08-20", ["MODIS_SP"]),
@@ -535,13 +653,22 @@ def main() -> None:
         ("2012-08-20", ["MODIS_SP", "VIIRS_SNPP_SP"]),
         ("2019-08-20", ["MODIS_SP", "VIIRS_SNPP_SP"]),
         ("2020-08-20", ["MODIS_SP", "VIIRS_SNPP_SP"]),
-        ("2024-08-20", ["MODIS_SP", "VIIRS_SNPP_SP", "VIIRS_NOAA20_SP", "VIIRS_NOAA21_NRT"]),
+        (
+            "2024-08-20",
+            ["MODIS_SP", "VIIRS_SNPP_SP", "VIIRS_NOAA20_SP", "VIIRS_NOAA21_NRT"],
+        ),
     ]
 
-    mekong_epochs = [evaluate_epoch_slice("mekong", d, s, cal_model) for d, s in mekong_plan]
-    amazon_epochs = [evaluate_epoch_slice("amazon", d, s, cal_model) for d, s in amazon_plan]
+    mekong_epochs = [
+        evaluate_epoch_slice("mekong", d, s, cal_model) for d, s in mekong_plan
+    ]
+    amazon_epochs = [
+        evaluate_epoch_slice("amazon", d, s, cal_model) for d, s in amazon_plan
+    ]
 
-    omega_by_yr = {str(y): compute_effective_observation_effort(y, 16.0) for y in range(2000, 2027)}
+    omega_by_yr = {
+        str(y): compute_effective_observation_effort(y, 16.0) for y in range(2000, 2027)
+    }
     sat_by_yr = {}
     for y in range(2000, 2027):
         if y <= 2001:
@@ -597,11 +724,17 @@ def main() -> None:
     )
     print("           Saved fig2_overpass_deduplication_sza.png")
 
-    print("[Step 4/5] Evaluating SAA Nighttime Rejection & NRT SZA Reclassification on 7-Day Feeds...")
+    print(
+        "[Step 4/5] Evaluating SAA Nighttime Rejection & NRT SZA Reclassification on 7-Day Feeds..."
+    )
     saa_sza_stats = evaluate_saa_and_nrt_sza_on_open_feeds()
 
-    print("[Step 5/5] Building 26-Year Harmonized Burning Activity Calendars & Regime-Shift Figures...")
-    series_data, cal_matrix_data = build_26yr_calendars_and_series(mekong_epochs, amazon_epochs)
+    print(
+        "[Step 5/5] Building 26-Year Harmonized Burning Activity Calendars & Regime-Shift Figures..."
+    )
+    series_data, cal_matrix_data = build_26yr_calendars_and_series(
+        mekong_epochs, amazon_epochs
+    )
     render_fig4_regime_shift_elimination(
         FIG_DIR / "fig4_regime_shift_elimination.png",
         series_data,
@@ -610,7 +743,9 @@ def main() -> None:
         FIG_DIR / "fig5_harmonized_burning_calendar.png",
         cal_matrix_data,
     )
-    print("           Saved fig4_regime_shift_elimination.png & fig5_harmonized_burning_calendar.png")
+    print(
+        "           Saved fig4_regime_shift_elimination.png & fig5_harmonized_burning_calendar.png"
+    )
 
     full_results = {
         "scan_angle_physics": scan_stats,

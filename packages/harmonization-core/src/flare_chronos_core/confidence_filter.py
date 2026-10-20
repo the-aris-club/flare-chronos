@@ -11,7 +11,6 @@ Solves Problem 3 & Problem 5 (partial) of the NASA MODIS-VIIRS Harmonization Cha
 from __future__ import annotations
 
 import math
-from typing import Set, Tuple
 
 from .domain import ProcessingMode, SatellitePlatform, SensorType, ThermalDetection
 
@@ -30,7 +29,7 @@ def is_in_south_atlantic_anomaly(lat: float, lon: float) -> bool:
 def compute_unified_detection_probability(
     det: ThermalDetection,
     harmonized_daynight: str,
-) -> Tuple[float, bool]:
+) -> tuple[float, bool]:
     """Map heterogeneous sensor confidence and brightness temperatures to P(fire) in [0, 1].
 
     Returns:
@@ -72,7 +71,9 @@ def compute_unified_detection_probability(
     # corresponding 11um (T5) heating or sustained FRP (Schroeder et al., 2014).
     is_saa_false_alarm = False
     if in_saa and harmonized_daynight == "N":
-        if (delta_t45 < 16.5 and det.frp_mw < 2.2) or (base_prob < 0.45 and delta_t45 < 19.5):
+        if (delta_t45 < 16.5 and det.frp_mw < 2.2) or (
+            base_prob < 0.45 and delta_t45 < 19.5
+        ):
             is_saa_false_alarm = True
             base_prob *= 0.12
 
@@ -82,7 +83,7 @@ def compute_unified_detection_probability(
 def is_static_or_non_veg_source(
     det: ThermalDetection,
     h3_res8_cell: str,
-    persistent_static_cells: Set[str],
+    persistent_static_cells: set[str],
 ) -> bool:
     """Identify industrial gas flares, volcanoes, offshore platforms, or persistent H3 cells."""
     if det.fire_type is not None and det.fire_type in (1, 2, 3):
@@ -96,7 +97,8 @@ def has_aqua_nrt_geolocation_risk(det: ThermalDetection, scan_angle_deg: float) 
     """Flag Aqua NRT/RT/URT detections where orbital maneuvers can induce multi-km error."""
     if (
         det.platform == SatellitePlatform.AQUA
-        and det.processing_mode in (ProcessingMode.NRT, ProcessingMode.RT, ProcessingMode.URT)
+        and det.processing_mode
+        in (ProcessingMode.NRT, ProcessingMode.RT, ProcessingMode.URT)
         and scan_angle_deg >= 30.0
     ):
         return True

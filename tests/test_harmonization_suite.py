@@ -10,11 +10,11 @@ Tests all 5 core cross-sensor scientific harmonization equations:
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
 import math
-from pathlib import Path
 import sys
 import unittest
+from datetime import UTC, datetime
+from pathlib import Path
 
 import numpy as np
 
@@ -22,17 +22,13 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, str(ROOT / "packages" / "harmonization-core" / "src"))
 
-from harmonization.firms_harmonizer import (  # noqa: E402
-    FIRMSHarmonizer,
+from harmonization.firms_harmonizer import (
     ProcessingMode,
     SatellitePlatform,
     SensorType,
     ThermalDetection,
     allocate_footprint_to_h3,
-    build_burning_activity_calendar,
     cluster_fire_episodes,
-    compute_effective_observation_effort,
-    compute_frp_detection_limit,
     compute_solar_zenith_angle,
     compute_unified_detection_probability,
     fit_coincident_aqua_snpp_model,
@@ -91,7 +87,7 @@ class TestFlareChronosPhysics(unittest.TestCase):
             detection_id="M-EDGE",
             latitude=14.5,
             longitude=107.8,
-            acq_datetime_utc=datetime(2024, 3, 16, 6, 30, tzinfo=timezone.utc),
+            acq_datetime_utc=datetime(2024, 3, 16, 6, 30, tzinfo=UTC),
             sensor=SensorType.MODIS,
             platform=SatellitePlatform.AQUA,
             processing_mode=ProcessingMode.STANDARD,
@@ -104,8 +100,12 @@ class TestFlareChronosPhysics(unittest.TestCase):
             raw_daynight="D",
         )
         fp = reconstruct_instantaneous_footprint(edge_modis)
-        w7 = allocate_footprint_to_h3(edge_modis.latitude, edge_modis.longitude, fp, resolution=7)
-        w8 = allocate_footprint_to_h3(edge_modis.latitude, edge_modis.longitude, fp, resolution=8)
+        w7 = allocate_footprint_to_h3(
+            edge_modis.latitude, edge_modis.longitude, fp, resolution=7
+        )
+        w8 = allocate_footprint_to_h3(
+            edge_modis.latitude, edge_modis.longitude, fp, resolution=8
+        )
 
         self.assertAlmostEqual(sum(w7.values()), 1.0, places=4)
         self.assertAlmostEqual(sum(w8.values()), 1.0, places=4)
@@ -115,13 +115,15 @@ class TestFlareChronosPhysics(unittest.TestCase):
     def test_astronomical_sza_and_daynight_unification(self) -> None:
         """Verify SZA < 85 deg daytime classification and NRT twilight reclassification."""
         # Solar noon in Central Highlands Vietnam (14.0 N, 108.0 E) at 05:00 UTC (~12:12 local solar)
-        dt_noon = datetime(2024, 3, 20, 5, 0, tzinfo=timezone.utc)
+        dt_noon = datetime(2024, 3, 20, 5, 0, tzinfo=UTC)
         sza_noon = compute_solar_zenith_angle(14.0, 108.0, dt_noon)
         self.assertLess(sza_noon, 20.0)
 
         # Midnight at 17:00 UTC (~00:12 local solar)
-        dt_night = datetime(2024, 3, 20, 17, 0, tzinfo=timezone.utc)
-        sza_night, dn_flag, reclass = harmonize_daynight_flag(14.0, 108.0, dt_night, raw_daynight="D")
+        dt_night = datetime(2024, 3, 20, 17, 0, tzinfo=UTC)
+        sza_night, dn_flag, reclass = harmonize_daynight_flag(
+            14.0, 108.0, dt_night, raw_daynight="D"
+        )
         self.assertGreater(sza_night, 140.0)
         self.assertEqual(dn_flag, "N")
         self.assertTrue(reclass)
@@ -132,7 +134,7 @@ class TestFlareChronosPhysics(unittest.TestCase):
             detection_id="V-SAA",
             latitude=-22.5,
             longitude=-48.0,
-            acq_datetime_utc=datetime(2024, 8, 21, 4, 15, tzinfo=timezone.utc),
+            acq_datetime_utc=datetime(2024, 8, 21, 4, 15, tzinfo=UTC),
             sensor=SensorType.VIIRS,
             platform=SatellitePlatform.SNPP,
             processing_mode=ProcessingMode.NRT,
@@ -156,7 +158,7 @@ class TestFlareChronosPhysics(unittest.TestCase):
                 detection_id="N20-1",
                 latitude=base_lat,
                 longitude=base_lon,
-                acq_datetime_utc=datetime(2024, 3, 18, 5, 42, tzinfo=timezone.utc),
+                acq_datetime_utc=datetime(2024, 3, 18, 5, 42, tzinfo=UTC),
                 sensor=SensorType.VIIRS,
                 platform=SatellitePlatform.NOAA20,
                 processing_mode=ProcessingMode.STANDARD,
@@ -172,7 +174,7 @@ class TestFlareChronosPhysics(unittest.TestCase):
                 detection_id="N21-1",
                 latitude=base_lat + 0.0015,
                 longitude=base_lon - 0.0010,
-                acq_datetime_utc=datetime(2024, 3, 18, 6, 7, tzinfo=timezone.utc),
+                acq_datetime_utc=datetime(2024, 3, 18, 6, 7, tzinfo=UTC),
                 sensor=SensorType.VIIRS,
                 platform=SatellitePlatform.NOAA21,
                 processing_mode=ProcessingMode.NRT,
@@ -188,7 +190,7 @@ class TestFlareChronosPhysics(unittest.TestCase):
                 detection_id="SNPP-1",
                 latitude=base_lat - 0.0010,
                 longitude=base_lon + 0.0012,
-                acq_datetime_utc=datetime(2024, 3, 18, 6, 32, tzinfo=timezone.utc),
+                acq_datetime_utc=datetime(2024, 3, 18, 6, 32, tzinfo=UTC),
                 sensor=SensorType.VIIRS,
                 platform=SatellitePlatform.SNPP,
                 processing_mode=ProcessingMode.STANDARD,
@@ -204,7 +206,7 @@ class TestFlareChronosPhysics(unittest.TestCase):
                 detection_id="AQUA-1",
                 latitude=base_lat + 0.0030,
                 longitude=base_lon + 0.0020,
-                acq_datetime_utc=datetime(2024, 3, 18, 6, 35, tzinfo=timezone.utc),
+                acq_datetime_utc=datetime(2024, 3, 18, 6, 35, tzinfo=UTC),
                 sensor=SensorType.MODIS,
                 platform=SatellitePlatform.AQUA,
                 processing_mode=ProcessingMode.STANDARD,
@@ -233,7 +235,9 @@ class TestFlareChronosPhysics(unittest.TestCase):
         areas = rng.uniform(1.0, 7.5, size=n)
         true_frp = rng.lognormal(mean=3.4, sigma=0.75, size=n)
         # Simulate MODIS scan-angle attenuation + truncation vs VIIRS reference
-        modis_obs = true_frp / ((1.0 + 0.30 * np.log(areas)) * 1.32) + rng.normal(0, 2.0, size=n)
+        modis_obs = true_frp / ((1.0 + 0.30 * np.log(areas)) * 1.32) + rng.normal(
+            0, 2.0, size=n
+        )
         modis_obs = np.maximum(4.0, modis_obs)
         viirs_obs = true_frp + rng.normal(0, 1.5, size=n)
 

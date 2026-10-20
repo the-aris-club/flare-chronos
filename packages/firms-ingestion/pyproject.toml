@@ -9,6 +9,9 @@ dependencies = [
     "flare-chronos-core",
 ]
 
+[tool.uv.sources]
+flare-chronos-core = { workspace = true }
+
 [build-system]
 requires = ["setuptools>=68.0"]
 build-backend = "setuptools.build_meta"

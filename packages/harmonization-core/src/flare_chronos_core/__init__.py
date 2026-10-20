@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
-from typing import Dict, Iterable, List, Optional, Set, Tuple
+from collections.abc import Iterable
+from datetime import UTC, datetime, timezone
+from typing import Dict, List, Optional, Set, Tuple
 
 import pandas as pd
 
@@ -62,12 +63,14 @@ from .solar_sza import (
 )
 
 
-def parse_firms_dataframe(df: pd.DataFrame, default_source: str = "") -> List[ThermalDetection]:
+def parse_firms_dataframe(
+    df: pd.DataFrame, default_source: str = ""
+) -> list[ThermalDetection]:
     """Convert a raw NASA FIRMS CSV DataFrame (MODIS or VIIRS) into ThermalDetection records."""
     if df is None or df.empty:
         return []
 
-    records: List[ThermalDetection] = []
+    records: list[ThermalDetection] = []
     cols = {c.lower(): c for c in df.columns}
 
     for idx, row in df.iterrows():
@@ -87,13 +90,21 @@ def parse_firms_dataframe(df: pd.DataFrame, default_source: str = "") -> List[Th
             sensor = SensorType.MODIS
 
         inst_str = str(row[cols["instrument"]]).upper() if "instrument" in cols else ""
-        src_str = str(row[cols["source_code"]]).upper() if "source_code" in cols else default_source.upper()
+        src_str = (
+            str(row[cols["source_code"]]).upper()
+            if "source_code" in cols
+            else default_source.upper()
+        )
         if "VIIRS" in inst_str or "VIIRS" in src_str or scan_km < 0.85:
             sensor = SensorType.VIIRS
         elif "MODIS" in inst_str or "MODIS" in src_str:
             sensor = SensorType.MODIS
 
-        sat_raw = str(row[cols.get("satellite", "")]).strip().upper() if "satellite" in cols else ""
+        sat_raw = (
+            str(row[cols.get("satellite", "")]).strip().upper()
+            if "satellite" in cols
+            else ""
+        )
         if sat_raw in ("T", "TERRA"):
             platform = SatellitePlatform.TERRA
         elif sat_raw in ("A", "AQUA"):
@@ -105,9 +116,15 @@ def parse_firms_dataframe(df: pd.DataFrame, default_source: str = "") -> List[Th
         elif sat_raw in ("2", "J2", "N21", "NOAA-21", "NOAA21") or "NOAA21" in src_str:
             platform = SatellitePlatform.NOAA21
         else:
-            platform = SatellitePlatform.AQUA if sensor == SensorType.MODIS else SatellitePlatform.SNPP
+            platform = (
+                SatellitePlatform.AQUA
+                if sensor == SensorType.MODIS
+                else SatellitePlatform.SNPP
+            )
 
-        ver_str = str(row[cols["version"]]).strip().upper() if "version" in cols else "6.1"
+        ver_str = (
+            str(row[cols["version"]]).strip().upper() if "version" in cols else "6.1"
+        )
         if "URT" in ver_str:
             proc_mode = ProcessingMode.URT
         elif "NRT" in ver_str or "NRT" in src_str:
@@ -122,13 +139,21 @@ def parse_firms_dataframe(df: pd.DataFrame, default_source: str = "") -> List[Th
         hh = int(acq_time_raw[:2]) if acq_time_raw[:2].isdigit() else 0
         mm = int(acq_time_raw[2:4]) if acq_time_raw[2:4].isdigit() else 0
         dt_utc = datetime.strptime(acq_date_str, "%Y-%m-%d").replace(
-            hour=min(23, hh), minute=min(59, mm), tzinfo=timezone.utc
+            hour=min(23, hh), minute=min(59, mm), tzinfo=UTC
         )
 
-        frp_val = float(row[cols["frp"]]) if "frp" in cols and pd.notna(row[cols["frp"]]) else 1.0
+        frp_val = (
+            float(row[cols["frp"]])
+            if "frp" in cols and pd.notna(row[cols["frp"]])
+            else 1.0
+        )
         conf_val = str(row[cols.get("confidence", "nominal")]).strip()
         dn_val = str(row[cols.get("daynight", "D")]).strip().upper()
-        ftype = int(row[cols["type"]]) if "type" in cols and pd.notna(row[cols["type"]]) else None
+        ftype = (
+            int(row[cols["type"]])
+            if "type" in cols and pd.notna(row[cols["type"]])
+            else None
+        )
 
         records.append(
             ThermalDetection(
@@ -156,13 +181,13 @@ def parse_firms_dataframe(df: pd.DataFrame, default_source: str = "") -> List[Th
 
 def harmonize_detections(
     detections: Iterable[ThermalDetection],
-    calibration_model: Optional[CrossSensorCalibrationModel] = None,
-    persistent_static_h3_res8: Optional[Set[str]] = None,
-) -> List[HarmonizedDetection]:
+    calibration_model: CrossSensorCalibrationModel | None = None,
+    persistent_static_h3_res8: set[str] | None = None,
+) -> list[HarmonizedDetection]:
     """Execute full 5-stage physical & statistical harmonization on raw Thermal Detections."""
     static_cells = persistent_static_h3_res8 or set()
     cal_model = calibration_model or default_calibration_model()
-    results: List[HarmonizedDetection] = []
+    results: list[HarmonizedDetection] = []
 
     for det in detections:
         footprint = reconstruct_instantaneous_footprint(det)
@@ -178,8 +203,12 @@ def harmonize_detections(
         frp_lim, scan_frp, viirs_eq_frp, viirs_eq_cnt = apply_two_stage_frp_calibration(
             det, footprint, sza_deg, harm_dn, cal_model
         )
-        w_r7 = allocate_footprint_to_h3(det.latitude, det.longitude, footprint, resolution=7)
-        w_r8 = allocate_footprint_to_h3(det.latitude, det.longitude, footprint, resolution=8)
+        w_r7 = allocate_footprint_to_h3(
+            det.latitude, det.longitude, footprint, resolution=7
+        )
+        w_r8 = allocate_footprint_to_h3(
+            det.latitude, det.longitude, footprint, resolution=8
+        )
 
         results.append(
             HarmonizedDetection(
@@ -207,13 +236,13 @@ def harmonize_detections(
 
 
 __all__ = [
+    "DAYNIGHT_SZA_THRESHOLD_DEG",
+    "H3_RES7_AREA_KM2",
+    "H3_RES8_AREA_KM2",
     "AnomalyTier",
     "BurningCalendarCell",
     "CrossSensorCalibrationModel",
-    "DAYNIGHT_SZA_THRESHOLD_DEG",
     "FireEpisode",
-    "H3_RES7_AREA_KM2",
-    "H3_RES8_AREA_KM2",
     "HarmonizedDetection",
     "InstantaneousFootprint",
     "ProcessingMode",

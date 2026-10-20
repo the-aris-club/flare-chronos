@@ -14,40 +14,51 @@ References:
 from __future__ import annotations
 
 import math
-from typing import Dict, Tuple
 
-from .domain import InstantaneousFootprint, SatellitePlatform, SensorType, ThermalDetection
+from .domain import (
+    InstantaneousFootprint,
+    SatellitePlatform,
+    SensorType,
+    ThermalDetection,
+)
 
 # WGS-84 & Sensor Orbital Constants
 R_EARTH_KM = 6378.137
 MODIS_ALTITUDE_KM = 705.0
 MODIS_ORBIT_RADIUS_KM = R_EARTH_KM + MODIS_ALTITUDE_KM  # 7083.137 km
-MODIS_SAMPLING_RAD = 0.0014184397                       # s: radians per 1-km nominal sample
+MODIS_SAMPLING_RAD = 0.0014184397  # s: radians per 1-km nominal sample
 MODIS_MAX_SCAN_DEG = 55.0
 
 VIIRS_ALTITUDE_KM = 829.0
 VIIRS_ORBIT_RADIUS_KM = R_EARTH_KM + VIIRS_ALTITUDE_KM  # 7207.137 km
-VIIRS_NATIVE_SCAN_RAD = 0.0001458                       # ~121m across-track native detector IFOV (3x = 363m nadir, 795m at 56.28 deg)
-VIIRS_NATIVE_TRACK_RAD = 0.0004340                      # ~360m along-track native detector IFOV (784m at 56.28 deg)
-VIIRS_ZONE1_MAX_DEG = 31.72                             # 3:1 aggregation (0 to 31.72 deg)
-VIIRS_ZONE2_MAX_DEG = 44.86                             # 2:1 aggregation (31.72 to 44.86 deg)
-VIIRS_ZONE3_MAX_DEG = 56.28                             # 1:1 no aggregation (44.86 to 56.28 deg)
+VIIRS_NATIVE_SCAN_RAD = 0.0001458  # ~121m across-track native detector IFOV (3x = 363m nadir, 795m at 56.28 deg)
+VIIRS_NATIVE_TRACK_RAD = (
+    0.0004340  # ~360m along-track native detector IFOV (784m at 56.28 deg)
+)
+VIIRS_ZONE1_MAX_DEG = 31.72  # 3:1 aggregation (0 to 31.72 deg)
+VIIRS_ZONE2_MAX_DEG = 44.86  # 2:1 aggregation (31.72 to 44.86 deg)
+VIIRS_ZONE3_MAX_DEG = 56.28  # 1:1 no aggregation (44.86 to 56.28 deg)
 
 # Uber H3 Exact Geodesic Cell Areas & Circumradii
 H3_RES7_AREA_KM2 = 5.16129336
 H3_RES8_AREA_KM2 = 0.73732760
-H3_RES7_STEP_KM = math.sqrt(H3_RES7_AREA_KM2 / (1.5 * math.sqrt(3.0)))  # ~1.409 km hex radius
-H3_RES8_STEP_KM = math.sqrt(H3_RES8_AREA_KM2 / (1.5 * math.sqrt(3.0)))  # ~0.533 km hex radius
+H3_RES7_STEP_KM = math.sqrt(
+    H3_RES7_AREA_KM2 / (1.5 * math.sqrt(3.0))
+)  # ~1.409 km hex radius
+H3_RES8_STEP_KM = math.sqrt(
+    H3_RES8_AREA_KM2 / (1.5 * math.sqrt(3.0))
+)  # ~0.533 km hex radius
 
 try:
     import h3 as _h3_lib  # type: ignore
+
     HAS_NATIVE_H3 = True
 except ImportError:
     _h3_lib = None
     HAS_NATIVE_H3 = False
 
 
-def modis_dimensions_from_scan_angle(theta_rad: float) -> Tuple[float, float]:
+def modis_dimensions_from_scan_angle(theta_rad: float) -> tuple[float, float]:
     """Compute exact MODIS across-track (Delta S) and along-track (Delta T) in km.
 
     Equations (Giglio et al., 2016):
@@ -84,7 +95,7 @@ def invert_modis_scan_angle(scan_km: float) -> float:
     return 0.5 * (lo + hi)
 
 
-def viirs_aggregation_zone(theta_deg: float) -> Tuple[int, int]:
+def viirs_aggregation_zone(theta_deg: float) -> tuple[int, int]:
     """Return (zone_index, aggregation_factor) for VIIRS 375m I-band scan angle."""
     abs_deg = abs(theta_deg)
     if abs_deg < VIIRS_ZONE1_MAX_DEG:
@@ -94,7 +105,7 @@ def viirs_aggregation_zone(theta_deg: float) -> Tuple[int, int]:
     return 3, 1
 
 
-def viirs_dimensions_from_scan_angle(theta_rad: float) -> Tuple[float, float, int]:
+def viirs_dimensions_from_scan_angle(theta_rad: float) -> tuple[float, float, int]:
     """Compute VIIRS 375m I-band (Delta S, Delta T, zone) accounting for 3-zone aggregation.
 
     In Zone 1 (0-31.72 deg), 3 native pixels are aggregated across-track;
@@ -116,7 +127,7 @@ def viirs_dimensions_from_scan_angle(theta_rad: float) -> Tuple[float, float, in
     return delta_s, delta_t, zone
 
 
-def invert_viirs_scan_angle(scan_km: float, track_km: float) -> Tuple[float, int]:
+def invert_viirs_scan_angle(scan_km: float, track_km: float) -> tuple[float, int]:
     """Recover VIIRS scan angle theta_rad and aggregation zone from reported (scan, track) km."""
     # Track dimension grows monotonically from 0.36 km at nadir to ~0.784 km at 56.28 deg
     lo = 0.0
@@ -134,7 +145,13 @@ def invert_viirs_scan_angle(scan_km: float, track_km: float) -> Tuple[float, int
     best_theta = theta_from_track
     best_err = float("inf")
     for offset_deg in (-3.0, -1.5, -0.5, 0.0, 0.5, 1.5, 3.0):
-        cand = max(0.0, min(math.radians(VIIRS_ZONE3_MAX_DEG), theta_from_track + math.radians(offset_deg)))
+        cand = max(
+            0.0,
+            min(
+                math.radians(VIIRS_ZONE3_MAX_DEG),
+                theta_from_track + math.radians(offset_deg),
+            ),
+        )
         s_c, t_c, _ = viirs_dimensions_from_scan_angle(cand)
         err = (s_c - scan_km) ** 2 + 1.5 * (t_c - track_km) ** 2
         if err < best_err:
@@ -156,16 +173,17 @@ def compute_orbital_track_azimuth(
       i = 98.2 deg (Terra / Aqua)
       i = 98.7 deg (Suomi-NPP / NOAA-20 / NOAA-21)
     """
-    inc_deg = 98.2 if platform in (SatellitePlatform.TERRA, SatellitePlatform.AQUA) else 98.7
+    inc_deg = (
+        98.2 if platform in (SatellitePlatform.TERRA, SatellitePlatform.AQUA) else 98.7
+    )
     cos_i = math.cos(math.radians(inc_deg))
     cos_lat = max(0.15, math.cos(math.radians(latitude_deg)))
     sin_az = max(-1.0, min(1.0, cos_i / cos_lat))
     base_az_deg = math.degrees(math.asin(sin_az))  # ~ -8.3 deg at equator
 
     # Ascending node vs Descending node orientation
-    is_ascending = (
-        (platform != SatellitePlatform.TERRA and daynight == "D")
-        or (platform == SatellitePlatform.TERRA and daynight == "N")
+    is_ascending = (platform != SatellitePlatform.TERRA and daynight == "D") or (
+        platform == SatellitePlatform.TERRA and daynight == "N"
     )
     if is_ascending:
         return (360.0 + base_az_deg) % 360.0
@@ -212,7 +230,9 @@ def latlon_to_h3(lat: float, lon: float, resolution: int) -> str:
     return f"{cell_int:015x}"
 
 
-def reconstruct_instantaneous_footprint(det: ThermalDetection) -> InstantaneousFootprint:
+def reconstruct_instantaneous_footprint(
+    det: ThermalDetection,
+) -> InstantaneousFootprint:
     """Reconstruct physical ground footprint (Delta S x Delta T) and scan geometry."""
     scan_km = max(0.30, float(det.scan_km))
     track_km = max(0.30, float(det.track_km))
@@ -233,7 +253,9 @@ def reconstruct_instantaneous_footprint(det: ThermalDetection) -> InstantaneousF
         nadir_area = 0.375 * 0.375  # 0.140625 km^2 nominal
 
     area_km2 = delta_s * delta_t
-    track_az = compute_orbital_track_azimuth(det.latitude, det.platform, det.raw_daynight)
+    track_az = compute_orbital_track_azimuth(
+        det.latitude, det.platform, det.raw_daynight
+    )
 
     return InstantaneousFootprint(
         scan_angle_rad=theta_rad,
@@ -254,7 +276,7 @@ def allocate_footprint_to_h3(
     lon: float,
     footprint: InstantaneousFootprint,
     resolution: int = 7,
-) -> Dict[str, float]:
+) -> dict[str, float]:
     """Fractionally allocate an oriented elliptical footprint across Uber H3 Iso-Area Cells.
 
     Uses a 13-point Gaussian-like elliptical quadrature stencil rotated by the satellite
@@ -286,7 +308,7 @@ def allocate_footprint_to_h3(
     km_per_deg_lat = 111.132
     km_per_deg_lon = max(15.0, 111.320 * math.cos(math.radians(lat)))
 
-    weights: Dict[str, float] = {}
+    weights: dict[str, float] = {}
     for u_s, v_t, w in stencil:
         dx_scan = u_s * half_s
         dy_track = v_t * half_t

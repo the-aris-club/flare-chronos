@@ -6,9 +6,9 @@ into `docs/figures/*.png` from empirical NASA FIRMS harmonization metrics.
 
 from __future__ import annotations
 
-import math
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Any, Dict, List, Sequence, Tuple
+from typing import Any
 
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
@@ -21,15 +21,17 @@ GRID_COLOR = (232, 237, 245)
 TEXT_DARK = (20, 28, 44)
 TEXT_MUTED = (90, 102, 122)
 
-COL_MODIS = (213, 94, 0)       # Vermilion / Terra-Aqua Orange-Red
-COL_VIIRS = (0, 114, 178)      # Deep Ocean Blue / Suomi-JPSS
-COL_HARM = (0, 158, 115)       # Bluish Green / Flare-Chronos Harmonized
-COL_WARN = (230, 159, 0)       # Amber / Threshold
-COL_PURPLE = (148, 82, 165)    # NOAA-20 / 21 Accent
+COL_MODIS = (213, 94, 0)  # Vermilion / Terra-Aqua Orange-Red
+COL_VIIRS = (0, 114, 178)  # Deep Ocean Blue / Suomi-JPSS
+COL_HARM = (0, 158, 115)  # Bluish Green / Flare-Chronos Harmonized
+COL_WARN = (230, 159, 0)  # Amber / Threshold
+COL_PURPLE = (148, 82, 165)  # NOAA-20 / 21 Accent
 COL_GRAY = (130, 140, 155)
 
 
-def _get_font(size: int, bold: bool = False) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
+def _get_font(
+    size: int, bold: bool = False
+) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
     candidates = (
         [
             "/System/Library/Fonts/Supplemental/Arial Bold.ttf",
@@ -75,23 +77,27 @@ class ScientificCanvas:
 
     def draw_panel_box(
         self,
-        box: Tuple[int, int, int, int],
+        box: tuple[int, int, int, int],
         title: str,
         subtitle: str = "",
-    ) -> Tuple[int, int, int, int]:
+    ) -> tuple[int, int, int, int]:
         x0, y0, x1, y1 = box
-        self.draw.rounded_rectangle(box, radius=14, fill=PANEL_BG, outline=PANEL_BORDER, width=2)
+        self.draw.rounded_rectangle(
+            box, radius=14, fill=PANEL_BG, outline=PANEL_BORDER, width=2
+        )
         self.draw.text((x0 + 28, y0 + 16), title, fill=TEXT_DARK, font=self.f_panel)
         if subtitle:
-            self.draw.text((x0 + 28, y0 + 48), subtitle, fill=TEXT_MUTED, font=self.f_small)
+            self.draw.text(
+                (x0 + 28, y0 + 48), subtitle, fill=TEXT_MUTED, font=self.f_small
+            )
         # Return inner plot area (px0, py0, px1, py1) with generous top margin for y-axis label
         return (x0 + 108, y0 + 112, x1 - 45, y1 - 86)
 
     def draw_axes(
         self,
-        plot_box: Tuple[int, int, int, int],
-        x_lim: Tuple[float, float],
-        y_lim: Tuple[float, float],
+        plot_box: tuple[int, int, int, int],
+        x_lim: tuple[float, float],
+        y_lim: tuple[float, float],
         x_ticks: Sequence[float],
         y_ticks: Sequence[float],
         x_label: str,
@@ -108,14 +114,18 @@ class ScientificCanvas:
                 cx = int(px0 + (xt - xmin) / (xmax - xmin) * (px1 - px0))
                 self.draw.line([(cx, py0), (cx, py1)], fill=GRID_COLOR, width=2)
                 lbl = x_fmt.format(xt)
-                self.draw.text((cx - 18, py1 + 12), lbl, fill=TEXT_MUTED, font=self.f_tick)
+                self.draw.text(
+                    (cx - 18, py1 + 12), lbl, fill=TEXT_MUTED, font=self.f_tick
+                )
 
         for yt in y_ticks:
             if ymin <= yt <= ymax:
                 cy = int(py1 - (yt - ymin) / (ymax - ymin) * (py1 - py0))
                 self.draw.line([(px0, cy), (px1, cy)], fill=GRID_COLOR, width=2)
                 lbl = y_fmt.format(yt)
-                self.draw.text((px0 - 72, cy - 10), lbl, fill=TEXT_MUTED, font=self.f_tick)
+                self.draw.text(
+                    (px0 - 72, cy - 10), lbl, fill=TEXT_MUTED, font=self.f_tick
+                )
 
         self.draw.line([(px0, py0), (px0, py1)], fill=TEXT_DARK, width=3)
         self.draw.line([(px0, py1), (px1, py1)], fill=TEXT_DARK, width=3)
@@ -132,10 +142,10 @@ class ScientificCanvas:
     def map_pt(
         x: float,
         y: float,
-        plot_box: Tuple[int, int, int, int],
-        x_lim: Tuple[float, float],
-        y_lim: Tuple[float, float],
-    ) -> Tuple[int, int]:
+        plot_box: tuple[int, int, int, int],
+        x_lim: tuple[float, float],
+        y_lim: tuple[float, float],
+    ) -> tuple[int, int]:
         px0, py0, px1, py1 = plot_box
         u = (x - x_lim[0]) / max(1e-9, x_lim[1] - x_lim[0])
         v = (y - y_lim[0]) / max(1e-9, y_lim[1] - y_lim[0])
@@ -152,9 +162,9 @@ class ScientificCanvas:
 
 def render_fig1_scan_angle_physics(
     out_path: Path,
-    modis_curves: Dict[str, List[float]],
-    viirs_curves: Dict[str, List[float]],
-    empirical_samples: Dict[str, List[Tuple[float, float]]],
+    modis_curves: dict[str, list[float]],
+    viirs_curves: dict[str, list[float]],
+    empirical_samples: dict[str, list[tuple[float, float]]],
 ) -> None:
     """Render Figure 1: MODIS vs VIIRS Scan-Angle Bow-Tie Footprint Growth & H3 Allocation."""
     c = ScientificCanvas()
@@ -184,7 +194,10 @@ def render_fig1_scan_angle_physics(
     )
 
     # VIIRS Aggregation Zone vertical dividers
-    for z_deg, z_lbl in [(31.72, "Zone 1->2 (3:1 to 2:1)"), (44.86, "Zone 2->3 (2:1 to 1:1)")]:
+    for z_deg, z_lbl in [
+        (31.72, "Zone 1->2 (3:1 to 2:1)"),
+        (44.86, "Zone 2->3 (2:1 to 1:1)"),
+    ]:
         zx, zy0 = c.map_pt(z_deg, 0.0, p1, x_lim, y_lim)
         _, zy1 = c.map_pt(z_deg, 10.2, p1, x_lim, y_lim)
         for yy in range(zy1, zy0, 16):
@@ -192,7 +205,10 @@ def render_fig1_scan_angle_physics(
         c.draw.text((zx - 75, zy1 + 12), z_lbl, fill=COL_VIIRS, font=c.f_small)
 
     # H3 Res 7 (5.16 km^2) & Res 8 (0.74 km^2) reference horizontal bars
-    for h_area, h_lbl in [(5.161, "Uber H3 Res 7 Iso-Area Cell (5.16 km^2)"), (0.737, "Uber H3 Res 8 Iso-Area Cell (0.74 km^2)")]:
+    for h_area, h_lbl in [
+        (5.161, "Uber H3 Res 7 Iso-Area Cell (5.16 km^2)"),
+        (0.737, "Uber H3 Res 8 Iso-Area Cell (0.74 km^2)"),
+    ]:
         hx0, hy = c.map_pt(0.0, h_area, p1, x_lim, y_lim)
         hx1, _ = c.map_pt(58.0, h_area, p1, x_lim, y_lim)
         for xx in range(hx0, hx1, 18):
@@ -200,24 +216,42 @@ def render_fig1_scan_angle_physics(
         c.draw.text((hx0 + 16, hy - 24), h_lbl, fill=COL_HARM, font=c.f_small)
 
     # Plot theoretical curves
-    m_pts = [c.map_pt(th, ar, p1, x_lim, y_lim) for th, ar in zip(modis_curves["theta_deg"], modis_curves["area_km2"])]
-    v_pts = [c.map_pt(th, ar, p1, x_lim, y_lim) for th, ar in zip(viirs_curves["theta_deg"], viirs_curves["area_km2"])]
+    m_pts = [
+        c.map_pt(th, ar, p1, x_lim, y_lim)
+        for th, ar in zip(modis_curves["theta_deg"], modis_curves["area_km2"])
+    ]
+    v_pts = [
+        c.map_pt(th, ar, p1, x_lim, y_lim)
+        for th, ar in zip(viirs_curves["theta_deg"], viirs_curves["area_km2"])
+    ]
     c.draw.line(m_pts, fill=COL_MODIS, width=5)
     c.draw.line(v_pts, fill=COL_VIIRS, width=5)
 
     # Overlay empirical NASA FIRMS points
     for th, ar in empirical_samples.get("modis", [])[:120]:
         px, py = c.map_pt(th, ar, p1, x_lim, y_lim)
-        c.draw.ellipse([px - 5, py - 5, px + 5, py + 5], fill=COL_MODIS, outline=(255, 255, 255))
+        c.draw.ellipse(
+            [px - 5, py - 5, px + 5, py + 5], fill=COL_MODIS, outline=(255, 255, 255)
+        )
     for th, ar in empirical_samples.get("viirs", [])[:120]:
         px, py = c.map_pt(th, ar, p1, x_lim, y_lim)
         c.draw.ellipse([px - 4, py - 4, px + 4, py + 4], fill=COL_VIIRS)
 
     # Annotations
     p_edge_m = c.map_pt(55.0, 9.69, p1, x_lim, y_lim)
-    c.draw.text((p_edge_m[0] - 435, p_edge_m[1] + 38), "MODIS Edge (55 deg): 4.83x2.01 km = 9.69 km^2", fill=COL_MODIS, font=c.f_annot)
+    c.draw.text(
+        (p_edge_m[0] - 435, p_edge_m[1] + 38),
+        "MODIS Edge (55 deg): 4.83x2.01 km = 9.69 km^2",
+        fill=COL_MODIS,
+        font=c.f_annot,
+    )
     p_edge_v = c.map_pt(56.28, 0.623, p1, x_lim, y_lim)
-    c.draw.text((p_edge_v[0] - 455, p_edge_v[1] - 42), "VIIRS Edge (56.3 deg): 0.80x0.78 km = 0.62 km^2 (15.5x smaller)", fill=COL_VIIRS, font=c.f_annot)
+    c.draw.text(
+        (p_edge_v[0] - 455, p_edge_v[1] - 42),
+        "VIIRS Edge (56.3 deg): 0.80x0.78 km = 0.62 km^2 (15.5x smaller)",
+        fill=COL_VIIRS,
+        font=c.f_annot,
+    )
 
     # Right Panel: Minimum Detectable FRP Limit FRP_lim(theta, SZA)
     p2 = c.draw_panel_box(
@@ -238,9 +272,18 @@ def render_fig1_scan_angle_physics(
         y_fmt="{:.0f}",
     )
 
-    m_day_pts = [c.map_pt(th, fl, p2, x_lim, y_lim2) for th, fl in zip(modis_curves["theta_deg"], modis_curves["frp_lim_day_mw"])]
-    m_nit_pts = [c.map_pt(th, fl, p2, x_lim, y_lim2) for th, fl in zip(modis_curves["theta_deg"], modis_curves["frp_lim_night_mw"])]
-    v_day_pts = [c.map_pt(th, fl, p2, x_lim, y_lim2) for th, fl in zip(viirs_curves["theta_deg"], viirs_curves["frp_lim_day_mw"])]
+    m_day_pts = [
+        c.map_pt(th, fl, p2, x_lim, y_lim2)
+        for th, fl in zip(modis_curves["theta_deg"], modis_curves["frp_lim_day_mw"])
+    ]
+    m_nit_pts = [
+        c.map_pt(th, fl, p2, x_lim, y_lim2)
+        for th, fl in zip(modis_curves["theta_deg"], modis_curves["frp_lim_night_mw"])
+    ]
+    v_day_pts = [
+        c.map_pt(th, fl, p2, x_lim, y_lim2)
+        for th, fl in zip(viirs_curves["theta_deg"], viirs_curves["frp_lim_day_mw"])
+    ]
 
     c.draw.line(m_day_pts, fill=COL_MODIS, width=5)
     c.draw.line(m_nit_pts, fill=COL_WARN, width=4)
@@ -254,23 +297,43 @@ def render_fig1_scan_angle_physics(
     c.img = Image.alpha_composite(c.img.convert("RGBA"), overlay).convert("RGB")
     c.draw = ImageDraw.Draw(c.img)
 
-    c.draw.text((1310, 460), "Unobserved MODIS Sub-Pixel Fire Zone", fill=COL_MODIS, font=c.f_panel)
+    c.draw.text(
+        (1310, 460),
+        "Unobserved MODIS Sub-Pixel Fire Zone",
+        fill=COL_MODIS,
+        font=c.f_panel,
+    )
     c.draw.text(
         (1310, 495),
         "compensated by Flare-Chronos Stage-1 Scan-Angle Observation Operator",
         fill=TEXT_DARK,
         font=c.f_small,
     )
-    c.draw.text((1280, 260), "MODIS Daytime FRP_lim (8.2 MW nadir -> 41.2 MW at 55 deg)", fill=COL_MODIS, font=c.f_annot)
-    c.draw.text((1280, 770), "MODIS Nighttime FRP_lim (3.7 MW nadir -> 38.6 MW at 55 deg)", fill=COL_WARN, font=c.f_annot)
-    c.draw.text((1280, 1135), "VIIRS 375m Daytime FRP_lim (1.15 MW nadir -> 3.4 MW at 56.3 deg)", fill=COL_VIIRS, font=c.f_annot)
+    c.draw.text(
+        (1280, 260),
+        "MODIS Daytime FRP_lim (8.2 MW nadir -> 41.2 MW at 55 deg)",
+        fill=COL_MODIS,
+        font=c.f_annot,
+    )
+    c.draw.text(
+        (1280, 770),
+        "MODIS Nighttime FRP_lim (3.7 MW nadir -> 38.6 MW at 55 deg)",
+        fill=COL_WARN,
+        font=c.f_annot,
+    )
+    c.draw.text(
+        (1280, 1135),
+        "VIIRS 375m Daytime FRP_lim (1.15 MW nadir -> 3.4 MW at 56.3 deg)",
+        fill=COL_VIIRS,
+        font=c.f_annot,
+    )
 
     c.save(out_path)
 
 
 def render_fig2_overpass_deduplication(
     out_path: Path,
-    dedup_stats: Dict[str, Any],
+    dedup_stats: dict[str, Any],
 ) -> None:
     """Render Figure 2: Multi-Satellite Overpass Deduplication, SZA Reclassification & Omega Effort."""
     c = ScientificCanvas()
@@ -324,7 +387,12 @@ def render_fig2_overpass_deduplication(
         x_off = -145 if yr >= 2024 else -20
         c.draw.text((mx + x_off, my - 32), text, fill=COL_PURPLE, font=c.f_small)
 
-    c.draw.text((190, 910), "Effective Observation Effort Omega(y, phi) (Normalized to 2003-2011 Terra+Aqua = 1.00)", fill=COL_HARM, font=c.f_annot)
+    c.draw.text(
+        (190, 910),
+        "Effective Observation Effort Omega(y, phi) (Normalized to 2003-2011 Terra+Aqua = 1.00)",
+        fill=COL_HARM,
+        font=c.f_annot,
+    )
 
     # Right Panel: Empirical Deduplication Compression across Epochs (Real NASA FIRMS Data)
     p2 = c.draw_panel_box(
@@ -352,7 +420,9 @@ def render_fig2_overpass_deduplication(
 
     for idx, ep in enumerate(epochs):
         bx_raw_0, by_raw_0 = c.map_pt(idx - 0.26, 0, p2, x_lim2, y_lim2)
-        bx_raw_1, by_raw_1 = c.map_pt(idx - 0.02, ep["raw_detections"], p2, x_lim2, y_lim2)
+        bx_raw_1, by_raw_1 = c.map_pt(
+            idx - 0.02, ep["raw_detections"], p2, x_lim2, y_lim2
+        )
         c.draw.rectangle([bx_raw_0, by_raw_1, bx_raw_1, by_raw_0], fill=COL_MODIS)
 
         bx_ep_0, by_ep_0 = c.map_pt(idx + 0.02, 0, p2, x_lim2, y_lim2)
@@ -360,22 +430,44 @@ def render_fig2_overpass_deduplication(
         c.draw.rectangle([bx_ep_0, by_ep_1, bx_ep_1, by_ep_0], fill=COL_HARM)
 
         ratio = ep["raw_detections"] / max(1, ep["fire_episodes"])
-        c.draw.text((bx_raw_0 - 6, by_raw_1 - 26), f"{ep['raw_detections']:,}", fill=COL_MODIS, font=c.f_small)
-        c.draw.text((bx_ep_0 - 2, by_ep_1 - 26), f"{ep['fire_episodes']:,} ({ratio:.2f}x)", fill=COL_HARM, font=c.f_small)
-        c.draw.text((bx_raw_0 - 10, by_raw_0 + 34), ep["label"], fill=TEXT_DARK, font=c.f_small)
+        c.draw.text(
+            (bx_raw_0 - 6, by_raw_1 - 26),
+            f"{ep['raw_detections']:,}",
+            fill=COL_MODIS,
+            font=c.f_small,
+        )
+        c.draw.text(
+            (bx_ep_0 - 2, by_ep_1 - 26),
+            f"{ep['fire_episodes']:,} ({ratio:.2f}x)",
+            fill=COL_HARM,
+            font=c.f_small,
+        )
+        c.draw.text(
+            (bx_raw_0 - 10, by_raw_0 + 34), ep["label"], fill=TEXT_DARK, font=c.f_small
+        )
 
     # Legend box in Right Panel
     c.draw.rectangle([1280, 245, 1308, 268], fill=COL_MODIS)
-    c.draw.text((1320, 245), "Raw Multi-Sensor Thermal Detections (MODIS + S-NPP + NOAA-20/21)", fill=TEXT_DARK, font=c.f_annot)
+    c.draw.text(
+        (1320, 245),
+        "Raw Multi-Sensor Thermal Detections (MODIS + S-NPP + NOAA-20/21)",
+        fill=TEXT_DARK,
+        font=c.f_annot,
+    )
     c.draw.rectangle([1280, 282, 1308, 305], fill=COL_HARM)
-    c.draw.text((1320, 282), "Deduplicated Physical Fire Episodes (Spatio-Temporal Kernel Clustering)", fill=TEXT_DARK, font=c.f_annot)
+    c.draw.text(
+        (1320, 282),
+        "Deduplicated Physical Fire Episodes (Spatio-Temporal Kernel Clustering)",
+        fill=TEXT_DARK,
+        font=c.f_annot,
+    )
 
     c.save(out_path)
 
 
 def render_fig3_cross_sensor_frp(
     out_path: Path,
-    cal_data: Dict[str, Any],
+    cal_data: dict[str, Any],
 ) -> None:
     """Render Figure 3: Co-Incident Aqua-MODIS vs Suomi-NPP VIIRS Cross-Calibration & EQM."""
     c = ScientificCanvas()
@@ -409,24 +501,41 @@ def render_fig3_cross_sensor_frp(
     p00 = c.map_pt(0, 0, p1, x_lim, y_lim)
     p11 = c.map_pt(max_frp, max_frp, p1, x_lim, y_lim)
     c.draw.line([p00, p11], fill=TEXT_DARK, width=3)
-    c.draw.text((p11[0] - 190, p11[1] + 18), "1:1 Parity Reference", fill=TEXT_DARK, font=c.f_annot)
+    c.draw.text(
+        (p11[0] - 190, p11[1] + 18),
+        "1:1 Parity Reference",
+        fill=TEXT_DARK,
+        font=c.f_annot,
+    )
 
     for v_val, m_raw, m_harm in zip(
-        cal_data["viirs_sample"], cal_data["modis_raw_sample"], cal_data["modis_harm_sample"]
+        cal_data["viirs_sample"],
+        cal_data["modis_raw_sample"],
+        cal_data["modis_harm_sample"],
     ):
         pr = c.map_pt(v_val, m_raw, p1, x_lim, y_lim)
         ph = c.map_pt(v_val, m_harm, p1, x_lim, y_lim)
         c.draw.ellipse([pr[0] - 4, pr[1] - 4, pr[0] + 4, pr[1] + 4], fill=COL_MODIS)
         c.draw.ellipse([ph[0] - 4, ph[1] - 4, ph[0] + 4, ph[1] + 4], fill=COL_HARM)
 
-    c.draw.text((175, 255), f"Raw Aqua-MODIS (Systematic Underestimation Bias, R^2 = {cal_data['raw_r2']:.3f})", fill=COL_MODIS, font=c.f_annot)
-    c.draw.text((175, 292), f"Flare-Chronos Calibrated MODIS (Unbiased Parity, R^2 = {cal_data['harm_r2']:.3f})", fill=COL_HARM, font=c.f_annot)
+    c.draw.text(
+        (175, 255),
+        f"Raw Aqua-MODIS (Systematic Underestimation Bias, R^2 = {cal_data['raw_r2']:.3f})",
+        fill=COL_MODIS,
+        font=c.f_annot,
+    )
+    c.draw.text(
+        (175, 292),
+        f"Flare-Chronos Calibrated MODIS (Unbiased Parity, R^2 = {cal_data['harm_r2']:.3f})",
+        fill=COL_HARM,
+        font=c.f_annot,
+    )
 
     # Right Panel: Empirical Cumulative Distribution Function (ECDF) & KS Distance
     p2 = c.draw_panel_box(
         (1140, 132, 2164, 1275),
         "B. Cumulative Distribution Function (ECDF) & Kolmogorov-Smirnov Convergence",
-        f"Kolmogorov-Smirnov distance D_KS reduced by {(1.0 - cal_data['ks_after']/cal_data['ks_before'])*100:.1f}% (from D_KS = {cal_data['ks_before']:.3f} to {cal_data['ks_after']:.3f})",
+        f"Kolmogorov-Smirnov distance D_KS reduced by {(1.0 - cal_data['ks_after'] / cal_data['ks_before']) * 100:.1f}% (from D_KS = {cal_data['ks_before']:.3f} to {cal_data['ks_after']:.3f})",
     )
     x_lim2 = (0.0, max_frp)
     y_lim2 = (0.0, 1.02)
@@ -443,24 +552,48 @@ def render_fig3_cross_sensor_frp(
     )
 
     grid_x = cal_data["cdf_grid_mw"]
-    pts_v = [c.map_pt(x, y, p2, x_lim2, y_lim2) for x, y in zip(grid_x, cal_data["cdf_viirs"])]
-    pts_m = [c.map_pt(x, y, p2, x_lim2, y_lim2) for x, y in zip(grid_x, cal_data["cdf_modis_raw"])]
-    pts_h = [c.map_pt(x, y, p2, x_lim2, y_lim2) for x, y in zip(grid_x, cal_data["cdf_modis_harm"])]
+    pts_v = [
+        c.map_pt(x, y, p2, x_lim2, y_lim2)
+        for x, y in zip(grid_x, cal_data["cdf_viirs"])
+    ]
+    pts_m = [
+        c.map_pt(x, y, p2, x_lim2, y_lim2)
+        for x, y in zip(grid_x, cal_data["cdf_modis_raw"])
+    ]
+    pts_h = [
+        c.map_pt(x, y, p2, x_lim2, y_lim2)
+        for x, y in zip(grid_x, cal_data["cdf_modis_harm"])
+    ]
 
     c.draw.line(pts_m, fill=COL_MODIS, width=4)
     c.draw.line(pts_v, fill=COL_VIIRS, width=6)
     c.draw.line(pts_h, fill=COL_HARM, width=4)
 
-    c.draw.text((1460, 680), "Raw MODIS C6.1 CDF (Truncated sub-pixel fire tail)", fill=COL_MODIS, font=c.f_annot)
-    c.draw.text((1460, 725), "Reference VIIRS 375m C2 CDF (Target Distribution)", fill=COL_VIIRS, font=c.f_annot)
-    c.draw.text((1460, 770), "Flare-Chronos Harmonized CDF (Matches Target up to P99)", fill=COL_HARM, font=c.f_annot)
+    c.draw.text(
+        (1460, 680),
+        "Raw MODIS C6.1 CDF (Truncated sub-pixel fire tail)",
+        fill=COL_MODIS,
+        font=c.f_annot,
+    )
+    c.draw.text(
+        (1460, 725),
+        "Reference VIIRS 375m C2 CDF (Target Distribution)",
+        fill=COL_VIIRS,
+        font=c.f_annot,
+    )
+    c.draw.text(
+        (1460, 770),
+        "Flare-Chronos Harmonized CDF (Matches Target up to P99)",
+        fill=COL_HARM,
+        font=c.f_annot,
+    )
 
     c.save(out_path)
 
 
 def render_fig4_regime_shift_elimination(
     out_path: Path,
-    series_data: Dict[str, Any],
+    series_data: dict[str, Any],
 ) -> None:
     """Render Figure 4: 26-Year Multi-Epoch Regime Shift Elimination (Mekong & Amazon)."""
     c = ScientificCanvas()
@@ -471,8 +604,16 @@ def render_fig4_regime_shift_elimination(
 
     for panel_idx, (region_key, box, title_str) in enumerate(
         [
-            ("mekong", (36, 132, 1110, 1275), "A. Case Study 1: Mekong Subregion & Vietnam (Peak Dry Season - March)"),
-            ("amazon", (1140, 132, 2164, 1275), "B. Case Study 2: Southern Amazon Arc of Deforestation (Peak Burn - August)"),
+            (
+                "mekong",
+                (36, 132, 1110, 1275),
+                "A. Case Study 1: Mekong Subregion & Vietnam (Peak Dry Season - March)",
+            ),
+            (
+                "amazon",
+                (1140, 132, 2164, 1275),
+                "B. Case Study 2: Southern Amazon Arc of Deforestation (Peak Burn - August)",
+            ),
         ]
     ):
         rdata = series_data[region_key]
@@ -501,11 +642,17 @@ def render_fig4_regime_shift_elimination(
         )
 
         # Vertical sensor introduction lines
-        for s_yr, s_lbl in [(2012, "2012: +S-NPP VIIRS"), (2020, "2020: +NOAA-20"), (2024, "2024: +NOAA-21")]:
+        for s_yr, s_lbl in [
+            (2012, "2012: +S-NPP VIIRS"),
+            (2020, "2020: +NOAA-20"),
+            (2024, "2024: +NOAA-21"),
+        ]:
             sx, sy0 = c.map_pt(s_yr, 0, p, x_lim, y_lim)
             _, sy1 = c.map_pt(s_yr, ymax * 0.96, p, x_lim, y_lim)
             for yy in range(sy1, sy0, 16):
-                c.draw.line([(sx, yy), (sx, min(sy0, yy + 9))], fill=COL_PURPLE, width=2)
+                c.draw.line(
+                    [(sx, yy), (sx, min(sy0, yy + 9))], fill=COL_PURPLE, width=2
+                )
             c.draw.text((sx - 55, sy1 - 24), s_lbl, fill=COL_PURPLE, font=c.f_small)
 
         pts_raw = [c.map_pt(y, v, p, x_lim, y_lim) for y, v in zip(years, raw_idx)]
@@ -518,13 +665,23 @@ def render_fig4_regime_shift_elimination(
         for pt in pts_harm:
             c.draw.ellipse([pt[0] - 5, pt[1] - 5, pt[0] + 5, pt[1] + 5], fill=COL_HARM)
 
-        c.draw.text((box[0] + 130, 260), "Raw Unharmonized Sum (Artificial +380% to +540% Sensor Step Bias!)", fill=COL_MODIS, font=c.f_annot)
-        c.draw.text((box[0] + 130, 296), "Flare-Chronos Harmonized Fire Density (True Physical & Climatic Signal)", fill=COL_HARM, font=c.f_annot)
+        c.draw.text(
+            (box[0] + 125, 295),
+            "Raw Unharmonized Sum (Artificial +380% to +1,324% Sensor Step Bias!)",
+            fill=COL_MODIS,
+            font=c.f_annot,
+        )
+        c.draw.text(
+            (box[0] + 125, 330),
+            "Flare-Chronos Harmonized Fire Density (True Physical & Climatic Signal)",
+            fill=COL_HARM,
+            font=c.f_annot,
+        )
 
     c.save(out_path)
 
 
-def _heatmap_color(norm_val: float) -> Tuple[int, int, int]:
+def _heatmap_color(norm_val: float) -> tuple[int, int, int]:
     """YlOrRd / Inferno scientific perceptual colormap for norm_val in [0, 1]."""
     v = max(0.0, min(1.0, norm_val))
     stops = [
@@ -549,7 +706,7 @@ def _heatmap_color(norm_val: float) -> Tuple[int, int, int]:
 
 def render_fig5_burning_activity_calendar(
     out_path: Path,
-    cal_matrix_data: Dict[str, Any],
+    cal_matrix_data: dict[str, Any],
 ) -> None:
     """Render Figure 5: 26-Year Harmonized Burning Activity Calendar (Year x Pentad Heatmap & SFAI)."""
     c = ScientificCanvas()
@@ -559,11 +716,19 @@ def render_fig5_burning_activity_calendar(
     )
 
     for region_key, box, title_str in [
-        ("mekong", (36, 132, 1110, 1275), "A. Mekong & Vietnam Harmonized Burning Calendar (HFD & SFAI Anomalies)"),
-        ("amazon", (1140, 132, 2164, 1275), "B. Amazon Basin Harmonized Burning Calendar (HFD & SFAI Anomalies)"),
+        (
+            "mekong",
+            (36, 132, 1110, 1275),
+            "A. Mekong & Vietnam Harmonized Burning Calendar (HFD & SFAI Anomalies)",
+        ),
+        (
+            "amazon",
+            (1140, 132, 2164, 1275),
+            "B. Amazon Basin Harmonized Burning Calendar (HFD & SFAI Anomalies)",
+        ),
     ]:
         rdata = cal_matrix_data[region_key]
-        years = rdata["years"]         # 2001..2026 (26 rows)
+        years = rdata["years"]  # 2001..2026 (26 rows)
         matrix = np.array(rdata["hfd_matrix"], dtype=float)  # shape (26, 73)
         sfai_mat = np.array(rdata["sfai_matrix"], dtype=float)
 
@@ -583,7 +748,9 @@ def render_fig5_burning_activity_calendar(
             cy0 = int(py0 + r_idx * ch)
             cy1 = int(py0 + (r_idx + 1) * ch)
             if r_idx % 3 == 0 or yr in (2012, 2016, 2024, 2026):
-                c.draw.text((px0 - 58, cy0 + 2), str(yr), fill=TEXT_DARK, font=c.f_small)
+                c.draw.text(
+                    (px0 - 58, cy0 + 2), str(yr), fill=TEXT_DARK, font=c.f_small
+                )
 
             for c_idx in range(n_cols):
                 cx0 = int(px0 + c_idx * cw)
@@ -592,12 +759,24 @@ def render_fig5_burning_activity_calendar(
                 col = _heatmap_color(val / max(1e-6, vmax))
                 c.draw.rectangle([cx0, cy0, cx1, cy1], fill=col)
                 if sfai_mat[r_idx, c_idx] >= 2.15 and val >= 0.35 * vmax:
-                    c.draw.rectangle([cx0, cy0, cx1, cy1], outline=(0, 210, 255), width=2)
+                    c.draw.rectangle(
+                        [cx0, cy0, cx1, cy1], outline=(0, 210, 255), width=2
+                    )
 
         # Month / Pentad x-axis labels
         month_pentads = [
-            (1, "Jan"), (7, "Feb"), (13, "Mar"), (19, "Apr"), (25, "May"), (31, "Jun"),
-            (37, "Jul"), (43, "Aug"), (49, "Sep"), (55, "Oct"), (61, "Nov"), (67, "Dec"),
+            (1, "Jan"),
+            (7, "Feb"),
+            (13, "Mar"),
+            (19, "Apr"),
+            (25, "May"),
+            (31, "Jun"),
+            (37, "Jul"),
+            (43, "Aug"),
+            (49, "Sep"),
+            (55, "Oct"),
+            (61, "Nov"),
+            (67, "Dec"),
         ]
         for pt_idx, m_lbl in month_pentads:
             mx = int(px0 + (pt_idx - 1) * cw)

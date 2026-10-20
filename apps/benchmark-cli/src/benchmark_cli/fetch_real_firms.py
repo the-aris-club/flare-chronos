@@ -9,9 +9,8 @@ Respects the 5,000 transactions / 10-minute rate limit and caches all CSVs in da
 from __future__ import annotations
 
 import json
-from pathlib import Path
 import sys
-from typing import List
+from pathlib import Path
 
 # Ensure monorepo packages are importable
 ROOT = Path(__file__).resolve().parents[4]
@@ -20,9 +19,9 @@ sys.path.insert(0, str(ROOT / "packages" / "firms-ingestion" / "src"))
 from firms_ingestion import BBOX_AMAZON, BBOX_MEKONG, FIRMSClient, FIRMSQuerySpec
 
 
-def build_epoch_query_plan() -> List[FIRMSQuerySpec]:
+def build_epoch_query_plan() -> list[FIRMSQuerySpec]:
     """Construct a curated, high-signal multi-epoch query plan across sensor generations."""
-    specs: List[FIRMSQuerySpec] = []
+    specs: list[FIRMSQuerySpec] = []
 
     # 1. Mekong / Vietnam Peak Dry-Season Windows (March 15 - March 19, 5-day pentad)
     mekong_epochs = [
@@ -32,8 +31,14 @@ def build_epoch_query_plan() -> List[FIRMSQuerySpec]:
         ("2016-03-15", ["MODIS_SP", "VIIRS_SNPP_SP"]),  # Severe El Nino
         ("2020-03-15", ["MODIS_SP", "VIIRS_SNPP_SP", "VIIRS_NOAA20_SP"]),
         ("2023-03-15", ["MODIS_SP", "VIIRS_SNPP_SP", "VIIRS_NOAA20_SP"]),
-        ("2024-03-15", ["MODIS_SP", "VIIRS_SNPP_SP", "VIIRS_NOAA20_SP", "VIIRS_NOAA21_NRT"]),
-        ("2025-03-15", ["MODIS_NRT", "VIIRS_SNPP_NRT", "VIIRS_NOAA20_NRT", "VIIRS_NOAA21_NRT"]),
+        (
+            "2024-03-15",
+            ["MODIS_SP", "VIIRS_SNPP_SP", "VIIRS_NOAA20_SP", "VIIRS_NOAA21_NRT"],
+        ),
+        (
+            "2025-03-15",
+            ["MODIS_NRT", "VIIRS_SNPP_NRT", "VIIRS_NOAA20_NRT", "VIIRS_NOAA21_NRT"],
+        ),
     ]
     for start_date, sources in mekong_epochs:
         for src in sources:
@@ -66,7 +71,10 @@ def build_epoch_query_plan() -> List[FIRMSQuerySpec]:
         ("2012-08-20", ["MODIS_SP", "VIIRS_SNPP_SP"]),
         ("2019-08-20", ["MODIS_SP", "VIIRS_SNPP_SP"]),
         ("2020-08-20", ["MODIS_SP", "VIIRS_SNPP_SP", "VIIRS_NOAA20_SP"]),
-        ("2024-08-20", ["MODIS_SP", "VIIRS_SNPP_SP", "VIIRS_NOAA20_SP", "VIIRS_NOAA21_NRT"]),
+        (
+            "2024-08-20",
+            ["MODIS_SP", "VIIRS_SNPP_SP", "VIIRS_NOAA20_SP", "VIIRS_NOAA21_NRT"],
+        ),
     ]
     for start_date, sources in amazon_epochs:
         for src in sources:
@@ -102,7 +110,9 @@ def main() -> None:
         avail_df = client.check_data_availability()
         print(f"      Retrieved {len(avail_df)} sensor availability records:")
         for _, row in avail_df.iterrows():
-            print(f"      - {row.get('data_id', 'unknown')}: {row.get('min_date', '')} -> {row.get('max_date', '')}")
+            print(
+                f"      - {row.get('data_id', 'unknown')}: {row.get('min_date', '')} -> {row.get('max_date', '')}"
+            )
     except Exception as exc:
         print(f"[WARN] Could not fetch data_availability: {exc}")
 
@@ -131,7 +141,9 @@ def main() -> None:
     total_rows = sum(v for v in summary.values() if v > 0)
     manifest_path = ROOT / "data" / "raw" / "fetch_manifest.json"
     manifest_path.write_text(json.dumps(summary, indent=2), encoding="utf-8")
-    print(f"\n[3/3] Completed progressive fetch: {len(summary)} slices, {total_rows:,} total real Thermal Detections cached.")
+    print(
+        f"\n[3/3] Completed progressive fetch: {len(summary)} slices, {total_rows:,} total real Thermal Detections cached."
+    )
     print(f"      Manifest written to {manifest_path}")
 
 

@@ -6,19 +6,18 @@ the 5,000 transactions per 10-minute interval rate limit.
 
 from __future__ import annotations
 
+import os
+import time
 from dataclasses import dataclass
 from io import StringIO
-import os
 from pathlib import Path
-import time
-from typing import Dict, List, Optional
 
 import pandas as pd
 import requests
 
 # Canonical Case Study Bounding Boxes (west,south,east,north)
-BBOX_MEKONG = "100.0,11.0,109.5,23.5"      # Vietnam, Laos, Cambodia, E. Thailand
-BBOX_AMAZON = "-62.0,-14.0,-50.0,-4.0"     # Southern Amazon Arc of Deforestation (Mato Grosso / Para)
+BBOX_MEKONG = "100.0,11.0,109.5,23.5"  # Vietnam, Laos, Cambodia, E. Thailand
+BBOX_AMAZON = "-62.0,-14.0,-50.0,-4.0"  # Southern Amazon Arc of Deforestation (Mato Grosso / Para)
 
 FIRMS_API_BASE = "https://firms.modaps.eosdis.nasa.gov/api"
 FIRMS_OPEN_CSV_BASE = "https://firms.modaps.eosdis.nasa.gov/data/active_fire"
@@ -32,7 +31,7 @@ class FIRMSQuerySpec:
     source: str
     bbox: str
     day_range: int
-    start_date: Optional[str] = None  # YYYY-MM-DD; None fetches latest NRT window
+    start_date: str | None = None  # YYYY-MM-DD; None fetches latest NRT window
 
     @property
     def cache_filename(self) -> str:
@@ -40,7 +39,7 @@ class FIRMSQuerySpec:
         return f"{self.region_tag}__{self.source}__{date_part}__{self.day_range}d.csv"
 
 
-def load_env_map_key(env_path: Optional[Path] = None) -> str:
+def load_env_map_key(env_path: Path | None = None) -> str:
     """Load FIRMS_MAP_KEY from environment or workspace .env file."""
     if os.environ.get("FIRMS_MAP_KEY"):
         return os.environ["FIRMS_MAP_KEY"].strip()
@@ -64,13 +63,15 @@ class FIRMSClient:
 
     def __init__(
         self,
-        map_key: Optional[str] = None,
-        cache_dir: Optional[Path] = None,
+        map_key: str | None = None,
+        cache_dir: Path | None = None,
         min_request_interval_sec: float = 0.35,
         timeout_sec: int = 30,
     ) -> None:
         self.map_key = map_key or load_env_map_key()
-        self.cache_dir = cache_dir or (Path(__file__).resolve().parents[4] / "data" / "raw")
+        self.cache_dir = cache_dir or (
+            Path(__file__).resolve().parents[4] / "data" / "raw"
+        )
         self.cache_dir.mkdir(parents=True, exist_ok=True)
         self.min_request_interval_sec = min_request_interval_sec
         self.timeout_sec = timeout_sec
@@ -106,7 +107,9 @@ class FIRMSClient:
         cache_file.write_text(text + "\n", encoding="utf-8")
         return pd.read_csv(StringIO(text))
 
-    def fetch_area_csv(self, spec: FIRMSQuerySpec, force_refresh: bool = False) -> pd.DataFrame:
+    def fetch_area_csv(
+        self, spec: FIRMSQuerySpec, force_refresh: bool = False
+    ) -> pd.DataFrame:
         """Fetch active fire Thermal Detections for a bounding box and date window."""
         cache_file = self.cache_dir / spec.cache_filename
         if cache_file.exists() and not force_refresh:
@@ -157,11 +160,11 @@ class FIRMSClient:
 
     def fetch_batch_progressively(
         self,
-        specs: List[FIRMSQuerySpec],
+        specs: list[FIRMSQuerySpec],
         pause_between_specs_sec: float = 0.5,
-    ) -> Dict[str, int]:
+    ) -> dict[str, int]:
         """Fetch a list of FIRMSQuerySpecs progressively with caching and status counts."""
-        summary: Dict[str, int] = {}
+        summary: dict[str, int] = {}
         for spec in specs:
             try:
                 df = self.fetch_area_csv(spec)

@@ -8,9 +8,8 @@ ascending/descending orbital node rather than the physical Solar Zenith Angle th
 
 from __future__ import annotations
 
-from datetime import datetime
 import math
-from typing import Tuple
+from datetime import datetime
 
 DAYNIGHT_SZA_THRESHOLD_DEG = 85.0
 
@@ -65,10 +64,9 @@ def compute_solar_zenith_angle(
     lat_rad = math.radians(latitude_deg)
     ha_rad = math.radians(hour_angle_deg)
 
-    cos_sza = (
-        math.sin(lat_rad) * math.sin(decl_rad)
-        + math.cos(lat_rad) * math.cos(decl_rad) * math.cos(ha_rad)
-    )
+    cos_sza = math.sin(lat_rad) * math.sin(decl_rad) + math.cos(lat_rad) * math.cos(
+        decl_rad
+    ) * math.cos(ha_rad)
     cos_sza = max(-1.0, min(1.0, cos_sza))
     return round(math.degrees(math.acos(cos_sza)), 4)
 
@@ -79,7 +77,7 @@ def harmonize_daynight_flag(
     acq_datetime_utc: datetime,
     raw_daynight: str,
     sza_threshold_deg: float = DAYNIGHT_SZA_THRESHOLD_DEG,
-) -> Tuple[float, str, bool]:
+) -> tuple[float, str, bool]:
     """Return (sza_deg, harmonized_daynight, was_reclassified).
 
     Enforces NASA Standard Processing convention:
