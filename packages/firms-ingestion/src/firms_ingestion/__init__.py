@@ -15,3 +15,5 @@ __all__ = [
     "FIRMSQuerySpec",
     "load_env_map_key",
 ]
+
+__author__ = "Xiro The Dev <lethanhtrung.trungle@gmail.com>"

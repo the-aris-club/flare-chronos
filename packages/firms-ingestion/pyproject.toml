@@ -2,6 +2,7 @@
 name = "firms-ingestion"
 version = "0.1.0"
 description = "NASA LANCE FIRMS API and Archive ingestion adapter with rate-limit pacing and local cache"
+authors = [{name = "Xiro The Dev", email = "lethanhtrung.trungle@gmail.com"}]
 requires-python = ">=3.11"
 dependencies = [
     "pandas>=2.2.0",

@@ -21,3 +21,5 @@ __all__ = [
     "parse_firms_dataframe",
     "reconstruct_instantaneous_footprint",
 ]
+
+__author__ = "Xiro The Dev <lethanhtrung.trungle@gmail.com>"

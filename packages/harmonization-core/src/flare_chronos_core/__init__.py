@@ -1,5 +1,6 @@
 """Flare-Chronos Core Harmonization Deep Module Interface."""
 
+
 # pyright: reportGeneralTypeIssues=false, reportArgumentType=false, reportOptionalMemberAccess=false
 
 from __future__ import annotations
@@ -279,3 +280,5 @@ __all__ = [
     "viirs_aggregation_zone",
     "viirs_dimensions_from_scan_angle",
 ]
+
+__author__ = "Xiro The Dev <lethanhtrung.trungle@gmail.com>"
