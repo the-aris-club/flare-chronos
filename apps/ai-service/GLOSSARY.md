@@ -15,7 +15,7 @@ The Reflexive Layer's answer to "which of the twenty analyses does this request 
 _Avoid_: Routing, intent label, model selection
 
 **Triage Confidence**:
-The Reflexive Layer's estimate of how well it classified a request. A typed-questions endpoint returns a calibrated probability; a chat endpoint returns the model's own estimate, which is recorded as self-reported and must never be presented as calibrated.
+The Reflexive Layer's estimate of how well it classified a request. A decision endpoint returns a calibrated probability; a chat endpoint returns the model's own estimate, which is recorded as self-reported and must never be presented as calibrated. The harness records which of the two produced the answer, so a self-reported estimate is never read as a calibrated one.
 _Avoid_: Confidence score, certainty, probability of correctness
 
 **System 2 Deliberative Layer**:

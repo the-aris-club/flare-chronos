@@ -406,7 +406,7 @@ Trong quá trình chạy thực nghiệm trên $1.609.182$ bản ghi thực tế
 
 1. **Tầng Phản xạ Nhanh — System 1 (`system1_reflexive` — `SystemOneChatModel`):**
    - **Mô hình & Giao thức:** hai giao thức đều được hỗ trợ và chọn bằng cấu hình. **(i) typed-questions** (`POST {endpoint}` với `{model, state, questions}` → `{answers}`) trả về phân phối xác suất **hiệu chuẩn**; **(ii) native chat** (`POST {endpoint}` với `{model, messages, tools}`) trả về phân loại có cấu trúc qua tool `classify_request` — độ tin cậy lúc này là **tự báo cáo**, và harness ghi rõ nguồn (`triage_confidence_source`) để không bao giờ bị đọc nhầu là hiệu chuẩn. Cả hai đi qua **Endpoint Profile** (`harness_config.yaml` + `SYSTEM1_ENDPOINT` / `SYSTEM1_MODEL` / `SYSTEM1_API_KEY`).
-   - **Suy giảm khi classifier không sẵn sàng:** một lỗi rate-limit hoặc sự cố endpoint không được làm hỏng run; harness lùi về trích xuất tạm và ghi lý do (`triage_fallback`).
+   - **Suy giảm khi classifier không sẵn sàng:** một lỗi rate-limit hoặc sự cố endpoint không được làm hỏng run; harness lùi xuống **mô hình chat**, rồi tới trích xuất tạm, và ghi lý do từng bậc (`triage_fallback`). Nguồn của độ tin cậy được ghi lại (`triage_confidence_source`): `calibrated` khi **mô hình quyết định** trả lời, `self_reported` khi mô hình chat trả lời, `none` khi không classifier nào trả lời — để không bao giờ báo cáo nào đọc nhầm hai loại độ tin cậy.
    - **Chuỗi phân loại:** tầng phản xạ hỏi **theo thứ tự**: (1) **mô hình quyết định** (giao thức typed-questions, trả xác suất hiệu chuẩn) — phục vụ cục bộ trên node suy luận của dự án, **không tốn credit đám mây**; (2) **mô hình chat** (giao thức native chat, tool `classify_request`); (3) **trích xuất tất định** theo văn bản. Mỗi lần lùi bậc được ghi lại (`triage_fallback`), nên không báo cáo nào tự nhận đã có phân loại khi thực tế không có. Cả hai giao thức dùng **cùng một menu `20` phân tích**, nên hai tầng trả lời cùng một cấu trúc.
    - **Vai trò (tầng *báo cáo*):** **Gán phân tích** (chọn đúng `1` trong `20` phân tích mà yêu cầu cần), phân loại ý định & mức độ khẩn cấp (`UC-S1.1`), trích xuất thực thể không-thời gian có cấu trúc `SpatioTemporalQueryEntity` (`UC-S1.2`), tra cứu nhanh 1 bước (`UC-S1.3`), phát cảnh báo khẩn NRT (`UC-S1.4`), và dựng thẻ dữ kiện theo đối tượng (`UC-S1.5`). Tầng này **chỉ chạm tới `9` Atomic Tool**, **không** suy diễn phân tích, và **không** viết diễn giải. Khi người dùng **không** nêu mã use case, chính tầng này quyết định: câu trả lời của nó định nghĩa tầng nhận thức, bề mặt tool, khoá cache và tiêu đề báo cáo.
    - **Phân loại trước, định tuyến sau:** nút `system1_triage_node` **gọi mô hình phân loại trước khi định tuyến**. Câu trả lời có cấu trúc (`region`, `urgency`, `is_deliberative`, `use_case`) được ghi vào `HarnessState["triage_confidence"]`, kèm nguồn của độ tin cậy (`triage_confidence_source`) để phân phối hiệu chuẩn không bao giờ bị đọc nhầm là tự báo cáo. Use case **được nêu tường minh** luôn thắng; khi không được nêu, mã do tầng phản xạ gán quyết định tầng nhận thức. Mô hình chỉ được **ghi đè** tầng nhận thức khi người dùng **không** chỉ định use case; use case được chỉ định tường minh luôn thắng ([`ADR-0008`](../docs/adr/0008-model-driven-tool-selection-sign-off-and-event-stream.md)).
@@ -544,6 +544,32 @@ Chênh lệch **token** là cấu trúc: lượt suy luận phải đọc toàn 
 ⇒ Tầng suy luận giữ **`beam`**: không một lần sửa lỗi, không một câu hỏi làm rõ, đúng một vòng tool mỗi Use Case.
 
 Hai mô hình từ chối mức suy luận đã cấu hình (`xhigh`) và **trả lỗi HTTP 400 cho mọi yêu cầu**. Đây là lỗi của harness, không phải của mô hình: một mức suy luận thuộc về một họ mô hình, nên khi endpoint từ chối, adapter **hỏi lại không kèm suy luận** thay vì làm hỏng cả run, và telemetry ghi rõ tầng đó đã chạy **không** có suy luận. Tương tự, một phép đo symbiosis hỏng không còn xóa cả batch đo.
+
+#### 7.3.1.1. Hai Thế Hệ Mô Hình Trên Cùng Một Yêu Cầu Thật
+
+Bộ đo chạy trên **cùng** các yêu cầu của dự án, qua **đúng** đường gọi của harness:
+
+| Phép đo | Mô hình quyết định (`clef-flash`, cục bộ) | Mô hình chat (`gemma4:31b`) |
+| --- | --- | --- |
+| Vùng đúng (20 truy vấn tự nhiên) | **20 / 20** | **20 / 20** |
+| **Gán đúng phân tích** | **20 / 20** | **20 / 20** |
+| Vùng nêu gián tiếp (8 truy vấn) | **8 / 8** | **8 / 8** |
+| Tầng đúng (ngưỡng tối ưu) | 18 / 20 | 20 / 20 |
+| Khẩn cấp đúng | **20 / 20** | 20 / 20 |
+| Đồng thuận với mã use case người dùng ghi | 18 / 20 | — |
+| Token vào mỗi lượt | 976 | ~430 |
+| Credit | **0** (chạy cục bộ trên node suy luận) | có |
+
+⇒ Mô hình quyết định được dùng làm **phân loại chính** vì nó trả **xác suất hiệu chuẩn** (độ tin cậy `calibrated`), gán phân tích đúng tuyệt đối, và chạy **cục bộ** nên không tốn credit. Mô hình chat giữ vai trò **dự phòng** trong chuỗi phân loại.
+
+**Hiệu chuẩn định ngưỡng bằng đo:**
+
+| Xác suất | Nhóm "một bước" | Nhóm "suy luận" | Ngưỡng | Kết quả |
+| --- | --- | --- | --- | --- |
+| `is_deliberative` | 0,060 – 0,332 | 0,224 – 0,848 | 0,29 | 18/20 — **khe chồng nhau**, nên xác suất này chỉ là dự phòng; **phân tích đã gán** mới quyết định tầng |
+| `urgency` | 0,004 – 0,099 | 0,467 – 0,961 | 0,25 | **20/20** — ngưỡng đặt giữa khe hở để biên đệm rộng nhất |
+
+⇒ Ngưỡng không phải mặc định mà là **kết quả đo**, và mỗi ngưỡng được ghi kèm lý do trong [`harness_config.yaml`](../apps/ai-service/config/harness_config.yaml).
 
 #### 7.3.2. Định Tuyến Truy Vấn Tự Nhiên — Việc Thật Của Tầng Phản Xạ
 

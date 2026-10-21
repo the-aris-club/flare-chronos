@@ -24,10 +24,14 @@
     "calibrated"
   ],
   "zero_unverified_numbers_in_final_outputs": true,
-  "total_duration_sec": 0.01,
+  "total_duration_sec": 0.02,
   "slowest_use_cases": [
     [
       "UC-S1.1",
+      0.01
+    ],
+    [
+      "UC-1.1",
       0.01
     ],
     [
@@ -40,10 +44,6 @@
     ],
     [
       "UC-S1.4",
-      0.0
-    ],
-    [
-      "UC-S1.5",
       0.0
     ]
   ],
@@ -237,7 +237,7 @@
       },
       "has_system2_reasoning_trace": true,
       "synthesis_mode": "deterministic",
-      "duration_sec": 0.0,
+      "duration_sec": 0.01,
       "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: clef-flash | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-1.1)\n- **Tool Executed (`tool_uc1_1_regime_shift_attribution`)**:\n  - `use_case_id`: UC-1.1\n  - `region`: mekong\n  - `baseline_year`: **2005**\n  - `comparison_year`: **2024**\n  - `baseline_raw_detections`: **3580**\n  - `comparison_raw_detections`: **50988**\n  - `raw_apparent_step_jump_pct`: **1324.2**\n  - `baseline_modis_reference_count`: **3580**\n  - `comparison_modis_reference_count`: **3446**\n  - `modis_reference_pct_change`: **-3.7**\n  - `comparison_deduplicated_episodes`: **22557**\n  - `comparison_dedup_compression_ratio`: **2.26**\n  - `baseline_effort_omega`: **1.0084**\n  - `comparison_effort_omega`: **2.0975**\n  - `baseline_harmonized_episodes`: **7717.0**\n  - `comparison_harmonized_episodes`: **7266.4**\n  - `comparison_raw_index_2005_eq_100`: **1424.2**\n  - `comparison_harmonized_index_2005_eq_100`: **94.2**\n  - `true_physical_fire_pct_change`: **-5.8**\n- **Tool Executed (`tool_deduplicate_overpass_episodes`)**:\n  - `year`: **2024**\n  - `latitude_deg`: **17.2**\n  - `raw_detection_count`: **50988**\n  - `dedupl"
     },
     {

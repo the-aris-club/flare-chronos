@@ -113,10 +113,15 @@ cognition:
   # tier can never reach a Domain Diagnostic Tool.
   fast_tier_tool_surface: "atomic"
   # Probability of "is_deliberative" above which an unrequested query is routed
-  # to the deliberative tier.
-  deliberative_threshold: 0.5
+  # to the deliberative tier. This is the last-resort rule: when the classifier
+  # names the analysis, the analysis decides the tier. Measured on the twenty
+  # free-form requests, the decision model's probabilities overlap between the
+  # two tiers, so no threshold on this number reaches twenty of twenty.
+  deliberative_threshold: 0.29
   # Probability of "is_urgent" above which the request is a flash crisis.
-  urgency_threshold: 0.6
+  # Measured on the same twenty requests: the urgent ones start at 0.467 and
+  # the others end at 0.099, so the threshold sits in the middle of that gap.
+  urgency_threshold: 0.25
   # Maximum clarification questions the model may ask in one run.
   max_clarifications: 2
   # Use cases whose briefing must be authorized by a human before it is released.
