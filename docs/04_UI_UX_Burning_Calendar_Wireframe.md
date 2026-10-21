@@ -89,7 +89,7 @@ Giao diện **Flare-Chronos Workbench** giải quyết triệt để hai ảo gi
   3. **$\text{SFAI}$ (*Standardized Fire Anomaly Index*)**: Chỉ số Z-score phi tham số đo độ lệch của Pentad hiện tại so với đường cơ sở 25 năm của chính Pentad đó:
      $$\text{SFAI}_{y,p} = \frac{\text{HRF}_{y,p} - \text{Median}_y(\text{HRF}_{\cdot, p})}{\sigma_{\text{robust}}(\text{HRF}_{\cdot, p})}$$
 * **Nhận diện Tự động "Giai đoạn Cao điểm" & "Dị thường Ngoài mùa vụ"**:
-  - Các ô có $\text{SFAI}_{y,p} \ge +2.25\sigma$ được đóng khung viền xanh lơ phát sáng (*Crisis Anomaly Outline*), giúp chỉ huy cứu hỏa nhận ra ngay các đợt cháy rừng bùng phát sớm hơn quy luật mùa vụ (như đầu tháng 2 năm 2016 tại Tây Nguyên và Tiểu vùng Mekong).
+  - Các ô có $\text{SFAI}_{y,p} \ge +2.2\sigma$ được đóng khung viền xanh lơ phát sáng (*Crisis Anomaly Outline*), giúp chỉ huy cứu hỏa nhận ra ngay các đợt cháy rừng bùng phát sớm hơn quy luật mùa vụ (như đầu tháng 2 năm 2016 tại Tây Nguyên và Tiểu vùng Mekong). Ngưỡng này là **ngưỡng hiển thị** (khớp với chú thích của Hình 5), thấp hơn ngưỡng **báo động khủng hoảng** là $\text{SFAI} \ge +2.5\sigma$ (xem `docs/01` §6.1) — tức lịch cháy làm nổi bật dị thường nghiêm trọng *trước khi* báo động được kích hoạt.
 
 ### 3.3. Đồng Hồ Mùa Vụ Cháy Cực (`Polar Phenology Clock`)
 * Biểu diễn chu kỳ $365\text{ ngày}$ ($73\text{ Pentads}$) trên hệ tọa độ cực $\psi_p = \frac{2\pi(p - 0.5)}{73}$:

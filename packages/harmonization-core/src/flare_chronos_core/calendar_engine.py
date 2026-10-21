@@ -29,15 +29,22 @@ def pentad_to_doy_range(pentad: int) -> tuple[int, int]:
     return start, end
 
 
+# Operational SFAI Z-score boundaries. These are the two thresholds that
+# matter operationally: above the first, fire managers mobilise patrols;
+# above the second, an out-of-season crisis alarm is raised.
+SFAI_SEVERE_THRESHOLD_Z = 1.75
+SFAI_CRISIS_THRESHOLD_Z = 2.5
+
+
 def classify_sfai_tier(sfai: float) -> AnomalyTier:
     """Classify Standardized Fire Anomaly Index (SFAI Z-score) into operational risk tiers."""
     if sfai < -0.5:
         return AnomalyTier.QUIET
     if sfai < 1.0:
         return AnomalyTier.BASELINE
-    if sfai < 1.75:
+    if sfai < SFAI_SEVERE_THRESHOLD_Z:
         return AnomalyTier.ELEVATED
-    if sfai < 2.5:
+    if sfai < SFAI_CRISIS_THRESHOLD_Z:
         return AnomalyTier.SEVERE
     return AnomalyTier.CRISIS
 

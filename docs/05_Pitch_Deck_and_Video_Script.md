@@ -55,7 +55,7 @@
 
 ### Slide 6 — The Harmonized Burning Activity Calendar & Early Warning (Sản Phẩm Ứng Dụng Thực Tế)
 * **Trình diễn Ma trận Lịch Hoạt Động Cháy (`26 Năm × 73 Pentads`) & Chỉ số Dị thường $\text{SFAI}$:**
-  - **Tại Việt Nam & Tiểu vùng Mekong**: Xác định chính xác cửa sổ đốt phụ phẩm nông nghiệp và cháy rừng khộp theo mùa kéo dài từ **Pentad 11 đến Pentad 22 (20/02 – 20/04)**; phát hiện sớm dị thường cháy ngoài mùa vụ ngay từ **Pentad 8–10 (đầu tháng 2)** trong năm El Niño 2010 và 2016 với $\text{SFAI} > +2,8\sigma$ (viền xanh cảnh báo khẩn cấp).
+  - **Tại Việt Nam & Tiểu vùng Mekong**: Xác định chính xác cửa sổ đốt phụ phẩm nông nghiệp và cháy rừng khộp theo mùa kéo dài từ **Pentad 11 đến Pentad 22 (20/02 – 20/04)**; phát hiện sớm dị thường cháy ngoài mùa vụ ngay từ **Pentad 8–10 (đầu tháng 2)** trong năm El Niño 2010 và 2016 với $\text{SFAI} > +3\sigma$ (viền xanh cảnh báo khẩn cấp).
   - **Tại Lưu vực Amazon**: Định vị chính xác mùa cháy cao điểm từ **Pentad 40 đến Pentad 56 (15/07 – 07/10)**.
 * **Hình ảnh trực quan:** Nhúng [fig5_harmonized_burning_calendar.png](figures/fig5_harmonized_burning_calendar.png).
 

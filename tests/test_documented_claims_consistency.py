@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import json
 import re
+import sys
 import unittest
 from pathlib import Path
 
@@ -246,6 +247,44 @@ class DocumentedClaimsConsistencyTest(unittest.TestCase):
             self._assert_none_present(
                 doc, "alternate record count", ("1.609.182", "1,609,182")
             )
+
+    def test_sfai_thresholds_are_single_sourced_and_documented(self) -> None:
+        """The SFAI thresholds are named, single-sourced, and agree with the docs.
+
+        Three different numbers used to answer the same question -- "what
+        SFAI marks a crisis?" -- spread across the code, the figure renderer
+        and four documents. The operational boundaries now live in
+        ``flare_chronos_core``; the calendar's cyan outline uses a separate,
+        deliberately lower *display* threshold that the docs name explicitly.
+        """
+        try:
+            sys.path.insert(0, str(ROOT / "packages" / "harmonization-core" / "src"))
+            sys.path.insert(0, str(ROOT / "apps" / "benchmark-cli" / "src"))
+            from benchmark_cli.figure_renderer import SFAI_HIGHLIGHT_Z
+            from flare_chronos_core import (
+                SFAI_CRISIS_THRESHOLD_Z,
+                SFAI_SEVERE_THRESHOLD_Z,
+            )
+        except ImportError as exc:  # pragma: no cover - optional render deps
+            self.skipTest(f"figure rendering dependencies unavailable: {exc}")
+
+        self.assertEqual(SFAI_SEVERE_THRESHOLD_Z, 1.75)
+        self.assertEqual(SFAI_CRISIS_THRESHOLD_Z, 2.5)
+        self.assertEqual(SFAI_HIGHLIGHT_Z, 2.2)
+
+        # the calendar highlights severe anomalies *before* the crisis alarm
+        self.assertLess(SFAI_SEVERE_THRESHOLD_Z, SFAI_HIGHLIGHT_Z)
+        self.assertLess(SFAI_HIGHLIGHT_Z, SFAI_CRISIS_THRESHOLD_Z)
+
+        wireframe = (ROOT / "docs/04_UI_UX_Burning_Calendar_Wireframe.md").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("+2.2\\sigma", wireframe)
+
+        proposal = (ROOT / "docs/01_NASA_SpaceApps_Proposal.md").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("+2.5\\sigma", proposal)
 
 
 if __name__ == "__main__":

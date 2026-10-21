@@ -28,23 +28,38 @@ COL_WARN = (230, 159, 0)  # Amber / Threshold
 COL_PURPLE = (148, 82, 165)  # NOAA-20 / 21 Accent
 COL_GRAY = (130, 140, 155)
 
+# SFAI Z-score above which a calendar cell is outlined in Figure 5.
+# This is a *display* threshold, published as "+2.2" in the figure caption,
+# and is deliberately below the operational CRISIS tier (2.5) so the
+# calendar highlights severe anomalies before a crisis alarm is raised.
+SFAI_HIGHLIGHT_Z = 2.2
+
+# Font candidates, in priority order. The macOS paths come first so the
+# published figures stay byte-comparable on the reference machine; the
+# Linux paths let any contributor regenerate them instead of silently
+# falling back to Pillow's bitmap default font.
+_FONT_CANDIDATES_BOLD = (
+    "/System/Library/Fonts/Supplemental/Arial Bold.ttf",
+    "/Library/Fonts/Arial Bold.ttf",
+    "/System/Library/Fonts/Helvetica.ttc",
+    "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf",
+    "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+    "/usr/share/fonts/truetype/ubuntu/Ubuntu-Bold.ttf",
+)
+_FONT_CANDIDATES_REGULAR = (
+    "/System/Library/Fonts/Supplemental/Arial.ttf",
+    "/Library/Fonts/Arial.ttf",
+    "/System/Library/Fonts/Helvetica.ttc",
+    "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
+    "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+    "/usr/share/fonts/truetype/ubuntu/Ubuntu-R.ttf",
+)
+
 
 def _get_font(
     size: int, bold: bool = False
 ) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
-    candidates = (
-        [
-            "/System/Library/Fonts/Supplemental/Arial Bold.ttf",
-            "/System/Library/Fonts/Helvetica.ttc",
-            "/Library/Fonts/Arial Bold.ttf",
-        ]
-        if bold
-        else [
-            "/System/Library/Fonts/Supplemental/Arial.ttf",
-            "/System/Library/Fonts/Helvetica.ttc",
-            "/Library/Fonts/Arial.ttf",
-        ]
-    )
+    candidates = _FONT_CANDIDATES_BOLD if bold else _FONT_CANDIDATES_REGULAR
     for path in candidates:
         if Path(path).exists():
             try:
@@ -735,7 +750,7 @@ def render_fig5_burning_activity_calendar(
         p = c.draw_panel_box(
             box,
             title_str,
-            "Rows: Years (2001-2026) | Columns: 73 Climatological Pentads (Jan 1 - Dec 31) | Cyan Outline = SFAI Crisis Anomaly (Z >= +2.2)",
+            f"Rows: Years (2001-2026) | Columns: 73 Climatological Pentads (Jan 1 - Dec 31) | Cyan Outline = SFAI Crisis Anomaly (Z >= +{SFAI_HIGHLIGHT_Z})",
         )
         px0, py0, px1, py1 = p
         n_rows, n_cols = matrix.shape
@@ -758,7 +773,7 @@ def render_fig5_burning_activity_calendar(
                 val = matrix[r_idx, c_idx]
                 col = _heatmap_color(val / max(1e-6, vmax))
                 c.draw.rectangle([cx0, cy0, cx1, cy1], fill=col)
-                if sfai_mat[r_idx, c_idx] >= 2.15 and val >= 0.35 * vmax:
+                if sfai_mat[r_idx, c_idx] >= SFAI_HIGHLIGHT_Z and val >= 0.35 * vmax:
                     c.draw.rectangle(
                         [cx0, cy0, cx1, cy1], outline=(0, 210, 255), width=2
                     )
