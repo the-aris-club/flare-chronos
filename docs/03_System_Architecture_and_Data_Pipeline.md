@@ -28,7 +28,7 @@ flare-chronos/
 │   ├── 02_Cross_Sensor_Harmonization_Spec.md     # Đặc tả toán học & vật lý cảm biến MODIS - VIIRS
 │   ├── 03_System_Architecture_and_Data_Pipeline.md
 │   ├── 04_UI_UX_Burning_Calendar_Wireframe.md    # Thiết kế giao diện & Trực quan hóa Lịch Hoạt động Cháy
-│   └── 05_Pitch_Deck_and_Video_Script.md         # Kịch bản Pitch 7 slides & Video Demo từng giây
+│   └── 05_Pitch_Deck_and_Video_Script.md         # Kịch bản Pitch Deck 7 slides & Main Submission Video từng giây
 ├── packages/
 │   ├── harmonization-core/                       # [Deep Module] Lõi vật lý & toán học thuần túy (Zero I/O)
 │   │   ├── pyproject.toml

@@ -100,7 +100,7 @@ flowchart TB
         CAL["Động Cơ Lịch Hoạt Động Cháy (26 Năm × 73 Pentads: Chỉ số HFD, HRF, SFAI Z-Score)"]
     end
 
-    subgraph TIER5["5. Không Gian Phân Tích Tương Tác & Cảnh Báo Sớm (Analytical Workbench)"]
+    subgraph TIER5["5. Không Gian Phân Tích Tương Tác & Cảnh Báo Sớm (Workbench)"]
         MAP["Bản Đồ WebGL Đa Độ Phân Giải (Elip Footprint Thực & Lưới Lục Giác H3)"]
         CLOCK["Ma Trận Lịch Cháy 26×73, Đồng Hồ Mùa Vụ Cực & Hệ Thống Báo Động SFAI"]
     end
@@ -139,7 +139,7 @@ sequenceDiagram
 Để đảm bảo khả năng truy vấn tức thời (độ trễ `< 50 ms`) trên chuỗi lịch sử 26 năm cho bất kỳ vùng địa lý nào mà không bị nghẽn bởi phép toán giao cắt đa giác hình học phức tạp, hệ thống sử dụng ba trụ cột công nghệ:
 - **Hệ thống lưới rời rạc toàn cầu đẳng diện tích Uber H3 (*Hierarchical Hexagonal Discrete Global Grid System*):** Quy chiếu toàn bộ bề mặt Trái Đất về chỉ mục số nguyên 64-bit (`UINT64`) ở hai cấp độ phân giải đồng thời: **Resolution 7** (diện tích trung bình $\bar{A}_7 = 5.161\text{ km}^2$, phục vụ phân tích khí hậu vùng và hiệu chuẩn liên cảm biến) và **Resolution 8** ($\bar{A}_8 = 0.737\text{ km}^2$, phục vụ định vị đám cháy cấp độ hiện trường và lọc nguồn nhiệt công nghiệp tĩnh).
 - **Khối dữ liệu cột hiệu năng cao (*Columnar Spatio-Temporal Cube*):** Lưu trữ ba tầng dữ liệu chuẩn hóa gồm: (1) *Điểm nóng đã hiệu chuẩn mức cảm biến*, (2) *Danh mục sự kiện cháy độc lập sau khử trùng lặp đa vệ tinh*, và (3) *Khối lập phương Lịch Hoạt Động Cháy (`H3 Cell × Year × Pentad`)* hỗ trợ xuất trực tiếp sang chuẩn mở `GeoParquet` và `GeoJSON`.
-- **Không gian trực quan hóa địa không gian tăng tốc phần cứng (*WebGL Analytical Dashboard*):** Kết xuất đồng thời hàng trăm nghìn đa giác elip dải quét $\Delta S \times \Delta T$ xoay theo góc phương vị quỹ đạo cùng lưới lục giác H3 và biểu đồ ma trận mùa vụ.
+- **Không gian trực quan hóa địa không gian tăng tốc phần cứng (*WebGL Workbench*):** Kết xuất đồng thời hàng trăm nghìn đa giác elip dải quét $\Delta S \times \Delta T$ xoay theo góc phương vị quỹ đạo cùng lưới lục giác H3 và biểu đồ ma trận mùa vụ.
 
 ---
 
@@ -326,7 +326,7 @@ Khu vực phía Nam lưu vực Amazon (bang Mato Grosso và Pará, Brazil) đạ
 
 ## 6. Thiết kế giao diện Lịch Hoạt Động Cháy & Quy trình vận hành (UI/UX & Operational Workflow)
 
-### 6.1. Bố cục không gian phân tích đồng bộ 4 khung nhìn (Four-Pane Analytical Workbench)
+### 6.1. Bố cục không gian phân tích đồng bộ 4 khung nhìn (Four-Pane Workbench)
 
 ```text
 +----------------------------------------------------------------------------------------------------------------------+
@@ -352,7 +352,7 @@ Khu vực phía Nam lưu vực Amazon (bang Mato Grosso và Pará, Brazil) đạ
 |                                                       |              Pentad 37 (02/07)                               |
 +-------------------------------------------------------+--------------------------------------------------------------+
 | [MA TRẬN LỊCH HOẠT ĐỘNG CHÁY THỐNG NHẤT 26 NĂM - HARMONIZED BURNING ACTIVITY CALENDAR (26 YEARS x 73 PENTADS)]       |
-| Chỉ số hiển thị: (•) HFD (Sự kiện/100km2/ngày)   ( ) HRF (MW/km2)   ( ) SFAI Anomaly Z-Score   [x] Viền xanh Crisis  |
+| Chỉ số hiển thị: (•) HFD (Sự kiện/100km2/ngày)   ( ) HRF (MW/km2)   ( ) SFAI Anomaly Z-Score   [x] Viền xanh Severe Anomaly  |
 |                                                                                                                      |
 | Năm   | Jan (P01-06) | Feb (P07-12) | Mar (P13-18) | Apr (P19-24) | May-Jul (P25-42) | Aug-Oct (P43-60) | Nov-Dec    |
 | ------+--------------+--------------+--------------+--------------+------------------+------------------+----------- |

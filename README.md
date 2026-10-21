@@ -106,6 +106,7 @@ flare-chronos/
 ├── src/harmonization/                 # [Compat Seam] facade for auto-grading
 ├── tests/                             # Unit & invariant tests
 ├── docs/                              # Proposal, specs, ADRs, figures
+│   └── media/SOURCES.md               # Editorial deliverable index & naming convention
 └── .github/workflows/ci.yml           # CI
 ```
 
@@ -223,8 +224,9 @@ Branches are auto-deleted after merge.
 ## Domain Glossary & ADRs
 
 - [`GLOSSARY.md`](GLOSSARY.md) / [`GLOSSARY-MAP.md`](GLOSSARY-MAP.md) — ubiquitous language (multi-context).
-- [`docs/adr/`](docs/adr/) — Architecture Decision Records (0001–0004).
+- [`docs/adr/`](docs/adr/) — Architecture Decision Records (0001–0006).
 - [`docs/agents/`](docs/agents/) — agent skills config (issue tracker, triage labels, domain docs).
+- [`docs/media/SOURCES.md`](docs/media/SOURCES.md) — editorial deliverable index, naming convention, and the rules that keep the pitch honest about the data.
 
 ---
 

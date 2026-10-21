@@ -101,6 +101,14 @@ _Avoid_: Fire risk score, anomaly percent
 The two-dimensional phenological matrix ($\text{Year} \times \text{Pentad}$) and polar seasonal clock displaying Harmonized Fire Density, Harmonized Radiative Flux, and Standardized Fire Anomaly Index for an Area of Interest.
 _Avoid_: Fire heatmap, hotspot timeline
 
+**Anomaly Tier**:
+The operational severity band of a Standardized Fire Anomaly Index value, assigned in five ordered bands — QUIET ($< -0.5$), BASELINE ($-0.5 \le \text{SFAI} < 1.0$), ELEVATED ($1.0 \le \text{SFAI} < 1.75$), SEVERE ($1.75 \le \text{SFAI} < 2.5$), and CRISIS ($\ge 2.5$). SEVERE mobilises patrols; CRISIS raises an out-of-season crisis alarm.
+_Avoid_: Risk level, alert level, severity score, crisis threshold
+
+**Severe Anomaly Outline**:
+The cyan frame drawn on a Burning Activity Calendar cell whose Standardized Fire Anomaly Index reaches the display threshold of $+2.2\sigma$. It is a rendering convention for a *display* threshold, deliberately below the CRISIS Anomaly Tier so the calendar highlights severe anomalies before a crisis alarm is raised.
+_Avoid_: Crisis anomaly, crisis outline, alarm outline, threshold
+
 ### Visual Communication Artifacts
 
 **Scientific Figure**:
@@ -111,9 +119,9 @@ _Avoid_: Chart, plot, graph, illustration
 A hand-authored visual — motion graphic, 3D scene, title card or map animation — produced for the pitch video to explain the science. It may depict a concept truthfully but it never substitutes for a Scientific Figure, and it is never labelled as a measurement.
 _Avoid_: Figure, chart, data viz, screenshot, mock-up
 
-**Live Visualization**:
-The interactive Deck.gl / MapLibre workbench specified in `docs/04_UI_UX_Burning_Calendar_Wireframe.md`, which renders the harmonization engine's output on demand rather than pre-rendering it. Specified but not yet implemented.
-_Avoid_: UI, dashboard, app, interactive demo
+**Workbench**:
+The Flare-Chronos interactive analysis surface — the Deck.gl / MapLibre application specified in `docs/04_UI_UX_Burning_Calendar_Wireframe.md` that renders the harmonization engine's output on demand rather than pre-rendering it. Specified but not yet implemented.
+_Avoid_: Dashboard, UI, app, interactive demo, live visualization
 
 **Main Submission Video**:
 The 120-second primary pitch deliverable for NASA Space Apps, cut to the shot script in `docs/05_Pitch_Deck_and_Video_Script.md` §3.1.
@@ -122,3 +130,9 @@ _Avoid_: Demo, promo, trailer, explainer
 **Fast Pitch**:
 The 30-second condensed cut of the Main Submission Video, for judge screening and short-form channels. Reserved in the §3 script heading but not yet written.
 _Avoid_: Teaser, trailer, short, bumper
+
+**Pitch Deck**:
+The 7-slide presentation mirroring the `docs/05_Pitch_Deck_and_Video_Script.md` §2 blueprint — the still counterpart of the Main Submission Video, carrying the same argument in slide form.
+_Avoid_: Slide deck, slides, presentation, deck
+
+Rendered deliverables, their release tags, and the naming convention they share are indexed in [`docs/media/SOURCES.md`](docs/media/SOURCES.md).

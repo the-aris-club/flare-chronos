@@ -750,7 +750,7 @@ def render_fig5_burning_activity_calendar(
         p = c.draw_panel_box(
             box,
             title_str,
-            f"Rows: Years (2001-2026) | Columns: 73 Climatological Pentads (Jan 1 - Dec 31) | Cyan Outline = SFAI Crisis Anomaly (Z >= +{SFAI_HIGHLIGHT_Z})",
+            f"Rows: Years (2001-2026) | Columns: 73 Climatological Pentads (Jan 1 - Dec 31) | Cyan Outline = Severe Anomaly (Z >= +{SFAI_HIGHLIGHT_Z})",
         )
         px0, py0, px1, py1 = p
         n_rows, n_cols = matrix.shape

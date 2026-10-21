@@ -1,4 +1,4 @@
-# 05. Kịch Bản Thuyết Trình 7 Slides & Kịch Bản Video Demo Từng Giây (Global Judging Pitch Deck & Video Script)
+# 05. Kịch Bản Thuyết Trình 7 Slides & Kịch Bản Main Submission Video Từng Giây (Global Judging Pitch Deck & Video Script)
 
 **Dự án:** **Flare-Chronos** — *26-Year Cross-Sensor Harmonized Active Fire Intelligence & Phenology Calendar*  
 **Cuộc thi:** 2026 NASA Space Apps Challenge — *Harmonization of MODIS and VIIRS Hot Spots*  
@@ -67,7 +67,7 @@
 
 ---
 
-## 3. Kịch Bản Video Demo Từng Giây (120-Second Main Submission Video & 30-Second Fast Pitch)
+## 3. Kịch Bản Main Submission Video Từng Giây (120-Second Main Submission Video & 30-Second Fast Pitch)
 
 ### 3.1. Kịch Bản Video Chính Thức 2 Phút (120 Giây — Chuẩn Chấm Giải NASA Space Apps)
 

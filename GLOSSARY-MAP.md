@@ -4,7 +4,7 @@ This repo uses a **multi-context** layout. Each context owns its own `GLOSSARY.m
 
 | Context | Glossary | Notes |
 | --- | --- | --- |
-| root (system-wide / core domain) | [GLOSSARY.md](./GLOSSARY.md) | Cross-sensor harmonization domain: sensor physics, H3 grid, calendar, phenology, and the visual communication artifacts (Scientific Figure vs Narrative Asset vs Live Visualization). |
+| root (system-wide / core domain) | [GLOSSARY.md](./GLOSSARY.md) | Cross-sensor harmonization domain: sensor physics, H3 grid, calendar, phenology, the SFAI Anomaly Tiers, and the visual communication artifacts (Scientific Figure vs Narrative Asset vs Workbench). |
 | harmonization-core | [packages/harmonization-core/GLOSSARY.md](./packages/harmonization-core/GLOSSARY.md) | Created lazily when terms resolve. |
 | firms-ingestion | [packages/firms-ingestion/GLOSSARY.md](./packages/firms-ingestion/GLOSSARY.md) | Created lazily when terms resolve. |
 | benchmark-cli | [apps/benchmark-cli/GLOSSARY.md](./apps/benchmark-cli/GLOSSARY.md) | Created lazily when terms resolve. |
