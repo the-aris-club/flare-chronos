@@ -2,18 +2,18 @@
   "harness_framework": "LangGraph StateGraph + ToolNode + MemorySaver + Pydantic v2",
   "models": {
     "system1_reflexive": {
-      "provider": "opencode-v2",
-      "model_id": "jev",
-      "base_url": "https://opencode.ai/zen/v1"
+      "protocol": "typed_questions",
+      "model_id": "jev-1.13-free",
+      "endpoint": "https://opencode.ai/inference/systemone/v1/systemone"
     },
     "system2_deliberative": {
-      "provider": "qwen-local",
-      "model_id": "qwen3.8-flash-next",
-      "base_url": "http://100.67.91.54:8888/v1",
-      "reasoning_effort": "xhigh",
-      "reasoning_field": "reasoning_content"
+      "protocol": "native_chat",
+      "model_id": "beam",
+      "endpoint": "https://ollama.com/api/chat",
+      "thinking_level": "xhigh"
     }
   },
+  "mode": "deterministic",
   "total_use_cases_executed": 20,
   "system1_use_cases_count": 5,
   "system2_use_cases_count": 15,
@@ -59,7 +59,8 @@
       "unverified_numbers_count": 0,
       "self_correction_retries": 0,
       "has_system2_reasoning_trace": false,
-      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system1_fast_lookup | System 1: opencode-v2/jev | System 2: qwen-local/qwen3.8-flash-next]\n### Verified Analysis Report (UC-S1.1)\n- **Tool Executed (`tool_lookup_single_epoch_metrics`)**:\n  - `use_case_id`: UC-S1.3"
+      "synthesis_mode": "deterministic",
+      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system1_fast_lookup | System 1: jev-1.13-free | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-S1.1)\n- **Tool Executed (`tool_lookup_single_epoch_metrics`)**:\n  - `use_case_id`: UC-S1.3"
     },
     {
       "use_case_id": "UC-S1.2",
@@ -73,7 +74,8 @@
       "unverified_numbers_count": 0,
       "self_correction_retries": 0,
       "has_system2_reasoning_trace": false,
-      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system1_fast_lookup | System 1: opencode-v2/jev | System 2: qwen-local/qwen3.8-flash-next]\n### Verified Analysis Report (UC-S1.2)\n- **Tool Executed (`tool_lookup_single_epoch_metrics`)**:\n  - `use_case_id`: UC-S1.3"
+      "synthesis_mode": "deterministic",
+      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system1_fast_lookup | System 1: jev-1.13-free | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-S1.2)\n- **Tool Executed (`tool_lookup_single_epoch_metrics`)**:\n  - `use_case_id`: UC-S1.3"
     },
     {
       "use_case_id": "UC-S1.3",
@@ -87,7 +89,8 @@
       "unverified_numbers_count": 0,
       "self_correction_retries": 0,
       "has_system2_reasoning_trace": false,
-      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system1_fast_lookup | System 1: opencode-v2/jev | System 2: qwen-local/qwen3.8-flash-next]\n### Verified Analysis Report (UC-S1.3)\n- **Tool Executed (`tool_lookup_single_epoch_metrics`)**:\n  - `use_case_id`: UC-S1.3"
+      "synthesis_mode": "deterministic",
+      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system1_fast_lookup | System 1: jev-1.13-free | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-S1.3)\n- **Tool Executed (`tool_lookup_single_epoch_metrics`)**:\n  - `use_case_id`: UC-S1.3"
     },
     {
       "use_case_id": "UC-S1.4",
@@ -101,7 +104,8 @@
       "unverified_numbers_count": 0,
       "self_correction_retries": 0,
       "has_system2_reasoning_trace": false,
-      "final_briefing_preview": "[FIELD_RANGER BRIEFING | Cognitive Path: system1_flash_alert | System 1: opencode-v2/jev | System 2: qwen-local/qwen3.8-flash-next]\n### Verified Analysis Report (UC-S1.4)\n- **Tool Executed (`tool_emit_flash_nrt_alert`)**:\n  - `use_case_id`: UC-S1.4\n  - `region"
+      "synthesis_mode": "deterministic",
+      "final_briefing_preview": "[FIELD_RANGER BRIEFING | Cognitive Path: system1_flash_alert | System 1: jev-1.13-free | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-S1.4)\n- **Tool Executed (`tool_emit_flash_nrt_alert`)**:\n  - `use_case_id`: UC-S1.4\n  - `region"
     },
     {
       "use_case_id": "UC-S1.5",
@@ -115,7 +119,8 @@
       "unverified_numbers_count": 0,
       "self_correction_retries": 0,
       "has_system2_reasoning_trace": false,
-      "final_briefing_preview": "[FORESTRY_EXECUTIVE BRIEFING | Cognitive Path: system1_fast_lookup | System 1: opencode-v2/jev | System 2: qwen-local/qwen3.8-flash-next]\n### Verified Analysis Report (UC-S1.5)\n- **Tool Executed (`tool_uc2_3_verified_multistakeholder_briefing_data`)**:\n  - `us"
+      "synthesis_mode": "deterministic",
+      "final_briefing_preview": "[FORESTRY_EXECUTIVE BRIEFING | Cognitive Path: system1_fast_lookup | System 1: jev-1.13-free | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-S1.5)\n- **Tool Executed (`tool_uc2_3_verified_multistakeholder_briefing_data`)**:\n  - `us"
     },
     {
       "use_case_id": "UC-1.1",
@@ -130,7 +135,8 @@
       "unverified_numbers_count": 0,
       "self_correction_retries": 0,
       "has_system2_reasoning_trace": true,
-      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: opencode-v2/jev | System 2: qwen-local/qwen3.8-flash-next]\n### Verified Analysis Report (UC-1.1)\n- **Tool Executed (`tool_uc1_1_regime_shift_attribution`)**:\n  - `use_case_id`: UC-1"
+      "synthesis_mode": "deterministic",
+      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: jev-1.13-free | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-1.1)\n- **Tool Executed (`tool_uc1_1_regime_shift_attribution`)**:\n  - `use_case_id`: UC-1"
     },
     {
       "use_case_id": "UC-1.2",
@@ -145,7 +151,8 @@
       "unverified_numbers_count": 0,
       "self_correction_retries": 0,
       "has_system2_reasoning_trace": true,
-      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: opencode-v2/jev | System 2: qwen-local/qwen3.8-flash-next]\n### Verified Analysis Report (UC-1.2)\n- **Tool Executed (`tool_uc1_2_cross_sensor_discrepancy_forensics`)**:\n  - `use_case"
+      "synthesis_mode": "deterministic",
+      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: jev-1.13-free | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-1.2)\n- **Tool Executed (`tool_uc1_2_cross_sensor_discrepancy_forensics`)**:\n  - `use_case"
     },
     {
       "use_case_id": "UC-1.3",
@@ -160,7 +167,8 @@
       "unverified_numbers_count": 0,
       "self_correction_retries": 0,
       "has_system2_reasoning_trace": true,
-      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: opencode-v2/jev | System 2: qwen-local/qwen3.8-flash-next]\n### Verified Analysis Report (UC-1.3)\n- **Tool Executed (`tool_uc1_3_thermal_source_origin_classification`)**:\n  - `use_ca"
+      "synthesis_mode": "deterministic",
+      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: jev-1.13-free | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-1.3)\n- **Tool Executed (`tool_uc1_3_thermal_source_origin_classification`)**:\n  - `use_ca"
     },
     {
       "use_case_id": "UC-2.1",
@@ -175,7 +183,8 @@
       "unverified_numbers_count": 0,
       "self_correction_retries": 0,
       "has_system2_reasoning_trace": true,
-      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: opencode-v2/jev | System 2: qwen-local/qwen3.8-flash-next]\n### Verified Analysis Report (UC-2.1)\n- **Tool Executed (`tool_uc2_1_phenological_phase_shift_detection`)**:\n  - `use_case"
+      "synthesis_mode": "deterministic",
+      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: jev-1.13-free | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-2.1)\n- **Tool Executed (`tool_uc2_1_phenological_phase_shift_detection`)**:\n  - `use_case"
     },
     {
       "use_case_id": "UC-2.2",
@@ -190,7 +199,8 @@
       "unverified_numbers_count": 0,
       "self_correction_retries": 0,
       "has_system2_reasoning_trace": true,
-      "final_briefing_preview": "[FIELD_RANGER BRIEFING | Cognitive Path: system2_deliberative | System 1: opencode-v2/jev | System 2: qwen-local/qwen3.8-flash-next]\n### Verified Analysis Report (UC-2.2)\n- **Tool Executed (`tool_uc2_2_uncertainty_aware_tactical_dispatch`)**:\n  - `use_case_id`"
+      "synthesis_mode": "deterministic",
+      "final_briefing_preview": "[FIELD_RANGER BRIEFING | Cognitive Path: system2_deliberative | System 1: jev-1.13-free | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-2.2)\n- **Tool Executed (`tool_uc2_2_uncertainty_aware_tactical_dispatch`)**:\n  - `use_case_id`"
     },
     {
       "use_case_id": "UC-2.3",
@@ -204,7 +214,8 @@
       "unverified_numbers_count": 0,
       "self_correction_retries": 0,
       "has_system2_reasoning_trace": true,
-      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: opencode-v2/jev | System 2: qwen-local/qwen3.8-flash-next]\n### Verified Analysis Report (UC-2.3)\n- **Tool Executed (`tool_uc2_3_verified_multistakeholder_briefing_data`)**:\n  - `use"
+      "synthesis_mode": "deterministic",
+      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: jev-1.13-free | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-2.3)\n- **Tool Executed (`tool_uc2_3_verified_multistakeholder_briefing_data`)**:\n  - `use"
     },
     {
       "use_case_id": "UC-3.1",
@@ -218,7 +229,8 @@
       "unverified_numbers_count": 0,
       "self_correction_retries": 0,
       "has_system2_reasoning_trace": true,
-      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: opencode-v2/jev | System 2: qwen-local/qwen3.8-flash-next]\n### Verified Analysis Report (UC-3.1)\n- **Tool Executed (`tool_uc3_1_constellation_retirement_simulation`)**:\n  - `use_cas"
+      "synthesis_mode": "deterministic",
+      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: jev-1.13-free | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-3.1)\n- **Tool Executed (`tool_uc3_1_constellation_retirement_simulation`)**:\n  - `use_cas"
     },
     {
       "use_case_id": "UC-3.2",
@@ -233,7 +245,8 @@
       "unverified_numbers_count": 0,
       "self_correction_retries": 0,
       "has_system2_reasoning_trace": true,
-      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: opencode-v2/jev | System 2: qwen-local/qwen3.8-flash-next]\n### Verified Analysis Report (UC-3.2)\n- **Tool Executed (`tool_uc3_2_multihop_spatiotemporal_cube_query`)**:\n  - `use_case"
+      "synthesis_mode": "deterministic",
+      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: jev-1.13-free | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-3.2)\n- **Tool Executed (`tool_uc3_2_multihop_spatiotemporal_cube_query`)**:\n  - `use_case"
     },
     {
       "use_case_id": "UC-3.3",
@@ -248,7 +261,8 @@
       "unverified_numbers_count": 0,
       "self_correction_retries": 0,
       "has_system2_reasoning_trace": true,
-      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: opencode-v2/jev | System 2: qwen-local/qwen3.8-flash-next]\n### Verified Analysis Report (UC-3.3)\n- **Tool Executed (`tool_uc3_3_autonomous_biome_recalibration`)**:\n  - `use_case_id`"
+      "synthesis_mode": "deterministic",
+      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: jev-1.13-free | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-3.3)\n- **Tool Executed (`tool_uc3_3_autonomous_biome_recalibration`)**:\n  - `use_case_id`"
     },
     {
       "use_case_id": "UC-4.1",
@@ -263,7 +277,8 @@
       "unverified_numbers_count": 0,
       "self_correction_retries": 0,
       "has_system2_reasoning_trace": true,
-      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: opencode-v2/jev | System 2: qwen-local/qwen3.8-flash-next]\n### Verified Analysis Report (UC-4.1)\n- **Tool Executed (`tool_uc4_1_orbital_drift_and_sza_audit`)**:\n  - `use_case_id`: U"
+      "synthesis_mode": "deterministic",
+      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: jev-1.13-free | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-4.1)\n- **Tool Executed (`tool_uc4_1_orbital_drift_and_sza_audit`)**:\n  - `use_case_id`: U"
     },
     {
       "use_case_id": "UC-4.2",
@@ -277,7 +292,8 @@
       "unverified_numbers_count": 0,
       "self_correction_retries": 0,
       "has_system2_reasoning_trace": true,
-      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: opencode-v2/jev | System 2: qwen-local/qwen3.8-flash-next]\n### Verified Analysis Report (UC-4.2)\n- **Tool Executed (`tool_uc4_2_nrt_vs_sp_fidelity_audit`)**:\n  - `use_case_id`: UC-4"
+      "synthesis_mode": "deterministic",
+      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: jev-1.13-free | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-4.2)\n- **Tool Executed (`tool_uc4_2_nrt_vs_sp_fidelity_audit`)**:\n  - `use_case_id`: UC-4"
     },
     {
       "use_case_id": "UC-4.3",
@@ -291,7 +307,8 @@
       "unverified_numbers_count": 0,
       "self_correction_retries": 0,
       "has_system2_reasoning_trace": true,
-      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: opencode-v2/jev | System 2: qwen-local/qwen3.8-flash-next]\n### Verified Analysis Report (UC-4.3)\n- **Tool Executed (`tool_uc4_3_adaptive_firms_rate_limit_planner`)**:\n  - `use_case_"
+      "synthesis_mode": "deterministic",
+      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: jev-1.13-free | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-4.3)\n- **Tool Executed (`tool_uc4_3_adaptive_firms_rate_limit_planner`)**:\n  - `use_case_"
     },
     {
       "use_case_id": "UC-5.1",
@@ -305,7 +322,8 @@
       "unverified_numbers_count": 0,
       "self_correction_retries": 0,
       "has_system2_reasoning_trace": true,
-      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: opencode-v2/jev | System 2: qwen-local/qwen3.8-flash-next]\n### Verified Analysis Report (UC-5.1)\n- **Tool Executed (`tool_uc5_1_redd_plus_carbon_mrv_baseline_audit`)**:\n  - `use_cas"
+      "synthesis_mode": "deterministic",
+      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: jev-1.13-free | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-5.1)\n- **Tool Executed (`tool_uc5_1_redd_plus_carbon_mrv_baseline_audit`)**:\n  - `use_cas"
     },
     {
       "use_case_id": "UC-5.2",
@@ -319,7 +337,8 @@
       "unverified_numbers_count": 0,
       "self_correction_retries": 0,
       "has_system2_reasoning_trace": true,
-      "final_briefing_preview": "[FORESTRY_EXECUTIVE BRIEFING | Cognitive Path: system2_deliberative | System 1: opencode-v2/jev | System 2: qwen-local/qwen3.8-flash-next]\n### Verified Analysis Report (UC-5.2)\n- **Tool Executed (`tool_uc5_2_burn_ban_policy_counterfactual_audit`)**:\n  - `use_c"
+      "synthesis_mode": "deterministic",
+      "final_briefing_preview": "[FORESTRY_EXECUTIVE BRIEFING | Cognitive Path: system2_deliberative | System 1: jev-1.13-free | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-5.2)\n- **Tool Executed (`tool_uc5_2_burn_ban_policy_counterfactual_audit`)**:\n  - `use_c"
     },
     {
       "use_case_id": "UC-5.3",
@@ -333,7 +352,8 @@
       "unverified_numbers_count": 0,
       "self_correction_retries": 0,
       "has_system2_reasoning_trace": true,
-      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: opencode-v2/jev | System 2: qwen-local/qwen3.8-flash-next]\n### Verified Analysis Report (UC-5.3)\n- **Tool Executed (`tool_uc5_3_transboundary_fire_propagation_forensics`)**:\n  - `us"
+      "synthesis_mode": "deterministic",
+      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: jev-1.13-free | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-5.3)\n- **Tool Executed (`tool_uc5_3_transboundary_fire_propagation_forensics`)**:\n  - `us"
     }
   ]
 }

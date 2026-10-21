@@ -24,7 +24,7 @@ from ai_service.harness import FlareChronosDualSystemHarness
 from ai_service.schemas import UseCaseId
 
 USE_CASE_BENCHMARK_QUERIES: list[tuple[UseCaseId, str]] = [
-    # 5 System-1 Reflexive Use Cases (`opencode-v2 / jev`)
+    # 5 System-1 Reflexive Use Cases
     (
         UseCaseId.UC_S1_1_INTENT_TRIAGE,
         "UC-S1.1 Triage fast validation metrics overview for 2024 mekong.",
@@ -45,7 +45,7 @@ USE_CASE_BENCHMARK_QUERIES: list[tuple[UseCaseId, str]] = [
         UseCaseId.UC_S1_5_STAKEHOLDER_SYNTHESIS,
         "UC-S1.5 Format executive policy summary for ASEAN forestry_executive in 2024 mekong.",
     ),
-    # 15 System-2 Deliberative Use Cases (`qwen-local / qwen3.8-flash-next`)
+    # 15 System-2 Deliberative Use Cases
     (
         UseCaseId.UC_1_1_REGIME_SHIFT_ATTRIBUTION,
         "UC-1.1 Decompose the 2005 to 2024 fire regime shift in mekong between sensor multiplicity and physical trend.",
@@ -139,6 +139,7 @@ def run_all_benchmarks() -> dict[str, Any]:
                     state_out.get("self_correction_retries", 0)
                 ),
                 "has_system2_reasoning_trace": bool(state_out.get("reasoning_trace")),
+                "synthesis_mode": state_out.get("synthesis_mode", "unknown"),
                 "final_briefing_preview": str(state_out.get("final_briefing", ""))[
                     :260
                 ],
@@ -178,18 +179,18 @@ def run_all_benchmarks() -> dict[str, Any]:
         "harness_framework": "LangGraph StateGraph + ToolNode + MemorySaver + Pydantic v2",
         "models": {
             "system1_reflexive": {
-                "provider": "opencode-v2",
-                "model_id": "jev",
-                "base_url": "https://opencode.ai/zen/v1",
+                "protocol": harness.s1_profile.protocol,
+                "model_id": harness.s1_profile.model_id,
+                "endpoint": harness.s1_profile.endpoint,
             },
             "system2_deliberative": {
-                "provider": "qwen-local",
-                "model_id": "qwen3.8-flash-next",
-                "base_url": "http://100.67.91.54:8888/v1",
-                "reasoning_effort": "xhigh",
-                "reasoning_field": "reasoning_content",
+                "protocol": harness.s2_profile.protocol,
+                "model_id": harness.s2_profile.model_id,
+                "endpoint": harness.s2_profile.endpoint,
+                "thinking_level": harness.s2_profile.request.thinking_level,
             },
         },
+        "mode": harness.mode,
         "total_use_cases_executed": len(use_case_runs),
         "system1_use_cases_count": 5,
         "system2_use_cases_count": 15,

@@ -1,35 +1,36 @@
 # ==============================================================================
 # FLARE-CHRONOS DUAL-SYSTEM (SYSTEM 1 <-> SYSTEM 2) LANGGRAPH HARNESS CONFIG
 # ==============================================================================
-# Governed by ADR-0005: Zero LLM arithmetic; 100% of physical, geometric,
-# radiometric, and statistical metrics MUST be computed via @tool invocations
-# and verified against the per-session VerifiedFactsLedger.
+# Governed by ADR-0005 (Deterministic Tool Gate) and ADR-0006 (Explicit
+# Endpoint Profile). Every value below is resolved with the precedence
+#   process environment -> workspace .env file -> this file
+# No credential, endpoint, or model is ever read from the host's agent tooling
+# configuration. Secrets live in environment variables only.
+#
+# Protocol values:
+#   typed_questions  - posts {model, state, questions}, returns {answers} with
+#                      calibrated probabilities. Used by System 1.
+#   native_chat      - posts {model, messages, ...}, returns
+#                      {message: {content, thinking, tool_calls}}. Used by System 2.
 
 harness:
   name: "flare-chronos-dual-cognitive-harness"
-  version: "1.0.0"
+  version: "2.0.0"
   framework: "langgraph"
   state_checkpointer: "memory_saver"
 
 models:
   system1_reflexive:
     role: "System 1 Reflexive Layer (Fast Triage, Entity Extraction, 1-Hop Lookup, Flash NRT Alert, Stakeholder Formatting)"
-    provider: "opencode-v2"
+    protocol: "typed_questions"
+    endpoint: "https://opencode.ai/inference/systemone/v1/systemone"
+    endpoint_env: "SYSTEM1_ENDPOINT"
     model_id: "jev-1.13-free"
-    model_alias: "jev"
-    base_url: "https://opencode.ai/zen/v1"
-    systemone_endpoint: "https://opencode.ai/zen/v1/systemone"
-    api_key_env: "OPENCODE_API_KEY"
-    default_key_if_free: "public"
-    auth_fallback_file: "~/.local/share/opencode/auth.json"
-    auth_fallback_provider_key: "opencode-go"
-    temperature: 0.0
-    max_output_tokens: 4096
-    timeout_ms: 30000
-    capabilities:
-      tools: true
-      structured_output: true
-      systemone_primitives: ["noul", "choice", "score"]
+    model_env: "SYSTEM1_MODEL"
+    api_key_env: "SYSTEM1_API_KEY"
+    request:
+      timeout_ms: 30000
+      user_agent: "flare-chronos/2.0.0"
     assigned_use_cases:
       - "UC-S1.1"  # Reflexive Intent & Urgency Triage (<150ms routing)
       - "UC-S1.2"  # Spatio-Temporal Entity & Schema Extraction (Pydantic v2)
@@ -39,34 +40,21 @@ models:
 
   system2_deliberative:
     role: "System 2 Deliberative Layer (Multi-Step Causal Attribution, Sensor Forensics, Counterfactual Simulation, Policy & QA/QC Auditing)"
-    provider: "qwen-local"
-    name: "Qwen3.8-Flash-Next NVFP4 (TP2+MTP3, 262K native)"
-    model_id: "qwen3.8-flash-next"
-    base_url: "http://100.67.91.54:8888/v1"
-    api_key_env: "QWEN_LOCAL_API_KEY"
-    opencode_config_file: "~/.config/opencode/opencode.jsonc"
-    opencode_provider_key: "qwen-local"
-    temperature: 0.0
-    # Qwen3.8 chat template strictly accepts xhigh | medium | low (default xhigh)
-    reasoning_effort: "xhigh"
-    variants:
-      default:
-        reasoning_effort: "xhigh"
-      fast:
-        reasoning_effort: "medium"
-      low:
-        reasoning_effort: "low"
-    compatibility:
-      reasoning_field: "reasoning_content"
-    capabilities:
-      tools: true
-      input_modalities: ["text", "image"]
-      output_modalities: ["text"]
-    limits:
-      context_window: 262144
+    protocol: "native_chat"
+    endpoint: "https://ollama.com/api/chat"
+    endpoint_env: "SYSTEM2_ENDPOINT"
+    model_id: "beam"
+    model_env: "SYSTEM2_MODEL"
+    api_key_env: "SYSTEM2_API_KEY"
+    request:
+      timeout_ms: 300000
+      temperature: 0.0
       max_output_tokens: 65536
-    timeout_ms: 300000
-    chunk_timeout_ms: 60000
+      thinking_level: "xhigh"
+      seed: 20240315
+      user_agent: "flare-chronos/2.0.0"
+      headers: {}
+      extra_body: {}
     assigned_use_cases:
       - "UC-1.1"  # Regime-Shift Attribution (Sensor Artifact vs Real Fire)
       - "UC-1.2"  # Cross-Sensor Discrepancy Forensics (MODIS vs VIIRS)

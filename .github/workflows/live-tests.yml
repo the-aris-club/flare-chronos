@@ -1,0 +1,45 @@
+name: Live Model Tests
+
+# Manual trigger only. The default CI workflow never calls a hosted language
+# model, so provider credit is spent only when a maintainer asks for it.
+on:
+  workflow_dispatch:
+    inputs:
+      pytest_args:
+        description: 'Extra pytest arguments, e.g. "-k slice_3" to run a subset'
+        required: false
+        default: ""
+
+concurrency:
+  group: live-model-tests
+  cancel-in-progress: false
+
+jobs:
+  live:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Sync dependencies
+        run: uv sync --group dev
+
+      - name: Run live model tests
+        run: uv run python -m pytest -m live -v
+        env:
+          PYTEST_ADDOPTS: ${{ inputs.pytest_args }}
+          SYSTEM1_API_KEY: ${{ secrets.SYSTEM1_API_KEY }}
+          SYSTEM2_API_KEY: ${{ secrets.SYSTEM2_API_KEY }}
+
+      - name: Report provider usage
+        if: always()
+        run: |
+          echo "Live model tests finished. Check the provider usage dashboard for the spend of this run."

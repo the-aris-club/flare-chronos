@@ -1,5 +1,7 @@
 {
   "include": ["src", "packages", "apps", "tests"],
+  "venvPath": ".",
+  "venv": ".venv",
   "extraPaths": [
     "src",
     "packages/harmonization-core/src",

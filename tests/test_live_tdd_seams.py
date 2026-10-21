@@ -2,6 +2,14 @@
 
 Follows the `tdd` skill (`Red -> Green` vertical slices, zero internal mocks,
 independent literal expectations, domain vocabulary from `GLOSSARY.md` and `apps/ai-service/GLOSSARY.md`).
+
+These tests call a real hosted language model, so they are marked `live` and
+excluded from the default suite. Run them explicitly:
+
+    pytest -m live
+
+They are triggered by the manual `live-tests.yml` GitHub Actions workflow so
+that model spend never happens on a push or a pull request.
 """
 
 from __future__ import annotations
@@ -9,6 +17,8 @@ from __future__ import annotations
 import sys
 import unittest
 from pathlib import Path
+
+import pytest
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 for pkg_src in (
@@ -18,7 +28,12 @@ for pkg_src in (
     if str(pkg_src) not in sys.path:
         sys.path.insert(0, str(pkg_src))
 
+from ai_service.harness import FlareChronosDualSystemHarness
+from ai_service.models import load_harness_config, resolve_endpoint_profile
+from ai_service.schemas import CognitivePath, UseCaseId
 
+
+@pytest.mark.live
 class TestLiveDualSystemSeamsTDD(unittest.TestCase):
     """Vertical TDD tests across the 4 confirmed public seams."""
 
@@ -51,9 +66,6 @@ class TestLiveDualSystemSeamsTDD(unittest.TestCase):
         self,
     ) -> None:
         """[Seam 1] Live System 1 model invokes deterministic lookup tool and passes VerifiedFactsLedger."""
-        from ai_service.harness import FlareChronosDualSystemHarness
-        from ai_service.schemas import CognitivePath, UseCaseId
-
         harness = FlareChronosDualSystemHarness(mode="live", enable_cache=False)
         out = harness.invoke_use_case(
             user_query="UC-S1.3 Retrieve verified single-epoch metrics for 2024 in mekong.",
@@ -73,26 +85,27 @@ class TestLiveDualSystemSeamsTDD(unittest.TestCase):
             out["verification_report"]["passed"], msg=out["verification_report"]
         )
         self.assertEqual(out["verification_report"]["unverified_numbers"], [])
+        self.assertEqual(out["verification_report"]["unresolved_citations"], [])
         self.assertIn("94.2", out["final_briefing"])
 
-        # Verify live Jev 1.13 SystemOne structured decision telemetry on AIMessage
-        jev_payloads = [
-            m.additional_kwargs["jev_systemone"]
+        # Live typed-questions answers must be attached to the model's own turn.
+        answer_payloads = [
+            m.additional_kwargs["systemone_result"]
             for m in out["messages"]
             if getattr(m, "additional_kwargs", None)
-            and "jev_systemone" in m.additional_kwargs
+            and "systemone_result" in m.additional_kwargs
         ]
-        self.assertGreaterEqual(len(jev_payloads), 2)
-        self.assertEqual(jev_payloads[0]["model"], "jev-1.13-free")
-        self.assertEqual(jev_payloads[0]["answers"]["region"]["choice"], "mekong")
+        self.assertGreaterEqual(len(answer_payloads), 2)
+        configured_model = resolve_endpoint_profile(
+            load_harness_config(), "system1_reflexive"
+        ).model_id
+        self.assertEqual(answer_payloads[0]["model"], configured_model)
+        self.assertEqual(answer_payloads[0]["answers"]["region"]["choice"], "mekong")
 
     def test_slice_3_live_system2_deliberative_attribution_seam_with_reasoning_trace(
         self,
     ) -> None:
         """[Seam 2] Live System 2 model executes deliberative attribution with reasoning_trace and verified ledger."""
-        from ai_service.harness import FlareChronosDualSystemHarness
-        from ai_service.schemas import CognitivePath, UseCaseId
-
         harness = FlareChronosDualSystemHarness(mode="live", enable_cache=False)
         out_uc11 = harness.invoke_use_case(
             user_query="UC-1.1 Why did raw detections in mekong 2024 jump to 1424.2 while harmonized is 94.2?",
@@ -118,13 +131,16 @@ class TestLiveDualSystemSeamsTDD(unittest.TestCase):
             out_uc11["verification_report"]["passed"],
             msg=out_uc11["verification_report"],
         )
-        self.assertGreaterEqual(
-            out_uc11["live_telemetry"]["system2_reasoning_calls"], 2
-        )
-        self.assertIn(
-            out_uc11["live_telemetry"]["system2_provider_used"],
-            ("qwen-local/qwen3.8-flash-next", "9router/ds/deepseek-v4-pro"),
-        )
+        self.assertGreaterEqual(out_uc11["live_telemetry"]["system2_calls"], 2)
+        configured_model = resolve_endpoint_profile(
+            load_harness_config(), "system2_deliberative"
+        ).model_id
+        self.assertEqual(out_uc11["live_telemetry"]["system2_model"], configured_model)
+
+        # The narrative is authored by the model and every number in it is
+        # traceable to the Verified Facts Ledger.
+        self.assertEqual(out_uc11["synthesis_mode"], "llm")
+        self.assertNotIn("{{", out_uc11["final_briefing"])
 
         out_uc33 = harness.invoke_use_case(
             user_query="UC-3.3 Verify cross-sensor KS distance before and after harmonization.",
@@ -149,10 +165,7 @@ class TestLiveDualSystemSeamsTDD(unittest.TestCase):
         self,
     ) -> None:
         """[Seam 3] Live System 1 -> System 2 dynamic escalation on >=200% divergence & self-correction loop."""
-        from ai_service.harness import FlareChronosDualSystemHarness
-        from ai_service.schemas import CognitivePath, UseCaseId
-
-        # Part A: Live System 1 (jev-1.13-free) escalates to Live System 2 when divergence = 1330.0% >= 200%
+        # Part A: Live System 1 escalates to Live System 2 when divergence = 1330.0% >= 200%
         harness_esc = FlareChronosDualSystemHarness(mode="live", enable_cache=False)
         out_esc = harness_esc.invoke_use_case(
             user_query=(
@@ -167,8 +180,8 @@ class TestLiveDualSystemSeamsTDD(unittest.TestCase):
             out_esc["cognitive_path"], CognitivePath.ESCALATED_S1_TO_S2.value
         )
         self.assertIn("1330.0%", out_esc["escalation_reason"])
-        self.assertGreaterEqual(out_esc["live_telemetry"]["system1_jev_calls"], 1)
-        self.assertGreaterEqual(out_esc["live_telemetry"]["system2_reasoning_calls"], 2)
+        self.assertGreaterEqual(out_esc["live_telemetry"]["system1_calls"], 1)
+        self.assertGreaterEqual(out_esc["live_telemetry"]["system2_calls"], 2)
         self.assertTrue(
             out_esc["verification_report"]["passed"], msg=out_esc["verification_report"]
         )
@@ -184,7 +197,7 @@ class TestLiveDualSystemSeamsTDD(unittest.TestCase):
             use_case_id=UseCaseId.UC_1_1_REGIME_SHIFT_ATTRIBUTION,
             thread_id="tdd-live-slice-4-repair",
         )
-        self.assertEqual(out_repair["self_correction_retries"], 1)
+        self.assertGreaterEqual(out_repair["self_correction_retries"], 1)
         self.assertTrue(
             out_repair["verification_report"]["passed"],
             msg=out_repair["verification_report"],

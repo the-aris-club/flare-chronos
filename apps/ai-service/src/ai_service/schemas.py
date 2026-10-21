@@ -11,6 +11,63 @@ from langchain_core.messages import BaseMessage
 from langgraph.graph.message import add_messages
 from pydantic import BaseModel, Field
 
+CITATION_PATTERN = re.compile(r"\{\{([A-Za-z0-9_.\[\]-]+)\}\}")
+
+
+def collect_citation_keys(payload: Any, prefix: str = "") -> dict[str, float]:
+    """Map every numeric leaf of a tool payload to its canonical ledger fact key.
+
+    The key names match `VerifiedFactsLedger.ingest_tool_payload` exactly, so a
+    citation table built from a payload always addresses real ledger entries.
+    Numeric tokens embedded in string fields are excluded: they are ledger
+    entries but not citable quantities.
+    """
+    citations: dict[str, float] = {}
+    if isinstance(payload, str):
+        try:
+            decoded = json.loads(payload)
+        except ValueError:
+            return citations
+        if isinstance(decoded, str):
+            return citations
+        return collect_citation_keys(decoded, prefix)
+    if isinstance(payload, dict):
+        for key, value in payload.items():
+            sub_key = f"{prefix}.{key}" if prefix else str(key)
+            citations.update(collect_citation_keys(value, sub_key))
+    elif isinstance(payload, list):
+        for index, item in enumerate(payload):
+            citations.update(collect_citation_keys(item, f"{prefix}[{index}]"))
+    elif isinstance(payload, int | float) and not isinstance(payload, bool):
+        citations[prefix or "value"] = float(payload)
+    return citations
+
+
+def format_citation_value(value: float) -> str:
+    """Render a ledger value without exponent notation or trailing zeros."""
+    if value == int(value) and abs(value) < 1e15:
+        return str(int(value))
+    return f"{value:.6f}".rstrip("0").rstrip(".")
+
+
+def resolve_citations(text: str, citations: dict[str, float]) -> tuple[str, list[str]]:
+    """Replace `{{fact_key}}` placeholders with the ledger value of that key.
+
+    Returns the resolved text and the list of keys that had no ledger entry.
+    An unresolved key is a grounding error: the model cited a quantity that no
+    deterministic tool produced.
+    """
+    unresolved: list[str] = []
+
+    def _substitute(match: re.Match[str]) -> str:
+        key = match.group(1)
+        if key not in citations:
+            unresolved.append(key)
+            return match.group(0)
+        return format_citation_value(citations[key])
+
+    return CITATION_PATTERN.sub(_substitute, text), unresolved
+
 
 class UseCaseId(StrEnum):
     """Canonical identifiers for all 20 Dual-System Use Cases (5 System-1 + 15 System-2)."""
@@ -116,6 +173,7 @@ class VerificationReport(BaseModel):
     checked_numbers_count: int
     verified_numbers: list[float] = Field(default_factory=list)
     unverified_numbers: list[float] = Field(default_factory=list)
+    unresolved_citations: list[str] = Field(default_factory=list)
     feedback_message: str = ""
 
 
@@ -313,6 +371,35 @@ class VerifiedFactsLedger(BaseModel):
         )
 
 
+def verify_grounded_draft(
+    draft_text: str,
+    ledger: VerifiedFactsLedger,
+    rel_tolerance: float = 0.008,
+) -> tuple[str, VerificationReport]:
+    """Resolve `{{fact_key}}` citations and verify the resolved text.
+
+    Returns the resolved text and the verification report. A citation that no
+    deterministic tool produced is a grounding error and fails the report even
+    when every number in the draft is verified.
+    """
+    citations = {
+        entry.fact_key: entry.numeric_value
+        for entry in ledger.entries
+        if not entry.fact_key.endswith(("_round1", "_round2"))
+    }
+    resolved, unresolved = resolve_citations(draft_text, citations)
+    report = ledger.verify_draft_text(resolved, rel_tolerance=rel_tolerance)
+    if unresolved:
+        report.unresolved_citations = sorted(set(unresolved))
+        report.passed = False
+        report.feedback_message = (
+            "VIOLATION OF DETERMINISTIC TOOL GATE: the draft cited "
+            f"{report.unresolved_citations} which no deterministic tool produced. "
+            "Cite only the keys listed in the available facts list."
+        )
+    return resolved, report
+
+
 class HarnessState(TypedDict):
     """LangGraph State schema shared across System 1, System 2, ToolNode, and Verifier."""
 
@@ -331,3 +418,4 @@ class HarnessState(TypedDict):
     final_briefing: str
     reasoning_trace: list[str]
     live_telemetry: dict[str, Any]
+    synthesis_mode: str

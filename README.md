@@ -76,7 +76,7 @@ See [`docs/00_Project_Name_and_Acronym.md`](docs/00_Project_Name_and_Acronym.md)
 - **Spatio-temporal deduplication**: multi-satellite overpass clustering into Fire Episodes (τ = 95 min).
 - **Effort normalization**: Ω(year, latitude) prevents constellation-expansion artificial trends.
 - **Burning Activity Calendar**: 26 Years × 73 Pentads matrix of HFD / HRF / SFAI with robust seasonal Z-scores.
-- **Dual-System Cognitive AI Harness (`apps/ai-service`)**: LangGraph orchestration pairing **System 1 (`opencode-v2 / jev-1.13-free`)** reflexive triage with **System 2 (`qwen-local / qwen3.8-flash-next`)** deliberative reasoning across **20 Use Cases** and **24 deterministic `@tool` functions** guarded by a `NumericGroundingVerifier`.
+- **Dual-System Cognitive AI Harness (`apps/ai-service`)**: LangGraph orchestration pairing a **System 1 typed-questions endpoint** (reflexive triage, calibrated probabilities) with a **System 2 native chat endpoint** (deliberative reasoning) across **20 Use Cases** and **24 deterministic `@tool` functions**. Every briefing is a **Grounded Narrative**: the model authors the interpretation while the harness injects every quantity from the `VerifiedFactsLedger`, checked by a `NumericGroundingVerifier`. Each layer is bound through an **Endpoint Profile** (protocol, endpoint, model, API key, request options) resolved from explicit configuration only — never from the host's agent tooling configuration ([ADR-0006](docs/adr/0006-explicit-endpoint-profiles-and-grounded-narrative-assembly.md)).
 - **Deep-module monorepo**: pure core (zero I/O) behind a clean seam; ingestion adapter; benchmark CLI; dual-system AI service; PDF exports (`exports/PROPOSAL.pdf` & `exports/REPORT.pdf`).
 
 ---
@@ -210,13 +210,21 @@ Raw NASA FIRMS CSVs are cached under `data/raw/` (Amazon & Mekong AOIs, 2000–2
 
 - `tests/test_harmonization_suite.py` — 7 tests covering the 5 core scientific equations.
 - `tests/test_core_coverage.py` — 7 additional tests for previously untested public seams.
-- `tests/test_ai_service_harness.py` — 8 tests verifying the Dual-System (System 1 + System 2) LangGraph harness, 24 deterministic `@tool` functions, and `NumericGroundingVerifier`.
-- `tests/test_live_tdd_seams.py` — 4 live TDD vertical slice tests verifying `JevSystemOneChatModel`, `LiveOpenCodeSystem2ChatModel`, real NASA FIRMS CSV harmonization, and live telemetry.
+- `tests/test_ai_service_harness.py` — 13 tests verifying the Dual-System (System 1 + System 2) LangGraph harness, 24 deterministic `@tool` functions, `NumericGroundingVerifier`, Endpoint Profile resolution, citation grounding, and the absence of any ambient agent-tooling read.
+- `tests/test_live_tdd_seams.py` — 4 live TDD vertical slice tests (marked `live`) verifying the typed-questions and native-chat adapters against a real hosted model, real NASA FIRMS CSV harmonization, and live telemetry.
 
 Run with:
 
 ```bash
-uv run python -m pytest
+uv run python -m pytest          # offline suite; no network, no provider spend
+uv run python -m pytest -m live  # live suite; calls a hosted model and spends credit
+```
+
+The live suite is excluded from the default run and from continuous integration. It runs only from the manually triggered `Live Model Tests` workflow, so provider credit is spent only on request. Configure the credentials in the environment or in the workspace `.env` file:
+
+```bash
+export SYSTEM1_API_KEY=...   # System 1 typed-questions endpoint
+export SYSTEM2_API_KEY=...   # System 2 native chat endpoint
 ```
 
 ---

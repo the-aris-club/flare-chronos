@@ -30,6 +30,18 @@ _Avoid_: Tool log, scratchpad memory, context history
 The post-synthesis validation gate that cross-checks every numerical claim in a draft response against the Verified Facts Ledger and triggers self-correction whenever an unverified number is detected.
 _Avoid_: Output filter, regex sanitizer, hallucination prompt
 
+**Endpoint Profile**:
+The explicit binding that connects one cognitive layer to one language model service, made of a protocol, an endpoint URL, a model identifier, an API key, and request options, resolved entirely from declared configuration.
+_Avoid_: Provider config, machine config, ambient credential, agent connection
+
+**Grounded Narrative**:
+A briefing whose every quantity is injected by the harness from the Verified Facts Ledger and never written by the language model, which authors only the interpretation.
+_Avoid_: LLM-written report, generated summary, AI briefing
+
+**Synthesis Mode**:
+The record of which author produced a briefing: the language model, the deterministic formatter, or the deterministic formatter after the Numeric Grounding Verifier rejected the model output.
+_Avoid_: Generation mode, output source
+
 ### Analytical & Tactical Use-Case Concepts
 
 **Regime-Shift Attribution**:

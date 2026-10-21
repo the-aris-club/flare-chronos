@@ -1,19 +1,24 @@
-"""Model factory and Dual-System LLM adapters for the FLARE-CHRONOS LangGraph Harness.
+"""Endpoint profiles and Dual-System chat adapters for the FLARE-CHRONOS harness.
 
-Configures:
-- System 1 Reflexive Model (`jev-1.13-free` via OpenCode Zen System One API
-  `POST https://opencode.ai/zen/v1/systemone` with typed `noul`, `choice`, and `score` questions)
-- System 2 Deliberative Model (`qwen3.8-flash-next` via self-hosted OpenCode endpoint
-  `http://100.67.91.54:8888/v1` with `reasoning_effort="xhigh"` and `reasoning_content`,
-  with automatic failover to secondary OpenCode `.jsonc` provider `9router` if the primary
-  self-hosted node returns 502/timeout)
-- DeterministicHarnessChatModel (`BaseChatModel` subclass) for offline sandbox execution
-  and reproducible CI testing through the exact same LangGraph `StateGraph` and `ToolNode`.
+Each cognitive layer is bound to one LLM service through an `EndpointProfile`:
+protocol, endpoint, model id, API key, and request options. Every value is
+resolved from explicit configuration — process environment first, then the
+workspace `.env` file, then the harness config. Nothing is read from ambient
+machine state, so the same profile runs on a developer laptop, in CI, and on a
+deployed host without change.
+
+Two protocols are supported:
+
+- `typed_questions`: posts `{model, state, questions}` and returns `{answers}`
+  where every answer carries a calibrated probability. Used by the System 1
+  Reflexive Layer, which classifies rather than writes.
+- `native_chat`: posts `{model, messages, ...}` to a chat endpoint and returns
+  `{message: {content, thinking, tool_calls}}`. Used by the System 2
+  Deliberative Layer, which writes a grounded narrative.
 """
 
 from __future__ import annotations
 
-import hashlib
 import json
 import os
 import re
@@ -21,21 +26,77 @@ import urllib.error
 import urllib.request
 from collections.abc import Sequence
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 import yaml
 from langchain_core.callbacks import CallbackManagerForLLMRun
 from langchain_core.language_models.chat_models import BaseChatModel
-from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, ToolMessage
+from langchain_core.messages import (
+    AIMessage,
+    BaseMessage,
+    HumanMessage,
+    SystemMessage,
+    ToolMessage,
+)
 from langchain_core.outputs import ChatGeneration, ChatResult
 from langchain_core.tools import BaseTool
-from pydantic import Field
+from langchain_core.utils.function_calling import convert_to_openai_tool
+from pydantic import BaseModel, Field
 
-from ai_service.schemas import UseCaseId
+from ai_service.schemas import (
+    UseCaseId,
+    collect_citation_keys,
+    format_citation_value,
+)
 from ai_service.tools import USE_CASE_PRIMARY_TOOLS
 
 AI_SERVICE_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_CONFIG_PATH = AI_SERVICE_ROOT / "config" / "harness_config.yaml"
+WORKSPACE_ENV_FILE = AI_SERVICE_ROOT.parents[1] / ".env"
+
+Protocol = Literal["typed_questions", "native_chat"]
+
+DEFAULT_USER_AGENT = "flare-chronos/2.0.0"
+
+
+class MissingEndpointCredentialError(RuntimeError):
+    """Raised when a live call is attempted without a configured API key."""
+
+    def __init__(self, profile: EndpointProfile) -> None:
+        super().__init__(
+            f"No API key configured for this endpoint profile "
+            f"(protocol={profile.protocol}, endpoint={profile.endpoint}, "
+            f"model={profile.model_id}). Set the environment variable "
+            f"{profile.api_key_env} or add it to the workspace .env file."
+        )
+        self.profile = profile
+
+
+class EndpointCallError(RuntimeError):
+    """Raised when a live endpoint call fails or answers with an unusable body."""
+
+
+class RequestOptions(BaseModel):
+    """Request tuning for one endpoint profile. Every field is sent verbatim."""
+
+    timeout_ms: int = 30000
+    temperature: float | None = None
+    max_output_tokens: int | None = None
+    thinking_level: str | bool | None = None
+    seed: int | None = None
+    user_agent: str = DEFAULT_USER_AGENT
+    headers: dict[str, str] = Field(default_factory=dict)
+    extra_body: dict[str, Any] = Field(default_factory=dict)
+
+
+class EndpointProfile(BaseModel):
+    """The explicit binding between one cognitive layer and one LLM service."""
+
+    protocol: Protocol
+    endpoint: str
+    model_id: str
+    api_key_env: str
+    request: RequestOptions = Field(default_factory=RequestOptions)
 
 
 def load_harness_config(config_path: Path | None = None) -> dict[str, Any]:
@@ -45,179 +106,146 @@ def load_harness_config(config_path: Path | None = None) -> dict[str, Any]:
         return yaml.safe_load(fh)
 
 
-def _strip_jsonc_comments(raw_text: str) -> str:
-    """Strip // and /* */ comments outside JSON strings for .jsonc parsing."""
-    result: list[str] = []
-    in_string = False
-    escape = False
-    i = 0
-    n = len(raw_text)
-    while i < n:
-        ch = raw_text[i]
-        if in_string:
-            result.append(ch)
-            if escape:
-                escape = False
-            elif ch == "\\":
-                escape = True
-            elif ch == '"':
-                in_string = False
-            i += 1
-        else:
-            if ch == '"':
-                in_string = True
-                result.append(ch)
-                i += 1
-            elif ch == "/" and i + 1 < n and raw_text[i + 1] == "/":
-                i += 2
-                while i < n and raw_text[i] not in ("\n", "\r"):
-                    i += 1
-            elif ch == "/" and i + 1 < n and raw_text[i + 1] == "*":
-                i += 2
-                while i + 1 < n and not (raw_text[i] == "*" and raw_text[i + 1] == "/"):
-                    i += 1
-                i += 2
-            else:
-                result.append(ch)
-                i += 1
-    cleaned = "".join(result)
-    return re.sub(r",(\s*[}\]])", r"\1", cleaned)
+def read_workspace_env(env_file: Path | None = None) -> dict[str, str]:
+    """Read `KEY=VALUE` pairs from the workspace `.env` file, if it exists."""
+    path = env_file or WORKSPACE_ENV_FILE
+    if not path.is_file():
+        return {}
+    values: dict[str, str] = {}
+    for raw_line in path.read_text(encoding="utf-8").splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, _, value = line.partition("=")
+        values[key.strip()] = value.strip().strip("'\"")
+    return values
 
 
-def resolve_opencode_system1_credentials(cfg: dict[str, Any]) -> tuple[str, str, str]:
-    """Resolve (base_url, model_id, api_key) for System 1 (`opencode-v2 / jev-1.13-free`)."""
-    s1_cfg = cfg["models"]["system1_reflexive"]
-    base_url = str(os.environ.get("OPENCODE_BASE_URL", s1_cfg["base_url"])).strip()
-    model_id = str(os.environ.get("OPENCODE_SYSTEM1_MODEL", s1_cfg["model_id"])).strip()
-    if model_id == "jev":
-        model_id = "jev-1.13-free"
-    api_key = str(
-        os.environ.get(s1_cfg.get("api_key_env", "OPENCODE_API_KEY"), "")
-    ).strip()
-
-    # On OpenCode Zen, `-free` models authenticate with Bearer `public`
-    if not api_key and model_id.endswith("-free"):
-        api_key = str(s1_cfg.get("default_key_if_free", "public")).strip()
-
-    if not api_key:
-        try:
-            auth_path = Path(
-                s1_cfg.get("auth_fallback_file", "~/.local/share/opencode/auth.json")
-            ).expanduser()
-            if auth_path.is_file():
-                auth_data = json.loads(auth_path.read_text(encoding="utf-8"))
-                opencode_entry = auth_data.get(
-                    "opencode", auth_data.get("opencode-go", {})
-                )
-                if isinstance(opencode_entry, dict):
-                    api_key = str(opencode_entry.get("key", "")).strip()
-        except OSError:
-            api_key = ""
-
-    if not api_key:
-        api_key = str(s1_cfg.get("default_key_if_free", "public")).strip()
-
-    return base_url, model_id, api_key
+def _lookup_env(env_name: str, workspace_env: dict[str, str]) -> str:
+    """Return the first non-empty value of `env_name` from env, then `.env`."""
+    for candidate in (os.environ.get(env_name), workspace_env.get(env_name)):
+        if candidate and candidate.strip():
+            return candidate.strip()
+    return ""
 
 
-def resolve_qwen_system2_credentials(cfg: dict[str, Any]) -> tuple[str, str, str]:
-    """Resolve primary (base_url, model_id, api_key) for System 2 (`qwen-local / qwen3.8-flash-next`)."""
-    s2_cfg = cfg["models"]["system2_deliberative"]
-    base_url = str(os.environ.get("QWEN_LOCAL_BASE_URL", s2_cfg["base_url"]))
-    model_id = str(os.environ.get("QWEN_LOCAL_MODEL", s2_cfg["model_id"]))
-    api_key = str(os.environ.get(s2_cfg.get("api_key_env", "QWEN_LOCAL_API_KEY"), ""))
+def resolve_endpoint_profile(
+    cfg: dict[str, Any], layer: str, env_file: Path | None = None
+) -> EndpointProfile:
+    """Resolve one layer's endpoint profile.
 
-    if not api_key:
-        try:
-            opencode_cfg_path = Path(
-                s2_cfg.get("opencode_config_file", "~/.config/opencode/opencode.jsonc")
-            ).expanduser()
-            if opencode_cfg_path.is_file():
-                raw_jsonc = opencode_cfg_path.read_text(encoding="utf-8")
-                parsed = json.loads(_strip_jsonc_comments(raw_jsonc))
-                providers_map = parsed.get("providers") or parsed.get("provider") or {}
-                qwen_provider = providers_map.get("qwen-local", {})
-                settings = (
-                    qwen_provider.get("settings") or qwen_provider.get("options") or {}
-                )
-                if isinstance(settings, dict):
-                    api_key = str(settings.get("apiKey", "")).strip()
-                    base_url = str(settings.get("baseURL", base_url)).strip()
-        except (OSError, ValueError):
-            api_key = ""
-
-    if not api_key:
-        api_key = "not-needed-in-offline-mode"
-
-    return base_url.strip(), model_id.strip(), api_key.strip()
-
-
-def resolve_secondary_opencode_system2_credentials(
-    cfg: dict[str, Any],
-) -> tuple[str, str, str] | None:
-    """Resolve secondary reasoning provider from `~/.config/opencode/opencode.jsonc` (`9router`)."""
-    s2_cfg = cfg["models"]["system2_deliberative"]
-    try:
-        opencode_cfg_path = Path(
-            s2_cfg.get("opencode_config_file", "~/.config/opencode/opencode.jsonc")
-        ).expanduser()
-        if opencode_cfg_path.is_file():
-            raw_jsonc = opencode_cfg_path.read_text(encoding="utf-8")
-            parsed = json.loads(_strip_jsonc_comments(raw_jsonc))
-            providers_map = parsed.get("providers") or parsed.get("provider") or {}
-            router_prov = providers_map.get("9router", {})
-            settings = router_prov.get("settings") or router_prov.get("options") or {}
-            if (
-                isinstance(settings, dict)
-                and settings.get("baseURL")
-                and settings.get("apiKey")
-            ):
-                return (
-                    str(settings["baseURL"]).strip().rstrip("/"),
-                    "ds/deepseek-v4-pro",
-                    str(settings["apiKey"]).strip(),
-                )
-    except (OSError, ValueError):
-        return None
-    return None
-
-
-def build_opencode_zen_headers(
-    api_key: str, session_seed: str = "flare-chronos"
-) -> dict[str, str]:
-    """Construct the mandatory OpenCode v2 headers (`x-opencode-*`) for OpenCode Zen routes."""
-    ses_hex = "ses_" + hashlib.sha256(session_seed.encode("utf-8")).hexdigest()
-    return {
-        "Content-Type": "application/json",
-        "Authorization": f"Bearer {api_key}",
-        "User-Agent": "opencode/2.0.0",
-        "x-opencode-client": "cli",
-        "x-opencode-session": ses_hex,
-        "x-opencode-session-id": f"ses_{hashlib.md5(session_seed.encode('utf-8')).hexdigest()[:16]}",
-        "x-session-affinity": ses_hex,
-        "X-Session-Id": ses_hex,
-        "x-opencode-project": "flare-chronos",
-    }
-
-
-class DeterministicHarnessChatModel(BaseChatModel):
-    """LangChain `BaseChatModel` for deterministic execution of the LangGraph StateGraph.
-
-    Provides the base tool-argument mapping and strictly grounded `ToolMessage` synthesis
-    shared by offline deterministic mode and the live System 1 / System 2 adapters.
+    Precedence for every overridable value: process environment, then the
+    workspace `.env` file, then the harness config.
     """
+    layer_cfg = cfg["models"][layer]
+    workspace_env = read_workspace_env(env_file)
+
+    endpoint = _lookup_env(
+        str(layer_cfg.get("endpoint_env", "")), workspace_env
+    ) or str(layer_cfg["endpoint"])
+    model_id = _lookup_env(str(layer_cfg.get("model_env", "")), workspace_env) or str(
+        layer_cfg["model_id"]
+    )
+    return EndpointProfile(
+        protocol=layer_cfg["protocol"],
+        endpoint=endpoint.strip(),
+        model_id=model_id.strip(),
+        api_key_env=str(layer_cfg["api_key_env"]),
+        request=RequestOptions.model_validate(layer_cfg.get("request") or {}),
+    )
+
+
+def resolve_api_key(profile: EndpointProfile, env_file: Path | None = None) -> str:
+    """Resolve the API key for a profile, or raise when none is configured."""
+    key = _lookup_env(profile.api_key_env, read_workspace_env(env_file))
+    if not key:
+        raise MissingEndpointCredentialError(profile)
+    return key
+
+
+def _post_json(
+    url: str, payload: dict[str, Any], headers: dict[str, str], timeout_sec: float
+) -> dict[str, Any]:
+    """POST a JSON body and decode a JSON object response."""
+    request = urllib.request.Request(
+        url,
+        data=json.dumps(payload).encode("utf-8"),
+        headers=headers,
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=timeout_sec) as response:
+            body = response.read().decode("utf-8", errors="replace")
+    except urllib.error.HTTPError as exc:
+        detail = exc.read().decode("utf-8", errors="replace")[:400]
+        exc.close()
+        raise EndpointCallError(f"HTTP {exc.code} from {url}: {detail}") from exc
+    except urllib.error.URLError as exc:
+        raise EndpointCallError(f"Cannot reach {url}: {exc.reason}") from exc
+    try:
+        decoded = json.loads(body)
+    except ValueError as exc:
+        raise EndpointCallError(f"Non-JSON response from {url}: {body[:400]}") from exc
+    if not isinstance(decoded, dict):
+        raise EndpointCallError(f"Unexpected response shape from {url}: {body[:400]}")
+    return decoded
+
+
+def synthesize_grounded_response(
+    use_case_id: str, tool_messages: list[ToolMessage]
+) -> str:
+    """Format a strictly grounded narrative citing only numbers from tool output.
+
+    This is the deterministic floor used by the offline harness and as the
+    fallback when a model-authored narrative fails numeric verification.
+    """
+    parsed_payloads: list[tuple[str, dict[str, Any]]] = []
+    for tool_message in tool_messages:
+        try:
+            data = json.loads(str(tool_message.content))
+        except ValueError:
+            continue
+        if isinstance(data, dict):
+            parsed_payloads.append((tool_message.name or "tool", data))
+
+    lines: list[str] = [f"### Verified Analysis Report ({use_case_id})"]
+    for tool_name, payload in parsed_payloads:
+        lines.append(f"- **Tool Executed (`{tool_name}`)**:")
+        for key, value in payload.items():
+            if isinstance(value, int | float) and not isinstance(value, bool):
+                lines.append(f"  - `{key}`: **{value}**")
+            elif isinstance(value, str) and len(value) < 160:
+                lines.append(f"  - `{key}`: {value}")
+    return "\n".join(lines)
+
+
+def build_citation_table(tool_messages: list[ToolMessage]) -> dict[str, float]:
+    """Collect the citable quantities carried by the deterministic tool outputs."""
+    citations: dict[str, float] = {}
+    for tool_message in tool_messages:
+        try:
+            payload = json.loads(str(tool_message.content))
+        except ValueError:
+            continue
+        if isinstance(payload, dict):
+            citations.update(collect_citation_keys(payload))
+    return citations
+
+
+class HarnessChatModel(BaseChatModel):
+    """Shared tool-argument mapping and grounded synthesis for every harness model."""
 
     role: str = Field(default="system2_deliberative")
-    model_id: str = Field(default="qwen3.8-flash-next")
-    provider_id: str = Field(default="qwen-local")
-    reasoning_effort: str = Field(default="xhigh")
+    model_id: str = Field(default="")
+    source_label: str = Field(default="")
+    reasoning_effort: str = Field(default="low")
     bound_tool_names: list[str] = Field(default_factory=list)
     inject_unverified_number_once: bool = Field(default=False)
     _injected_once: bool = False
 
     @property
     def _llm_type(self) -> str:
-        return f"flare-chronos-deterministic-{self.role}"
+        return f"flare-chronos-{self.role}"
 
     def bind_tools(
         self,
@@ -225,15 +253,15 @@ class DeterministicHarnessChatModel(BaseChatModel):
         *,
         tool_choice: str | None = None,
         **kwargs: Any,
-    ) -> DeterministicHarnessChatModel:
+    ) -> HarnessChatModel:
         names: list[str] = []
-        for t in tools:
-            if isinstance(t, dict) and "name" in t:
-                names.append(str(t["name"]))
+        for tool in tools:
+            if isinstance(tool, dict) and "name" in tool:
+                names.append(str(tool["name"]))
             else:
-                t_name = getattr(t, "name", None)
-                if t_name is not None:
-                    names.append(str(t_name))
+                tool_name = getattr(tool, "name", None)
+                if tool_name is not None:
+                    names.append(str(tool_name))
         return self.model_copy(update={"bound_tool_names": names})
 
     def _infer_use_case_and_params_from_messages(
@@ -246,17 +274,17 @@ class DeterministicHarnessChatModel(BaseChatModel):
             "region": "mekong",
             "stakeholder_tier": "climate_scientist",
         }
-        for msg in messages:
-            text = str(msg.content)
+        for message in messages:
+            text = str(message.content)
             match_uc = re.search(r"\[USE_CASE:(UC-[A-Z0-9\.-]+)\]", text)
             if match_uc:
                 use_case_id = match_uc.group(1)
             match_year = re.search(r"\[YEAR:(\d{4})\]", text)
             if match_year:
                 params["year"] = int(match_year.group(1))
-            match_reg = re.search(r"\[REGION:([a-z_]+)\]", text)
-            if match_reg:
-                params["region"] = match_reg.group(1)
+            match_region = re.search(r"\[REGION:([a-z_]+)\]", text)
+            if match_region:
+                params["region"] = match_region.group(1)
             match_tier = re.search(r"\[TIER:([a-z_]+)\]", text)
             if match_tier:
                 params["stakeholder_tier"] = match_tier.group(1)
@@ -360,42 +388,42 @@ class DeterministicHarnessChatModel(BaseChatModel):
         }
         return arg_map.get(tool_name, {})
 
-    def _synthesize_grounded_response(
-        self,
-        use_case_id: str,
-        tool_messages: list[ToolMessage],
-        is_repair_turn: bool,
-    ) -> str:
-        """Format a strictly grounded narrative citing only numbers from ToolMessage JSONs."""
-        parsed_payloads: list[tuple[str, dict[str, Any]]] = []
-        for tm in tool_messages:
-            try:
-                data = json.loads(str(tm.content))
-                if isinstance(data, dict):
-                    parsed_payloads.append((tm.name or "tool", data))
-            except ValueError:
-                continue
+    def _selected_tools(
+        self, use_case_id: str, bound_tool_names: list[str]
+    ) -> list[str]:
+        target_tools = bound_tool_names or USE_CASE_PRIMARY_TOOLS.get(
+            UseCaseId(use_case_id), ["tool_lookup_single_epoch_metrics"]
+        )
+        return target_tools[:2]
 
-        lines: list[str] = [f"### Verified Analysis Report ({use_case_id})"]
-        for tool_name, payload in parsed_payloads:
-            lines.append(f"- **Tool Executed (`{tool_name}`)**:")
-            for k, v in payload.items():
-                if isinstance(v, (int, float)) and not isinstance(v, bool):
-                    lines.append(f"  - `{k}`: **{v}**")
-                elif isinstance(v, str) and len(v) < 160:
-                    lines.append(f"  - `{k}`: {v}")
+    def _tool_call_message(
+        self, use_case_id: str, tool_names: list[str], params: dict[str, Any]
+    ) -> AIMessage:
+        """Build the tool-call turn that binds a use case to its primary tools."""
+        tool_calls = [
+            {
+                "name": tool_name,
+                "args": self._build_tool_arguments(tool_name, params),
+                "id": f"call_{use_case_id.replace('-', '_').replace('.', '_')}_{tool_name}",
+                "type": "tool_call",
+            }
+            for tool_name in tool_names
+        ]
+        return AIMessage(content="", tool_calls=tool_calls)
 
-        if (
-            self.inject_unverified_number_once
-            and not self._injected_once
-            and not is_repair_turn
-        ):
-            self._injected_once = True
-            lines.append(
-                "- **Speculative Unverified Extrapolation**: Estimated anomaly of **98765.4321** MW."
-            )
 
-        return "\n".join(lines)
+class DeterministicHarnessChatModel(HarnessChatModel):
+    """LangChain `BaseChatModel` for deterministic execution of the LangGraph StateGraph.
+
+    Provides the offline sandbox used by CI and by the local benchmark run. The
+    same StateGraph, ToolNode, and Verified Facts Ledger are exercised as in
+    live mode, so the offline suite proves graph and gate behaviour without
+    calling any network service.
+    """
+
+    @property
+    def _llm_type(self) -> str:
+        return f"flare-chronos-deterministic-{self.role}"
 
     def _generate(
         self,
@@ -419,144 +447,90 @@ class DeterministicHarnessChatModel(BaseChatModel):
             t for t in self.bound_tool_names if t not in already_called_names
         ]
 
-        # Emit tool_calls if no tool has been called yet, or if escalated to System 2 with new tools
         if not tool_messages or (has_escalated_msg and missing_bound_tools):
-            target_tools = (
-                missing_bound_tools
-                if missing_bound_tools
-                else (
-                    self.bound_tool_names
-                    if self.bound_tool_names
-                    else USE_CASE_PRIMARY_TOOLS.get(
-                        UseCaseId(use_case_id), ["tool_lookup_single_epoch_metrics"]
-                    )
-                )
-            )
-            selected_tools = target_tools[:2]
-            tool_calls = [
-                {
-                    "name": t_name,
-                    "args": self._build_tool_arguments(t_name, params),
-                    "id": f"call_{use_case_id.replace('-', '_').replace('.', '_')}_{t_name}",
-                    "type": "tool_call",
-                }
-                for t_name in selected_tools
-            ]
+            selected_tools = self._selected_tools(use_case_id, missing_bound_tools)
             additional_kwargs: dict[str, Any] = {}
             if self.role == "system2_deliberative":
                 additional_kwargs["reasoning_content"] = (
-                    f"[System 2 Deliberative Reasoning ({self.model_id}, effort={self.reasoning_effort})]: "
-                    f"Decomposing {use_case_id} into deterministic tool invocations {selected_tools}."
+                    f"[System 2 Deliberative Reasoning ({self.model_id}, "
+                    f"effort={self.reasoning_effort})]: Decomposing {use_case_id} "
+                    f"into deterministic tool invocations {selected_tools}."
                 )
-            ai_msg = AIMessage(
-                content="",
-                tool_calls=tool_calls,
-                additional_kwargs=additional_kwargs,
+            return ChatResult(
+                generations=[
+                    ChatGeneration(
+                        message=self._tool_call_message(
+                            use_case_id, selected_tools, params
+                        ).model_copy(update={"additional_kwargs": additional_kwargs})
+                    )
+                ]
             )
-            return ChatResult(generations=[ChatGeneration(message=ai_msg)])
 
-        # Tool outputs are available -> synthesize strictly grounded response
-        content = self._synthesize_grounded_response(
-            use_case_id=use_case_id,
-            tool_messages=tool_messages,
-            is_repair_turn=is_repair_turn,
-        )
+        content = synthesize_grounded_response(use_case_id, tool_messages)
+        if (
+            self.inject_unverified_number_once
+            and not self._injected_once
+            and not is_repair_turn
+        ):
+            self._injected_once = True
+            content += (
+                "\n- **Speculative Unverified Extrapolation**: "
+                "Estimated anomaly of **98765.4321** MW."
+            )
         additional_kwargs = {}
         if self.role == "system2_deliberative":
             additional_kwargs["reasoning_content"] = (
-                f"[System 2 Deliberative Verification ({self.model_id}, effort={self.reasoning_effort})]: "
-                f"Synthesizing narrative from {len(tool_messages)} deterministic tool outputs "
-                f"with strict adherence to the VerifiedFactsLedger."
+                f"[System 2 Deliberative Verification ({self.model_id}, "
+                f"effort={self.reasoning_effort})]: Synthesizing narrative from "
+                f"{len(tool_messages)} deterministic tool outputs with strict "
+                f"adherence to the VerifiedFactsLedger."
             )
-        ai_msg = AIMessage(content=content, additional_kwargs=additional_kwargs)
-        return ChatResult(generations=[ChatGeneration(message=ai_msg)])
+        return ChatResult(
+            generations=[
+                ChatGeneration(
+                    message=AIMessage(
+                        content=content, additional_kwargs=additional_kwargs
+                    )
+                )
+            ]
+        )
 
 
-class JevSystemOneChatModel(DeterministicHarnessChatModel):
-    """Live System 1 adapter calling OpenCode Zen's TypeSafe Jev API (`POST /zen/v1/systemone`).
+class SystemOneChatModel(HarnessChatModel):
+    """Live System 1 adapter for the typed-questions protocol.
 
-    Jev 1.13 (`jev-1.13-free` / `jev-1.13`) is a dedicated System One structured decision engine
-    on OpenCode Zen that evaluates an input `state` against typed `questions` (`noul`, `choice`,
-    `score`) and returns calibrated probabilities in `answers`.
+    The protocol evaluates a `state` against typed questions and returns
+    calibrated probabilities instead of free text, so it fits the System 1
+    Reflexive Layer: intent triage, entity classification, and verification of
+    the deterministic tool output. It is not an OpenAI-shaped chat API, so it
+    is implemented directly over HTTP.
     """
 
-    base_url: str = Field(default="https://opencode.ai/zen/v1")
-    api_key: str = Field(default="public")
-    timeout_sec: float = Field(default=20.0)
+    profile: EndpointProfile
 
     @property
     def _llm_type(self) -> str:
-        return "opencode-zen-jev-systemone"
+        return "flare-chronos-system-one"
 
-    def evaluate_systemone(
-        self,
-        state_text: str,
-        questions: dict[str, Any],
-    ) -> dict[str, Any]:
-        """Execute a live `POST /zen/v1/systemone` request against `jev-1.13-free`."""
-        endpoint = f"{self.base_url.rstrip('/')}/systemone"
+    def evaluate(self, state_text: str, questions: dict[str, Any]) -> dict[str, Any]:
+        """Send one typed-questions request and return the raw answers payload."""
         payload = {
-            "model": self.model_id,
+            "model": self.profile.model_id,
             "state": state_text,
             "questions": questions,
         }
-        raw_bytes = json.dumps(payload).encode("utf-8")
-
-        for candidate_key in dict.fromkeys([self.api_key, "public"]):
-            req = urllib.request.Request(
-                endpoint,
-                data=raw_bytes,
-                headers=build_opencode_zen_headers(candidate_key),
-                method="POST",
-            )
-            try:
-                with urllib.request.urlopen(req, timeout=self.timeout_sec) as resp:
-                    body = resp.read().decode("utf-8", errors="replace")
-                    return json.loads(body)
-            except urllib.error.HTTPError as exc:
-                exc.close()
-                if exc.code == 401 and candidate_key != "public":
-                    continue
-                break
-            except Exception:  # noqa: BLE001
-                break
-
-        region_choice = (
-            "amazon"
-            if "amazon" in state_text.lower() or "south_america" in state_text.lower()
-            else "mekong"
-        )
-        return {
-            "model": self.model_id,
-            "answers": {
-                "region": {
-                    "type": "choice",
-                    "choice": region_choice,
-                    "confidence": 1.0,
-                    "probabilities": {
-                        "mekong": 1.0 if region_choice == "mekong" else 0.0,
-                        "amazon": 1.0 if region_choice == "amazon" else 0.0,
-                    },
-                },
-                "is_deliberative": {"type": "noul", "noul": 0.11},
-                "requires_escalation": {
-                    "type": "noul",
-                    "noul": 0.95 if "1330.0" in state_text else 0.05,
-                },
-                "verification_status": {
-                    "type": "choice",
-                    "choice": "regime_conflict"
-                    if "1330.0" in state_text
-                    else "verified_nominal",
-                    "confidence": 0.98,
-                    "probabilities": {
-                        "verified_nominal": 0.02,
-                        "regime_conflict": 0.98,
-                    },
-                },
-            },
-            "usage": {"input_tokens": 351, "output_tokens": 53},
+        headers = {
+            **self.profile.request.headers,
+            "Content-Type": "application/json",
+            "User-Agent": self.profile.request.user_agent,
+            "Authorization": f"Bearer {resolve_api_key(self.profile)}",
         }
+        return _post_json(
+            self.profile.endpoint,
+            payload,
+            headers,
+            self.profile.request.timeout_ms / 1000.0,
+        )
 
     def _generate(
         self,
@@ -567,18 +541,12 @@ class JevSystemOneChatModel(DeterministicHarnessChatModel):
     ) -> ChatResult:
         use_case_id, params = self._infer_use_case_and_params_from_messages(messages)
         tool_messages = [m for m in messages if isinstance(m, ToolMessage)]
-        is_repair_turn = any(
-            isinstance(m, HumanMessage)
-            and "[NUMERIC_VERIFIER_REJECTION]" in str(m.content)
-            for m in messages
-        )
 
-        # Turn 1: Live Jev `/zen/v1/systemone` structured triage & parameter classification
         if not tool_messages:
             user_text = "\n".join(
                 str(m.content) for m in messages if not isinstance(m, ToolMessage)
             )
-            jev_resp = self.evaluate_systemone(
+            response = self.evaluate(
                 state_text=user_text,
                 questions={
                     "region": {
@@ -595,184 +563,128 @@ class JevSystemOneChatModel(DeterministicHarnessChatModel):
                     },
                 },
             )
-            answers = jev_resp.get("answers", {})
+            answers = response.get("answers", {})
             region_choice = answers.get("region", {}).get("choice")
             if region_choice in ("mekong", "amazon"):
                 params["region"] = region_choice
 
-            target_tools = (
-                self.bound_tool_names
-                if self.bound_tool_names
-                else USE_CASE_PRIMARY_TOOLS.get(
-                    UseCaseId(use_case_id), ["tool_lookup_single_epoch_metrics"]
-                )
-            )
-            selected_tools = target_tools[:2]
-            tool_calls = [
-                {
-                    "name": t_name,
-                    "args": self._build_tool_arguments(t_name, params),
-                    "id": f"call_{use_case_id.replace('-', '_').replace('.', '_')}_{t_name}",
-                    "type": "tool_call",
-                }
-                for t_name in selected_tools
-            ]
-            ai_msg = AIMessage(
-                content="",
-                tool_calls=tool_calls,
-                additional_kwargs={"jev_systemone": jev_resp},
-            )
-            return ChatResult(generations=[ChatGeneration(message=ai_msg)])
+            selected_tools = self._selected_tools(use_case_id, self.bound_tool_names)
+            message = self._tool_call_message(use_case_id, selected_tools, params)
+            message.additional_kwargs["systemone_result"] = response
+            return ChatResult(generations=[ChatGeneration(message=message)])
 
-        # Turn 2: Live Jev `/zen/v1/systemone` post-tool verification & grounded briefing
         tool_summary = "\n".join(str(tm.content) for tm in tool_messages)
-        jev_resp = self.evaluate_systemone(
+        response = self.evaluate(
             state_text=tool_summary[:4000],
             questions={
                 "requires_escalation": {
                     "type": "noul",
-                    "instructions": "Does this tool output show severe raw-vs-harmonized divergence (>= 200%) or SAA anomalies requiring System 2 escalation?",
+                    "instructions": (
+                        "Does this tool output show severe raw-vs-harmonized divergence "
+                        "(>= 200%) or South Atlantic Anomaly anomalies requiring "
+                        "System 2 escalation?"
+                    ),
                 },
                 "verification_status": {
                     "type": "choice",
                     "instructions": "Classify the physical status of the returned fire metrics.",
                     "criteria": {
                         "verified_nominal": "Metrics are consistent and within expected harmonized bounds",
-                        "regime_conflict": "Severe raw-vs-harmonized divergence or orbital/SAA artifact detected",
+                        "regime_conflict": "Severe raw-vs-harmonized divergence or orbital artifact detected",
                     },
                 },
             },
         )
-        content = self._synthesize_grounded_response(
-            use_case_id=use_case_id,
-            tool_messages=tool_messages,
-            is_repair_turn=is_repair_turn,
+        message = AIMessage(
+            content=synthesize_grounded_response(use_case_id, tool_messages),
+            additional_kwargs={"systemone_result": response},
         )
-        ai_msg = AIMessage(
-            content=content,
-            additional_kwargs={"jev_systemone": jev_resp},
-        )
-        return ChatResult(generations=[ChatGeneration(message=ai_msg)])
+        return ChatResult(generations=[ChatGeneration(message=message)])
 
 
-_PRIMARY_S2_CIRCUIT_OPEN: bool = False
+class SystemTwoChatModel(HarnessChatModel):
+    """Live System 2 adapter for the native chat protocol.
 
-
-class LiveOpenCodeSystem2ChatModel(DeterministicHarnessChatModel):
-    """Live System 2 deliberative model adapter (`qwen-local / qwen3.8-flash-next` + `.jsonc` failover).
-
-    Calls the self-hosted `qwen3.8-flash-next` endpoint (`http://100.67.91.54:8888/v1`) with
-    `reasoning_effort` (`"xhigh"`, `"medium"`, `"low"`), extracting live `reasoning_content` /
-    `reasoning` traces, and automatically failing over to the secondary OpenCode `.jsonc`
-    provider (`9router / ds/deepseek-v4-pro`) if the primary GPU node returns 502/timeout.
+    The endpoint returns the model's deliberation as a dedicated `thinking`
+    field, which the harness records as reasoning evidence. On the synthesis
+    turn the model writes the analytical narrative and cites every quantity as
+    a `{{fact_key}}` placeholder; the harness resolves those placeholders
+    against the Verified Facts Ledger, so the model never writes a number.
     """
 
-    base_url: str = Field(default="http://100.67.91.54:8888/v1")
-    api_key: str = Field(default="")
-    secondary_base_url: str = Field(default="")
-    secondary_model_id: str = Field(default="ds/deepseek-v4-pro")
-    secondary_api_key: str = Field(default="")
-    primary_timeout_sec: float = Field(default=3.5)
-    secondary_timeout_sec: float = Field(default=25.0)
+    profile: EndpointProfile
 
     @property
     def _llm_type(self) -> str:
-        return "opencode-qwen-system2-live"
+        return "flare-chronos-system-two"
 
-    def _call_live_reasoning_endpoint(self, prompt_text: str) -> tuple[str, str, str]:
-        """Invoke primary (`qwen-local`) or secondary (`9router`) live endpoint.
+    def _to_native_messages(self, messages: list[BaseMessage]) -> list[dict[str, Any]]:
+        """Convert LangChain messages into the native chat message shape."""
+        native: list[dict[str, Any]] = []
+        for message in messages:
+            if isinstance(message, SystemMessage):
+                native.append({"role": "system", "content": str(message.content)})
+            elif isinstance(message, HumanMessage):
+                native.append({"role": "user", "content": str(message.content)})
+            elif isinstance(message, ToolMessage):
+                native.append({"role": "tool", "content": str(message.content)})
+            elif isinstance(message, AIMessage):
+                entry: dict[str, Any] = {
+                    "role": "assistant",
+                    "content": str(message.content),
+                }
+                if message.tool_calls:
+                    entry["tool_calls"] = [
+                        {
+                            "function": {
+                                "name": call["name"],
+                                "arguments": call.get("args", {}),
+                            }
+                        }
+                        for call in message.tool_calls
+                    ]
+                native.append(entry)
+        return native
 
-        Returns `(reasoning_trace, content_text, provider_used)`.
-        """
-        global _PRIMARY_S2_CIRCUIT_OPEN
-        if self.api_key == "not-needed-in-offline-mode" and not self.secondary_api_key:
-            return (
-                f"Deterministic CI fallback reasoning for: {prompt_text[:120]}",
-                "OK",
-                f"qwen-local/{self.model_id}",
-            )
+    def _build_payload(
+        self, messages: list[BaseMessage], tools: Sequence[Any] | None
+    ) -> dict[str, Any]:
+        """Build the native chat request body from the profile and the turn."""
+        options: dict[str, Any] = {}
+        request = self.profile.request
+        if request.temperature is not None:
+            options["temperature"] = request.temperature
+        if request.max_output_tokens is not None:
+            options["num_predict"] = request.max_output_tokens
+        if request.seed is not None:
+            options["seed"] = request.seed
 
-        candidates: list[tuple[str, str, str, str, float]] = []
-        if not _PRIMARY_S2_CIRCUIT_OPEN:
-            candidates.append(
-                (
-                    "qwen-local",
-                    self.base_url.rstrip("/"),
-                    self.model_id,
-                    self.api_key,
-                    self.primary_timeout_sec,
-                )
-            )
-        if self.secondary_base_url and self.secondary_api_key:
-            candidates.append(
-                (
-                    "9router",
-                    self.secondary_base_url.rstrip("/"),
-                    self.secondary_model_id,
-                    self.secondary_api_key,
-                    self.secondary_timeout_sec,
-                )
-            )
+        payload: dict[str, Any] = {
+            "model": self.profile.model_id,
+            "messages": self._to_native_messages(messages),
+            "stream": False,
+        }
+        if options:
+            payload["options"] = options
+        if request.thinking_level is not None:
+            payload["think"] = request.thinking_level
+        if tools:
+            payload["tools"] = [convert_to_openai_tool(tool) for tool in tools]
+        payload.update(request.extra_body)
+        return payload
 
-        last_err: Exception | None = None
-        for prov_name, b_url, m_id, key, timeout_s in candidates:
-            payload: dict[str, Any] = {
-                "model": m_id,
-                "messages": [
-                    {
-                        "role": "system",
-                        "content": (
-                            "You are FLARE-CHRONOS System 2 Deliberative Reasoner. "
-                            "Formulate a concise physical and statistical reasoning trace."
-                        ),
-                    },
-                    {"role": "user", "content": prompt_text},
-                ],
-                "max_tokens": 256,
-                "temperature": 0.1,
-            }
-            if prov_name == "qwen-local":
-                payload["reasoning_effort"] = self.reasoning_effort
-
-            req = urllib.request.Request(
-                f"{b_url}/chat/completions",
-                data=json.dumps(payload).encode("utf-8"),
-                headers={
-                    "Content-Type": "application/json",
-                    "Authorization": f"Bearer {key}",
-                    "User-Agent": "opencode/2.0.0",
-                },
-                method="POST",
-            )
-            try:
-                with urllib.request.urlopen(req, timeout=timeout_s) as resp:
-                    raw_body = resp.read().decode("utf-8", errors="replace").lstrip()
-                    data, _ = json.JSONDecoder().raw_decode(raw_body)
-                    msg = data.get("choices", [{}])[0].get("message", {})
-                    reasoning = (
-                        msg.get("reasoning_content")
-                        or msg.get("reasoning")
-                        or msg.get("content")
-                        or ""
-                    )
-                    content = msg.get("content") or ""
-                    return (
-                        str(reasoning).strip(),
-                        str(content).strip(),
-                        f"{prov_name}/{m_id}",
-                    )
-            except Exception as exc:  # noqa: BLE001
-                if isinstance(exc, urllib.error.HTTPError):
-                    exc.close()
-                if prov_name == "qwen-local":
-                    _PRIMARY_S2_CIRCUIT_OPEN = True
-                last_err = exc
-                continue
-
-        return (
-            f"Deterministic CI fallback reasoning ({last_err!r}) for: {prompt_text[:120]}",
-            "OK",
-            f"qwen-local/{self.model_id}",
+    def _call(self, payload: dict[str, Any]) -> dict[str, Any]:
+        headers = {
+            **self.profile.request.headers,
+            "Content-Type": "application/json",
+            "User-Agent": self.profile.request.user_agent,
+            "Authorization": f"Bearer {resolve_api_key(self.profile)}",
+        }
+        return _post_json(
+            self.profile.endpoint,
+            payload,
+            headers,
+            self.profile.request.timeout_ms / 1000.0,
         )
 
     def _generate(
@@ -784,11 +696,6 @@ class LiveOpenCodeSystem2ChatModel(DeterministicHarnessChatModel):
     ) -> ChatResult:
         use_case_id, params = self._infer_use_case_and_params_from_messages(messages)
         tool_messages = [m for m in messages if isinstance(m, ToolMessage)]
-        is_repair_turn = any(
-            isinstance(m, HumanMessage)
-            and "[NUMERIC_VERIFIER_REJECTION]" in str(m.content)
-            for m in messages
-        )
         has_escalated_msg = any(
             "[ESCALATED_S1_TO_S2]" in str(m.content) for m in messages
         )
@@ -797,116 +704,106 @@ class LiveOpenCodeSystem2ChatModel(DeterministicHarnessChatModel):
             t for t in self.bound_tool_names if t not in already_called_names
         ]
 
-        # Turn 1: Live System 2 deliberative decomposition + tool call emission
         if not tool_messages or (has_escalated_msg and missing_bound_tools):
-            target_tools = (
-                missing_bound_tools
-                if missing_bound_tools
-                else (
-                    self.bound_tool_names
-                    if self.bound_tool_names
-                    else USE_CASE_PRIMARY_TOOLS.get(
-                        UseCaseId(use_case_id), ["tool_lookup_single_epoch_metrics"]
-                    )
-                )
-            )
-            selected_tools = target_tools[:2]
-            reasoning_trace, _, provider_used = self._call_live_reasoning_endpoint(
-                f"Decompose FLARE-CHRONOS use case {use_case_id} for region={params.get('region')} "
-                f"year={params.get('year')} using deterministic tools {selected_tools}."
-            )
-            tool_calls = [
+            selected_tools = self._selected_tools(use_case_id, missing_bound_tools)
+            payload = self._build_payload(messages, None)
+            payload["messages"] = payload["messages"] + [
                 {
-                    "name": t_name,
-                    "args": self._build_tool_arguments(t_name, params),
-                    "id": f"call_{use_case_id.replace('-', '_').replace('.', '_')}_{t_name}",
-                    "type": "tool_call",
-                }
-                for t_name in selected_tools
-            ]
-            ai_msg = AIMessage(
-                content="",
-                tool_calls=tool_calls,
-                additional_kwargs={
-                    "reasoning_content": (
-                        f"[Live System 2 ({provider_used}, effort={self.reasoning_effort})]: "
-                        f"{reasoning_trace}"
+                    "role": "user",
+                    "content": (
+                        f"Decompose FLARE-CHRONOS use case {use_case_id} for "
+                        f"region={params.get('region')} year={params.get('year')} "
+                        f"using deterministic tools {selected_tools}."
                     ),
-                    "live_provider_used": provider_used,
-                },
+                }
+            ]
+            response = self._call(payload)
+            message_data = response.get("message", {})
+            thinking = str(message_data.get("thinking") or "")
+            message = self._tool_call_message(use_case_id, selected_tools, params)
+            message.additional_kwargs["reasoning_content"] = (
+                f"[Live System 2 ({self.model_id})]: {thinking}"
             )
-            return ChatResult(generations=[ChatGeneration(message=ai_msg)])
+            message.additional_kwargs["model_used"] = self.model_id
+            return ChatResult(generations=[ChatGeneration(message=message)])
 
-        # Turn 2: Live System 2 deliberative verification + strictly grounded synthesis
-        tool_summary = "\n".join(str(tm.content) for tm in tool_messages)
-        reasoning_trace, _, provider_used = self._call_live_reasoning_endpoint(
-            f"Verify deterministic tool output for {use_case_id} against VerifiedFactsLedger: "
-            f"{tool_summary[:1500]}"
+        citations = build_citation_table(tool_messages)
+        citation_lines = "\n".join(
+            f"- {key} = {format_citation_value(value)}"
+            for key, value in sorted(citations.items())
         )
-        content = self._synthesize_grounded_response(
-            use_case_id=use_case_id,
-            tool_messages=tool_messages,
-            is_repair_turn=is_repair_turn,
+        narrative_prompt = (
+            "Write the analytical briefing for the FLARE-CHRONOS System 2 "
+            "Deliberative Layer.\n"
+            "Rules:\n"
+            "1. Cite EVERY quantity as {{fact_key}} using exactly the keys listed "
+            "below. Never write a digit yourself.\n"
+            "2. Never introduce a quantity, percentage, or ratio that is not in "
+            "the list.\n"
+            "3. Explain the physical interpretation: what the deterministic tool "
+            "outputs imply about the process, and what the caller should do.\n"
+            f"Available facts:\n{citation_lines}\n"
         )
-        ai_msg = AIMessage(
+        payload = self._build_payload(messages, None)
+        payload["messages"] = payload["messages"] + [
+            {"role": "user", "content": narrative_prompt}
+        ]
+        response = self._call(payload)
+        message_data = response.get("message", {})
+        thinking = str(message_data.get("thinking") or "")
+        content = str(message_data.get("content") or "")
+        is_repair_turn = any(
+            isinstance(m, HumanMessage)
+            and "[NUMERIC_VERIFIER_REJECTION]" in str(m.content)
+            for m in messages
+        )
+        if (
+            self.inject_unverified_number_once
+            and not self._injected_once
+            and not is_repair_turn
+        ):
+            self._injected_once = True
+            content += (
+                "\n- Speculative Unverified Extrapolation: estimated anomaly "
+                "of 98765.4321 MW."
+            )
+        message = AIMessage(
             content=content,
             additional_kwargs={
-                "reasoning_content": (
-                    f"[Live System 2 Verification ({provider_used}, effort={self.reasoning_effort})]: "
-                    f"{reasoning_trace}"
-                ),
-                "live_provider_used": provider_used,
+                "reasoning_content": f"[Live System 2 ({self.model_id})]: {thinking}",
+                "model_used": self.model_id,
             },
         )
-        return ChatResult(generations=[ChatGeneration(message=ai_msg)])
+        return ChatResult(generations=[ChatGeneration(message=message)])
 
 
 def build_live_system1_chat_model(
     cfg: dict[str, Any] | None = None,
-) -> JevSystemOneChatModel:
-    """Create a live `JevSystemOneChatModel` client for System 1 (`opencode-v2 / jev-1.13-free`)."""
+) -> SystemOneChatModel:
+    """Create the live System 1 client for the typed-questions protocol."""
     config = cfg or load_harness_config()
-    s1_cfg = config["models"]["system1_reflexive"]
-    base_url, model_id, api_key = resolve_opencode_system1_credentials(config)
-    return JevSystemOneChatModel(
+    profile = resolve_endpoint_profile(config, "system1_reflexive")
+    return SystemOneChatModel(
         role="system1_reflexive",
-        model_id=model_id,
-        provider_id=s1_cfg.get("provider", "opencode-v2"),
+        model_id=profile.model_id,
+        source_label=profile.endpoint,
         reasoning_effort="low",
-        base_url=base_url,
-        api_key=api_key,
-        timeout_sec=float(s1_cfg.get("timeout_ms", 20000)) / 1000.0,
+        profile=profile,
     )
 
 
 def build_live_system2_chat_model(
     cfg: dict[str, Any] | None = None,
-    variant: str = "xhigh",
     inject_unverified_number_once: bool = False,
-) -> LiveOpenCodeSystem2ChatModel:
-    """Create a live `LiveOpenCodeSystem2ChatModel` client for System 2 (`qwen-local / qwen3.8-flash-next`)."""
+) -> SystemTwoChatModel:
+    """Create the live System 2 client for the native chat protocol."""
     config = cfg or load_harness_config()
-    s2_cfg = config["models"]["system2_deliberative"]
-    allowed_efforts = {"xhigh", "medium", "low"}
-    reasoning_effort = (
-        variant
-        if variant in allowed_efforts
-        else s2_cfg.get("reasoning_effort", "xhigh")
-    )
-    base_url, model_id, api_key = resolve_qwen_system2_credentials(config)
-    secondary = resolve_secondary_opencode_system2_credentials(config)
-    sec_base, sec_model, sec_key = (
-        secondary if secondary else ("", "ds/deepseek-v4-pro", "")
-    )
-    return LiveOpenCodeSystem2ChatModel(
+    profile = resolve_endpoint_profile(config, "system2_deliberative")
+    return SystemTwoChatModel(
         role="system2_deliberative",
-        model_id=model_id,
-        provider_id=s2_cfg.get("provider", "qwen-local"),
-        reasoning_effort=reasoning_effort,
-        base_url=base_url,
-        api_key=api_key,
-        secondary_base_url=sec_base,
-        secondary_model_id=sec_model,
-        secondary_api_key=sec_key,
+        model_id=profile.model_id,
+        source_label=profile.endpoint,
+        reasoning_effort=str(profile.request.thinking_level or "low"),
+        profile=profile,
         inject_unverified_number_once=inject_unverified_number_once,
     )

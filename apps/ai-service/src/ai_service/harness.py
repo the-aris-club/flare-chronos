@@ -1,16 +1,21 @@
 """LangGraph Dual-System Harness (`StateGraph` + `ToolNode` + `MemorySaver` + `VerifiedFactsLedger`).
 
 Orchestrates:
-- System 1 (`opencode-v2 / jev`): Reflexive Triage (`UC-S1.1`), Entity Extraction (`UC-S1.2`),
-  Single-Hop Fast Lookup (`UC-S1.3`), Flash NRT Alert (`UC-S1.4`), and Multi-Stakeholder
-  Synthesis (`UC-S1.5`).
-- System 2 (`qwen-local / qwen3.8-flash-next`, `reasoning_effort="xhigh"`): 15 Deliberative
-  Use Cases (`UC-1.1` through `UC-5.3`).
+- System 1 Reflexive Layer: Intent Triage (`UC-S1.1`), Entity Extraction
+  (`UC-S1.2`), Single-Hop Fast Lookup (`UC-S1.3`), Flash NRT Alert (`UC-S1.4`),
+  and Multi-Stakeholder Synthesis (`UC-S1.5`).
+- System 2 Deliberative Layer: 15 Deliberative Use Cases (`UC-1.1` through
+  `UC-5.3`), which author the analytical narrative.
 - Symbiosis:
   1. System 1 -> System 2 Context & Tool Pruning
   2. Dynamic Escalation Gate on Physical Conflict (`divergence >= 200%` or `saa_rejected_count > 0`)
   3. Deterministic `VerifiedFactsLedger` + `NumericGroundingVerifier` loopback edge
   4. System 2 -> System 1 `VerifiedPatternCache` distillation
+
+Every language model is reached through an `EndpointProfile` resolved from
+explicit configuration. The harness never reads the host's agent tooling
+configuration, and it never fabricates a model answer: a missing credential or
+a failed call surfaces as an error.
 """
 
 from __future__ import annotations
@@ -31,6 +36,8 @@ from ai_service.models import (
     build_live_system1_chat_model,
     build_live_system2_chat_model,
     load_harness_config,
+    resolve_endpoint_profile,
+    synthesize_grounded_response,
 )
 from ai_service.schemas import (
     CognitivePath,
@@ -40,6 +47,7 @@ from ai_service.schemas import (
     UseCaseId,
     VerifiedFactEntry,
     VerifiedFactsLedger,
+    verify_grounded_draft,
 )
 from ai_service.tools import ALL_DETERMINISTIC_TOOLS, TOOL_MAP, USE_CASE_PRIMARY_TOOLS
 
@@ -89,8 +97,10 @@ class FlareChronosDualSystemHarness:
         self.checkpointer = MemorySaver()
         self.tool_node = ToolNode(ALL_DETERMINISTIC_TOOLS)
 
-        s1_cfg = self.config["models"]["system1_reflexive"]
-        s2_cfg = self.config["models"]["system2_deliberative"]
+        s1_profile = resolve_endpoint_profile(self.config, "system1_reflexive")
+        s2_profile = resolve_endpoint_profile(self.config, "system2_deliberative")
+        self.s1_profile = s1_profile
+        self.s2_profile = s2_profile
 
         if mode == "live":
             self.system1_model: BaseChatModel = build_live_system1_chat_model(
@@ -98,22 +108,21 @@ class FlareChronosDualSystemHarness:
             )
             self.system2_model: BaseChatModel = build_live_system2_chat_model(
                 self.config,
-                variant=s2_cfg.get("reasoning_effort", "xhigh"),
                 inject_unverified_number_once=inject_unverified_number_once,
             )
         else:
             self.system1_model = DeterministicHarnessChatModel(
                 role="system1_reflexive",
-                model_id=s1_cfg["model_id"],
-                provider_id=s1_cfg["provider"],
+                model_id=s1_profile.model_id,
+                source_label=s1_profile.endpoint,
                 reasoning_effort="low",
                 inject_unverified_number_once=False,
             )
             self.system2_model = DeterministicHarnessChatModel(
                 role="system2_deliberative",
-                model_id=s2_cfg["model_id"],
-                provider_id=s2_cfg["provider"],
-                reasoning_effort=s2_cfg.get("reasoning_effort", "xhigh"),
+                model_id=s2_profile.model_id,
+                source_label=s2_profile.endpoint,
+                reasoning_effort=str(s2_profile.request.thinking_level or "low"),
                 inject_unverified_number_once=inject_unverified_number_once,
             )
 
@@ -204,6 +213,7 @@ class FlareChronosDualSystemHarness:
                     "verification_report": cached["verification_report"],
                     "distilled_cache_hit": True,
                     "final_briefing": cached["final_briefing"],
+                    "live_telemetry": cached["live_telemetry"],
                 }
 
         pruned_tools = list(
@@ -213,7 +223,8 @@ class FlareChronosDualSystemHarness:
             content=(
                 f"[USE_CASE:{uc_enum.value}] [YEAR:{target_year}] "
                 f"[REGION:{entity.region}] [TIER:{entity.stakeholder_tier.value}] "
-                f"System 1 (`opencode-v2/jev`) extracted entity and pruned tools to {pruned_tools}.\n"
+                f"System 1 extracted the entity and pruned the tool surface to "
+                f"{pruned_tools}.\n"
                 f"STRICT DETERMINISTIC TOOL GATE RULES (ADR-0005):\n"
                 f"1. If no tool has been called yet, you MUST call the bound tool(s) {pruned_tools} first.\n"
                 f"2. After receiving the ToolMessage JSON, write a concise technical summary that cites "
@@ -236,6 +247,7 @@ class FlareChronosDualSystemHarness:
             "self_correction_retries": state.get("self_correction_retries", 0),
             "distilled_cache_hit": False,
             "reasoning_trace": state.get("reasoning_trace", []),
+            "synthesis_mode": "pending",
         }
 
     def _route_after_triage(
@@ -252,7 +264,7 @@ class FlareChronosDualSystemHarness:
         return "system2_planner_node"
 
     def _system1_fast_node(self, state: HarnessState) -> dict[str, Any]:
-        """Node 2 (`UC-S1.3` & `UC-S1.4`): System 1 (`opencode-v2/jev`) single-hop tool call or synthesis."""
+        """Node 2 (`UC-S1.3` & `UC-S1.4`): System 1 single-hop tool call or synthesis."""
         pruned_names = state.get("pruned_tool_names", [])
         bound_tools = [TOOL_MAP[name] for name in pruned_names if name in TOOL_MAP]
         bound_s1 = self.system1_model.bind_tools(bound_tools)
@@ -260,6 +272,7 @@ class FlareChronosDualSystemHarness:
         updates: dict[str, Any] = {"messages": [response]}
         if isinstance(response, AIMessage) and not response.tool_calls:
             updates["final_briefing"] = str(response.content)
+            updates["synthesis_mode"] = "deterministic"
         return updates
 
     def _route_after_system1_fast(
@@ -272,7 +285,7 @@ class FlareChronosDualSystemHarness:
         return "numeric_verifier_node"
 
     def _system2_planner_node(self, state: HarnessState) -> dict[str, Any]:
-        """Node 3 (`UC-1.1..UC-5.3`): System 2 (`qwen-local/qwen3.8-flash-next`) deliberative node."""
+        """Node 3 (`UC-1.1..UC-5.3`): System 2 deliberative node."""
         pruned_names = state.get("pruned_tool_names", [])
         bound_tools = [TOOL_MAP[name] for name in pruned_names if name in TOOL_MAP]
         bound_s2 = self.system2_model.bind_tools(bound_tools)
@@ -286,6 +299,9 @@ class FlareChronosDualSystemHarness:
                 updates["reasoning_trace"] = trace
             if not response.tool_calls:
                 updates["final_briefing"] = str(response.content)
+                updates["synthesis_mode"] = (
+                    "llm" if self.mode == "live" else "deterministic"
+                )
         return updates
 
     def _route_after_system2_planner(
@@ -353,19 +369,19 @@ class FlareChronosDualSystemHarness:
             try:
                 payload = json.loads(str(tm.content))
                 if isinstance(payload, dict):
-                    div = float(
+                    divergence = float(
                         payload.get("raw_vs_harmonized_index_divergence_pct", 0.0)
                     )
-                    saa_cnt = int(payload.get("saa_rejected_count", 0))
+                    saa_count = int(payload.get("saa_rejected_count", 0))
                     if (
                         payload.get("requires_system2_escalation")
-                        or div >= 200.0
-                        or saa_cnt > 0
+                        or divergence >= 200.0
+                        or saa_count > 0
                     ):
                         should_escalate = True
                         reason = (
-                            f"Physical divergence {div:.1f}% (>= 200.0%) or SAA anomalies "
-                            f"({saa_cnt}) detected in {tm.name}."
+                            f"Physical divergence {divergence:.1f}% (>= 200.0%) or SAA anomalies "
+                            f"({saa_count}) detected in {tm.name}."
                         )
                         break
             except (ValueError, TypeError):
@@ -382,8 +398,8 @@ class FlareChronosDualSystemHarness:
         )
         esc_msg = SystemMessage(
             content=(
-                f"[ESCALATED_S1_TO_S2] {reason} Escalating from System 1 (`jev`) to "
-                f"System 2 (`qwen3.8-flash-next`) with expanded attribution tools {escalated_tools}."
+                f"[ESCALATED_S1_TO_S2] {reason} Escalating from System 1 to "
+                f"System 2 with expanded attribution tools {escalated_tools}."
             )
         )
         return {
@@ -402,16 +418,31 @@ class FlareChronosDualSystemHarness:
         return "system1_fast_node"
 
     def _numeric_verifier_node(self, state: HarnessState) -> dict[str, Any]:
-        """Node 6: Deterministic Numeric Grounding Verifier (`VerifiedFactsLedger` check)."""
+        """Node 6: Numeric Grounding Verifier (`VerifiedFactsLedger` check).
+
+        The verifier resolves `{{fact_key}}` citations against the ledger and
+        then checks every number in the resolved text. A citation with no
+        ledger entry is a grounding error, not a formatting problem.
+        """
         draft = state.get("final_briefing", "")
         existing_entries = [
             VerifiedFactEntry.model_validate(e)
             for e in state.get("verified_ledger_entries", [])
         ]
         ledger = VerifiedFactsLedger(entries=existing_entries)
-        report = ledger.verify_draft_text(draft)
+        tolerance = float(
+            self.config.get("verification_gate", {}).get("numeric_tolerance_rel", 0.005)
+        )
+        resolved, report = verify_grounded_draft(draft, ledger, tolerance)
+        if not resolved.strip():
+            report.passed = False
+            report.feedback_message = (
+                "VIOLATION OF DETERMINISTIC TOOL GATE: the draft is empty. "
+                "Write the analytical narrative and cite the available facts."
+            )
         updates: dict[str, Any] = {
             "verification_report": report.model_dump(),
+            "final_briefing": resolved,
         }
         if not report.passed:
             retries = int(state.get("self_correction_retries", 0)) + 1
@@ -438,7 +469,7 @@ class FlareChronosDualSystemHarness:
         return "system1_synthesizer_node"
 
     def _system1_synthesizer_node(self, state: HarnessState) -> dict[str, Any]:
-        """Node 7 (`UC-S1.5`): System 1 (`opencode-v2/jev`) Stakeholder Formatting & Cache Distillation."""
+        """Node 7 (`UC-S1.5`): Stakeholder header, synthesis mode, and cache distillation."""
         entity = state.get("extracted_entity", {})
         tier = entity.get("stakeholder_tier", StakeholderTier.CLIMATE_SCIENTIST.value)
         uc_val = entity.get(
@@ -450,32 +481,58 @@ class FlareChronosDualSystemHarness:
         draft = state.get("final_briefing", "")
         c_path = state.get("cognitive_path", CognitivePath.SYSTEM2_DELIBERATIVE.value)
 
+        report = state.get("verification_report", {})
+        synthesis_mode = str(state.get("synthesis_mode") or "pending")
+        if not report.get("passed", True):
+            tool_messages = [
+                m for m in state.get("messages", []) if isinstance(m, ToolMessage)
+            ]
+            draft = synthesize_grounded_response(str(uc_val), tool_messages)
+            synthesis_mode = "deterministic_fallback"
+            ledger = VerifiedFactsLedger(
+                entries=[
+                    VerifiedFactEntry.model_validate(e)
+                    for e in state.get("verified_ledger_entries", [])
+                ]
+            )
+            tolerance = float(
+                self.config.get("verification_gate", {}).get(
+                    "numeric_tolerance_rel", 0.005
+                )
+            )
+            draft, fallback_report = verify_grounded_draft(draft, ledger, tolerance)
+            report = fallback_report.model_dump()
+
         header = (
             f"[{tier.upper()} BRIEFING | Cognitive Path: {c_path} | "
-            f"System 1: opencode-v2/jev | System 2: qwen-local/qwen3.8-flash-next]\n"
+            f"System 1: {self.s1_profile.model_id} | "
+            f"System 2: {self.s2_profile.model_id} | "
+            f"Synthesis: {synthesis_mode}]\n"
         )
         final_text = header + draft
 
         messages = state.get("messages", [])
         s1_calls = 0
-        s1_model = "jev-1.13-free"
+        s1_model = self.s1_profile.model_id
         s2_calls = 0
-        s2_provider = "qwen-local/qwen3.8-flash-next"
-        for msg in messages:
-            kw = getattr(msg, "additional_kwargs", None) or {}
-            if "jev_systemone" in kw:
+        s2_model = self.s2_profile.model_id
+        for message in messages:
+            kwargs = getattr(message, "additional_kwargs", None) or {}
+            if "systemone_result" in kwargs:
                 s1_calls += 1
-                s1_model = str(kw["jev_systemone"].get("model", s1_model))
-            if "live_provider_used" in kw:
+            if "model_used" in kwargs:
                 s2_calls += 1
-                s2_provider = str(kw["live_provider_used"])
+                s2_model = str(kwargs["model_used"])
 
         live_telemetry = {
             "mode": self.mode,
-            "system1_jev_calls": s1_calls,
+            "system1_calls": s1_calls,
             "system1_model": s1_model,
-            "system2_reasoning_calls": s2_calls,
-            "system2_provider_used": s2_provider,
+            "system1_endpoint": self.s1_profile.endpoint,
+            "system2_calls": s2_calls,
+            "system2_model": s2_model,
+            "system2_endpoint": self.s2_profile.endpoint,
+            "synthesis_mode": synthesis_mode,
         }
 
         if self.enable_cache:
@@ -499,6 +556,8 @@ class FlareChronosDualSystemHarness:
         return {
             "final_briefing": final_text,
             "live_telemetry": live_telemetry,
+            "synthesis_mode": synthesis_mode,
+            "verification_report": report,
         }
 
     def _compile_state_graph(self):
