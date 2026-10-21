@@ -50,7 +50,7 @@ H3_RES8_STEP_KM = math.sqrt(
 )  # ~0.533 km hex radius
 
 try:
-    import h3 as _h3_lib  # type: ignore
+    import h3 as _h3_lib  # type: ignore  # optional dep; resolved when installed
 
     HAS_NATIVE_H3 = True
 except ImportError:

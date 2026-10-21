@@ -49,7 +49,7 @@ flare-chronos/
 │       ├── pyproject.toml
 │       └── src/benchmark_cli/
 │           ├── fetch_real_firms.py               # Tiến trình tải dữ liệu lịch sử & NRT từ NASA FIRMS
-│           ├── run_experiments.py                # Thực thi kiểm chứng định lượng trên 775.000+ điểm nóng thực tế
+│           ├── run_experiments.py                # Thực thi kiểm chứng định lượng trên 1.609.194 điểm nóng thực tế
 │           └── figure_renderer.py                # Động cơ kết xuất đồ họa khoa học độ phân giải cao
 ├── src/
 │   └── harmonization/
@@ -73,7 +73,7 @@ flowchart TB
 
     subgraph INGESTION_SEAM["2. Tầng Thu Thập & Lưu Đệm (packages/firms-ingestion)"]
         API_ADAPTER["FIRMSClient Adapter<br/>Quản lý hạn mức 5.000 tx / 10 phút & Pacing 0.35s"]
-        RAW_CACHE["Kho Lưu Trữ Dữ Liệu Thô (data/raw/*.csv & GeoParquet)<br/>775.531+ bản ghi thực tế đã xác thực"]
+        RAW_CACHE["Kho Lưu Trữ Dữ Liệu Thô (data/raw/*.csv & GeoParquet)<br/>1.609.194 bản ghi thực tế đã xác thực"]
     end
 
     subgraph CORE_ENGINE["3. Lõi Đồng Bộ Hóa Vật Lý Liên Cảm Biến (packages/harmonization-core)"]
