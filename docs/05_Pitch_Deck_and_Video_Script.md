@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="figures/flare-chronos-logo.png" alt="Flare-Chronos Official Logo" width="220" />
+</p>
+
 # 05. Kịch Bản Thuyết Trình 7 Slides & Kịch Bản Main Submission Video Từng Giây (Global Judging Pitch Deck & Video Script)
 
 **Dự án:** **Flare-Chronos** — *26-Year Cross-Sensor Harmonized Active Fire Intelligence & Phenology Calendar*  

@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/figures/flare-chronos-logo.png" alt="Flare-Chronos Official Logo" width="220" />
+</p>
+
 # Flare-Chronos
 
 **Full name (abbreviation note):** *Fire Long-term Archive Resolution & Cross-sensor Harmonization for Operational Near-real-time Observation System*

@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="figures/flare-chronos-logo.png" alt="Flare-Chronos Official Logo" width="240" />
+</p>
+
 # 01. Thuyết Minh Dự Án Toàn Diện — NASA Space Apps Challenge 2026
 
 # 🔥 FLARE-CHRONOS: Hệ Thống Đồng Bộ Hóa Vật Lý Liên Cảm Biến MODIS–VIIRS & Lịch Hoạt Động Cháy Thông Minh 26 Năm (2000–2026+)

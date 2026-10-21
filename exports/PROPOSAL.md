@@ -1,3 +1,7 @@
+<div align="center" class="brand-logo-container">
+  <img class="brand-logo-img" src="../docs/figures/flare-chronos-logo.png" alt="Flare-Chronos Official Logo — 26-Year Harmonized Burning Activity Calendar" width="210" />
+</div>
+
 # ĐỀ XUẤT GIẢI PHÁP KHOA HỌC & THUYẾT MINH DỰ ÁN: FLARE-CHRONOS
 
 > **Tên dự án:** **FLARE-CHRONOS** — *Hệ Thống Đồng Bộ Hóa Vật Lý Liên Cảm Biến MODIS–VIIRS & Lịch Hoạt Động Cháy Thông Minh 26 Năm (2000–2026+)*

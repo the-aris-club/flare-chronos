@@ -1,3 +1,7 @@
+<div align="center" class="brand-logo-container">
+  <img class="brand-logo-img" src="../docs/figures/flare-chronos-logo.png" alt="Flare-Chronos Official Logo — 26-Year Harmonized Burning Activity Calendar" width="210" />
+</div>
+
 # BÁO CÁO KẾT QUẢ TRIỂN KHAI KIẾN TRÚC MÃ NGUỒN & THỰC NGHIỆM HỆ THỐNG: FLARE-CHRONOS
 
 > **Phiên bản:** `v1.0.0` — cập nhật 21/10/2026
@@ -8,7 +12,7 @@
 
 > **Mục đích tài liệu:** Báo cáo toàn diện kết quả hiện thực hóa hệ thống **Flare-Chronos** từ đặc tả toán học – vật lý sang kiến trúc phần mềm **Monorepo Deep-Module** và tầng điều phối trí tuệ nhân tạo nhận thức kép (**Dual-System LangGraph Harness**) hoạt động thực tế.
 
-> Tài liệu trình bày chi tiết mô hình miền nghiệp vụ đa ngữ cảnh, lý do lựa chọn các quyết định kiến trúc (`ADR-0001` đến `ADR-0005`), giải phẫu từng gói mã nguồn (`packages/*`, `apps/*`, `src/*`, `tests/*`), lược đồ cơ sở dữ liệu không-thời gian `DuckDB / Uber H3`, nhật ký thu thập **$1.609.182$ bản ghi điểm nóng thực tế (`134` lát cắt CSV phủ trọn 26 năm liên tục `2001–2026` và 12 tháng mùa vụ) từ NASA LANCE FIRMS API**, kiến trúc điều phối **System 1 (`opencode-v2 / jev`) $\leftrightarrow$ System 2 (`qwen-local / qwen3.8-flash-next`)** thực thi **20 Use Cases** thông qua **23 `@tool` tất định**, và hướng dẫn kiểm chứng tự động khép kín (`22/22` bài kiểm thử).
+> Tài liệu trình bày chi tiết mô hình miền nghiệp vụ đa ngữ cảnh, lý do lựa chọn các quyết định kiến trúc (`ADR-0001` đến `ADR-0005`), giải phẫu từng gói mã nguồn (`packages/*`, `apps/*`, `src/*`, `tests/*`), lược đồ cơ sở dữ liệu không-thời gian `DuckDB / Uber H3`, nhật ký thu thập **$1.609.182$ bản ghi điểm nóng thực tế (`134` lát cắt CSV phủ trọn 26 năm liên tục `2001–2026` và 12 tháng mùa vụ) từ NASA LANCE FIRMS API**, kiến trúc điều phối **System 1 (`opencode-v2 / jev-1.13-free`) $\leftrightarrow$ System 2 (`qwen-local / qwen3.8-flash-next`)** thực thi **20 Use Cases** thông qua **24 `@tool` tất định**, và hướng dẫn kiểm chứng tự động khép kín (`26/26` bài kiểm thử).
 
 ---
 

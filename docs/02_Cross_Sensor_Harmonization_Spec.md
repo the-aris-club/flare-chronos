@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="figures/flare-chronos-logo.png" alt="Flare-Chronos Official Logo" width="220" />
+</p>
+
 # 02. Đặc Tả Toán Học & Vật Lý Đồng Bộ Hóa Liên Cảm Biến MODIS – VIIRS (Cross-Sensor Physical & Statistical Harmonization Specification)
 
 **Dự án:** **Flare-Chronos** — *26-Year Cross-Sensor Harmonized Active Fire Intelligence & Phenology Calendar*  

@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="figures/flare-chronos-logo.png" alt="Flare-Chronos Official Logo" width="220" />
+</p>
+
 # 03. Kiến Trúc Hệ Thống & Đường Ống Dữ Liệu Không-Thời Gian (System Architecture & Spatio-Temporal Data Pipeline)
 
 **Dự án:** **Flare-Chronos** — *Fire Long-term Archive Resolution & Cross-sensor Harmonization for Operational Near-real-time Observation System* (*26-Year Cross-Sensor Harmonized Active Fire Intelligence & Phenology Calendar*)  

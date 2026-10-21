@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="figures/flare-chronos-logo.png" alt="Flare-Chronos Official Logo" width="220" />
+</p>
+
 # 04. Đặc Tả Giao Diện Người Dùng & Trực Quan Hóa Lịch Hoạt Động Cháy (UI/UX & Burning Activity Calendar Wireframe Specification)
 
 **Dự án:** **Flare-Chronos** — *26-Year Cross-Sensor Harmonized Active Fire Intelligence & Phenology Calendar*  

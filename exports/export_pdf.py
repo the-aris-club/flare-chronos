@@ -762,9 +762,12 @@ def preprocess_markdown_for_weasyprint(
         md_content = md_content.replace(f"@@CODE_BLOCK_{idx}@@", block)
 
     figures_dir = (workspace_root / "docs" / "figures").resolve()
-    md_content = md_content.replace(
-        "](docs/figures/", f"](file://{figures_dir}/"
-    ).replace("](../docs/figures/", f"](file://{figures_dir}/")
+    md_content = (
+        md_content.replace("](docs/figures/", f"](file://{figures_dir}/")
+        .replace("](../docs/figures/", f"](file://{figures_dir}/")
+        .replace('src="docs/figures/', f'src="file://{figures_dir}/')
+        .replace('src="../docs/figures/', f'src="file://{figures_dir}/')
+    )
 
     return md_content, html_injections
 
@@ -824,6 +827,23 @@ body {
     text-transform: uppercase;
     display: inline-block;
     margin-bottom: 8px;
+}
+
+.brand-logo-container {
+    text-align: center;
+    margin: 4px 0 8px 0;
+    page-break-inside: avoid;
+    page-break-after: avoid;
+}
+
+img.brand-logo-img {
+    width: 175px;
+    max-width: 175px;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+    border: none;
+    border-radius: 10px;
 }
 
 h1 {
