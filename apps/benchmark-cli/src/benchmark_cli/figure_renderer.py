@@ -680,9 +680,18 @@ def render_fig4_regime_shift_elimination(
         for pt in pts_harm:
             c.draw.ellipse([pt[0] - 5, pt[1] - 5, pt[0] + 5, pt[1] + 5], fill=COL_HARM)
 
+        # The step-bias range is derived from this panel's own raw index at the
+        # years a satellite was added, so the annotation cannot drift from the
+        # curve it labels.
+        step_years = [y for y in (2012, 2020, 2024) if y in years]
+        inflations = [raw_idx[years.index(y)] - 100.0 for y in step_years]
+        step_lo = f"{min(inflations):,.0f}"
+        step_hi = f"{max(inflations):,.0f}"
+
         c.draw.text(
             (box[0] + 125, 295),
-            "Raw Unharmonized Sum (Artificial +380% to +1,324% Sensor Step Bias!)",
+            f"Raw Unharmonized Sum (Artificial +{step_lo}% to +{step_hi}% "
+            "Sensor Step Bias!)",
             fill=COL_MODIS,
             font=c.f_annot,
         )

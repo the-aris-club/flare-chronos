@@ -441,8 +441,8 @@ Trích từ `GLOSSARY.md` (root). Mỗi thuật ngữ kèm định nghĩa và t�
 ## 8. Ghi Chú Về Tính Nhất Quán Dữ Liệu (Data Consistency Notes)
 
 Sau audit, các số liệu sau đã được hiệu chỉnh cho khớp với `data/processed/empirical_results.json`:
-- Tổng detections: **1,609,194** (không phải 1,609,182).
-- Số lát cắt CSV: **138** (không phải 134).
+- Tổng detections: **1,609,182** (không phải 1,609,194).
+- Số lát cắt CSV: **134** (không phải 138).
 - Thời gian test: **0.004s** (không phải 0.003s).
 - `n_pairs`: **11,553**; R²: **0.7330 → 0.7470**; KS: **0.1166 → 0.0237**; count ratio: **3.56×**; FRP ratio: **1.371×**.
 - MODIS nadir area: **1.000 km²**; edge (55°): **9.688 km²**.

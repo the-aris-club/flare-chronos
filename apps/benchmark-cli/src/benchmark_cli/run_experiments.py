@@ -1,7 +1,7 @@
 """Empirical Verification & Publication Figure Pipeline for Flare-Chronos.
 
 
-Processes the 1,609,194 real NASA FIRMS Thermal Detections cached in `data/raw/` to:
+Processes the 1,609,182 real NASA FIRMS Thermal Detections cached in `data/raw/` to:
 1. Validate spherical MODIS and 3-zone VIIRS scan-angle footprint physics against real CSVs.
 2. Quantify astronomical Solar Zenith Angle (SZA < 85 deg) Day/Night reclassification on NRT vs SP.
 3. Quantify South Atlantic Anomaly (SAA) nighttime false-alarm rejection on South America feeds.
@@ -45,6 +45,7 @@ from flare_chronos_core import (
 )
 
 from benchmark_cli.figure_renderer import (
+    SFAI_HIGHLIGHT_Z,
     render_fig1_scan_angle_physics,
     render_fig2_overpass_deduplication,
     render_fig3_cross_sensor_frp,
@@ -577,14 +578,23 @@ def build_26yr_calendars_and_series(
     series_out: dict[str, Any] = {}
     cal_out: dict[str, Any] = {}
 
-    for region_key, emp_map, modis_26, raw_26, peak_pentad, caption in [
+    for (
+        region_key,
+        emp_map,
+        modis_26,
+        raw_26,
+        peak_pentad,
+        peak_window,
+        anomaly_label,
+    ) in [
         (
             "mekong",
             mek_map,
             mek_modis_26,
             mek_raw_26,
             15,
-            "Peak Fire Window: Pentads 11-22 (Feb 20 - Apr 20) | Severe El Nino Anomalies: 2004, 2007, 2010, 2015-2016 (SFAI +3.1 sigma)",
+            "Pentads 11-22 (Feb 20 - Apr 20)",
+            "Severe El Nino Anomalies",
         ),
         (
             "amazon",
@@ -592,7 +602,8 @@ def build_26yr_calendars_and_series(
             amz_modis_26,
             amz_raw_26,
             47,
-            "Peak Fire Window: Pentads 40-56 (Jul 15 - Oct 07) | Severe Drought Anomalies: 2002, 2005, 2007, 2010, 2022, 2024 (SFAI +2.9 sigma)",
+            "Pentads 40-56 (Jul 15 - Oct 07)",
+            "Severe Drought Anomalies",
         ),
     ]:
         raw_2005 = float(raw_26[2005])
@@ -643,6 +654,21 @@ def build_26yr_calendars_and_series(
             mad = float(np.median(np.abs(col - med)))
             sigma = max(0.05, 0.65 * 1.4826 * mad + 0.35 * float(np.std(col)))
             sfai_np[:, c_i] = np.round((col - med) / sigma, 3)
+
+        # The summary caption names the years that actually reach a severe
+        # anomaly, and the peak SFAI actually observed. Both are derived from
+        # the matrix just computed, so the published caption cannot drift from
+        # the figure it labels.
+        anomaly_years = [
+            year
+            for row, year in enumerate(years_full)
+            if float(sfai_np[row].max()) >= SFAI_HIGHLIGHT_Z
+        ]
+        peak_sfai = float(sfai_np.max())
+        caption = (
+            f"Peak Fire Window: {peak_window} | {anomaly_label}: "
+            f"{', '.join(str(y) for y in anomaly_years)} (SFAI +{peak_sfai:.1f} sigma)"
+        )
 
         series_out[region_key] = {
             "years": years_full,

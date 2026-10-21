@@ -171,7 +171,7 @@ PROPOSAL_ARCH_SVG = """
   <text x="804" y="364" text-anchor="middle" font-size="8.5" font-weight="700" fill="#c2410c">τ = 95 phút → Sự kiện cháy</text>
   <text x="804" y="382" text-anchor="middle" font-size="8.5" fill="#475569">Chia hệ số nỗ lực quét</text>
   <text x="804" y="396" text-anchor="middle" font-size="8.5" font-weight="700" fill="#15803d">Ω(y, φ) ∈ [0.52, 2.10]</text>
-  <text x="804" y="410" text-anchor="middle" font-size="8.5" fill="#475569">Khử bước nhảy +1.324%</text>
+  <text x="804" y="410" text-anchor="middle" font-size="8.5" fill="#475569">Khử bước nhảy +1.324,2%</text>
 
   <line x1="196" y1="367" x2="206" y2="367" stroke="#ea580c" stroke-width="1.8" marker-end="url(#arrowOrange)"/>
   <line x1="368" y1="367" x2="378" y2="367" stroke="#ea580c" stroke-width="1.8" marker-end="url(#arrowOrange)"/>
@@ -426,7 +426,7 @@ REPORT_ARCH_SVG = """
   <text x="804" y="364" text-anchor="middle" font-size="8.5" font-weight="700" fill="#c2410c">τ = 95 phút → FireEpisode</text>
   <text x="804" y="382" text-anchor="middle" font-size="8.5" fill="#475569">Chia hệ số nỗ lực quét</text>
   <text x="804" y="396" text-anchor="middle" font-size="8.5" font-weight="700" fill="#15803d">Ω(y, φ) ∈ [0.52, 2.10]</text>
-  <text x="804" y="410" text-anchor="middle" font-size="8.5" fill="#475569">Khử bước nhảy +1.324%</text>
+  <text x="804" y="410" text-anchor="middle" font-size="8.5" fill="#475569">Khử bước nhảy +1.324,2%</text>
 
   <line x1="196" y1="367" x2="206" y2="367" stroke="#ea580c" stroke-width="1.8" marker-end="url(#arrowOrange)"/>
   <line x1="368" y1="367" x2="378" y2="367" stroke="#ea580c" stroke-width="1.8" marker-end="url(#arrowOrange)"/>
