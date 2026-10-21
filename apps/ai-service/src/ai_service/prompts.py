@@ -15,6 +15,7 @@ from __future__ import annotations
 
 from typing import Any
 
+from ai_service.classification import USE_CASE_MENU
 from ai_service.schemas import SpatioTemporalQueryEntity
 
 EPOCH_OPTIONS = {str(year): f"Year {year}" for year in range(2000, 2027)}
@@ -149,6 +150,11 @@ def system1_typed_questions(
                 "Does the request describe an active, time-critical fire "
                 "situation that needs an immediate near-real-time alert?"
             ),
+        },
+        "use_case": {
+            "type": "choice",
+            "instructions": ("Which analysis does this request need?"),
+            "criteria": dict(USE_CASE_MENU),
         },
     }
     if not entity.epoch_years:

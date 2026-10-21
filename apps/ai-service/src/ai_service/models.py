@@ -180,6 +180,34 @@ def resolve_endpoint_profile(
     )
 
 
+def resolve_fallback_profile(
+    cfg: dict[str, Any], layer: str, env_file: Path | None = None
+) -> EndpointProfile | None:
+    """Resolve the layer's fallback endpoint profile, when it declares one.
+
+    A layer may name a second endpoint to try when the first one cannot be
+    reached. The chain ends with the deterministic extraction, so a run never
+    depends on a single service being up.
+    """
+    fallback_cfg = (cfg["models"][layer].get("fallback") or {}) if cfg else {}
+    if not fallback_cfg:
+        return None
+    workspace_env = read_workspace_env(env_file)
+    endpoint = _lookup_env(
+        str(fallback_cfg.get("endpoint_env", "")), workspace_env
+    ) or str(fallback_cfg["endpoint"])
+    model_id = _lookup_env(
+        str(fallback_cfg.get("model_env", "")), workspace_env
+    ) or str(fallback_cfg["model_id"])
+    return EndpointProfile(
+        protocol=fallback_cfg["protocol"],
+        endpoint=endpoint.strip(),
+        model_id=model_id.strip(),
+        api_key_env=str(fallback_cfg["api_key_env"]),
+        request=RequestOptions.model_validate(fallback_cfg.get("request") or {}),
+    )
+
+
 def resolve_api_key(profile: EndpointProfile, env_file: Path | None = None) -> str:
     """Resolve the API key for a profile, or raise when none is configured."""
     key = _lookup_env(profile.api_key_env, read_workspace_env(env_file))
@@ -950,12 +978,8 @@ class NativeChatModel(HarnessChatModel):
         return ChatResult(generations=[ChatGeneration(message=message)])
 
 
-def build_live_system1_chat_model(
-    cfg: dict[str, Any] | None = None,
-) -> HarnessChatModel:
-    """Create the live System 1 client for the configured protocol."""
-    config = cfg or load_harness_config()
-    profile = resolve_endpoint_profile(config, "system1_reflexive")
+def build_chat_model_for_profile(profile: EndpointProfile) -> HarnessChatModel:
+    """Create the client that speaks a profile's protocol."""
     if profile.protocol == "typed_questions":
         return SystemOneChatModel(
             role="system1_reflexive",
@@ -971,6 +995,26 @@ def build_live_system1_chat_model(
         reasoning_effort=str(profile.request.thinking_level or "low"),
         profile=profile,
     )
+
+
+def build_live_system1_chat_model(
+    cfg: dict[str, Any] | None = None,
+) -> HarnessChatModel:
+    """Create the live System 1 client for the configured protocol."""
+    config = cfg or load_harness_config()
+    profile = resolve_endpoint_profile(config, "system1_reflexive")
+    return build_chat_model_for_profile(profile)
+
+
+def build_live_system1_fallback_model(
+    cfg: dict[str, Any] | None = None,
+) -> HarnessChatModel | None:
+    """Create the System 1 client for the fallback endpoint, when there is one."""
+    config = cfg or load_harness_config()
+    profile = resolve_fallback_profile(config, "system1_reflexive")
+    if profile is None:
+        return None
+    return build_chat_model_for_profile(profile)
 
 
 def build_live_system2_chat_model(

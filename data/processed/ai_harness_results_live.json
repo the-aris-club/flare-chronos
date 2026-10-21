@@ -2,9 +2,9 @@
   "harness_framework": "LangGraph StateGraph + ToolNode + MemorySaver + Pydantic v2",
   "models": {
     "system1_reflexive": {
-      "protocol": "native_chat",
-      "model_id": "gemma4:31b",
-      "endpoint": "https://ollama.com/api/chat"
+      "protocol": "typed_questions",
+      "model_id": "clef-flash",
+      "endpoint": "http://127.0.0.1:11434/v1/systemone"
     },
     "system2_deliberative": {
       "protocol": "native_chat",
@@ -19,32 +19,53 @@
   "system2_use_cases_count": 15,
   "deterministic_tools_registered": 23,
   "all_verifications_passed": true,
-  "triage_fallbacks": [],
+  "triage_fallbacks": [
+    "UC-S1.1",
+    "UC-S1.2",
+    "UC-S1.3",
+    "UC-S1.4",
+    "UC-S1.5",
+    "UC-1.1",
+    "UC-1.2",
+    "UC-1.3",
+    "UC-2.1",
+    "UC-2.2",
+    "UC-2.3",
+    "UC-3.1",
+    "UC-3.2",
+    "UC-3.3",
+    "UC-4.1",
+    "UC-4.2",
+    "UC-4.3",
+    "UC-5.1",
+    "UC-5.2",
+    "UC-5.3"
+  ],
   "triage_confidence_sources": [
     "self_reported"
   ],
   "zero_unverified_numbers_in_final_outputs": true,
-  "total_duration_sec": 108.29,
+  "total_duration_sec": 100.35,
   "slowest_use_cases": [
     [
-      "UC-5.3",
-      11.72
-    ],
-    [
-      "UC-5.1",
-      8.9
-    ],
-    [
-      "UC-4.2",
-      7.81
+      "UC-4.1",
+      8.1
     ],
     [
       "UC-1.3",
-      7.79
+      7.26
     ],
     [
       "UC-4.3",
-      7.56
+      7.24
+    ],
+    [
+      "UC-5.2",
+      7.09
+    ],
+    [
+      "UC-5.1",
+      7.01
     ]
   ],
   "symbiosis_benchmarks": {
@@ -89,7 +110,7 @@
       "unverified_numbers_count": 0,
       "self_correction_retries": 0,
       "clarification_requests": 0,
-      "triage_fallback": "",
+      "triage_fallback": "SystemOneChatModel_unavailable: HTTP 404 from http://127.0.0.1:11434/v1/systemone: 404 page not found",
       "triage_confidence_source": "self_reported",
       "thinking_level_supported": true,
       "clarification_questions": [],
@@ -101,8 +122,8 @@
       },
       "has_system2_reasoning_trace": false,
       "synthesis_mode": "deterministic",
-      "duration_sec": 0.76,
-      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system1_fast_lookup | System 1: gemma4:31b | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-S1.1)\n- **Tool Executed (`tool_lookup_single_epoch_metrics`)**:\n  - `use_case_id`: UC-S1.3\n  - `region`: mekong\n  - `year`: **2024**\n  - `total_raw_detections`: **50988**\n  - `modis_reference_detections`: **3446**\n  - `deduplicated_fire_episodes`: **22557**\n  - `effective_observation_effort_omega`: **2.0975**\n  - `harmonized_viirs_eq_episodes`: **7266.4**\n  - `raw_index_2005_eq_100`: **1424.2**\n  - `harmonized_index_2005_eq_100`: **94.2**\n  - `raw_vs_harmonized_index_divergence_pct`: **1330.0**\n  - `saa_rejected_count`: **0**"
+      "duration_sec": 1.35,
+      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system1_fast_lookup | System 1: clef-flash | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-S1.1)\n- **Tool Executed (`tool_lookup_single_epoch_metrics`)**:\n  - `use_case_id`: UC-S1.3\n  - `region`: mekong\n  - `year`: **2024**\n  - `total_raw_detections`: **50988**\n  - `modis_reference_detections`: **3446**\n  - `deduplicated_fire_episodes`: **22557**\n  - `effective_observation_effort_omega`: **2.0975**\n  - `harmonized_viirs_eq_episodes`: **7266.4**\n  - `raw_index_2005_eq_100`: **1424.2**\n  - `harmonized_index_2005_eq_100`: **94.2**\n  - `raw_vs_harmonized_index_divergence_pct`: **1330.0**\n  - `saa_rejected_count`: **0**"
     },
     {
       "use_case_id": "UC-S1.2",
@@ -116,7 +137,7 @@
       "unverified_numbers_count": 0,
       "self_correction_retries": 0,
       "clarification_requests": 0,
-      "triage_fallback": "",
+      "triage_fallback": "SystemOneChatModel_unavailable: HTTP 404 from http://127.0.0.1:11434/v1/systemone: 404 page not found",
       "triage_confidence_source": "self_reported",
       "thinking_level_supported": true,
       "clarification_questions": [],
@@ -128,8 +149,8 @@
       },
       "has_system2_reasoning_trace": false,
       "synthesis_mode": "deterministic",
-      "duration_sec": 0.77,
-      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system1_fast_lookup | System 1: gemma4:31b | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-S1.2)\n- **Tool Executed (`tool_lookup_single_epoch_metrics`)**:\n  - `use_case_id`: UC-S1.3\n  - `region`: amazon\n  - `year`: **2024**\n  - `total_raw_detections`: **112405**\n  - `modis_reference_detections`: **8151**\n  - `deduplicated_fire_episodes`: **22579**\n  - `effective_observation_effort_omega`: **2.0847**\n  - `harmonized_viirs_eq_episodes`: **7318.1**\n  - `raw_index_2005_eq_100`: **814.3**\n  - `harmonized_index_2005_eq_100`: **70.7**\n  - `raw_vs_harmonized_index_divergence_pct`: **743.6**\n  - `saa_rejected_count`: **18097**"
+      "duration_sec": 1.46,
+      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system1_fast_lookup | System 1: clef-flash | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-S1.2)\n- **Tool Executed (`tool_lookup_single_epoch_metrics`)**:\n  - `use_case_id`: UC-S1.3\n  - `region`: amazon\n  - `year`: **2024**\n  - `total_raw_detections`: **112405**\n  - `modis_reference_detections`: **8151**\n  - `deduplicated_fire_episodes`: **22579**\n  - `effective_observation_effort_omega`: **2.0847**\n  - `harmonized_viirs_eq_episodes`: **7318.1**\n  - `raw_index_2005_eq_100`: **814.3**\n  - `harmonized_index_2005_eq_100`: **70.7**\n  - `raw_vs_harmonized_index_divergence_pct`: **743.6**\n  - `saa_rejected_count`: **18097**"
     },
     {
       "use_case_id": "UC-S1.3",
@@ -143,7 +164,7 @@
       "unverified_numbers_count": 0,
       "self_correction_retries": 0,
       "clarification_requests": 0,
-      "triage_fallback": "",
+      "triage_fallback": "SystemOneChatModel_unavailable: HTTP 404 from http://127.0.0.1:11434/v1/systemone: 404 page not found",
       "triage_confidence_source": "self_reported",
       "thinking_level_supported": true,
       "clarification_questions": [],
@@ -155,8 +176,8 @@
       },
       "has_system2_reasoning_trace": false,
       "synthesis_mode": "deterministic",
-      "duration_sec": 0.81,
-      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system1_fast_lookup | System 1: gemma4:31b | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-S1.3)\n- **Tool Executed (`tool_lookup_single_epoch_metrics`)**:\n  - `use_case_id`: UC-S1.3\n  - `region`: mekong\n  - `year`: **2024**\n  - `total_raw_detections`: **50988**\n  - `modis_reference_detections`: **3446**\n  - `deduplicated_fire_episodes`: **22557**\n  - `effective_observation_effort_omega`: **2.0975**\n  - `harmonized_viirs_eq_episodes`: **7266.4**\n  - `raw_index_2005_eq_100`: **1424.2**\n  - `harmonized_index_2005_eq_100`: **94.2**\n  - `raw_vs_harmonized_index_divergence_pct`: **1330.0**\n  - `saa_rejected_count`: **0**"
+      "duration_sec": 2.42,
+      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system1_fast_lookup | System 1: clef-flash | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-S1.3)\n- **Tool Executed (`tool_lookup_single_epoch_metrics`)**:\n  - `use_case_id`: UC-S1.3\n  - `region`: mekong\n  - `year`: **2024**\n  - `total_raw_detections`: **50988**\n  - `modis_reference_detections`: **3446**\n  - `deduplicated_fire_episodes`: **22557**\n  - `effective_observation_effort_omega`: **2.0975**\n  - `harmonized_viirs_eq_episodes`: **7266.4**\n  - `raw_index_2005_eq_100`: **1424.2**\n  - `harmonized_index_2005_eq_100`: **94.2**\n  - `raw_vs_harmonized_index_divergence_pct`: **1330.0**\n  - `saa_rejected_count`: **0**"
     },
     {
       "use_case_id": "UC-S1.4",
@@ -170,7 +191,7 @@
       "unverified_numbers_count": 0,
       "self_correction_retries": 0,
       "clarification_requests": 0,
-      "triage_fallback": "",
+      "triage_fallback": "SystemOneChatModel_unavailable: HTTP 404 from http://127.0.0.1:11434/v1/systemone: 404 page not found",
       "triage_confidence_source": "self_reported",
       "thinking_level_supported": true,
       "clarification_questions": [],
@@ -182,8 +203,8 @@
       },
       "has_system2_reasoning_trace": false,
       "synthesis_mode": "deterministic",
-      "duration_sec": 0.76,
-      "final_briefing_preview": "[FIELD_RANGER BRIEFING | Cognitive Path: system1_flash_alert | System 1: gemma4:31b | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-S1.4)\n- **Tool Executed (`tool_emit_flash_nrt_alert`)**:\n  - `use_case_id`: UC-S1.4\n  - `region`: amazon\n  - `modis_nrt_count`: **965**\n  - `viirs_snpp_nrt_count`: **4061**\n  - `viirs_noaa20_nrt_count`: **4898**\n  - `viirs_noaa21_nrt_count`: **4045**\n  - `total_live_nrt_detections`: **13969**\n  - `estimated_unique_fire_episodes`: **2805**\n  - `effective_observation_effort_omega`: **2.0847**\n  - `flash_alert_tier`: TIER_1_ACTIVE_MONITORING"
+      "duration_sec": 2.13,
+      "final_briefing_preview": "[FIELD_RANGER BRIEFING | Cognitive Path: system1_flash_alert | System 1: clef-flash | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-S1.4)\n- **Tool Executed (`tool_emit_flash_nrt_alert`)**:\n  - `use_case_id`: UC-S1.4\n  - `region`: amazon\n  - `modis_nrt_count`: **965**\n  - `viirs_snpp_nrt_count`: **4061**\n  - `viirs_noaa20_nrt_count`: **4898**\n  - `viirs_noaa21_nrt_count`: **4045**\n  - `total_live_nrt_detections`: **13969**\n  - `estimated_unique_fire_episodes`: **2805**\n  - `effective_observation_effort_omega`: **2.0847**\n  - `flash_alert_tier`: TIER_1_ACTIVE_MONITORING"
     },
     {
       "use_case_id": "UC-S1.5",
@@ -197,7 +218,7 @@
       "unverified_numbers_count": 0,
       "self_correction_retries": 0,
       "clarification_requests": 0,
-      "triage_fallback": "",
+      "triage_fallback": "SystemOneChatModel_unavailable: HTTP 404 from http://127.0.0.1:11434/v1/systemone: 404 page not found",
       "triage_confidence_source": "self_reported",
       "thinking_level_supported": true,
       "clarification_questions": [],
@@ -209,8 +230,8 @@
       },
       "has_system2_reasoning_trace": false,
       "synthesis_mode": "deterministic",
-      "duration_sec": 0.79,
-      "final_briefing_preview": "[FORESTRY_EXECUTIVE BRIEFING | Cognitive Path: system1_fast_lookup | System 1: gemma4:31b | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-S1.5)\n- **Tool Executed (`tool_assemble_stakeholder_briefing_card`)**:\n  - `use_case_id`: UC-S1.5\n  - `region`: mekong\n  - `year`: **2024**\n  - `total_raw_detections`: **50988**\n  - `deduplicated_fire_episodes`: **22557**\n  - `harmonized_viirs_eq_episodes`: **7266.4**\n  - `raw_index_2005_eq_100`: **1424.2**\n  - `harmonized_index_2005_eq_100`: **94.2**\n  - `effective_observation_effort_omega`: **2.0975**\n  - `saa_rejected_count`: **0**\n  - `modis_mean_footprint_area_km2`: **2.155**\n  - `viirs_mean_footprint_area_km2`: **0.221**"
+      "duration_sec": 1.34,
+      "final_briefing_preview": "[FORESTRY_EXECUTIVE BRIEFING | Cognitive Path: system1_fast_lookup | System 1: clef-flash | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-S1.5)\n- **Tool Executed (`tool_assemble_stakeholder_briefing_card`)**:\n  - `use_case_id`: UC-S1.5\n  - `region`: mekong\n  - `year`: **2024**\n  - `total_raw_detections`: **50988**\n  - `deduplicated_fire_episodes`: **22557**\n  - `harmonized_viirs_eq_episodes`: **7266.4**\n  - `raw_index_2005_eq_100`: **1424.2**\n  - `harmonized_index_2005_eq_100`: **94.2**\n  - `effective_observation_effort_omega`: **2.0975**\n  - `saa_rejected_count`: **0**\n  - `modis_mean_footprint_area_km2`: **2.155**\n  - `viirs_mean_footprint_area_km2`: **0.221**"
     },
     {
       "use_case_id": "UC-1.1",
@@ -221,11 +242,11 @@
       ],
       "verified_facts_ingested": 52,
       "verification_passed": true,
-      "checked_numbers_count": 32,
+      "checked_numbers_count": 30,
       "unverified_numbers_count": 0,
       "self_correction_retries": 0,
       "clarification_requests": 0,
-      "triage_fallback": "",
+      "triage_fallback": "SystemOneChatModel_unavailable: HTTP 404 from http://127.0.0.1:11434/v1/systemone: 404 page not found",
       "triage_confidence_source": "self_reported",
       "thinking_level_supported": true,
       "clarification_questions": [],
@@ -233,12 +254,12 @@
       "verification_rejections": [],
       "usage": {
         "prompt_tokens": 6285,
-        "completion_tokens": 943
+        "completion_tokens": 872
       },
       "has_system2_reasoning_trace": true,
       "synthesis_mode": "llm",
-      "duration_sec": 6.0,
-      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: gemma4:31b | System 2: beam | Synthesis: llm]\nThe 2005\u21922024 Mekong record is a textbook Constellation Step-Jump Illusion: the raw count explodes while the sensor-invariant physical signal is essentially flat-to-slightly-negative.\n\n- **Raw apparent step jump:** detections rose from 3580 (2005) to 50988 (2024), an apparent increase of 1324.2% (raw index 1424.2 with 2005 = 100). This is the illusion the harmonization exists to remove.\n- **Sensor-invariant anchor (MODIS reference):** the MODIS reference count moved from 3580 to 3446, a change of -3.7%. Because MODIS is the stable backbone, this is the best proxy for the true physical trend and it is near zero.\n- **Constellation effort growth:** Effective Observation Effort (omega) rose from 1.0084 to 2.0975, i.e. the sensing capacity roughly doubled. Raw counts are therefore not comparable across the two epochs; the extra detections are largely extra looks, not extra fire.\n- **Deduplication:** in 2024 the 50988 raw detections compressed to 22557 episodes at a compression ratio of 2.26, confirming that a large share of the raw jump is overpass repetition of t"
+      "duration_sec": 5.71,
+      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: clef-flash | System 2: beam | Synthesis: llm]\n## UC-1.1 Regime-Shift Attribution: Mekong 2005 \u2192 2024\n\n**Physical interpretation.** The apparent fire explosion in the Mekong between 2005 and 2024 is a Constellation Step-Jump Illusion, not a physical trend. Raw active-fire detections rose from 3580 to 50988, an apparent step-jump of 1324.2% (raw index 1424.2 with 2005 = 100). Yet the MODIS reference count \u2014 the sensor-stable backbone \u2014 moved only from 3580 to 3446, a change of -3.7%. The MODIS backbone is essentially flat, so the raw surge is driven by added constellation capacity, not by more burning.\n\n**Sensor multiplicity.** Effective Observation Effort (omega) nearly doubled, from 1.0084 to 2.0975, reflecting the growth of the VIIRS constellation and additional overpasses. The deduplication step compressed 50988 raw detections into 22557 episodes at a compression ratio of 2.26, confirming that a large share of the raw surge is repeat sampling of the same physical fires rather than new events.\n\n**Harmonized (effort-normalized) trend.** After normalizing by omega and cross-sensor calibration, harmonized "
     },
     {
       "use_case_id": "UC-1.2",
@@ -253,7 +274,7 @@
       "unverified_numbers_count": 0,
       "self_correction_retries": 0,
       "clarification_requests": 0,
-      "triage_fallback": "",
+      "triage_fallback": "SystemOneChatModel_unavailable: HTTP 404 from http://127.0.0.1:11434/v1/systemone: 404 page not found",
       "triage_confidence_source": "self_reported",
       "thinking_level_supported": true,
       "clarification_questions": [],
@@ -261,12 +282,12 @@
       "verification_rejections": [],
       "usage": {
         "prompt_tokens": 6032,
-        "completion_tokens": 586
+        "completion_tokens": 589
       },
       "has_system2_reasoning_trace": true,
       "synthesis_mode": "llm",
-      "duration_sec": 5.1,
-      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: gemma4:31b | System 2: beam | Synthesis: llm]\n## UC-1.2 Cross-Sensor Discrepancy Forensics \u2014 Mekong, 2024\n\n**Physical interpretation.** The representative co-incident detection analysed here is a VIIRS active-fire cluster with an observed FRP of 18.5 MW that Aqua-MODIS failed to register. The discrepancy is explained by MODIS off-nadir blindness: at the representative scan angle of 52\u00b0, the MODIS footprint area is 6.7515 km\u00b2 versus VIIRS's 0.3273 km\u00b2 \u2014 an area asymmetry ratio of 20.63. The MODIS FRP detection limit at this geometry is 56.83 MW, far above the VIIRS cluster's 18.5 MW, whereas VIIRS's limit is only 2.42 MW. The VIIRS cluster therefore falls below MODIS's sensitivity floor at this scan angle, so MODIS's non-detection is a geometric/radiometric sensitivity effect rather than an absence of fire.\n\n**SAA and geolocation risk.** The detection is not a South Atlantic Anomaly nighttime false alarm (false). However, an Aqua NRT geolocation drift risk is flagged (true), meaning the MODIS non-detection could be compounded by NRT geolocation uncertainty in addition to the scan-angle sensitivity gap.\n\n*"
+      "duration_sec": 4.82,
+      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: clef-flash | System 2: beam | Synthesis: llm]\n## UC-1.2 Cross-Sensor Discrepancy Forensics \u2014 Mekong, 2024\n\n**Physical interpretation.** The representative co-incident detection analysed here is a VIIRS cluster with an observed FRP of 18.5 MW that Aqua-MODIS failed to register. The forensics attribute this miss to **MODIS off-nadir blindness**: at the representative scan angle of 52\u00b0, the MODIS footprint has grown to 6.7515 km\u00b2 while the VIIRS footprint remains 0.3273 km\u00b2, an area asymmetry ratio of 20.63. The enlarged MODIS pixel dilutes the sub-pixel fire signal below the MODIS FRP detection limit of 56.83 MW, whereas VIIRS \u2014 with its finer footprint and lower detection limit of 2.42 MW \u2014 still resolves the cluster. The flag `explained_by_modis_offnadir_blindness` is true, confirming this mechanism.\n\n**SAA and geolocation checks.** The detection is **not** a South Atlantic Anomaly nighttime false alarm (`is_saa_nighttime_false_alarm` = false). However, an Aqua NRT geolocation drift risk is present (`has_aqua_nrt_geolocation_drift_risk` = true), which should be flagged when using NRT streams for tactical"
     },
     {
       "use_case_id": "UC-1.3",
@@ -277,11 +298,11 @@
       ],
       "verified_facts_ingested": 25,
       "verification_passed": true,
-      "checked_numbers_count": 18,
+      "checked_numbers_count": 17,
       "unverified_numbers_count": 0,
       "self_correction_retries": 0,
       "clarification_requests": 0,
-      "triage_fallback": "",
+      "triage_fallback": "SystemOneChatModel_unavailable: HTTP 404 from http://127.0.0.1:11434/v1/systemone: 404 page not found",
       "triage_confidence_source": "self_reported",
       "thinking_level_supported": true,
       "clarification_questions": [],
@@ -289,12 +310,12 @@
       "verification_rejections": [],
       "usage": {
         "prompt_tokens": 6037,
-        "completion_tokens": 1174
+        "completion_tokens": 1047
       },
       "has_system2_reasoning_trace": true,
       "synthesis_mode": "llm",
-      "duration_sec": 7.79,
-      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: gemma4:31b | System 2: beam | Synthesis: llm]\n## UC-1.3 Thermal Source-Origin Classification \u2014 Mekong\n\n**Scope and method.** This classification partitions thermal detections in the Mekong corridor into three source classes \u2014 agricultural residue burning, deforestation slash-and-burn, and persistent static industrial flares \u2014 using sub-pixel sensitivity multipliers, cross-sensor coincidence ratios, and temporal persistence filters. All quantities below are retrieved from the UC-1.3 classification tool; no values are estimated or derived.\n\n### 1. Agricultural residue burning (small-fire sub-pixel class)\n\nAgricultural residue fires in Mekong are dominated by small, short-lived sub-pixel burns that fall below the MODIS detection threshold but are captured by VIIRS. The sub-pixel multiplier for this class in Mekong is 3.65, meaning VIIRS resolves roughly that many times more small-fire detections than MODIS for the same physical burning. This is the largest single source of the constellation step-jump illusion in the region: raw counts inflate not because more fire exists, but because the sensor sees smaller"
+      "duration_sec": 7.26,
+      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: clef-flash | System 2: beam | Synthesis: llm]\n## UC-1.3 Thermal Source-Origin Classification \u2014 Mekong\n\n**Physical interpretation.** The classification separates three distinct thermal regimes that dominate the Mekong fire landscape: (1) small agricultural residue burns that are sub-pixel relative to MODIS but resolved by VIIRS, (2) deforestation slash-and-burn fronts, and (3) persistent static industrial flares. Each regime carries a different sub-pixel multiplier and persistence signature, and the harmonized record must disentangle them before any trend or policy attribution is attempted.\n\n**Agricultural residue burning.** Small agricultural fires in the Mekong are systematically under-counted by coarser sensors. The sub-pixel multiplier for agricultural small fires in Mekong is 3.65, meaning the true fire count is several-fold higher than the raw MODIS detection count. This is the dominant source of the \"Point-Buffer Illusion\" in this region: each detection is an area, and many small burns fall below the MODIS detection threshold entirely.\n\n**Deforestation slash-and-burn.** For comparison, the deforest"
     },
     {
       "use_case_id": "UC-2.1",
@@ -305,11 +326,11 @@
       ],
       "verified_facts_ingested": 34,
       "verification_passed": true,
-      "checked_numbers_count": 26,
+      "checked_numbers_count": 22,
       "unverified_numbers_count": 0,
       "self_correction_retries": 0,
       "clarification_requests": 0,
-      "triage_fallback": "",
+      "triage_fallback": "SystemOneChatModel_unavailable: HTTP 404 from http://127.0.0.1:11434/v1/systemone: 404 page not found",
       "triage_confidence_source": "self_reported",
       "thinking_level_supported": true,
       "clarification_questions": [],
@@ -317,12 +338,12 @@
       "verification_rejections": [],
       "usage": {
         "prompt_tokens": 6103,
-        "completion_tokens": 871
+        "completion_tokens": 857
       },
       "has_system2_reasoning_trace": true,
       "synthesis_mode": "llm",
-      "duration_sec": 6.2,
-      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: gemma4:31b | System 2: beam | Synthesis: llm]\n## UC-2.1 \u2014 Early-Onset Burning Phenological Phase-Shift Detection (Mekong)\n\n### Physical interpretation\n\nThe Mekong fire season normally peaks between pentad 11 and pentad 22. During El Ni\u00f1o / severe drought years, the burning phase shifts earlier: onset is detected at pentad 8, an advance of 3 pentads (15 days) relative to the climatological baseline. This is consistent with drought-driven fuel desiccation advancing the fire-weather window ahead of the normal monsoon retreat.\n\n### Evidence\n\n- **El Ni\u00f1o 2010 (Feb 05, MODIS):** 3175 detections \u2014 a suppressed early-season count, indicating that the 2010 El Ni\u00f1o onset was not yet fire-active at this date despite the phase-shift signal.\n- **Drought 2007 (Mar 15, MODIS):** 11296 detections vs. baseline 2005 (Mar 15, MODIS): 3580 detections \u2014 a marked amplification during the drought year at the same calendar date.\n- **2024 (Feb 05, SNPP):** 10471 detections \u2014 reflecting the expanded VIIRS constellation sensitivity; raw counts are not directly comparable to MODIS-era values without effort normalization (omega).\n- "
+      "duration_sec": 5.88,
+      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: clef-flash | System 2: beam | Synthesis: llm]\n## UC-2.1 \u2014 Early-Onset Burning Phenological Phase-Shift Detection (Mekong)\n\n### Physical interpretation\n\nThe Mekong fire season normally peaks between pentad 11 and pentad 22. During El Ni\u00f1o / severe drought years, the burning phase shifts earlier: onset is detected at pentad 8, an advance of 3 pentads (15 days) relative to the climatological baseline. This is consistent with drought-driven fuel desiccation advancing the fire-weather window ahead of the normal monsoon retreat.\n\n### Evidence\n\n- **El Ni\u00f1o 2010 (MODIS, Feb 05):** 3175 detections \u2014 a suppressed early-season count relative to the 2024 SNPP figure, reflecting the MODIS-era sensor baseline and the earlier, weaker onset of that event.\n- **2024 (SNPP, Feb 05):** 10471 detections \u2014 the constellation-era count is higher in raw terms, but this is partly the Constellation Step-Jump Illusion; the harmonized record is what supports the phase-shift claim.\n- **Drought 2007 (MODIS, Mar 15):** 11296 detections vs. the 2005 baseline of 3580 detections \u2014 a large positive anomaly consistent with drought-amplified"
     },
     {
       "use_case_id": "UC-2.2",
@@ -333,11 +354,11 @@
       ],
       "verified_facts_ingested": 31,
       "verification_passed": true,
-      "checked_numbers_count": 15,
+      "checked_numbers_count": 17,
       "unverified_numbers_count": 0,
       "self_correction_retries": 0,
       "clarification_requests": 0,
-      "triage_fallback": "",
+      "triage_fallback": "SystemOneChatModel_unavailable: HTTP 404 from http://127.0.0.1:11434/v1/systemone: 404 page not found",
       "triage_confidence_source": "self_reported",
       "thinking_level_supported": true,
       "clarification_questions": [],
@@ -345,12 +366,12 @@
       "verification_rejections": [],
       "usage": {
         "prompt_tokens": 6010,
-        "completion_tokens": 667
+        "completion_tokens": 811
       },
       "has_system2_reasoning_trace": true,
       "synthesis_mode": "llm",
-      "duration_sec": 5.48,
-      "final_briefing_preview": "[FIELD_RANGER BRIEFING | Cognitive Path: system2_deliberative | System 1: gemma4:31b | System 2: beam | Synthesis: llm]\n**UC-2.2 \u2014 Uncertainty-Aware Tactical Ranger Dispatch**\n\n**Operational implication:** When a MODIS detection comes in at the scan edge, the true fire location is not a point \u2014 it is an ellipse. Dispatch the ranger team to the ellipse centroid, but plan the search pattern across the full ellipse footprint, not a single coordinate. Once VIIRS refines the detection, the search zone shrinks dramatically, so hold the team in a staging posture until the VIIRS pass confirms.\n\n**Footprint uncertainty (MODIS edge):**\n- Ellipse area: 9.6875 km\u00b2\n- Scan dimension: 4.8299 km\n- Track dimension: 2.0057 km\n- Track azimuth: 351.54\u00b0\n- H3 Res-8 search cells to cover: 10\n\n**VIIRS refinement:**\n- Refined search area: 0.4947 km\u00b2\n- H3 Res-8 search cells: 1\n- Search-area reduction factor: 19.58\u00d7\n\n**Revisit & clustering schedule:**\n- Afternoon VIIRS constellation train interval: 25 minutes\n- Episode clustering window: 95 minutes\n\n**Ranger guidance:** Treat the MODIS edge ellipse as the initial search envelope (10 H3 cells). Expect the afternoon VIIRS train to revisit within 25 minutes, co"
+      "duration_sec": 4.25,
+      "final_briefing_preview": "[FIELD_RANGER BRIEFING | Cognitive Path: system2_deliberative | System 1: clef-flash | System 2: beam | Synthesis: llm]\n**UC-2.2 \u2014 Uncertainty-Aware Tactical Ranger Dispatch**\n\n**Operational implication:** When a MODIS detection comes in at the scan edge, the ranger's search ellipse is large \u2014 9.6875 km\u00b2 \u2014 so dispatch should treat the reported point as the centre of a broad area, not a precise location. A VIIRS refinement pass shrinks that search zone to 0.4947 km\u00b2, a 19.58\u00d7 reduction, so the ranger should hold position and wait for the VIIRS revisit before committing ground teams.\n\n**Footprint uncertainty (MODIS edge):**\n- Scan dimension: 4.8299 km\n- Track dimension: 2.0057 km\n- Ellipse area: 9.6875 km\u00b2\n- Track azimuth: 351.54\u00b0\n\n**H3 Res-8 search cells to cover:**\n- MODIS edge detection: 10 cells\n- VIIRS refinement: 1 cell\n\n**Revisit schedule:**\n- Afternoon VIIRS constellation train interval: 25 minutes\n- Episode clustering window: 95 minutes\n\n**Ranger guidance:** Dispatch to the MODIS ellipse centre but keep the search radius wide (4.8299 km \u00d7 2.0057 km). Expect a VIIRS refinement within 25 minutes that collapses the search to a single H3 cell (1 cell, 0.4947 km\u00b2). Do not declare"
     },
     {
       "use_case_id": "UC-2.3",
@@ -360,11 +381,11 @@
       ],
       "verified_facts_ingested": 31,
       "verification_passed": true,
-      "checked_numbers_count": 33,
+      "checked_numbers_count": 17,
       "unverified_numbers_count": 0,
       "self_correction_retries": 0,
       "clarification_requests": 0,
-      "triage_fallback": "",
+      "triage_fallback": "SystemOneChatModel_unavailable: HTTP 404 from http://127.0.0.1:11434/v1/systemone: 404 page not found",
       "triage_confidence_source": "self_reported",
       "thinking_level_supported": true,
       "clarification_questions": [],
@@ -372,12 +393,12 @@
       "verification_rejections": [],
       "usage": {
         "prompt_tokens": 6062,
-        "completion_tokens": 1570
+        "completion_tokens": 986
       },
       "has_system2_reasoning_trace": true,
       "synthesis_mode": "llm",
-      "duration_sec": 6.83,
-      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: gemma4:31b | System 2: beam | Synthesis: llm]\n## UC-2.3 Cross-Verified Multi-Stakeholder Briefing \u2014 Mekong, 2024\n\n**Physical interpretation for a climate scientist**\n\nThe 2024 Mekong record illustrates both dominant illusions the harmonization system is built to remove.\n\n**Constellation Step-Jump Illusion.** Raw detections total 50988, but the effective observation effort (omega) is 2.0975, reflecting a constellation that has roughly doubled its sensing capacity relative to the 2005 baseline. Consequently the raw fire index against the 2005 reference (1424.2) is far above 100, while the harmonized, effort-normalized index is 94.2 \u2014 i.e. near the baseline. The raw count is therefore not evidence of a proportional increase in burning; it is largely an artifact of more satellites and more overpasses. After deduplication, the 50988 raw detections collapse to 22557 physical fire episodes, and the harmonized VIIRS-equivalent episode count is 7266.4.\n\n**Point-Buffer Illusion.** A single detection is an area, not a point. The mean MODIS footprint is 2.155 km\u00b2 versus 0.221 km\u00b2 for VIIRS \u2014 an order-of-magnitude di"
+      "duration_sec": 6.51,
+      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: clef-flash | System 2: beam | Synthesis: llm]\n## UC-2.3 Cross-Verified Multi-Stakeholder Briefing \u2014 Mekong, 2024\n\n**Physical interpretation.** The 2024 Mekong fire record illustrates the two dominant illusions FLARE-CHRONOS exists to remove. Raw detections (50988) are inflated by constellation growth (effective observation effort \u03a9 = 2.0975), so the raw index against the 2005 baseline (1424.2) is not a physical fire signal. After deduplication into fire episodes (22557) and effort normalization, the harmonized index (94.2) sits near the 2005 reference, indicating no large physical anomaly once sensor multiplicity is removed. The harmonized VIIRS-equivalent episode count is 7266.4.\n\n**Sensor footprint contrast.** MODIS mean footprint area (2.155 km\u00b2) is roughly an order of magnitude larger than VIIRS (0.221 km\u00b2), so a single MODIS detection aggregates sub-pixel fires that VIIRS resolves individually \u2014 the Point-Buffer Illusion. This is why raw counts and harmonized counts diverge.\n\n**SAA / nighttime quality.** South Atlantic Anomaly rejections for this region-year are 0, so no nighttime proton-spike conta"
     },
     {
       "use_case_id": "UC-3.1",
@@ -387,11 +408,11 @@
       ],
       "verified_facts_ingested": 28,
       "verification_passed": true,
-      "checked_numbers_count": 13,
+      "checked_numbers_count": 15,
       "unverified_numbers_count": 0,
       "self_correction_retries": 0,
       "clarification_requests": 0,
-      "triage_fallback": "",
+      "triage_fallback": "SystemOneChatModel_unavailable: HTTP 404 from http://127.0.0.1:11434/v1/systemone: 404 page not found",
       "triage_confidence_source": "self_reported",
       "thinking_level_supported": true,
       "clarification_questions": [],
@@ -399,12 +420,12 @@
       "verification_rejections": [],
       "usage": {
         "prompt_tokens": 6072,
-        "completion_tokens": 796
+        "completion_tokens": 528
       },
       "has_system2_reasoning_trace": true,
       "synthesis_mode": "llm",
-      "duration_sec": 6.43,
-      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: gemma4:31b | System 2: beam | Synthesis: llm]\n## UC-3.1 \u2014 Post-2026 Constellation Retirement Simulation (Mekong, 2024)\n\n### Physical interpretation\n\nRetiring Terra, Aqua (MODIS), and Suomi-NPP leaves only the JPSS pair (NOAA-20 + NOAA-21) as the active-fire observing constellation. The simulation recomputes harmonized fire metrics for the Mekong region in 2024 under that reduced constellation and compares them against the full five-satellite baseline.\n\n### Raw-count illusion vs. harmonized reality\n\nUnder the full five-satellite constellation, the raw detection count is 50988. Under JPSS-only, the combined raw count from NOAA-20 (15651) and NOAA-21 (15871) is 31522, a drop of 38.2%. This is the Constellation Step-Jump Illusion in reverse: fewer satellites mechanically produce fewer raw detections, but that does not imply less fire.\n\nThe harmonized episode counts tell the physically meaningful story. The full constellation yields 7266.4 harmonized episodes; the JPSS-only scenario yields 7198.3. The post-retirement continuity drift is only 0.94%.\n\n### Conclusion\n\nThe harmonized record is designed to be sens"
+      "duration_sec": 4.7,
+      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: clef-flash | System 2: beam | Synthesis: llm]\n## UC-3.1 \u2014 Post-2026 Constellation Retirement Simulation (Mekong, 2024)\n\n### Physical interpretation\n\nRetiring Terra, Aqua (MODIS), and Suomi-NPP leaves only the JPSS pair (NOAA-20 + NOAA-21). The raw detection count falls sharply because fewer sensors are contributing overpasses, but the harmonized episode count \u2014 which is effort-normalized and cross-sensor comparable \u2014 changes only marginally. This is the Constellation Step-Jump Illusion in reverse: the raw drop is an artifact of reduced sensor multiplicity, not a loss of physical fire signal.\n\n### Evidence\n\n- Full 5-satellite constellation raw detections: 50988\n- JPSS-only (NOAA-20 + NOAA-21) raw detections: 31522 (NOAA-20: 15651, NOAA-21: 15871)\n- Raw count drop: 38.2%\n- Full 5-satellite harmonized episodes: 7266.4\n- JPSS-only harmonized episodes: 7198.3\n- Post-retirement continuity drift: 0.94%\n\n### Limits and assumptions\n\n- The simulation assumes the JPSS pair alone carries the full observational load; no compensating increase in overpass frequency or scan-angle coverage is modeled.\n- The harmonized ep"
     },
     {
       "use_case_id": "UC-3.2",
@@ -415,11 +436,11 @@
       ],
       "verified_facts_ingested": 31,
       "verification_passed": true,
-      "checked_numbers_count": 26,
+      "checked_numbers_count": 27,
       "unverified_numbers_count": 0,
       "self_correction_retries": 0,
       "clarification_requests": 0,
-      "triage_fallback": "",
+      "triage_fallback": "SystemOneChatModel_unavailable: HTTP 404 from http://127.0.0.1:11434/v1/systemone: 404 page not found",
       "triage_confidence_source": "self_reported",
       "thinking_level_supported": true,
       "clarification_questions": [],
@@ -427,12 +448,12 @@
       "verification_rejections": [],
       "usage": {
         "prompt_tokens": 6103,
-        "completion_tokens": 954
+        "completion_tokens": 925
       },
       "has_system2_reasoning_trace": true,
       "synthesis_mode": "llm",
-      "duration_sec": 6.2,
-      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: gemma4:31b | System 2: beam | Synthesis: llm]\n## UC-3.2 Multi-Hop Spatio-Temporal Cube Query: Mekong and Amazon Extremes (2001\u20132026)\n\n### Overview\n\nThis query traverses the full 26-year empirical cube spanning both the Mekong and Amazon domains, surfacing the most extreme raw and harmonized fire metrics recorded in each region. The cube is backed by 134 cached NASA FIRMS slices and 1609182 verified thermal detections across the archive.\n\n### Mekong Extremes\n\n- **Peak raw detection year:** 2019, with 51974 raw thermal detections \u2014 the highest single-year raw count in the Mekong record. This reflects the Constellation Step-Jump Illusion: raw counts rise with sensor multiplicity and are not directly comparable across years without effort normalization.\n- **Peak harmonized fire index year:** 2007, with a harmonized index of 297.8. Unlike the raw peak, the harmonized maximum occurs over a decade earlier, illustrating how effort normalization and cross-sensor calibration can shift the apparent timing of fire extremes. The divergence between the raw peak (2019) and the harmonized peak (2007) is a direct consequ"
+      "duration_sec": 5.94,
+      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: clef-flash | System 2: beam | Synthesis: llm]\n## UC-3.2 Multi-Hop Spatio-Temporal Cube Query: Mekong and Amazon Extremes (2001\u20132026)\n\n### Overview\n\nThis query traverses the full 26-year empirical cube spanning both the Mekong and Amazon archives, surfacing the most extreme raw and harmonized fire metrics for each region. The cube is backed by 134 cached NASA FIRMS slices and 1609182 verified thermal detections across the record.\n\n### Mekong Extremes\n\n- **Peak raw detection year:** 2019, with 51974 raw thermal detections \u2014 the highest single-year raw count in the Mekong archive. This reflects the Constellation Step-Jump Illusion: raw counts rise with sensor multiplicity, not necessarily with fire activity.\n- **Peak harmonized fire index year:** 2007, with a harmonized index of 297.8. Because the harmonized index is effort-normalized against the 2005 reference baseline, this peak represents the true physical fire maximum after removing sensor-multiplicity and observation-effort effects. The divergence between the raw peak year (2019) and the harmonized peak year (2007) illustrates why raw counts alone are "
     },
     {
       "use_case_id": "UC-3.3",
@@ -447,7 +468,7 @@
       "unverified_numbers_count": 0,
       "self_correction_retries": 0,
       "clarification_requests": 0,
-      "triage_fallback": "",
+      "triage_fallback": "SystemOneChatModel_unavailable: HTTP 404 from http://127.0.0.1:11434/v1/systemone: 404 page not found",
       "triage_confidence_source": "self_reported",
       "thinking_level_supported": true,
       "clarification_questions": [],
@@ -455,12 +476,12 @@
       "verification_rejections": [],
       "usage": {
         "prompt_tokens": 6041,
-        "completion_tokens": 539
+        "completion_tokens": 610
       },
       "has_system2_reasoning_trace": true,
       "synthesis_mode": "llm",
-      "duration_sec": 5.04,
-      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: gemma4:31b | System 2: beam | Synthesis: llm]\nThe UC-3.3 audit of the Two-Stage Observation Operator + Empirical Quantile Mapping (EQM) calibration transfer function, fitted across 11553 co-incident Aqua-SNPP cells, yields the following.\n\n**Transfer function parameters.** The power-law cross-sensor mapping is governed by exponent 1.7121 and coefficient 0.9271, with a scan-tail correction factor 0.1 applied to the high-scan-angle tail. These three constants define the full observation-operator-plus-EQM transfer from raw MODIS FRP to harmonized, sensor-invariant FRP.\n\n**Goodness of fit.** Before harmonization, the Aqua-SNPP co-incident cell comparison achieved R\u00b2 = 0.733 with RMSE 149.104 MW. After applying the two-stage calibration, R\u00b2 rose to 0.747 and RMSE fell to 145.155 MW. The modest but consistent improvement in both metrics indicates the transfer function removes a measurable fraction of cross-sensor bias without over-fitting.\n\n**Distributional agreement (KS test).** The Kolmogorov-Smirnov distance between the Aqua and SNPP FRP distributions dropped from 0.1166 before calibration to 0.0237 after ca"
+      "duration_sec": 5.2,
+      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: clef-flash | System 2: beam | Synthesis: llm]\nUC-3.3 audits the Two-Stage Observation Operator + Empirical Quantile Mapping (EQM) calibration transfer function fitted across 11553 co-incident Aqua-SNPP cells. The audit returns the following evidence.\n\n**Transfer function parameters.** The fitted power-law relation carries exponent 1.7121 and coefficient 0.9271, with a scan-tail correction parameter 0.1. These define the cross-sensor FRP mapping from Aqua-MODIS to SNPP-VIIRS.\n\n**Goodness of fit.** Before harmonization, the Aqua-SNPP cell-pair regression shows R\u00b2 = 0.733 and RMSE = 149.104 MW. After applying the two-stage operator, R\u00b2 rises to 0.747 and RMSE falls to 145.155 MW. The modest R\u00b2 gain and RMSE reduction indicate the operator removes systematic scan-angle and sensor-multiplicity bias without over-fitting the co-incident sample.\n\n**Distributional agreement (KS test).** The Kolmogorov-Smirnov distance between the Aqua and SNPP FRP distributions is 0.1166 before calibration and 0.0237 after. The KS error reduction is 79.7%. This is the headline result: the calibration collapses the cross-sensor di"
     },
     {
       "use_case_id": "UC-4.1",
@@ -471,11 +492,11 @@
       ],
       "verified_facts_ingested": 34,
       "verification_passed": true,
-      "checked_numbers_count": 38,
+      "checked_numbers_count": 52,
       "unverified_numbers_count": 0,
       "self_correction_retries": 0,
       "clarification_requests": 0,
-      "triage_fallback": "",
+      "triage_fallback": "SystemOneChatModel_unavailable: HTTP 404 from http://127.0.0.1:11434/v1/systemone: 404 page not found",
       "triage_confidence_source": "self_reported",
       "thinking_level_supported": true,
       "clarification_questions": [],
@@ -483,12 +504,12 @@
       "verification_rejections": [],
       "usage": {
         "prompt_tokens": 6152,
-        "completion_tokens": 1691
+        "completion_tokens": 1641
       },
       "has_system2_reasoning_trace": true,
       "synthesis_mode": "llm",
-      "duration_sec": 6.03,
-      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: gemma4:31b | System 2: beam | Synthesis: llm]\n## UC-4.1 Audit: Terra/Aqua Orbital Drift and MODIS Reference Count Stability (2001\u20132026)\n\n**Physical interpretation.** The audit tracks MODIS-only active-fire reference counts alongside the Effective Observation Effort (\u03c9) of the full constellation. Because \u03c9 rose from 0.52 (Terra-only, 2001) to 1 (dual MODIS, 2005) to 2.08 (five-satellite, 2026), raw MODIS counts are not directly comparable across epochs \u2014 this is the Constellation Step-Jump Illusion the harmonized record exists to remove. The audit therefore asks whether MODIS counts, viewed on their own sensor lineage, remain stable or show drift-induced degradation.\n\n**Evidence.**\n\n- **Mekong MODIS counts:** 229 (2001, Terra-only) \u2192 3580 (2005 baseline) \u2192 3446 (2024) \u2192 2016 (2026).\n- **Amazon MODIS counts:** 3364 (2001, Terra-only) \u2192 13804 (2005 baseline) \u2192 8151 (2024) \u2192 3555 (2026).\n\n**Reading.** Both regions show a large step-up from the Terra-only 2001 epoch to the dual-MODIS 2005 baseline, consistent with the addition of Aqua and the doubling of overpass coverage (\u03c9 from 0.52 to 1). Counts then decli"
+      "duration_sec": 8.1,
+      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: clef-flash | System 2: beam | Synthesis: llm]\n## UC-4.1 \u2014 Terra/Aqua Orbital Drift and MODIS Reference Count Stability Audit (2001\u20132026)\n\n**Physical interpretation.** Raw MODIS active-fire counts are not a stable fire-activity metric across the 2001\u20132026 record because the sensing constellation and the orbital geometry of Terra/Aqua both changed. The audit separates three confounders: (i) the *constellation step-jump* (Terra-only \u2192 dual MODIS \u2192 five-satellite), captured by Effective Observation Effort (\u03c9); (ii) the *orbital-drift* degradation of the MODIS reference as Terra/Aqua age; and (iii) genuine fire change. The 2005 dual-MODIS epoch (\u03c9 = 1) is the harmonized reference baseline.\n\n**Effort ladder (\u03c9).** Sensing capacity rose from Terra-only 0.52 in 2001, to dual MODIS 1 in 2005, to five-satellite 2.08 in 2026. Because \u03c9 more than quadrupled, a flat or falling raw MODIS count in 2026 is not evidence of less fire \u2014 it is evidence that the MODIS reference itself is degrading.\n\n**Mekong MODIS reference counts.** Terra-only 2001: 229; 2005 baseline: 3580; 2024: 3446; 2026: 2016. The 2024 count sits close"
     },
     {
       "use_case_id": "UC-4.2",
@@ -498,11 +519,11 @@
       ],
       "verified_facts_ingested": 28,
       "verification_passed": true,
-      "checked_numbers_count": 16,
+      "checked_numbers_count": 19,
       "unverified_numbers_count": 0,
       "self_correction_retries": 0,
       "clarification_requests": 0,
-      "triage_fallback": "",
+      "triage_fallback": "SystemOneChatModel_unavailable: HTTP 404 from http://127.0.0.1:11434/v1/systemone: 404 page not found",
       "triage_confidence_source": "self_reported",
       "thinking_level_supported": true,
       "clarification_questions": [],
@@ -510,12 +531,12 @@
       "verification_rejections": [],
       "usage": {
         "prompt_tokens": 6063,
-        "completion_tokens": 819
+        "completion_tokens": 933
       },
       "has_system2_reasoning_trace": true,
       "synthesis_mode": "llm",
-      "duration_sec": 7.81,
-      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: gemma4:31b | System 2: beam | Synthesis: llm]\n## UC-4.2 \u2014 NRT vs Standard Processing Fidelity and SAA Nighttime False-Alarm Audit\n\n**Physical interpretation.** The South Atlantic Anomaly (SAA) is a geomagnetic noise region that produces spurious night-time thermal detections in VIIRS radiometers. Because these detections are not real fires, they must be rejected before any harmonized fire record is published. This audit quantifies, over a 7-day open feed window, how many raw detections each sensor/region stream contributed and how many were removed by the SAA nighttime proton-spike filter.\n\n**Evidence (all quantities from the UC-4.2 audit tool, no defaults overridden).**\n\n- **South America \u2014 SNPP (Suomi-NPP VIIRS):** 57713 raw 7-day rows; 2674 rejected as SAA nighttime false alarms; rejection rate 4.633%.\n- **South America \u2014 NOAA-20 (JPSS-1 VIIRS):** 60052 raw 7-day rows; 2130 rejected; rejection rate 3.547%.\n- **Southeast Asia \u2014 SNPP:** 73555 raw 7-day rows; 0 SAA rejections (the SAA footprint does not intersect this region, so no nighttime proton-spike filtering is triggered).\n- **Combined 7-day SAA fa"
+      "duration_sec": 6.35,
+      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: clef-flash | System 2: beam | Synthesis: llm]\n## UC-4.2 \u2014 NRT vs Standard Processing Fidelity and SAA Nighttime False-Alarm Audit\n\n**Physical interpretation.** The South Atlantic Anomaly (SAA) is a geomagnetic noise region that produces spurious night-time detections in VIIRS radiometers. The UC-4.2 audit quantifies how many of those spurious detections are rejected on the 7-day open feeds, separately for the two VIIRS sensors (SNPP and NOAA-20) and for the two regions where the SAA footprint intersects the observation domain (South America) versus where it does not (Southeast Asia).\n\n**Evidence.**\n\n- **South America \u2014 SNPP (7-day feed):** 57713 raw rows ingested; 2674 rejected as SAA nighttime false alarms, i.e. 4.633% of the SNPP feed.\n- **South America \u2014 NOAA-20 (7-day feed):** 60052 raw rows ingested; 2130 rejected as SAA nighttime false alarms, i.e. 3.547% of the NOAA-20 feed.\n- **Southeast Asia \u2014 SNPP (7-day feed):** 73555 raw rows ingested; 0 rejected as SAA nighttime false alarms. The SAA footprint does not intersect this domain, so no nighttime proton-spike rejections are expected or observed.\n-"
     },
     {
       "use_case_id": "UC-4.3",
@@ -525,11 +546,11 @@
       ],
       "verified_facts_ingested": 22,
       "verification_passed": true,
-      "checked_numbers_count": 17,
+      "checked_numbers_count": 23,
       "unverified_numbers_count": 0,
       "self_correction_retries": 0,
       "clarification_requests": 0,
-      "triage_fallback": "",
+      "triage_fallback": "SystemOneChatModel_unavailable: HTTP 404 from http://127.0.0.1:11434/v1/systemone: 404 page not found",
       "triage_confidence_source": "self_reported",
       "thinking_level_supported": true,
       "clarification_questions": [],
@@ -537,12 +558,12 @@
       "verification_rejections": [],
       "usage": {
         "prompt_tokens": 5918,
-        "completion_tokens": 800
+        "completion_tokens": 780
       },
       "has_system2_reasoning_trace": true,
       "synthesis_mode": "llm",
-      "duration_sec": 7.56,
-      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: gemma4:31b | System 2: beam | Synthesis: llm]\n**UC-4.3 \u2014 Adaptive NASA FIRMS rate-limit budget across the 134 cached slices**\n\nThe FIRMS transaction budget is governed by a hard ceiling of 5000 transactions per 10-minute window, with a minimum request pacing of 0.35 seconds between calls. The cached inventory comprises 134 slices in total: 128 API-area slices that consume transaction budget, and 6 zero-cost open 7-day slices that do not. Across all cached slices the system holds 1609182 detections, averaging 12008.8 rows per slice.\n\nInterpretation for the climate-scientist reader: the 128 API-area slices are the budget-relevant population; the 6 open 7-day slices are effectively free and can be refreshed without touching the transaction ceiling. Because the mean payload is ~12k rows per slice, the dominant cost driver is not row volume but request count \u2014 each slice is one transaction regardless of how many detections it carries. The 0.35-second floor is the adaptive pacing knob: it spaces the 128 budgeted calls so the 10-minute window is not exhausted before the full slice set is drained. The 6 zero-cos"
+      "duration_sec": 7.24,
+      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: clef-flash | System 2: beam | Synthesis: llm]\nUC-4.3 \u2014 Adaptive NASA FIRMS rate-limit budget across the 134 cached slices\n\nThe FIRMS transaction budget is governed by a hard ceiling of 5000 transactions per 10-minute window, with a minimum request pacing of 0.35 seconds between calls. The cached inventory comprises 134 slices in total: 128 API area slices that consume transaction budget, plus 6 zero-cost open 7-day slices that do not count against the limit. Across all cached slices there are 1609182 detections, averaging 12008.8 rows per slice.\n\nInterpretation for the climate-scientist reader:\n\n- The 128 API area slices are the budget-consuming population; the 6 open 7-day slices are effectively free and can be refreshed without pacing cost. Any adaptive schedule should therefore front-load or interleave the free slices to preserve transaction headroom for the area slices.\n- With a 0.35-second floor between requests, the per-window throughput is bounded well below the raw 5000 ceiling; the planner must pace area-slice calls so that the 10-minute window is never exhausted before the 128 area slices compl"
     },
     {
       "use_case_id": "UC-5.1",
@@ -552,11 +573,11 @@
       ],
       "verified_facts_ingested": 25,
       "verification_passed": true,
-      "checked_numbers_count": 60,
+      "checked_numbers_count": 26,
       "unverified_numbers_count": 0,
       "self_correction_retries": 0,
       "clarification_requests": 0,
-      "triage_fallback": "",
+      "triage_fallback": "SystemOneChatModel_unavailable: HTTP 404 from http://127.0.0.1:11434/v1/systemone: 404 page not found",
       "triage_confidence_source": "self_reported",
       "thinking_level_supported": true,
       "clarification_questions": [],
@@ -564,12 +585,12 @@
       "verification_rejections": [],
       "usage": {
         "prompt_tokens": 6157,
-        "completion_tokens": 1890
+        "completion_tokens": 1205
       },
       "has_system2_reasoning_trace": true,
       "synthesis_mode": "llm",
-      "duration_sec": 8.9,
-      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: gemma4:31b | System 2: beam | Synthesis: llm]\n## UC-5.1 \u2014 Sensor-Invariant FRP and Harmonized Radiative Flux Audit for REDD+ Carbon MRV (Amazon)\n\n**Physical interpretation.** The audit compares raw (sensor-dependent) Fire Radiative Power against the harmonized, effort-normalized FRP across four epochs spanning the 2005 reference baseline through the 2024 drought. The harmonized series removes the Constellation Step-Jump Illusion: raw counts rise as the satellite constellation grows, but the harmonized quantity isolates true physical fire change. For REDD+ MRV, the harmonized FRP is the defensible emissions proxy because it is sensor-invariant and comparable across the 2005\u20132026 record.\n\n**Evidence (all quantities from the UC-5.1 audit tool).**\n\n- Region: amazon; use case: UC-5.1.\n- 2005 reference baseline (harmonized): 1130862.5 MW; raw: 917080.2 MW.\n- 2012 transition epoch (harmonized): 973432.6 MW; raw: 864588.6 MW.\n- 2024 drought epoch (harmonized): 814613.6 MW; raw: 1990752.4 MW.\n- 2025 post-drought epoch (harmonized): 68321.5 MW; raw: 401081.2 MW.\n\n**Key findings for the climate scientist.**\n\n1. **R"
+      "duration_sec": 7.01,
+      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: clef-flash | System 2: beam | Synthesis: llm]\n## UC-5.1 \u2014 Sensor-Invariant FRP and Harmonized Radiative Flux Audit for REDD+ Carbon MRV (Amazon)\n\n**Scope and method.** This audit compares raw, sensor-dependent Fire Radiative Power (FRP) against the harmonized, effort-normalized Fire Radiative Power for the Amazon across four epochs spanning the 2005 reference baseline through the 2024 drought and 2025 post-drought recovery. The harmonized series removes the Constellation Step-Jump Illusion (more satellites \u2192 more raw counts) and the Point-Buffer Illusion (a detection is an area, not a point), yielding a sensor-invariant quantity suitable for REDD+ forest carbon MRV baselines. The 2005 epoch is the reference baseline per the harmonized index definition.\n\n**Key findings.**\n\n- **2005 reference baseline.** Raw FRP = 917080.2 MW; harmonized FRP = 1130862.5 MW. The harmonized value exceeds the raw value, indicating that after effort normalization and cross-sensor calibration the baseline radiative flux is higher than the raw constellation count suggests \u2014 the raw record under-represents true fire radiative out"
     },
     {
       "use_case_id": "UC-5.2",
@@ -579,11 +600,11 @@
       ],
       "verified_facts_ingested": 28,
       "verification_passed": true,
-      "checked_numbers_count": 33,
+      "checked_numbers_count": 26,
       "unverified_numbers_count": 0,
       "self_correction_retries": 0,
       "clarification_requests": 0,
-      "triage_fallback": "",
+      "triage_fallback": "SystemOneChatModel_unavailable: HTTP 404 from http://127.0.0.1:11434/v1/systemone: 404 page not found",
       "triage_confidence_source": "self_reported",
       "thinking_level_supported": true,
       "clarification_questions": [],
@@ -591,12 +612,12 @@
       "verification_rejections": [],
       "usage": {
         "prompt_tokens": 6095,
-        "completion_tokens": 900
+        "completion_tokens": 951
       },
       "has_system2_reasoning_trace": true,
       "synthesis_mode": "llm",
-      "duration_sec": 7.31,
-      "final_briefing_preview": "[FORESTRY_EXECUTIVE BRIEFING | Cognitive Path: system2_deliberative | System 1: gemma4:31b | System 2: beam | Synthesis: llm]\n**UC-5.2 \u2014 Agricultural Residue Burn-Ban Policy Counterfactual Audit (Mekong, 2019\u21922026)**\n\n**Bottom line:** After stripping out sensor-multiplicity and ENSO variance, the harmonized fire index fell from 147.3 to 56.3, a net harmonized reduction of 61.8%. The burn-ban policy is working on the physical fire signal \u2014 but the raw index barely moved (1451.8 \u2192 967.9), so any assessment based on raw counts would have masked the gain.\n\n**What the numbers say**\n\n- Raw index (sensor-inflated): 1451.8 (2019) \u2192 1424.2 (2024) \u2192 878.4 (2025) \u2192 967.9 (2026). The constellation step-jump illusion keeps raw counts high even as true fire declines.\n- Harmonized index (effort-normalized, cross-sensor comparable): 147.3 (2019) \u2192 94.2 (2024) \u2192 59.5 (2025) \u2192 56.3 (2026). The physical signal is down sharply.\n- Net harmonized reduction 2019\u21922026: 61.8%.\n\n**Decision implication for forestry leadership**\n\n- The policy is delivering real, sensor-invariant fire reduction; do not let raw-count dashboards tell a flat story. Continue and tighten the burn-ban enforcement, and report progres"
+      "duration_sec": 7.09,
+      "final_briefing_preview": "[FORESTRY_EXECUTIVE BRIEFING | Cognitive Path: system2_deliberative | System 1: clef-flash | System 2: beam | Synthesis: llm]\n**UC-5.2 \u2014 Agricultural Residue Burn-Ban Policy Counterfactual Audit, Mekong (2019\u20132026)**\n\n**Headline:** After stripping out sensor-multiplicity and ENSO variance, the harmonized fire index for the Mekong fell 61.8% between 147.3 (2019) and 56.3 (2026). The burn-ban policy is delivering a real, physics-validated reduction \u2014 not a constellation artifact.\n\n**What the raw counts hide (Constellation Step-Jump Illusion):**\n- Raw index 2019: 1451.8 \u2192 Raw index 2024: 1424.2 \u2014 essentially flat, suggesting \"no change.\"\n- Harmonized index 2019: 147.3 \u2192 Harmonized index 2024: 94.2 \u2014 a substantial decline once effort normalization is applied.\n- The flat raw series is an illusion created by growing satellite constellation capacity; the harmonized series reveals the true physical trend.\n\n**Post-2024 acceleration:**\n- Harmonized index 2025: 59.5\n- Harmonized index 2026: 56.3\n- Raw index 2025: 878.4; Raw index 2026: 967.9\n\n**Policy implication for forestry executives:**\n- The counterfactual audit confirms the burn-ban is effective: a 61.8% harmonized reduction over the pol"
     },
     {
       "use_case_id": "UC-5.3",
@@ -606,11 +627,11 @@
       ],
       "verified_facts_ingested": 29,
       "verification_passed": true,
-      "checked_numbers_count": 34,
+      "checked_numbers_count": 35,
       "unverified_numbers_count": 0,
       "self_correction_retries": 0,
       "clarification_requests": 0,
-      "triage_fallback": "",
+      "triage_fallback": "SystemOneChatModel_unavailable: HTTP 404 from http://127.0.0.1:11434/v1/systemone: 404 page not found",
       "triage_confidence_source": "self_reported",
       "thinking_level_supported": true,
       "clarification_questions": [],
@@ -618,12 +639,12 @@
       "verification_rejections": [],
       "usage": {
         "prompt_tokens": 6089,
-        "completion_tokens": 1115
+        "completion_tokens": 1055
       },
       "has_system2_reasoning_trace": true,
       "synthesis_mode": "llm",
-      "duration_sec": 11.72,
-      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: gemma4:31b | System 2: beam | Synthesis: llm]\n## UC-5.3 Transboundary Fire Episode Clustering and H3 Hexagonal Propagation \u2014 Mekong Corridor\n\n### Physical Interpretation\n\nThe Mekong corridor bounding box (100.0,11.0,109.5,23.5) spans the transboundary fire zone across Vietnam, Laos, Cambodia, and Thailand. Two epochs are compared: the 2016 El Ni\u00f1o drought year and 2024, using H3 hexagonal tessellation at resolution 7 (cell area 5.161 km\u00b2) and resolution 8 (cell area 0.737 km\u00b2) for spatial propagation analysis.\n\n### Key Findings\n\n**Raw detection counts are misleading (Constellation Step-Jump Illusion).** Raw detections rose from 43342 in 2016 to 50988 in 2024. A naive reading would suggest fire activity increased. However, this increase is driven by constellation growth (more satellites, more overpasses), not by more fire.\n\n**Deduplicated fire episodes reveal physical stability.** After clustering overpass repeats into physical burning events, fire episodes were nearly identical: 22573 in 2016 versus 22557 in 2024. The physical number of distinct burning events did not change meaningfully between the two "
+      "duration_sec": 5.59,
+      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: clef-flash | System 2: beam | Synthesis: llm]\n## UC-5.3 Transboundary Fire Episode Clustering and H3 Hexagonal Propagation \u2014 Mekong Corridor\n\n**Scope.** The analysis covers the Mekong transboundary corridor bounded by 100.0,11.0,109.5,23.5 (Vietnam\u2013Laos\u2013Cambodia\u2013Thailand), using H3 hexagonal tessellation at resolution 7 (cell area 5.161 km\u00b2) and resolution 8 (cell area 0.737 km\u00b2) to resolve episode clustering and ring propagation.\n\n**Key observations.**\n\n- **Raw detection inflation vs. physical episodes.** In the 2016 El Ni\u00f1o year, the corridor produced 43342 raw thermal detections, which collapsed to 22573 distinct fire episodes after overpass deduplication \u2014 a compression that reflects the Constellation Step-Jump Illusion (more satellite overpasses inflate raw counts without more physical fire). In 2024, raw detections rose to 50988 while fire episodes stayed essentially flat at 22557, confirming that the apparent growth in raw counts is a sensing-capacity artifact rather than a proportional increase in burning events.\n\n- **Harmonized (effort-normalized) episodes.** After normalizing by Effective Obser"
     }
   ]
 }

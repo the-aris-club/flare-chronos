@@ -46,6 +46,7 @@ from ai_service.models import (
     HarnessChatModel,
     build_citation_table,
     build_live_system1_chat_model,
+    build_live_system1_fallback_model,
     build_live_system2_chat_model,
     load_harness_config,
     resolve_endpoint_profile,
@@ -152,6 +153,9 @@ class FlareChronosDualSystemHarness:
             self.system1_model: HarnessChatModel = build_live_system1_chat_model(
                 self.config
             )
+            self.system1_fallback_model: HarnessChatModel | None = (
+                build_live_system1_fallback_model(self.config)
+            )
             self.system2_model: HarnessChatModel = build_live_system2_chat_model(
                 self.config,
                 inject_unverified_number_once=inject_unverified_number_once,
@@ -171,6 +175,7 @@ class FlareChronosDualSystemHarness:
                 reasoning_effort=str(s2_profile.request.thinking_level or "low"),
                 inject_unverified_number_once=inject_unverified_number_once,
             )
+            self.system1_fallback_model = None
         # The fast tier returns a fact card, not a narrative, so it never asks a
         # model to write. It executes one Atomic Tool and formats the result.
         self.system1_fast_model = DeterministicHarnessChatModel(
@@ -340,6 +345,37 @@ class FlareChronosDualSystemHarness:
     # Nodes
     # ------------------------------------------------------------------
 
+    def _classify_request(
+        self,
+        user_query: str,
+        questions: dict[str, Any],
+        provisional: SpatioTemporalQueryEntity,
+    ) -> tuple[dict[str, Any], str]:
+        """Ask the classifier, then its fallback, then give up on both.
+
+        The chain ends with the deterministic extraction, so a run never depends
+        on one service being up. The reason for every step down is recorded.
+        """
+        chain = [self.system1_model]
+        if self.system1_fallback_model is not None:
+            chain.append(self.system1_fallback_model)
+        reasons: list[str] = []
+        for model in chain:
+            try:
+                return (
+                    model.classify(
+                        state_text=user_query,
+                        questions=questions,
+                        entity=provisional,
+                    ),
+                    "; ".join(reasons),
+                )
+            except EndpointCallError as exc:
+                reasons.append(f"{type(model).__name__}_unavailable: {exc}"[:160])
+        # Every classifier was unavailable. The provisional extraction is the
+        # floor, and the reason is recorded so no report overclaims.
+        return {"answers": {}, "confidence_source": "none"}, "; ".join(reasons)[:200]
+
     def _system1_triage_node(self, state: HarnessState) -> dict[str, Any]:
         """Node 1: System 1 classifies intent and extracts the entity, then routes."""
         user_query = state.get("user_query", "")
@@ -348,18 +384,10 @@ class FlareChronosDualSystemHarness:
         explicit_use_case = bool(requested_uc)
 
         provisional = self._extract_entity(user_query, requested_uc)
-        triage_fallback = ""
-        try:
-            classification = self.system1_model.classify(
-                state_text=user_query,
-                questions=system1_typed_questions(provisional),
-                entity=provisional,
-            )
-        except EndpointCallError as exc:
-            # The classifier is an enhancement over the provisional extraction.
-            # A transient endpoint failure must not take the whole run down.
-            triage_fallback = f"classifier_unavailable: {exc}"[:200]
-            classification = {"answers": {}, "confidence_source": "none"}
+        questions = system1_typed_questions(provisional)
+        classification, triage_fallback = self._classify_request(
+            user_query, questions, provisional
+        )
         answers = classification.get("answers", {}) or {}
         entity, confidence, tier = self._refine_entity(
             provisional, answers, explicit_use_case

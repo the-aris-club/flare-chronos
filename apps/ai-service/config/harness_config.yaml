@@ -21,19 +21,32 @@ harness:
 
 models:
   system1_reflexive:
-    role: "System 1 Reflexive Layer (Intent & Entity Classification, 1-Hop Lookup, Flash NRT Alert, Stakeholder Fact Card)"
-    protocol: "native_chat"
-    endpoint: "https://ollama.com/api/chat"
+    role: "System 1 Reflexive Layer (Analysis Assignment, Intent & Entity Classification, 1-Hop Lookup, Flash NRT Alert, Stakeholder Fact Card)"
+    # The decision model answers typed questions with calibrated probabilities.
+    # It runs on the local inference node and answers the region, the urgency,
+    # the deliberative flag and the analysis the request needs.
+    protocol: "typed_questions"
+    endpoint: "http://127.0.0.1:11434/v1/systemone"
     endpoint_env: "SYSTEM1_ENDPOINT"
-    # Chosen by measurement: the model that answered all twenty classification
-    # requests exactly, in under two seconds each.
-    model_id: "gemma4:31b"
+    model_id: "clef-flash"
     model_env: "SYSTEM1_MODEL"
     api_key_env: "SYSTEM1_API_KEY"
     request:
-      timeout_ms: 60000
-      thinking_level: false
+      timeout_ms: 120000
       user_agent: "flare-chronos/2.0.0"
+    # The fallback answers through the native chat protocol when the decision
+    # model cannot be reached. The chain ends at the deterministic extraction.
+    fallback:
+      protocol: "native_chat"
+      endpoint: "https://ollama.com/api/chat"
+      endpoint_env: "SYSTEM1_FALLBACK_ENDPOINT"
+      model_id: "gemma4:31b"
+      model_env: "SYSTEM1_FALLBACK_MODEL"
+      api_key_env: "SYSTEM1_API_KEY"
+      request:
+        timeout_ms: 60000
+        thinking_level: false
+        user_agent: "flare-chronos/2.0.0"
     assigned_use_cases:
       - "UC-S1.1"  # Reflexive Intent & Urgency Triage (<150ms routing)
       - "UC-S1.2"  # Spatio-Temporal Entity & Schema Extraction (Pydantic v2)

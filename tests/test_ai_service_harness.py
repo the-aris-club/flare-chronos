@@ -8,6 +8,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from typing import Any, Self
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 for pkg_src in (
@@ -23,6 +24,7 @@ from ai_service.models import (
     load_harness_config,
     resolve_api_key,
     resolve_endpoint_profile,
+    resolve_fallback_profile,
 )
 from ai_service.run_all_usecases import USE_CASE_BENCHMARK_QUERIES
 from ai_service.schemas import (
@@ -38,6 +40,84 @@ from ai_service.schemas import (
 from ai_service.tools import ALL_DETERMINISTIC_TOOLS, TOOL_MAP, USE_CASE_PRIMARY_TOOLS
 
 
+class _DecisionStub:
+    """A local endpoint that answers typed questions like a decision model does."""
+
+    def __init__(self) -> None:
+        self.received: list[dict] = []
+        self._server: Any = None
+
+    def __enter__(self) -> Self:
+        import threading
+        from http.server import BaseHTTPRequestHandler, HTTPServer
+
+        stub = self
+
+        class Handler(BaseHTTPRequestHandler):
+            def do_POST(self) -> None:
+                length = int(self.headers.get("Content-Length", "0"))
+                body = json.loads(self.rfile.read(length) or b"{}")
+                stub.received.append(body)
+                answers = {
+                    "region": {
+                        "type": "choice",
+                        "choice": "amazon",
+                        "confidence": 0.99,
+                        "probabilities": {"amazon": 0.99, "mekong": 0.01},
+                    },
+                    "is_deliberative": {"type": "noul", "noul": 0.05},
+                    "urgency": {"type": "noul", "noul": 0.02},
+                    "use_case": {
+                        "type": "choice",
+                        "choice": "UC-S1.3",
+                        "confidence": 0.9,
+                        "probabilities": {"UC-S1.3": 0.9},
+                    },
+                }
+                payload = json.dumps(
+                    {"model": body.get("model"), "answers": answers}
+                ).encode()
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json")
+                self.send_header("Content-Length", str(len(payload)))
+                self.end_headers()
+                self.wfile.write(payload)
+
+            def log_message(self, *args: Any) -> None:
+                pass
+
+        self._server = HTTPServer(("127.0.0.1", 0), Handler)
+        threading.Thread(target=self._server.serve_forever, daemon=True).start()
+        return self
+
+    def __exit__(self, *args: object) -> None:
+        self._server.shutdown()
+
+    @property
+    def url(self) -> str:
+        return f"http://127.0.0.1:{self._server.server_port}/v1/systemone"
+
+
+def _stub_model(url: str) -> Any:
+    """Build a typed-questions client that talks to a local stub."""
+    from ai_service.models import EndpointProfile, RequestOptions, SystemOneChatModel
+
+    profile = EndpointProfile(
+        protocol="typed_questions",
+        endpoint=url,
+        model_id="stub-model",
+        api_key_env="SYSTEM1_API_KEY",
+        request=RequestOptions(timeout_ms=5000),
+    )
+    return SystemOneChatModel(
+        role="system1_reflexive",
+        model_id="stub-model",
+        source_label=url,
+        reasoning_effort="low",
+        profile=profile,
+    )
+
+
 class TestFlareChronosDualSystemHarness(unittest.TestCase):
     """Verify the LangGraph Dual-System Harness, 23 Tools, 20 Use Cases, and Symbiosis."""
 
@@ -46,10 +126,17 @@ class TestFlareChronosDualSystemHarness(unittest.TestCase):
         s1_cfg = cfg["models"]["system1_reflexive"]
         s2_cfg = cfg["models"]["system2_deliberative"]
 
-        self.assertEqual(s1_cfg["protocol"], "native_chat")
+        self.assertEqual(s1_cfg["protocol"], "typed_questions")
         self.assertEqual(s1_cfg["api_key_env"], "SYSTEM1_API_KEY")
-        self.assertTrue(s1_cfg["endpoint"].startswith("https://"))
+        self.assertTrue(s1_cfg["endpoint"].startswith(("http://", "https://")))
         self.assertTrue(s1_cfg["model_id"])
+
+        # The Reflexive Layer declares a fallback endpoint, so a run does not
+        # depend on one service being up.
+        fallback_cfg = s1_cfg["fallback"]
+        self.assertEqual(fallback_cfg["protocol"], "native_chat")
+        self.assertTrue(fallback_cfg["endpoint"].startswith(("http://", "https://")))
+        self.assertTrue(fallback_cfg["model_id"])
 
         self.assertEqual(s2_cfg["protocol"], "native_chat")
         self.assertEqual(s2_cfg["api_key_env"], "SYSTEM2_API_KEY")
@@ -64,6 +151,13 @@ class TestFlareChronosDualSystemHarness(unittest.TestCase):
         self.assertEqual(s2_profile.request.temperature, 0.0)
         self.assertEqual(s2_profile.request.max_output_tokens, 65536)
         self.assertIsNotNone(s2_profile.request.thinking_level)
+
+        # The fallback profile resolves through the same precedence rules.
+        fallback_profile = resolve_fallback_profile(cfg, "system1_reflexive")
+        self.assertIsNotNone(fallback_profile)
+        assert fallback_profile is not None
+        self.assertEqual(fallback_profile.protocol, "native_chat")
+        self.assertTrue(fallback_profile.model_id)
 
     def test_02_tool_registry_completeness(self) -> None:
         self.assertEqual(len(ALL_DETERMINISTIC_TOOLS), 23)
@@ -822,6 +916,48 @@ class TestFlareChronosDualSystemHarness(unittest.TestCase):
             models_module._post_json = original_post  # type: ignore[assignment]
 
         self.assertEqual([p.get("think") for p in seen], ["xhigh", False, False])
+
+    def test_33_the_decision_protocol_answers_the_entity(self) -> None:
+        """A decision endpoint answers the entity, and its answer wins."""
+        with _DecisionStub() as stub:
+            harness = FlareChronosDualSystemHarness(
+                mode="live", enable_cache=False, enable_sign_off=False
+            )
+            harness.system1_model = _stub_model(stub.url)
+            out = harness.invoke_use_case(
+                "how many fires were detected near Manaus in 2024?",
+                thread_id="decision-protocol",
+            )
+
+        entity = out["extracted_entity"]
+        # The text extraction would have said Mekong; the classifier said Amazon.
+        self.assertEqual(entity["region"], "amazon")
+        # The text extraction would have stamped a fixed use case; the
+        # classifier named the analysis.
+        self.assertEqual(entity["use_case_id"], "UC-S1.3")
+        self.assertEqual(out["cognitive_tier"], "fast")
+        # The payload asked for the analysis, so the endpoint could name one.
+        self.assertIn("use_case", stub.received[0]["questions"])
+        self.assertEqual(len(stub.received[0]["questions"]["use_case"]["criteria"]), 20)
+
+    def test_34_the_fallback_classifier_answers_when_the_first_one_is_down(
+        self,
+    ) -> None:
+        """The classifier chain ends at the text extraction, never below it."""
+        with _DecisionStub() as alive:
+            harness = FlareChronosDualSystemHarness(
+                mode="live", enable_cache=False, enable_sign_off=False
+            )
+            harness.system1_model = _stub_model("http://127.0.0.1:1/v1/systemone")
+            harness.system1_fallback_model = _stub_model(alive.url)
+            out = harness.invoke_use_case(
+                "how many fires were detected near Manaus in 2024?",
+                thread_id="classifier-fallback",
+            )
+
+        self.assertEqual(out["extracted_entity"]["region"], "amazon")
+        self.assertEqual(len(alive.received), 1)
+        self.assertIn("unavailable", str(out.get("triage_fallback", "")))
 
 
 if __name__ == "__main__":
