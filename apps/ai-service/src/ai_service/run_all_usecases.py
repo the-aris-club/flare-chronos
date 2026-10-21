@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 import sys
+import time
 from pathlib import Path
 from typing import Any
 
@@ -109,6 +110,14 @@ USE_CASE_BENCHMARK_QUERIES: list[tuple[UseCaseId, str]] = [
 ]
 
 
+def _measure(label: str, run: Any) -> dict[str, Any]:
+    """Run one symbiosis measurement and keep a failure from killing the batch."""
+    try:
+        return run()
+    except Exception as exc:  # noqa: BLE001 - one failure must not stop the batch
+        return {"error": f"{type(exc).__name__}: {exc}"[:400], "measurement": label}
+
+
 def run_all_benchmarks(
     mode: str = "deterministic", enable_sign_off: bool = False
 ) -> dict[str, Any]:
@@ -121,6 +130,7 @@ def run_all_benchmarks(
     use_case_runs: list[dict[str, Any]] = []
 
     for idx, (uc_enum, query) in enumerate(USE_CASE_BENCHMARK_QUERIES, start=1):
+        started = time.perf_counter()
         try:
             state_out = harness.invoke_to_completion(
                 user_query=query,
@@ -133,6 +143,7 @@ def run_all_benchmarks(
                     "use_case_id": uc_enum.value,
                     "error": f"{type(exc).__name__}: {exc}"[:400],
                     "verification_passed": False,
+                    "duration_sec": round(time.perf_counter() - started, 2),
                 }
             )
             continue
@@ -163,6 +174,9 @@ def run_all_benchmarks(
                 "triage_confidence_source": (state_out.get("live_telemetry") or {}).get(
                     "triage_confidence_source", ""
                 ),
+                "thinking_level_supported": (state_out.get("live_telemetry") or {}).get(
+                    "thinking_level_supported", True
+                ),
                 "clarification_questions": [
                     c.get("question", "")
                     for c in state_out.get("clarification_requests", [])
@@ -174,6 +188,7 @@ def run_all_benchmarks(
                 "usage": (state_out.get("live_telemetry") or {}).get("usage", {}),
                 "has_system2_reasoning_trace": bool(state_out.get("reasoning_trace")),
                 "synthesis_mode": state_out.get("synthesis_mode", "unknown"),
+                "duration_sec": round(time.perf_counter() - started, 2),
                 "final_briefing_preview": str(state_out.get("final_briefing", ""))[
                     :1200
                 ],
@@ -181,13 +196,16 @@ def run_all_benchmarks(
         )
 
     # Symbiosis Test 1: Dynamic System 1 -> System 2 Escalation on Physical Conflict
-    escalation_out = harness.invoke_use_case(
-        user_query=(
-            "UC-S1.3 Fast lookup for 2024 mekong ESCALATE_IF_CONFLICT "
-            "when raw vs harmonized divergence exceeds 200%."
+    escalation_out = _measure(
+        "s1_to_s2_dynamic_escalation",
+        lambda: harness.invoke_use_case(
+            user_query=(
+                "UC-S1.3 Fast lookup for 2024 mekong ESCALATE_IF_CONFLICT "
+                "when raw vs harmonized divergence exceeds 200%."
+            ),
+            use_case_id=UseCaseId.UC_S1_3_SINGLE_HOP_LOOKUP,
+            thread_id="symbiosis-escalation-test",
         ),
-        use_case_id=UseCaseId.UC_S1_3_SINGLE_HOP_LOOKUP,
-        thread_id="symbiosis-escalation-test",
     )
 
     # Symbiosis Test 2: NumericGroundingVerifier Reject & Self-Correction Loop
@@ -197,17 +215,23 @@ def run_all_benchmarks(
         enable_cache=False,
         enable_sign_off=False,
     )
-    repair_out = repair_harness.invoke_use_case(
-        user_query="UC-1.1 Decompose the 2005 to 2024 fire regime shift in mekong.",
-        use_case_id=UseCaseId.UC_1_1_REGIME_SHIFT_ATTRIBUTION,
-        thread_id="symbiosis-verifier-repair-test",
+    repair_out = _measure(
+        "numeric_verifier_self_correction_loop",
+        lambda: repair_harness.invoke_use_case(
+            user_query="UC-1.1 Decompose the 2005 to 2024 fire regime shift in mekong.",
+            use_case_id=UseCaseId.UC_1_1_REGIME_SHIFT_ATTRIBUTION,
+            thread_id="symbiosis-verifier-repair-test",
+        ),
     )
 
     # Symbiosis Test 3: System 2 -> System 1 VerifiedPatternCache Hit
-    cache_hit_out = harness.invoke_use_case(
-        user_query=USE_CASE_BENCHMARK_QUERIES[5][1],
-        use_case_id=UseCaseId.UC_1_1_REGIME_SHIFT_ATTRIBUTION,
-        thread_id="symbiosis-cache-hit-test",
+    cache_hit_out = _measure(
+        "s2_to_s1_verified_pattern_cache",
+        lambda: harness.invoke_use_case(
+            user_query=USE_CASE_BENCHMARK_QUERIES[5][1],
+            use_case_id=UseCaseId.UC_1_1_REGIME_SHIFT_ATTRIBUTION,
+            thread_id="symbiosis-cache-hit-test",
+        ),
     )
 
     summary_payload: dict[str, Any] = {
@@ -242,6 +266,17 @@ def run_all_benchmarks(
         "zero_unverified_numbers_in_final_outputs": all(
             r["unverified_numbers_count"] == 0 for r in use_case_runs
         ),
+        "total_duration_sec": round(
+            sum(float(r.get("duration_sec", 0.0)) for r in use_case_runs), 2
+        ),
+        "slowest_use_cases": sorted(
+            (
+                (r["use_case_id"], float(r.get("duration_sec", 0.0)))
+                for r in use_case_runs
+            ),
+            key=lambda item: item[1],
+            reverse=True,
+        )[:5],
         "symbiosis_benchmarks": {
             "s1_to_s2_dynamic_escalation": {
                 "initial_use_case": UseCaseId.UC_S1_3_SINGLE_HOP_LOOKUP.value,
@@ -252,6 +287,7 @@ def run_all_benchmarks(
                 "verification_passed": escalation_out.get(
                     "verification_report", {}
                 ).get("passed"),
+                "error": escalation_out.get("error", ""),
             },
             "numeric_verifier_self_correction_loop": {
                 "injected_unverified_number": 98765.4321,
@@ -264,12 +300,14 @@ def run_all_benchmarks(
                 "final_unverified_numbers": repair_out.get(
                     "verification_report", {}
                 ).get("unverified_numbers"),
+                "error": repair_out.get("error", ""),
             },
             "s2_to_s1_verified_pattern_cache": {
                 "use_case_id": UseCaseId.UC_1_1_REGIME_SHIFT_ATTRIBUTION.value,
                 "cognitive_path": cache_hit_out.get("cognitive_path"),
                 "distilled_cache_hit": cache_hit_out.get("distilled_cache_hit"),
                 "cached_patterns_total": harness.pattern_cache.size(),
+                "error": cache_hit_out.get("error", ""),
             },
         },
         "use_case_runs": use_case_runs,

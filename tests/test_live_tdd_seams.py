@@ -204,6 +204,67 @@ class TestLiveDualSystemSeamsTDD(unittest.TestCase):
         self.assertNotIn("98765.4321", out_repair["final_briefing"])
         self.assertIn("94.2", out_repair["final_briefing"])
 
+    def test_slice_5_live_sign_off_gate_pauses_the_run_and_publishes_only_on_approval(
+        self,
+    ) -> None:
+        """[Seam 5] A field-authorizing briefing waits for a human on a live run."""
+        from langgraph.types import Command
+
+        harness = FlareChronosDualSystemHarness(
+            mode="live", enable_cache=False, enable_sign_off=True
+        )
+
+        def run_until_pause(thread_id: str) -> dict:
+            harness.invoke_use_case(
+                user_query=(
+                    "UC-S1.4 Generate flash NRT tactical ranger alert for amazon in 2026."
+                ),
+                use_case_id=UseCaseId.UC_S1_4_FLASH_NRT_ALERT,
+                thread_id=thread_id,
+            )
+            snapshot = harness.graph.get_state(
+                {"configurable": {"thread_id": thread_id}}
+            )
+            self.assertTrue(snapshot.interrupts)
+            request = snapshot.interrupts[0].value
+            self.assertEqual(request["kind"], "sign_off")
+            self.assertEqual(request["use_case_id"], "UC-S1.4")
+            # The evidence the human decides on is the verified briefing.
+            self.assertIn("final_briefing", request["evidence"])
+            return request
+
+        declined_thread = "tdd-live-slice-5-declined"
+        run_until_pause(declined_thread)
+        declined = harness.graph.invoke(
+            Command(resume={"approved": False, "reason": "duplicate alert"}),
+            {"configurable": {"thread_id": declined_thread}},
+        )
+        self.assertFalse(declined["sign_off_decision"]["approved"])
+        self.assertEqual(declined["final_briefing"], "")
+        self.assertEqual(declined["synthesis_mode"], "sign_off_declined")
+
+        approved_thread = "tdd-live-slice-5-approved"
+        run_until_pause(approved_thread)
+        approved = harness.graph.invoke(
+            Command(
+                resume={
+                    "approved": True,
+                    "reason": "verified on the ground",
+                    "decided_by": "ranger-01",
+                }
+            ),
+            {"configurable": {"thread_id": approved_thread}},
+        )
+        decision = approved["sign_off_decision"]
+        self.assertTrue(decision["approved"])
+        self.assertEqual(decision["decided_by"], "ranger-01")
+        self.assertIn("TIER_1_ACTIVE_MONITORING", approved["final_briefing"])
+        # The released briefing carries no number that a tool did not produce.
+        self.assertTrue(
+            approved["verification_report"]["passed"],
+            msg=approved["verification_report"],
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

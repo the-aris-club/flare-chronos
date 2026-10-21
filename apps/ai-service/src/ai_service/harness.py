@@ -858,6 +858,9 @@ class FlareChronosDualSystemHarness:
             ),
             "clarification_requests": state.get("clarification_requests", []),
             "sign_off_decision": state.get("sign_off_decision", {}),
+            "thinking_level_supported": bool(
+                self.system2_model.endpoint_state.get("thinking_level_supported", True)
+            ),
             "usage": {
                 "prompt_tokens": prompt_tokens,
                 "completion_tokens": completion_tokens,

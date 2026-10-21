@@ -25,7 +25,9 @@ models:
     protocol: "native_chat"
     endpoint: "https://ollama.com/api/chat"
     endpoint_env: "SYSTEM1_ENDPOINT"
-    model_id: "beam"
+    # Chosen by measurement: the model that answered all twenty classification
+    # requests exactly, in under two seconds each.
+    model_id: "gemma4:31b"
     model_env: "SYSTEM1_MODEL"
     api_key_env: "SYSTEM1_API_KEY"
     request:
@@ -44,6 +46,8 @@ models:
     protocol: "native_chat"
     endpoint: "https://ollama.com/api/chat"
     endpoint_env: "SYSTEM2_ENDPOINT"
+    # Chosen by measurement: the model that needed no repair and no
+    # clarification across the whole live benchmark, one tool round each.
     model_id: "beam"
     model_env: "SYSTEM2_MODEL"
     api_key_env: "SYSTEM2_API_KEY"
@@ -51,6 +55,9 @@ models:
       timeout_ms: 300000
       temperature: 0.0
       max_output_tokens: 65536
+      # The deliberation level belongs to one model family. Another model may
+      # refuse it; the adapter then asks without deliberation and the telemetry
+      # records that the tier ran without it.
       thinking_level: "xhigh"
       seed: 20240315
       user_agent: "flare-chronos/2.0.0"

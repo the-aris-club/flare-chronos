@@ -211,7 +211,7 @@ Raw NASA FIRMS CSVs are cached under `data/raw/` (Amazon & Mekong AOIs, 2000–2
 - `tests/test_harmonization_suite.py` — 7 tests covering the 5 core scientific equations.
 - `tests/test_core_coverage.py` — 7 additional tests for previously untested public seams.
 - `tests/test_ai_service_harness.py` — 22 tests verifying the Dual-System (System 1 + System 2) LangGraph harness, the Atomic / Domain Diagnostic tool tiers, Endpoint Profile resolution, citation grounding, human sign-off, the SSE event stream, and the absence of any ambient agent-tooling read.
-- `tests/test_live_tdd_seams.py` — 4 live TDD vertical slice tests (marked `live`) verifying the typed-questions and native-chat adapters against a real hosted model, real NASA FIRMS CSV harmonization, and live telemetry.
+- `tests/test_live_tdd_seams.py` — 5 live TDD vertical slice tests (marked `live`) verifying the native-chat adapters, the reasoning trace, the symbiosis escalation and the human sign-off gate against a real hosted model, real NASA FIRMS CSV harmonization, and live telemetry.
 
 Run with:
 

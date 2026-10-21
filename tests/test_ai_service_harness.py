@@ -590,6 +590,100 @@ class TestFlareChronosDualSystemHarness(unittest.TestCase):
         self.assertEqual(answers["urgency"]["noul"], 0.0)
         self.assertEqual(answers["focus_epoch"]["choice"], "2019")
 
+    def test_29_an_unsupported_deliberation_level_does_not_lose_the_run(self) -> None:
+        """A model that refuses the configured thinking level still answers."""
+        from ai_service import models as models_module
+        from ai_service.models import EndpointProfile, NativeChatModel, RequestOptions
+
+        profile = EndpointProfile(
+            protocol="native_chat",
+            endpoint="https://example.invalid/api/chat",
+            model_id="model-x",
+            api_key_env="HARNESS_TEST_KEY",
+            request=RequestOptions(
+                timeout_ms=5000,
+                thinking_level="xhigh",
+                user_agent="flare-chronos/2.0.0",
+            ),
+        )
+        model = NativeChatModel(
+            role="system2_deliberative",
+            model_id="model-x",
+            source_label=profile.endpoint,
+            reasoning_effort="low",
+            profile=profile,
+        )
+        os.environ["HARNESS_TEST_KEY"] = "test-key"
+        seen: list[dict] = []
+
+        def fake_post(
+            url: str, payload: dict, headers: dict, timeout_sec: float
+        ) -> dict:
+            seen.append(payload)
+            if payload.get("think") == "xhigh":
+                raise models_module.EndpointCallError(
+                    'HTTP 400 from endpoint: {"error":"invalid think value: \\"xhigh\\""}',
+                    400,
+                )
+            return {"message": {"role": "assistant", "content": "answer"}}
+
+        original_post = models_module._post_json
+        models_module._post_json = fake_post  # type: ignore[assignment]
+        try:
+            response = model._call(model._build_payload([], []))
+        finally:
+            models_module._post_json = original_post  # type: ignore[assignment]
+
+        self.assertEqual(response["message"]["content"], "answer")
+        self.assertEqual([p.get("think") for p in seen], ["xhigh", False])
+        self.assertFalse(model.endpoint_state["thinking_level_supported"])
+
+    def test_30_a_second_call_skips_the_level_the_endpoint_refused(self) -> None:
+        """The refusal is remembered, so the next turn does not fail first."""
+        from ai_service import models as models_module
+        from ai_service.models import EndpointProfile, NativeChatModel, RequestOptions
+
+        profile = EndpointProfile(
+            protocol="native_chat",
+            endpoint="https://example.invalid/api/chat",
+            model_id="model-x",
+            api_key_env="HARNESS_TEST_KEY",
+            request=RequestOptions(
+                timeout_ms=5000,
+                thinking_level="xhigh",
+                user_agent="flare-chronos/2.0.0",
+            ),
+        )
+        model = NativeChatModel(
+            role="system2_deliberative",
+            model_id="model-x",
+            source_label=profile.endpoint,
+            reasoning_effort="low",
+            profile=profile,
+        )
+        os.environ["HARNESS_TEST_KEY"] = "test-key"
+        seen: list[dict] = []
+
+        def fake_post(
+            url: str, payload: dict, headers: dict, timeout_sec: float
+        ) -> dict:
+            seen.append(payload)
+            if payload.get("think") == "xhigh":
+                raise models_module.EndpointCallError(
+                    'HTTP 400 from endpoint: {"error":"invalid think value"}', 400
+                )
+            return {"message": {"role": "assistant", "content": "answer"}}
+
+        original_post = models_module._post_json
+        models_module._post_json = fake_post  # type: ignore[assignment]
+        try:
+            model._call(model._build_payload([], []))
+            model._call(model._build_payload([], []))
+        finally:
+            models_module._post_json = original_post  # type: ignore[assignment]
+
+        self.assertEqual([p.get("think") for p in seen], ["xhigh", False, False])
+
 
 if __name__ == "__main__":
     unittest.main()

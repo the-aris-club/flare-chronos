@@ -280,6 +280,11 @@ class HarnessChatModel(BaseChatModel):
     bound_tools: list[Any] = Field(default_factory=list)
     planned_tool_names: list[str] = Field(default_factory=list)
     inject_unverified_number_once: bool = Field(default=False)
+    # Shared with every copy of this model, so an adapter that degrades a
+    # request can record it and the harness can report it.
+    endpoint_state: dict[str, bool] = Field(
+        default_factory=lambda: {"thinking_level_supported": True}
+    )
     _injected_once: bool = False
 
     @property
@@ -784,12 +789,22 @@ class NativeChatModel(HarnessChatModel):
             "User-Agent": self.profile.request.user_agent,
             "Authorization": f"Bearer {resolve_api_key(self.profile)}",
         }
-        response = _post_json(
-            self.profile.endpoint,
-            payload,
-            headers,
-            self.profile.request.timeout_ms / 1000.0,
-        )
+        timeout = self.profile.request.timeout_ms / 1000.0
+        if not self.endpoint_state.get("thinking_level_supported", True):
+            # The endpoint already rejected the configured deliberation level.
+            payload = {**payload, "think": False}
+        try:
+            response = _post_json(self.profile.endpoint, payload, headers, timeout)
+        except EndpointCallError as exc:
+            if "invalid think value" not in str(exc).lower():
+                raise
+            # The configured deliberation level belongs to one model family.
+            # Another model refuses it, so ask without deliberation rather than
+            # lose the run, and record that the tier ran without it.
+            self.endpoint_state["thinking_level_supported"] = False
+            response = _post_json(
+                self.profile.endpoint, {**payload, "think": False}, headers, timeout
+            )
         message = response.get("message") or {}
         produced_nothing = not (
             message.get("content")
