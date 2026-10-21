@@ -90,7 +90,7 @@ flowchart TB
 
     subgraph INGESTION_SEAM["2. Tầng Thu Thập & Lưu Đệm (packages/firms-ingestion)"]
         API_ADAPTER["FIRMSClient Adapter (firms_client.py)<br/>Quản lý hạn mức 5.000 tx / 10 phút & Pacing 0.35s"]
-        RAW_CACHE["Kho Lưu Trữ Dữ Liệu Thô (data/raw/*.csv & fetch_manifest.json)<br/>138 lát cắt • 1.609.194 bản ghi thực tế đã xác thực"]
+        RAW_CACHE["Kho Lưu Trữ Dữ Liệu Thô (data/raw/*.csv & fetch_manifest.json)<br/>134 lát cắt • 1.609.182 bản ghi thực tế đã xác thực"]
     end
 
 subgraph CORE_ENGINE["3.
@@ -109,7 +109,7 @@ Lõi Đồng Bộ Hóa Vật Lý Liên Cảm Biến (packages/harmonization-core
     end
 
     subgraph PRESENTATION["5. Tầng Ứng Dụng CLI, Xuất Đồ Họa & Facade Kiểm Chứng (apps/benchmark-cli)"]
-        CLI_EXP["run_experiments.py & fetch_real_firms.py<br/>Thực thi kiểm chứng 1.609.194 bản ghi & Xuất empirical_results.json"]
+        CLI_EXP["run_experiments.py & fetch_real_firms.py<br/>Thực thi kiểm chứng 1.609.182 bản ghi & Xuất empirical_results.json"]
         FIG_REND["figure_renderer.py & export_pdf.py<br/>Kết xuất 5 biểu đồ PNG (1800×1080) & Hồ sơ PDF Vector A4"]
     end
 
@@ -132,8 +132,8 @@ sequenceDiagram
     participant Store as data/processed & docs/figures
 
     Dev->>CLI: Thực thi python3 apps/benchmark-cli/src/benchmark_cli/run_experiments.py
-    CLI->>Ingest: Nạp 138 tệp CSV từ data/raw/ qua parse_firms_dataframe()
-    Ingest-->>CLI: Trả về danh sách thực thể bất biến List[ThermalDetection] (1.609.194 bản ghi)
+    CLI->>Ingest: Nạp 134 tệp CSV từ data/raw/ qua parse_firms_dataframe()
+    Ingest-->>CLI: Trả về danh sách thực thể bất biến List[ThermalDetection] (1.609.182 bản ghi)
     CLI->>Core: Gọi fit_coincident_aqua_snpp_model() trên giai đoạn chồng lấn 2012–2026
     Core-->>CLI: Trả về CrossSensorCalibrationModel (N=11.553 cặp, D_KS = 0.0237, R² = 0.7470)
     CLI->>Core: Gọi harmonize_detections(detections, calibration_model)
@@ -327,7 +327,7 @@ CREATE TABLE h3_burning_calendar_cube (
 
 ### 5.1. Thống kê Kho Dữ liệu Thực tế Đã Thu thập (`data/raw/fetch_manifest.json`)
 
-Thông qua [`fetch_real_firms.py`](../apps/benchmark-cli/src/benchmark_cli/fetch_real_firms.py), hệ thống đã truy vấn trực tiếp **NASA LANCE FIRMS API** và kho lưu trữ khu vực của NASA Earthdata, xác nhận độ phủ thời gian của từng nguồn cảm biến và lưu đệm **138 tệp CSV hợp lệ (tổng cộng $1.609.194$ bản ghi điểm nóng thực tế)**:
+Thông qua [`fetch_real_firms.py`](../apps/benchmark-cli/src/benchmark_cli/fetch_real_firms.py), hệ thống đã truy vấn trực tiếp **NASA LANCE FIRMS API** và kho lưu trữ khu vực của NASA Earthdata, xác nhận độ phủ thời gian của từng nguồn cảm biến và lưu đệm **134 tệp CSV hợp lệ (tổng cộng $1.609.182$ bản ghi điểm nóng thực tế)**:
 
 | Phân Nhóm Dữ Liệu Thực Tế Trong `data/raw/` | Cảm Biến & Sản Phẩm | Giai Đoạn Phủ | Số Lát Cắt (Files) | Tổng Số Bản Ghi Thực Tế (`Rows`) |
 | :--- | :--- | :---: | :---: | :---: |
@@ -337,7 +337,7 @@ Thông qua [`fetch_real_firms.py`](../apps/benchmark-cli/src/benchmark_cli/fetch
 | **4. Chu kỳ Mùa vụ 12 Tháng Lưu vực Amazon (Đỉnh hạn 82.079 điểm 09/2024)** | `VIIRS_SNPP_SP` (`Jan–Dec 2024`) | `01–12/2024` | 13 | **170.664** |
 | **5. Chuỗi Thời gian Thực NRT Tháng 10/2026 (Mekong & Amazon Live)** | `MODIS_NRT`, `VIIRS_SNPP_NRT`, `VIIRS_NOAA20_NRT`, `VIIRS_NOAA21_NRT` | `10/2026` | 8 | **15.923** |
 | **6. Luồng Khu vực Đông Nam Á & Nam Mỹ 7 Ngày (Kiểm định SAA & NRT)** | `MODIS_C6.1`, `SUOMI_VIIRS_C2`, `J1_VIIRS_C2` | `10/2026` | 6 | **317.263** |
-| **TỔNG CỘNG TOÀN BỘ KHO DỮ LIỆU ĐÃ XÁC THỰC** | **5 Vệ tinh (`Terra`, `Aqua`, `S-NPP`, `NOAA-20`, `NOAA-21`)** | **`2001–2026`** | **138 tệp CSV** | **$1.609.194$ bản ghi** |
+| **TỔNG CỘNG TOÀN BỘ KHO DỮ LIỆU ĐÃ XÁC THỰC** | **5 Vệ tinh (`Terra`, `Aqua`, `S-NPP`, `NOAA-20`, `NOAA-21`)** | **`2001–2026`** | **134 tệp CSV** | **$1.609.182$ bản ghi** |
 
 ### 5.2. Kết quả Thực nghiệm Toàn diện Từ [`data/processed/empirical_results.json`](../data/processed/empirical_results.json)
 
@@ -373,7 +373,7 @@ Thông qua [`fetch_real_firms.py`](../apps/benchmark-cli/src/benchmark_cli/fetch
 
 ## 6. Các Phát hiện Kỹ thuật & Hiệu chỉnh Thuật toán Trọng yếu Qua Thực nghiệm
 
-Trong quá trình chạy thực nghiệm trên $1.609.194$ bản ghi thực tế từ NASA LANCE FIRMS, chúng tôi đã phát hiện và xử lý **4 vấn đề kỹ thuật quan trọng** mà các tài liệu lý thuyết thường bỏ qua:
+Trong quá trình chạy thực nghiệm trên $1.609.182$ bản ghi thực tế từ NASA LANCE FIRMS, chúng tôi đã phát hiện và xử lý **4 vấn đề kỹ thuật quan trọng** mà các tài liệu lý thuyết thường bỏ qua:
 
 1. **Đột phá Hiệu năng Gom cụm Không-Thời gian từ $O(N^2)$ xuống $O(N)$ (`deduplication.py`):**
    - *Vấn đề:* Trong kỳ cao điểm tháng 8/2024 tại Amazon, 5 ngày dữ liệu gộp từ 4 luồng cảm biến (`MODIS_SP`, `VIIRS_SNPP_SP`, `VIIRS_NOAA20_SP`, `VIIRS_NOAA21_NRT`) chứa tới **$112.405$ điểm nóng**. Phép so sánh khoảng cách Haversine từng đôi một $O(N^2)$ cần $\sim 6,3 \times 10^9$ phép tính lượng giác, gây treo tiến trình.

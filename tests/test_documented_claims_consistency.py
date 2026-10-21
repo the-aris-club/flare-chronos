@@ -36,6 +36,7 @@ CLAIM_DOCS = (
     "docs/03_System_Architecture_and_Data_Pipeline.md",
     "docs/05_Pitch_Deck_and_Video_Script.md",
     "exports/PROPOSAL.md",
+    "exports/REPORT.md",
 )
 
 # Metrics published by the calibration / benchmark pipeline.
@@ -362,7 +363,11 @@ class DocumentedClaimsConsistencyTest(unittest.TestCase):
         raw_index = mekong["raw_index_2005_eq_100"]
         jump_2024 = (raw_index[years.index(2024)] - 100.0) / 100.0 * 100.0
         self.assertAlmostEqual(jump_2024, 1324.2, delta=0.05)
-        for doc in ("docs/01_NASA_SpaceApps_Proposal.md", "exports/PROPOSAL.md"):
+        for doc in (
+            "docs/01_NASA_SpaceApps_Proposal.md",
+            "exports/PROPOSAL.md",
+            "exports/REPORT.md",
+        ):
             self._assert_present_with_context(
                 doc,
                 "2024 multi-sensor step jump",
