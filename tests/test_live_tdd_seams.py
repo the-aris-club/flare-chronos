@@ -265,6 +265,40 @@ class TestLiveDualSystemSeamsTDD(unittest.TestCase):
             msg=approved["verification_report"],
         )
 
+    def test_slice_6_live_classifier_assigns_the_analysis_to_a_free_form_request(
+        self,
+    ) -> None:
+        """[Seam 6] A request that names no use case is assigned the right one."""
+        harness = FlareChronosDualSystemHarness(mode="live", enable_cache=False)
+        cases = [
+            (
+                "Audit the orbital drift of Terra and Aqua from 2001 to 2026 in the Mekong.",
+                UseCaseId.UC_4_1_ORBITAL_DRIFT_SZA_AUDIT,
+                "mekong",
+            ),
+            (
+                "What is the harmonized fire index for the Amazon in 2024?",
+                UseCaseId.UC_S1_3_SINGLE_HOP_LOOKUP,
+                "amazon",
+            ),
+        ]
+        for index, (query, expected_use_case, expected_region) in enumerate(cases):
+            out = harness.invoke_use_case(
+                user_query=query,
+                thread_id=f"tdd-live-slice-6-{index}",
+            )
+            entity = out["extracted_entity"]
+            self.assertEqual(entity["use_case_id"], expected_use_case.value)
+            self.assertEqual(entity["region"], expected_region)
+            # The assigned analysis decides the tier, not the other way round.
+            expected_tier = (
+                "fast"
+                if expected_use_case.value.startswith("UC-S1")
+                else "deliberative"
+            )
+            self.assertEqual(out["cognitive_tier"], expected_tier)
+            self.assertEqual(out["triage_fallback"], "")
+
 
 if __name__ == "__main__":
     unittest.main()

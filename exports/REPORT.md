@@ -44,7 +44,7 @@ Song hành cùng bản thuyết minh dự án [`exports/PROPOSAL.md`](PROPOSAL.m
    - Sử dụng framework chuẩn công nghiệp **`LangGraph` (`StateGraph`, `ToolNode`, `MemorySaver`) + `LangChain Core` + `Pydantic v2`** kết hợp cộng sinh giữa **System 1 (native chat, phân loại có cấu trúc qua tool `classify_request`)** và **System 2 (native chat, `thinking_level="xhigh"`)**, trong đó mỗi tầng được gắn qua **Endpoint Profile** (`protocol`, `endpoint`, `model_id`, `api_key_env`, `request`) chỉ đọc từ cấu hình tường minh — không đọc cấu hình agent trên máy người dùng ([`ADR-0006`](../docs/adr/0006-explicit-endpoint-profiles-and-grounded-narrative-assembly.md)).
    - Đóng gói **24 hàm `@tool` tất định**: `9` **Atomic Tool** (vật lý/geometry/truy xuất dữ liệu) + `14` **Domain Diagnostic Tool** (phân tích/giám định/mô phỏng theo miền) + `1` công cụ đồng bộ hóa trực tiếp tệp CSV thô `data/raw/` **nằm ngoài registry** (mô hình không bao giờ chạm tới). Chỉ `23` tool được đưa vào bề mặt gọi của mô hình. để phục vụ trọn vẹn **20 Use Cases** (`5` Use Cases phản xạ nhanh của System 1 + `15` Use Cases suy luận nhân quả sâu của System 2), kèm cổng kiểm chứng số học **`VerifiedFactsLedger` + `NumericGroundingVerifier`** đảm bảo LLM **không bao giờ tự tính toán nhẩm số liệu**.
 5. **Đạt $100\%$ Kiểm thử Đơn vị, Bất biến Vật lý, LangGraph & Live TDD Seams (`26/26` Tests):**
-   - Toàn bộ `62/62` bài kiểm thử **ngoại tuyến** trong `tests/test_harmonization_suite.py`, `tests/test_core_coverage.py` và `tests/test_ai_service_harness.py` đều chạy thành công (`100% PASS`, không gọi mạng, không tốn credit). Bộ `tests/test_live_tdd_seams.py` (`4/4`) được đánh dấu `live`, chạy trên **model thật** và chỉ kích hoạt thủ công qua workflow `Live Model Tests`.
+   - Toàn bộ `65/65` bài kiểm thử **ngoại tuyến** trong `tests/test_harmonization_suite.py`, `tests/test_core_coverage.py` và `tests/test_ai_service_harness.py` đều chạy thành công (`100% PASS`, không gọi mạng, không tốn credit). Bộ `tests/test_live_tdd_seams.py` (`4/4`) được đánh dấu `live`, chạy trên **model thật** và chỉ kích hoạt thủ công qua workflow `Live Model Tests`.
 
 ---
 
@@ -407,8 +407,8 @@ Trong quá trình chạy thực nghiệm trên $1.609.182$ bản ghi thực tế
 1. **Tầng Phản xạ Nhanh — System 1 (`system1_reflexive` — `SystemOneChatModel`):**
    - **Mô hình & Giao thức:** hai giao thức đều được hỗ trợ và chọn bằng cấu hình. **(i) typed-questions** (`POST {endpoint}` với `{model, state, questions}` → `{answers}`) trả về phân phối xác suất **hiệu chuẩn**; **(ii) native chat** (`POST {endpoint}` với `{model, messages, tools}`) trả về phân loại có cấu trúc qua tool `classify_request` — độ tin cậy lúc này là **tự báo cáo**, và harness ghi rõ nguồn (`triage_confidence_source`) để không bao giờ bị đọc nhầu là hiệu chuẩn. Cả hai đi qua **Endpoint Profile** (`harness_config.yaml` + `SYSTEM1_ENDPOINT` / `SYSTEM1_MODEL` / `SYSTEM1_API_KEY`).
    - **Suy giảm khi classifier không sẵn sàng:** một lỗi rate-limit hoặc sự cố endpoint không được làm hỏng run; harness lùi về trích xuất tạm và ghi lý do (`triage_fallback`).
-   - **Vai trò (tầng *báo cáo*):** Phân loại ý định & mức độ khẩn cấp (`UC-S1.1`), trích xuất thực thể không-thời gian có cấu trúc `SpatioTemporalQueryEntity` (`UC-S1.2`), tra cứu nhanh 1 bước (`UC-S1.3`), phát cảnh báo khẩn NRT (`UC-S1.4`), và dựng thẻ dữ kiện theo đối tượng (`UC-S1.5`). Tầng này **chỉ chạm tới `9` Atomic Tool**, **không** suy diễn phân tích, và **không** viết diễn giải.
-   - **Phân loại trước, định tuyến sau:** nút `system1_triage_node` **gọi mô hình phân loại trước khi định tuyến**. Câu trả lời có cấu trúc (`region`, `urgency`, `is_deliberative`) được ghi vào `HarnessState["triage_confidence"]`, kèm nguồn của độ tin cậy (`triage_confidence_source`) để phân phối hiệu chuẩn không bao giờ bị đọc nhầm là tự báo cáo. Mô hình chỉ được **ghi đè** tầng nhận thức khi người dùng **không** chỉ định use case; use case được chỉ định tường minh luôn thắng ([`ADR-0008`](../docs/adr/0008-model-driven-tool-selection-sign-off-and-event-stream.md)).
+   - **Vai trò (tầng *báo cáo*):** **Gán phân tích** (chọn đúng `1` trong `20` phân tích mà yêu cầu cần), phân loại ý định & mức độ khẩn cấp (`UC-S1.1`), trích xuất thực thể không-thời gian có cấu trúc `SpatioTemporalQueryEntity` (`UC-S1.2`), tra cứu nhanh 1 bước (`UC-S1.3`), phát cảnh báo khẩn NRT (`UC-S1.4`), và dựng thẻ dữ kiện theo đối tượng (`UC-S1.5`). Tầng này **chỉ chạm tới `9` Atomic Tool**, **không** suy diễn phân tích, và **không** viết diễn giải. Khi người dùng **không** nêu mã use case, chính tầng này quyết định: câu trả lời của nó định nghĩa tầng nhận thức, bề mặt tool, khoá cache và tiêu đề báo cáo.
+   - **Phân loại trước, định tuyến sau:** nút `system1_triage_node` **gọi mô hình phân loại trước khi định tuyến**. Câu trả lời có cấu trúc (`region`, `urgency`, `is_deliberative`, `use_case`) được ghi vào `HarnessState["triage_confidence"]`, kèm nguồn của độ tin cậy (`triage_confidence_source`) để phân phối hiệu chuẩn không bao giờ bị đọc nhầm là tự báo cáo. Use case **được nêu tường minh** luôn thắng; khi không được nêu, mã do tầng phản xạ gán quyết định tầng nhận thức. Mô hình chỉ được **ghi đè** tầng nhận thức khi người dùng **không** chỉ định use case; use case được chỉ định tường minh luôn thắng ([`ADR-0008`](../docs/adr/0008-model-driven-tool-selection-sign-off-and-event-stream.md)).
 2. **Tầng Suy luận Sâu — System 2 (`system2_deliberative` — `NativeChatModel`):**
    - **Mô hình & Giao thức:** giao thức **native chat** (`POST {endpoint}` với `{model, messages, think, options}` → `{message: {content, thinking, tool_calls}}`) qua **Endpoint Profile** (`harness_config.yaml` + `SYSTEM2_ENDPOINT` / `SYSTEM2_MODEL` / `SYSTEM2_API_KEY`; `options.num_predict` = `max_output_tokens`, `options.temperature` = `temperature`, `think` = `thinking_level`, trích xuất chuỗi suy luận `message.thinking` vào `HarnessState["reasoning_trace"]`). **Không còn nhánh dự phòng:** lỗi kết nối hoặc thiếu credential được ném ra ngay, không được che bằng kết quả giả.
    - **Vai trò (tầng *giải thích*):** Thực thi **15 Use Cases suy luận đa bước (`UC-1.1` đến `UC-5.3`)**. **Mô hình tự chọn công cụ `@tool`** trong bề mặt được mở (`23` tool tất định + `ask_user_question`) — harness chỉ quyết định *tầng nào được chạm tới bề mặt nào*, không viết kịch bản từng bước. Định hướng trước được giao bằng **system prompt** (`prompts.py`) theo đúng tinh thần các hệ thống agent mã nguồn mở: mô tả miền, kỷ luật dùng tool, giao thức trích dẫn, và ngưỡng hỏi làm rõ. **Tầng đối tượng** (`field ranger` / `forestry executive` / `climate scientist`) quyết định điều diễn giải dẫn dắt bằng gì: địa điểm hành động và độ bất định footprint, hay quy mô và hệ quả chính sách, hay cơ chế vật lý và mọi giả định. Lỗi vận chuyển và lỗi `5xx` được **retry có giới hạn** (`RetryPolicy`, tối đa `3` lần); lỗi `4xx` thì không retry.
@@ -532,6 +532,35 @@ Nhà cung cấp công bố nhiều mô hình trên cùng một gói miễn phí;
 
 Hai mô hình từ chối mức suy luận đã cấu hình (`xhigh`) và **trả lỗi HTTP 400 cho mọi yêu cầu**. Đây là lỗi của harness, không phải của mô hình: một mức suy luận thuộc về một họ mô hình, nên khi endpoint từ chối, adapter **hỏi lại không kèm suy luận** thay vì làm hỏng cả run, và telemetry ghi rõ tầng đó đã chạy **không** có suy luận. Tương tự, một phép đo symbiosis hỏng không còn xóa cả batch đo.
 
+#### 7.3.2. Định Tuyến Truy Vấn Tự Nhiên — Việc Thật Của Tầng Phản Xạ
+
+Cả `20` Use Case trong benchmark đều **ghi rõ mã use case**, nên quyết định định tuyến của tầng phản xạ bị bỏ qua: tầng nhận thức lấy từ mã, chứ không phải từ câu trả lời của mô hình. Để đo đúng việc mà tầng phản xạ phải làm, cần một bộ **truy vấn tự nhiên** — không mã use case, đúng như một lệnh viện thực tế.
+
+**Phép đo định tuyến** (`20` truy vấn tự nhiên, ba trường: vùng, tầng, khẩn cấp):
+
+| Mô hình | Phân loại thành công | Vùng đúng | Tầng đúng | Khẩn cấp đúng | Độ trễ TB |
+| --- | --- | --- | --- | --- | --- |
+| **`gemma4:31b`** | **20 / 20** | **20 / 20** | **20 / 20** | **20 / 20** | **2,05 s** |
+| `beam` | 20 / 20 | 20 / 20 | 20 / 20 | 20 / 20 | 2,92 s |
+| `nemotron-3-super` | 20 / 20 | 20 / 20 | 19 / 20 | 20 / 20 | 7,04 s |
+| `nemotron-3-ultra` | 20 / 20 | 19 / 20 | 20 / 20 | 20 / 20 | 6,17 s |
+| `minimax-m3.1-flash` | 20 / 20 | 19 / 20 | 19 / 20 | 20 / 20 | 5,45 s |
+| `gpt-oss:120b` | 20 / 20 | 20 / 20 | 18 / 20 | 20 / 20 | 2,71 s |
+| `gpt-oss:20b` | 20 / 20 | 20 / 20 | 18 / 20 | 20 / 20 | 5,74 s |
+
+**Phép đo gán phân tích** (chọn đúng `1` trong `20` phân tích, mã bị ép bằng `enum`):
+
+| Mô hình | Gán đúng use case | Độ trễ TB |
+| --- | --- | --- |
+| **`gemma4:31b`** | **20 / 20** | **1,26 s** |
+| `beam` | 20 / 20 | 1,91 s |
+| `nemotron-3-super` | 19 / 20 | 3,00 s |
+| `gpt-oss:120b` | 8 / 20 (trả *mô tả* thay vì *mã*) | 1,58 s |
+
+⇒ **Mô hình quyết định chuyên dụng là không cần thiết.** Mô hình chat nhỏ, miễn phí, gán đúng phân tích cho cả `20` truy vấn tự nhiên trong `1,26` giây. Mô hình quyết định chuyên dụng chỉ bổ sung **xác suất hiệu chuẩn** — mà ngưỡng định tuyến hiện so sánh với một **giá trị nhị phân**, nên xác suất đó **không thay đổi bất kỳ quyết định nào**. Đổi lại phải trả tiền, thêm phụ thuộc credit, và thêm một giao thức riêng.
+
+Hệ quả trực tiếp: **tầng phản xạ được giao việc gán phân tích**. Trước đây một truy vấn không nêu mã use case bị đóng dấu một mã cố định, và dấu đó lọt vào **tiêu đề báo cáo** và **khoá cache**. Nay câu trả lời của tầng phản xạ thay thế nó, và một bài kiểm thử trên mô hình thật giữ điều đó.
+
 ### 7.4. Kết quả Đo kiểm 3 Cơ chế Cộng sinh (`System 1` $\leftrightarrow$ `System 2` Symbiosis)
 
 1. **Cơ chế Leo thang Động khi Phát hiện Xung đột Vật lý (`Dynamic S1 -> S2 Escalation`):**
@@ -546,22 +575,22 @@ Hai mô hình từ chối mức suy luận đã cấu hình (`xhigh`) và **tr�
 
 ## 8. Kiểm thử Tự động (`26/26` Unit, Integration & Live TDD Seams) & Hướng dẫn Vận hành Bàn giao
 
-### 8.1. Danh mục 67 Bài Kiểm thử Bất biến Vật lý, Độ phủ Lõi, LangGraph & Live TDD (`tests/`)
+### 8.1. Danh mục 71 Bài Kiểm thử Bất biến Vật lý, Độ phủ Lõi, LangGraph & Live TDD (`tests/`)
 
 | Bộ Kiểm Thử (`Test Suite`) | Số Bài Test | Phạm Vi Kiểm Chứng Toán Học – Vật Lý & Đồ Thị Trạng Thái | Trạng Thái |
 | :--- | :---: | :--- | :---: |
 | **[`tests/test_harmonization_suite.py`](../tests/test_harmonization_suite.py)** | **7 / 7** | Hình học cầu MODIS ($1.00\text{ km}^2 \to 9.69\text{ km}^2$), 3 vùng gom cụm VIIRS ($\le 0.65\text{ km}^2$), bảo toàn năng lượng cầu phương 13 điểm Uber H3 ($\sum w = 1.0000$), góc $\text{SZA} < 85^\circ$, lọc nhiễu hạt ban đêm vùng SAA, gom cụm đoàn tàu 4 vệ tinh chiều thành 1 `FireEpisode`, và hiệu chuẩn 2 giai đoạn giảm $D_{\text{KS}}$. | **PASS** |
 | **[`tests/test_core_coverage.py`](../tests/test_core_coverage.py)** | **7 / 7** | Kiểm chứng khoảng cách trắc địa Haversine, ánh xạ lưới H3, kiểm tra biên hộp tọa độ SAA, hàm nỗ lực quan sát cơ sở $\Omega(y, \phi)$, phân loại ngưỡng cảnh báo $\text{SFAI}$, và động cơ Lịch Hoạt Động Cháy trên tập rỗng / tập thực. | **PASS** |
-| **[`tests/test_ai_service_harness.py`](../tests/test_ai_service_harness.py)** | **32 / 32** | Kiểm chứng **Endpoint Profile** (thứ tự ưu tiên env → `.env` → YAML), lỗi ngay khi thiếu API key, độ phủ 24 `@tool` tất định, thực thi toàn trình **20/20 Use Cases** qua `LangGraph`, leo thang động `S1 -> S2`, vòng lặp tự sửa lỗi `NumericGroundingVerifier`, grounding placeholder `{{fact_key}}`, và hai chốt chặn hồi quy: **không đọc cấu hình agent trên máy** & **không có tên provider trong mã nguồn**. | **PASS** |
+| **[`tests/test_ai_service_harness.py`](../tests/test_ai_service_harness.py)** | **35 / 35** | Kiểm chứng **Endpoint Profile** (thứ tự ưu tiên env → `.env` → YAML), lỗi ngay khi thiếu API key, độ phủ 24 `@tool` tất định, thực thi toàn trình **20/20 Use Cases** qua `LangGraph`, leo thang động `S1 -> S2`, vòng lặp tự sửa lỗi `NumericGroundingVerifier`, grounding placeholder `{{fact_key}}`, và hai chốt chặn hồi quy: **không đọc cấu hình agent trên máy** & **không có tên provider trong mã nguồn**. | **PASS** |
 | **[`tests/test_documented_claims_consistency.py`](../tests/test_documented_claims_consistency.py)** | **15 / 15** | Đối chiếu **từng claim đã công bố** trong báo cáo với mã nguồn và dữ liệu thật: số bản ghi FIRMS, số lát cắt, khoảng cách Kolmogorov–Smirnov, tỷ lệ giảm, tham số hiệu chuẩn, tỷ lệ đếm chéo cảm biến, hệ số phóng đại theo góc quét số, ngưỡng SFAI, và phần chú thích hình ảnh được **sinh từ mã** chứ không hardcode | **100% PASS** |
 | **[`tests/test_published_figures_match_code.py`](../tests/test_published_figures_match_code.py)** | **1 / 1** | Hình ảnh đã công bố phải khớp với giá trị mà mã nguồn sinh ra | **100% PASS** |
-| **[`tests/test_live_tdd_seams.py`](../tests/test_live_tdd_seams.py)** | **5 / 5** | Kiểm thử TDD (`Red -> Green`) trực tiếp trên dữ liệu thô `mekong__MODIS_SP__2024-03-15__5d.csv` (`3.446` dòng) và trên **model thật** của cả hai tầng (giao thức typed-questions & native chat): `reasoning_trace`, `live_telemetry`, leo thang động `1.330,0% >= 200%`, tự sửa lỗi số ảo `98765.4321`, và bản tin **Grounded Narrative** do mô hình soạn (`synthesis_mode = llm`). Bộ test này **được đánh dấu `live`**, bị loại khỏi lần chạy mặc định và chỉ chạy từ workflow kích hoạt thủ công. | **PASS** |
-| **TỔNG CỘNG TOÀN WORKSPACE** | **67 / 67** (`62` ngoại tuyến + `5` live) | **100% vượt qua kiểm chứng toán học, vật lý và suy luận thực tế (`OK`)** | **100% PASS** |
+| **[`tests/test_live_tdd_seams.py`](../tests/test_live_tdd_seams.py)** | **6 / 6** | Kiểm thử TDD (`Red -> Green`) trực tiếp trên dữ liệu thô `mekong__MODIS_SP__2024-03-15__5d.csv` (`3.446` dòng) và trên **model thật** của cả hai tầng (giao thức typed-questions & native chat): `reasoning_trace`, `live_telemetry`, leo thang động `1.330,0% >= 200%`, tự sửa lỗi số ảo `98765.4321`, và bản tin **Grounded Narrative** do mô hình soạn (`synthesis_mode = llm`). Bộ test này **được đánh dấu `live`**, bị loại khỏi lần chạy mặc định và chỉ chạy từ workflow kích hoạt thủ công. | **PASS** |
+| **TỔNG CỘNG TOÀN WORKSPACE** | **71 / 71** (`65` ngoại tuyến + `6` live) | **100% vượt qua kiểm chứng toán học, vật lý và suy luận thực tế (`OK`)** | **100% PASS** |
 
 ### 8.2. Hướng dẫn Chạy Kiểm chứng Toàn trình Trong Workspace
 
 ```bash
-# 1. Chạy toàn bộ 62/62 bài kiểm thử đơn vị, bất biến vật lý & tích hợp LangGraph (~2.6s)
+# 1. Chạy toàn bộ 65/65 bài kiểm thử đơn vị, bất biến vật lý & tích hợp LangGraph (~2.6s)
 python3 -m unittest discover -s tests -p "test_*.py" -v
 
 # 2. Thực thi toàn bộ 20 Use Cases (System 1 + System 2) qua LangGraph Harness & xuất ai_harness_results.json

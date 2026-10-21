@@ -540,6 +540,15 @@ class DeterministicHarnessChatModel(HarnessChatModel):
                 }
             elif question_type == "noul":
                 answers[key] = {"type": "noul", "noul": 0.5}
+        # The offline classifier keeps the use case the query named. The
+        # scripted harness has no model to assign one, and the tier follows
+        # the use case family.
+        answers["use_case"] = {
+            "type": "choice",
+            "choice": entity.use_case_id.value,
+            "confidence": 0.9,
+            "probabilities": {entity.use_case_id.value: 0.9},
+        }
         return {"model": self.model_id, "answers": answers}
 
     def _generate(

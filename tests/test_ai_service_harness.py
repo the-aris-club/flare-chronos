@@ -567,8 +567,77 @@ class TestFlareChronosDualSystemHarness(unittest.TestCase):
         ]
         self.assertEqual(
             set(parameters),
-            {"region", "is_deliberative", "urgency", "focus_epoch", "confidence"},
+            {
+                "region",
+                "is_deliberative",
+                "urgency",
+                "use_case",
+                "confidence",
+                "focus_epoch",
+            },
         )
+
+    def test_29_the_analysis_menu_covers_every_use_case(self) -> None:
+        """The classifier can name every analysis the registry defines."""
+        from ai_service.classification import USE_CASE_MENU
+
+        self.assertEqual(set(USE_CASE_MENU), {uc.value for uc in UseCaseId})
+        for use_case, description in USE_CASE_MENU.items():
+            self.assertTrue(description.strip(), msg=use_case)
+
+    def test_30_the_classifier_assigns_the_analysis_when_none_is_named(self) -> None:
+        """A request with no use case gets the analysis the classifier names."""
+        from ai_service.classification import classification_answers
+
+        payload = classification_answers(
+            {
+                "region": "mekong",
+                "is_deliberative": True,
+                "urgency": False,
+                "use_case": "UC-4.1",
+                "confidence": 0.9,
+            },
+            "model-x",
+        )
+        self.assertEqual(payload["answers"]["use_case"]["choice"], "UC-4.1")
+
+        harness = FlareChronosDualSystemHarness(
+            mode="deterministic", enable_cache=False, enable_sign_off=False
+        )
+        provisional = harness._extract_entity("audit the orbital drift in the Mekong")
+        answers = payload["answers"]
+        entity, _confidence, tier = harness._refine_entity(
+            provisional, answers, explicit_use_case=False
+        )
+        self.assertEqual(entity.use_case_id.value, "UC-4.1")
+        self.assertEqual(tier, "deliberative")
+
+    def test_31_a_named_use_case_beats_the_classifier(self) -> None:
+        """An explicit use case always wins over the assigned analysis."""
+        from ai_service.classification import classification_answers
+
+        harness = FlareChronosDualSystemHarness(
+            mode="deterministic", enable_cache=False, enable_sign_off=False
+        )
+        provisional = harness._extract_entity(
+            "audit the orbital drift in the Mekong",
+            UseCaseId.UC_2_2_TACTICAL_DISPATCH,
+        )
+        answers = classification_answers(
+            {
+                "region": "mekong",
+                "is_deliberative": True,
+                "urgency": False,
+                "use_case": "UC-4.1",
+                "confidence": 0.9,
+            },
+            "model-x",
+        )["answers"]
+        entity, _confidence, tier = harness._refine_entity(
+            provisional, answers, explicit_use_case=True
+        )
+        self.assertEqual(entity.use_case_id.value, "UC-2.2")
+        self.assertEqual(tier, "deliberative")
 
     def test_28_classification_answers_match_the_typed_questions_shape(self) -> None:
         """Both protocols answer the harness in the same shape."""

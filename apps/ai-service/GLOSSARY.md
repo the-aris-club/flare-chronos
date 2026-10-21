@@ -7,8 +7,12 @@ Dual-process cognitive decision-support and autonomous scientific reasoning cont
 ### Cognitive Architecture & Harness
 
 **System 1 Reflexive Layer**:
-The tier that reports. It classifies intent and extracts the spatio-temporal entity, retrieves facts through the Atomic Tools, and returns a grounded fact card or a flash alert. It never derives an analysis, never orchestrates a tool sequence, and never writes an analytical narrative.
+The tier that reports. It assigns the analysis a request needs, classifies intent and extracts the spatio-temporal entity, retrieves facts through the Atomic Tools, and returns a grounded fact card or a flash alert. It never derives an analysis, never orchestrates a tool sequence, and never writes an analytical narrative.
 _Avoid_: Fast chatbot, simple prompt, router-only agent
+
+**Analysis Assignment**:
+The Reflexive Layer's answer to "which of the twenty analyses does this request need". The assignment decides the cognitive tier, the tool surface, the cache key and the report title. The System 2 Deliberative Layer still chooses the tool, so a wrong assignment shows up as a wrong title rather than a wrong calculation.
+_Avoid_: Routing, intent label, model selection
 
 **Triage Confidence**:
 The Reflexive Layer's estimate of how well it classified a request. A typed-questions endpoint returns a calibrated probability; a chat endpoint returns the model's own estimate, which is recorded as self-reported and must never be presented as calibrated.

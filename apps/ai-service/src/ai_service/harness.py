@@ -276,12 +276,22 @@ class FlareChronosDualSystemHarness:
                 data["epoch_years"] = [int(focus_choice)]
 
         threshold = float(self.cognition.get("deliberative_threshold", 0.5))
+        assigned = str((answers.get("use_case") or {}).get("choice") or "").strip()
+        assigned_known = assigned in {uc.value for uc in UseCaseId}
+        if not explicit_use_case and assigned_known:
+            # The Reflexive Layer assigns the analysis the request needs. The
+            # System 2 model still chooses the tool; this answer says which
+            # use case the run is, and therefore which tier, surface and title.
+            data["use_case_id"] = assigned
+
         if explicit_use_case:
             tier = (
                 FAST_TIER
                 if str(data["use_case_id"]).startswith("UC-S1")
                 else DELIBERATIVE_TIER
             )
+        elif assigned_known:
+            tier = FAST_TIER if assigned.startswith("UC-S1") else DELIBERATIVE_TIER
         else:
             tier = DELIBERATIVE_TIER if deliberative_p >= threshold else FAST_TIER
             if tier == FAST_TIER:
