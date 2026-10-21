@@ -18,8 +18,28 @@ import base64
 import html
 import os
 import re
+import shutil
 import subprocess
 from pathlib import Path
+
+
+def _resolve_binary(name: str) -> str:
+    """Locate a CLI dependency on ``PATH``, falling back to the Homebrew prefix.
+
+    The exporter was originally macOS-only because it hardcoded
+    ``/opt/homebrew/bin``. Resolving from ``PATH`` first keeps the macOS
+    behaviour while letting the PDF be regenerated on Linux (CI, contributors).
+    """
+    found = shutil.which(name)
+    if found:
+        return found
+    homebrew = Path("/opt/homebrew/bin") / name
+    if homebrew.exists():
+        return str(homebrew)
+    raise FileNotFoundError(
+        f"Required tool {name!r} was not found on PATH or in /opt/homebrew/bin."
+    )
+
 
 # ==============================================================================
 # 1A. CONCEPTUAL VECTOR SVG DIAGRAMS FOR STANDALONE PROPOSAL.PDF (ZERO CODEBASE REFS)
@@ -1134,7 +1154,7 @@ def build_pdf(
 
     print("[2/4] Đang biên dịch Markdown sang cấu trúc HTML5 qua Pandoc...")
     pandoc_cmd = [
-        "/opt/homebrew/bin/pandoc",
+        _resolve_binary("pandoc"),
         str(temp_md),
         "-f",
         "markdown+gfm_auto_identifiers+fenced_divs+pipe_tables+backtick_code_blocks+raw_html-tex_math_dollars",
@@ -1147,7 +1167,7 @@ def build_pdf(
     res = subprocess.run(pandoc_cmd, capture_output=True, text=True, check=False)
     if res.returncode != 0:
         pandoc_cmd = [
-            "/opt/homebrew/bin/pandoc",
+            _resolve_binary("pandoc"),
             str(temp_md),
             "-f",
             "markdown-tex_math_dollars",
@@ -1203,7 +1223,7 @@ def build_pdf(
         f"[3/4] Đang kết xuất PDF Vector độ phân giải cao qua WeasyPrint -> {pdf_path.name}..."
     )
     weasy_cmd = [
-        "/opt/homebrew/bin/weasyprint",
+        _resolve_binary("weasyprint"),
         "--base-url",
         str(workspace_root.resolve()),
         str(temp_html),

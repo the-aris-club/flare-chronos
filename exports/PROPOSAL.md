@@ -181,7 +181,7 @@ Từ kích thước $(\Delta S, \Delta T)$, hệ thống giải phương trình 
 
 $$w_{p, h} = \sum_{k \in \{1..13\}: \text{H3}(\phi_k, \lambda_k) = h} \omega_k, \quad \text{với } \sum_{h \in \mathcal{H}} w_{p, h} \equiv 1.0000$$
 
-![Figure 1 - Scan Angle Footprint Physics](file:///Users/xirothedev/workspace/flare-chronos/docs/figures/fig1_scan_angle_footprint_physics.png)
+![Figure 1 - Scan Angle Footprint Physics](../docs/figures/fig1_scan_angle_footprint_physics.png)
 
 ### 4.3. Giai đoạn 2: Toán tử quan sát bức xạ $4\,\mu\text{m}$ & Hiệu chuẩn chéo hai giai đoạn (Two-Stage FRP Calibration)
 
@@ -253,9 +253,9 @@ $$\text{FRP}_{\text{lim, VIIRS}}(A_p, \text{SZA}) = \left( 0.50 + 0.65 \cdot \ma
 | **Sai số toàn phương trung bình ($\text{RMSE}$, $\text{MW/cell}$)** | $149.104\text{ MW}$ | **$145.155\text{ MW}$** | Giảm sai số bậc hai trên toàn dải |
 | **Khoảng cách phân phối Kolmogorov-Smirnov ($D_{\text{KS}}$)** | $0.1166$ | **$0.0237$** | **Giảm $79,7\%$ sai lệch phân phối xác suất!** |
 
-![Figure 3 - Cross-Sensor FRP Calibration](file:///Users/xirothedev/workspace/flare-chronos/docs/figures/fig3_cross_sensor_frp_quantile_mapping.png)
+![Figure 3 - Cross-Sensor FRP Calibration](../docs/figures/fig3_cross_sensor_frp_quantile_mapping.png)
 
-![Figure 2 - Overpass Deduplication and Effort Factor](file:///Users/xirothedev/workspace/flare-chronos/docs/figures/fig2_overpass_deduplication_sza.png)
+![Figure 2 - Overpass Deduplication and Effort Factor](../docs/figures/fig2_overpass_deduplication_sza.png)
 
 ### 5.2. Nghiên cứu điển hình 1: Tiểu vùng sông Mekong & Việt Nam (`100.0°E–109.5°E, 11.0°N–23.5°N`)
 
@@ -318,9 +318,9 @@ Khu vực phía Nam lưu vực Amazon (bang Mato Grosso và Pará, Brazil) đạ
 | **Tháng 11 (`15/11`)** | `P64` | `1.212` điểm nóng | `456` điểm nóng | Kết thúc mùa mưa tại Đông Nam Á lục địa |
 | **Tháng 12 (`15/12`)** | `P70` | `2.505` điểm nóng | `112` điểm nóng | Chuẩn bị bước vào chu kỳ đốt sinh khối năm mới |
 
-![Figure 4 - Regime Shift Elimination](file:///Users/xirothedev/workspace/flare-chronos/docs/figures/fig4_regime_shift_elimination.png)
+![Figure 4 - Regime Shift Elimination](../docs/figures/fig4_regime_shift_elimination.png)
 
-![Figure 5 - Harmonized Burning Activity Calendar](file:///Users/xirothedev/workspace/flare-chronos/docs/figures/fig5_harmonized_burning_calendar.png)
+![Figure 5 - Harmonized Burning Activity Calendar](../docs/figures/fig5_harmonized_burning_calendar.png)
 
 ---
 
@@ -387,7 +387,7 @@ Khu vực phía Nam lưu vực Amazon (bang Mato Grosso và Pará, Brazil) đạ
 | **1. Validity (Tính Xác Thực Khoa Học)** | Giải pháp có dựa trên định luật vật lý cảm biến và toán học vững chắc không? Có số liệu kiểm chứng thực tế không? | Kiểm chứng trực tiếp trên **$1.609.194$ điểm nóng thực tế từ NASA LANCE FIRMS** phủ trọn 26 năm liên tục (`2001–2026`); giải phương trình cầu dải quét $\Delta S(\theta)\times\Delta T(\theta)$, toán tử quan sát bức xạ $4\,\mu\text{m}$ và hiệu chuẩn trên **$11.553$ cặp ô lưới đồng thời Aqua–SNPP**, giảm **$79,7\%$** sai số phân phối Kolmogorov-Smirnov ($D_{\text{KS}}$ từ $0.1166 \to 0.0237$, $R^2$ đạt $0.7470$). |
 | **2. Relevance (Tính Bám Sát Đề Bài)** | Có giải quyết trọn vẹn bài toán bất đồng nhất giữa MODIS và VIIRS để dựng ra *Burning Activity Calendar* không? | Giải quyết toàn diện cả **5 rào cản liên cảm biến** (Footprint Bow-tie, Độ nhạy FRP, Thang Confidence & nhiễu SAA, Trùng lặp quỹ đạo 5 vệ tinh, Cờ NRT/Standard SZA) để xuất ra ma trận **26 Năm × 73 Pentads** cùng chỉ số dị thường **$\text{SFAI Z-Score}$**. |
 | **3. Creativity (Tính Sáng Tạo Đột Phá)** | Phương pháp tiếp cận có mới mẻ, vượt qua cách gom ô lưới kinh-vĩ độ hay nhân hệ số tuyến tính đơn giản không? | Thay thế điểm tròn vô hướng bằng **Phép phân bổ trọng số diện tích elip định hướng lên lưới lục giác kép Uber H3 (Res 7 & Res 8)** kết hợp **Khử trùng lặp sự kiện cháy không-thời gian ($\tau = 95\text{ phút}$)** và chuẩn hóa theo **Nỗ lực quan sát hiệu dụng $\Omega(y, \phi)$**. |
-| **4. Impact (Tác Động Thực Tiễn)** | Giải pháp giúp ích gì cho lực lượng cứu hỏa, quản lý rừng và nghiên cứu biến đổi khí hậu khi MODIS và Suomi-NPP ngừng hoạt động? | Ngăn chặn sai lầm chính sách do "bẫy nhảy bậc giả tạo $+1.324\%$" khi gộp thô đa cảm biến; tách bạch chính xác mùa đốt phụ phẩm nông nghiệp định kỳ với khủng hoảng cháy rừng El Niño ngoài mùa vụ tại **Việt Nam / Tiểu vùng Mekong** và **Rừng Amazon**. |
+| **4. Impact (Tác Động Thực Tiễn)** | Giải pháp giúp ích gì cho lực lượng cứu hỏa, quản lý rừng và nghiên cứu biến đổi khí hậu khi MODIS và Suomi-NPP ngừng hoạt động? | Ngăn chặn sai lầm chính sách do "bẫy nhảy bậc giả tạo $+1.324,2\%$" khi gộp thô đa cảm biến; tách bạch chính xác mùa đốt phụ phẩm nông nghiệp định kỳ với khủng hoảng cháy rừng El Niño ngoài mùa vụ tại **Việt Nam / Tiểu vùng Mekong** và **Rừng Amazon**. |
 | **5. Presentation (Trình Bày & Trực Quan Hóa)** | Câu chuyện có súc tích, dễ hiểu và có sản phẩm thực thi rõ ràng không? | Bộ 5 biểu đồ khoa học chuẩn xuất bản cùng giao diện đồng bộ 4 khung nhìn (Elip Footprint + Lưới H3 + Ma trận 26×73 Pentad + Đồng hồ mùa vụ cực). |
 
 ### 7.2. Giới hạn vật lý và biện pháp quản trị rủi ro (Limitations & Risk Mitigation)

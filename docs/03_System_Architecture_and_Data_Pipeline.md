@@ -2,7 +2,7 @@
 
 **Dự án:** **Flare-Chronos** — *Fire Long-term Archive Resolution & Cross-sensor Harmonization for Operational Near-real-time Observation System* (*26-Year Cross-Sensor Harmonized Active Fire Intelligence & Phenology Calendar*)  
 **Cuộc thi:** 2026 NASA Space Apps Challenge — *Harmonization of MODIS and VIIRS Hot Spots*  
-**Tài liệu liên kết:** [GLOSSARY.md](file:///Users/xirothedev/workspace/flare-chronos/GLOSSARY.md) | [ADR-0001](file:///Users/xirothedev/workspace/flare-chronos/docs/adr/0001-dual-resolution-h3-fractional-allocation.md) | [ADR-0002](file:///Users/xirothedev/workspace/flare-chronos/docs/adr/0002-two-stage-physics-guided-frp-harmonization.md) | [ADR-0003](file:///Users/xirothedev/workspace/flare-chronos/docs/adr/0003-spatio-temporal-episode-deduplication-and-effort-normalization.md) | [ADR-0004](file:///Users/xirothedev/workspace/flare-chronos/docs/adr/0004-monorepo-deep-module-architecture.md)
+**Tài liệu liên kết:** [GLOSSARY.md](../GLOSSARY.md) | [ADR-0001](adr/0001-dual-resolution-h3-fractional-allocation.md) | [ADR-0002](adr/0002-two-stage-physics-guided-frp-harmonization.md) | [ADR-0003](adr/0003-spatio-temporal-episode-deduplication-and-effort-normalization.md) | [ADR-0004](adr/0004-monorepo-deep-module-architecture.md)
 
 ---
 

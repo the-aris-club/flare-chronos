@@ -439,6 +439,8 @@ Sau audit, các số liệu sau đã được hiệu chỉnh cho khớp với `d
 
 Các claim trong `PROPOSAL.md`/`REPORT.md` đã được cập nhật tương ứng. Các giá trị tổng hợp (synthetic) trong calendar 26 năm (noise rng, multiplier 1.55/1.85, điền VIIRS thiếu bằng ratio) **chưa** được hiệu chỉnh — xem Q4 trong handoff.
 
+Đồng thời, `docs/01_NASA_SpaceApps_Proposal.md` và `docs/05_Pitch_Deck_and_Video_Script.md` đã được đồng bộ lại với `data/processed/empirical_results.json` (chúng vẫn công bố số liệu của lần kéo FIRMS cũ: `775.531` bản ghi / `5.769` cặp ô lưới / `$D_{KS}$ 0.1180 → 0.0205`). `tests/test_documented_claims_consistency.py` tự động kiểm tra các claim này, nên lần tái tạo `empirical_results.json` sau này sẽ làm CI đỏ nếu tài liệu chưa được cập nhật theo.
+
 ---
 
 *Tài liệu này là phụ lục tham chiếu. Cập nhật khi thêm ký hiệu/công thức/thuật ngữ mới.*

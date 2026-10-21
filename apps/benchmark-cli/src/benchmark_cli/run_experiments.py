@@ -1,7 +1,7 @@
 """Empirical Verification & Publication Figure Pipeline for Flare-Chronos.
 
 
-Processes the 775,531 real NASA FIRMS Thermal Detections cached in `data/raw/` to:
+Processes the 1,609,194 real NASA FIRMS Thermal Detections cached in `data/raw/` to:
 1. Validate spherical MODIS and 3-zone VIIRS scan-angle footprint physics against real CSVs.
 2. Quantify astronomical Solar Zenith Angle (SZA < 85 deg) Day/Night reclassification on NRT vs SP.
 3. Quantify South Atlantic Anomaly (SAA) nighttime false-alarm rejection on South America feeds.

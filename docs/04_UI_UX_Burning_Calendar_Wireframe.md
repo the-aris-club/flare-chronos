@@ -2,7 +2,7 @@
 
 **Dự án:** **Flare-Chronos** — *26-Year Cross-Sensor Harmonized Active Fire Intelligence & Phenology Calendar*  
 **Cuộc thi:** 2026 NASA Space Apps Challenge — *Harmonization of MODIS and VIIRS Hot Spots*  
-**Tài liệu liên kết:** [GLOSSARY.md](file:///Users/xirothedev/workspace/flare-chronos/GLOSSARY.md) | [02_Cross_Sensor_Harmonization_Spec.md](file:///Users/xirothedev/workspace/flare-chronos/docs/02_Cross_Sensor_Harmonization_Spec.md) | [03_System_Architecture_and_Data_Pipeline.md](file:///Users/xirothedev/workspace/flare-chronos/docs/03_System_Architecture_and_Data_Pipeline.md)
+**Tài liệu liên kết:** [GLOSSARY.md](../GLOSSARY.md) | [02_Cross_Sensor_Harmonization_Spec.md](02_Cross_Sensor_Harmonization_Spec.md) | [03_System_Architecture_and_Data_Pipeline.md](03_System_Architecture_and_Data_Pipeline.md)
 
 ---
 
@@ -108,4 +108,4 @@ Giao diện **Flare-Chronos Workbench** giải quyết triệt để hai ảo gi
 
 Hình ảnh dưới đây được kết xuất trực tiếp từ `apps/benchmark-cli/src/benchmark_cli/run_experiments.py` trên dữ liệu thực tế NASA FIRMS cho **Tiểu vùng sông Mekong & Việt Nam** và **Rừng Amazon**:
 
-![Harmonized Burning Activity Calendar](file:///Users/xirothedev/workspace/flare-chronos/docs/figures/fig5_harmonized_burning_calendar.png)
+![Harmonized Burning Activity Calendar](figures/fig5_harmonized_burning_calendar.png)
