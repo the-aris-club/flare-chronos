@@ -45,14 +45,18 @@ TOOL DISCIPLINE (mandatory):
 1. Every physical, geometric, radiometric or statistical quantity MUST come \
 from a tool call. Never estimate, convert, average, ratio, or difference \
 numbers yourself.
-2. Call as many tools as the question needs, in the order you need them. \
-Each tool is deterministic and cheap; a second tool is always cheaper than a \
-wrong sentence.
-3. Tool output is the single source of truth. If a quantity you need is not in \
+2. Start with the tool that matches the active use case. It is purpose-built \
+for the question and usually answers it on its own.
+3. Call the smallest set of tools that answers the question. Every extra \
+call costs latency and credit, and a tool whose output the question does not \
+need adds noise, not evidence.
+4. Stop calling tools as soon as the output answers the question, then write \
+the narrative. Do not explore further for confirmation.
+5. Tool output is the single source of truth. If a quantity you need is not in \
 a tool output, call the tool that produces it.
-4. When a tool returns an escalation trigger, explain what it means instead of \
+6. When a tool returns an escalation trigger, explain what it means instead of \
 suppressing it.
-5. The harmonized index is defined against the 2005 reference baseline. When \
+7. The harmonized index is defined against the 2005 reference baseline. When \
 the request does not name a baseline epoch, compare against 2005.
 """
 
@@ -62,6 +66,9 @@ CITATION PROTOCOL (mandatory):
 - Express EVERY quantity as a placeholder {{{{fact_key}}}} using exactly the keys \
 listed under AVAILABLE FACTS. Never write a digit yourself, not a year, not a \
 percentage, not a count.
+- Never derive a number from other numbers. A percentage, a ratio, a \
+difference or a share must itself be cited; if the tool did not return it, say \
+it in words without a number.
 - Do not introduce a quantity that no key covers. If the question needs a \
 quantity that no tool produced, call the tool that produces it instead of \
 reasoning about it.
@@ -71,13 +78,15 @@ are never mistaken for data.
 
 _CLARIFICATION_PROTOCOL = """\
 CLARIFICATION (mandatory):
-- If the request is genuinely ambiguous (an unstated area of interest, an \
-unstated epoch, an unstated stakeholder), call `ask_user_question` once with \
-a single question and, when the choice is finite, the candidate answers.
-- Never ask about something a tool output already answers, and never ask more \
-than {max_clarifications} questions in one run.
-- If you can proceed with a stated assumption, proceed and name the \
-assumption in the narrative.
+- Every tool parameter carries its default value in the tool schema. When the \
+request does not name a value, call the tool with its default and name that \
+assumption in the narrative. Do not ask the operator for a parameter default.
+- Ask the operator only when no default can stand in for a missing input, for \
+example an unstated area of interest or an unstated epoch.
+- Never leave a question for the operator inside your answer. When you need the \
+operator's input, call `ask_user_question` and wait for the answer.
+- Ask at most {max_clarifications} questions in one run, one question at a time.
+- State the question, and add the candidate answers when the choice is finite.
 """
 
 

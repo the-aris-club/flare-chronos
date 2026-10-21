@@ -37,7 +37,7 @@ from ai_service.schemas import (
     VerificationReport,
     VerifiedFactEntry,
     VerifiedFactsLedger,
-    collect_citation_keys,
+    collect_citable_facts,
     resolve_citations,
     verify_grounded_draft,
 )
@@ -78,7 +78,7 @@ __all__ = [
     "build_live_system1_chat_model",
     "build_live_system2_chat_model",
     "build_sqlite_checkpointer",
-    "collect_citation_keys",
+    "collect_citable_facts",
     "load_harness_config",
     "resolve_api_key",
     "resolve_citations",

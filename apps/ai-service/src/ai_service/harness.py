@@ -44,6 +44,7 @@ from ai_service.models import (
     DeterministicHarnessChatModel,
     EndpointCallError,
     HarnessChatModel,
+    build_citation_table,
     build_live_system1_chat_model,
     build_live_system2_chat_model,
     load_harness_config,
@@ -328,11 +329,18 @@ class FlareChronosDualSystemHarness:
         explicit_use_case = bool(requested_uc)
 
         provisional = self._extract_entity(user_query, requested_uc)
-        classification = self.system1_model.classify(
-            state_text=user_query,
-            questions=system1_typed_questions(provisional),
-            entity=provisional,
-        )
+        triage_fallback = ""
+        try:
+            classification = self.system1_model.classify(
+                state_text=user_query,
+                questions=system1_typed_questions(provisional),
+                entity=provisional,
+            )
+        except EndpointCallError as exc:
+            # The classifier is an enhancement over the provisional extraction.
+            # A transient endpoint failure must not take the whole run down.
+            triage_fallback = f"classifier_unavailable: {exc}"[:200]
+            classification = {"answers": {}}
         answers = classification.get("answers", {}) or {}
         entity, confidence, tier = self._refine_entity(
             provisional, answers, explicit_use_case
@@ -391,6 +399,7 @@ class FlareChronosDualSystemHarness:
             "cognitive_tier": tier,
             "triage_confidence": confidence,
             "triage_classification": classification,
+            "triage_fallback": triage_fallback,
             "tool_surface": tool_surface,
             "pruned_tool_names": tool_surface,
             "escalated_from_system1": False,
@@ -527,8 +536,16 @@ class FlareChronosDualSystemHarness:
             if not isinstance(tm, ToolMessage):
                 continue
             if tm.name == "ask_user_question":
+                try:
+                    payload = json.loads(str(tm.content))
+                except ValueError:
+                    payload = {"answer": str(tm.content)}
                 clarifications.append(
-                    {"tool_call_id": tm.tool_call_id, "answer": str(tm.content)}
+                    {
+                        "tool_call_id": tm.tool_call_id,
+                        "question": payload.get("question", ""),
+                        "answer": payload.get("answer", ""),
+                    }
                 )
                 continue
             try:
@@ -645,6 +662,9 @@ class FlareChronosDualSystemHarness:
                 "numeric_tolerance_rel", 0.005
             )
         )
+        tool_messages = [
+            m for m in state.get("messages", []) if isinstance(m, ToolMessage)
+        ]
         resolved, report = verify_grounded_draft(
             draft,
             ledger,
@@ -654,6 +674,7 @@ class FlareChronosDualSystemHarness:
                 self.s2_profile.model_id,
                 str((state.get("extracted_entity") or {}).get("use_case_id", "")),
             ],
+            extra_facts=build_citation_table(tool_messages),
         )
         if not resolved.strip():
             report.passed = False
@@ -668,6 +689,16 @@ class FlareChronosDualSystemHarness:
         if not report.passed:
             retries = int(state.get("self_correction_retries", 0)) + 1
             updates["self_correction_retries"] = retries
+            updates["verification_rejections"] = [
+                *state.get("verification_rejections", []),
+                {
+                    "attempt": retries,
+                    "unverified_numbers": list(report.unverified_numbers),
+                    "unresolved_citations": list(report.unresolved_citations),
+                    "feedback": report.feedback_message,
+                    "rejected_draft": resolved[:800],
+                },
+            ]
             updates["messages"] = [
                 HumanMessage(
                     content=(f"[NUMERIC_VERIFIER_REJECTION] {report.feedback_message}")
@@ -782,6 +813,8 @@ class FlareChronosDualSystemHarness:
         s1_model = self.s1_profile.model_id
         s2_calls = 0
         s2_model = self.s2_profile.model_id
+        prompt_tokens = 0
+        completion_tokens = 0
         for message in messages:
             kwargs = getattr(message, "additional_kwargs", None) or {}
             if "systemone_result" in kwargs:
@@ -789,6 +822,9 @@ class FlareChronosDualSystemHarness:
             if "model_used" in kwargs:
                 s2_calls += 1
                 s2_model = str(kwargs["model_used"])
+            usage = kwargs.get("usage") or {}
+            prompt_tokens += int(usage.get("prompt_tokens", 0))
+            completion_tokens += int(usage.get("completion_tokens", 0))
 
         live_telemetry = {
             "mode": self.mode,
@@ -803,8 +839,13 @@ class FlareChronosDualSystemHarness:
             "synthesis_mode": synthesis_mode,
             "triage_confidence": state.get("triage_confidence", {}),
             "triage_classification": state.get("triage_classification", {}),
+            "triage_fallback": state.get("triage_fallback", ""),
             "clarification_requests": state.get("clarification_requests", []),
             "sign_off_decision": state.get("sign_off_decision", {}),
+            "usage": {
+                "prompt_tokens": prompt_tokens,
+                "completion_tokens": completion_tokens,
+            },
         }
 
         if self.enable_cache:
@@ -843,8 +884,9 @@ class FlareChronosDualSystemHarness:
 
         model_retry = RetryPolicy(
             max_attempts=3,
-            initial_interval=0.5,
+            initial_interval=1.0,
             backoff_factor=2.0,
+            max_interval=10.0,
             retry_on=lambda exc: isinstance(exc, EndpointCallError) and exc.retryable,
         )
 
@@ -960,6 +1002,46 @@ class FlareChronosDualSystemHarness:
             "configurable": {"thread_id": thread_id},
             "recursion_limit": int(self.cognition.get("recursion_limit", 24)),
         }
+
+    def pending_requests(self, thread_id: str) -> list[dict[str, Any]]:
+        """Return the human input requests a paused run is waiting for."""
+        snapshot = self.graph.get_state(self._run_config(thread_id))
+        return [dict(interrupt.value) for interrupt in snapshot.interrupts]
+
+    def invoke_to_completion(
+        self,
+        user_query: str,
+        use_case_id: UseCaseId | str | None = None,
+        thread_id: str = "default-thread",
+        clarification_answers: list[str] | None = None,
+        max_resumes: int = 4,
+    ) -> dict[str, Any]:
+        """Run a use case to completion, answering clarification requests.
+
+        A clarification request is answered from `clarification_answers`, or
+        with the first offered option when the list runs out. A sign-off
+        request is never answered here: it is the human's decision to make.
+        """
+        answers = list(clarification_answers or [])
+        state = self.invoke_use_case(user_query, use_case_id, thread_id)
+        for _ in range(max_resumes):
+            pending = self.pending_requests(thread_id)
+            if not pending:
+                return state
+            request = pending[0]
+            if request.get("kind") != "clarification":
+                return state
+            options = request.get("options") or []
+            if answers:
+                answer = answers.pop(0)
+            elif options:
+                answer = str(options[0])
+            else:
+                answer = "Proceed with the documented default values."
+            state = self.graph.invoke(
+                Command(resume={"answer": answer}), self._run_config(thread_id)
+            )
+        return state
 
     # ------------------------------------------------------------------
     # Event stream

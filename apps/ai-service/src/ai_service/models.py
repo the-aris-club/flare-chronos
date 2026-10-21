@@ -47,7 +47,7 @@ from pydantic import BaseModel, Field
 from ai_service.schemas import (
     SpatioTemporalQueryEntity,
     UseCaseId,
-    collect_citation_keys,
+    collect_citable_facts,
     format_citation_value,
 )
 from ai_service.tools import USE_CASE_PRIMARY_TOOLS
@@ -85,8 +85,16 @@ class EndpointCallError(RuntimeError):
 
     @property
     def retryable(self) -> bool:
-        """True for transport failures and server errors, false for client errors."""
-        return self.status_code is None or self.status_code >= 500
+        """True for transport failures, rate limits and server errors.
+
+        A client error that is not a rate limit is never retried: the same
+        request would fail the same way.
+        """
+        return (
+            self.status_code is None
+            or self.status_code >= 500
+            or self.status_code in (408, 429)
+        )
 
 
 class RequestOptions(BaseModel):
@@ -238,20 +246,20 @@ def synthesize_grounded_response(
     return "\n".join(lines)
 
 
-def build_citation_table(tool_messages: list[ToolMessage]) -> dict[str, float]:
-    """Collect the citable quantities carried by the deterministic tool outputs."""
-    citations: dict[str, float] = {}
+def build_citation_table(tool_messages: list[ToolMessage]) -> dict[str, Any]:
+    """Collect the citable facts carried by the deterministic tool outputs."""
+    facts: dict[str, Any] = {}
     for tool_message in tool_messages:
         try:
             payload = json.loads(str(tool_message.content))
         except ValueError:
             continue
         if isinstance(payload, dict):
-            citations.update(collect_citation_keys(payload))
-    return citations
+            facts.update(collect_citable_facts(payload))
+    return facts
 
 
-def format_citation_table(citations: dict[str, float]) -> str:
+def format_citation_table(citations: dict[str, Any]) -> str:
     """Render the citation table the model may cite from."""
     return "\n".join(
         f"- {key} = {format_citation_value(value)}"
@@ -658,27 +666,32 @@ class SystemOneChatModel(HarnessChatModel):
             return ChatResult(generations=[ChatGeneration(message=message)])
 
         tool_summary = "\n".join(str(tm.content) for tm in tool_messages)
-        response = self.evaluate(
-            state_text=tool_summary[:4000],
-            questions={
-                "requires_escalation": {
-                    "type": "noul",
-                    "instructions": (
-                        "Does this tool output show severe raw-vs-harmonized divergence "
-                        "(>= 200%) or South Atlantic Anomaly anomalies requiring "
-                        "System 2 escalation?"
-                    ),
-                },
-                "verification_status": {
-                    "type": "choice",
-                    "instructions": "Classify the physical status of the returned fire metrics.",
-                    "criteria": {
-                        "verified_nominal": "Metrics are consistent and within expected harmonized bounds",
-                        "regime_conflict": "Severe raw-vs-harmonized divergence or orbital artifact detected",
+        try:
+            response = self.evaluate(
+                state_text=tool_summary[:4000],
+                questions={
+                    "requires_escalation": {
+                        "type": "noul",
+                        "instructions": (
+                            "Does this tool output show severe raw-vs-harmonized divergence "
+                            "(>= 200%) or South Atlantic Anomaly anomalies requiring "
+                            "System 2 escalation?"
+                        ),
+                    },
+                    "verification_status": {
+                        "type": "choice",
+                        "instructions": "Classify the physical status of the returned fire metrics.",
+                        "criteria": {
+                            "verified_nominal": "Metrics are consistent and within expected harmonized bounds",
+                            "regime_conflict": "Severe raw-vs-harmonized divergence or orbital artifact detected",
+                        },
                     },
                 },
-            },
-        )
+            )
+        except EndpointCallError as exc:
+            # The verification question is advisory. The fact card is still
+            # grounded in the deterministic tool output.
+            response = {"answers": {}, "error": str(exc)[:200]}
         message = AIMessage(
             content=synthesize_grounded_response(use_case_id, tool_messages),
             additional_kwargs={"systemone_result": response},
@@ -851,6 +864,10 @@ class SystemTwoChatModel(HarnessChatModel):
             additional_kwargs={
                 "reasoning_content": f"[Live System 2 ({self.model_id})]: {thinking}",
                 "model_used": self.model_id,
+                "usage": {
+                    "prompt_tokens": int(response.get("prompt_eval_count") or 0),
+                    "completion_tokens": int(response.get("eval_count") or 0),
+                },
             },
         )
         return ChatResult(generations=[ChatGeneration(message=message)])

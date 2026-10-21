@@ -14,43 +14,50 @@ from pydantic import BaseModel, Field
 CITATION_PATTERN = re.compile(r"\{+([A-Za-z0-9_.\[\]-]+)\}+")
 
 
-def collect_citation_keys(payload: Any, prefix: str = "") -> dict[str, float]:
-    """Map every numeric leaf of a tool payload to its canonical ledger fact key.
+def collect_citable_facts(payload: Any, prefix: str = "") -> dict[str, Any]:
+    """Map every citable scalar of a tool payload to its fact key.
 
-    The key names match `VerifiedFactsLedger.ingest_tool_payload` exactly, so a
-    citation table built from a payload always addresses real ledger entries.
-    Numeric tokens embedded in string fields are excluded: they are ledger
-    entries but not citable quantities.
+    A narrative may cite a boolean finding or a short label as well as a
+    quantity, so the citation table carries numbers, booleans and short
+    strings. Numeric leaves keep the key names of the Verified Facts Ledger.
     """
-    citations: dict[str, float] = {}
+    facts: dict[str, Any] = {}
     if isinstance(payload, str):
         try:
             decoded = json.loads(payload)
         except ValueError:
-            return citations
-        if isinstance(decoded, str):
-            return citations
-        return collect_citation_keys(decoded, prefix)
+            decoded = None
+        if isinstance(decoded, str) or decoded is None:
+            if prefix and len(payload) <= 60:
+                facts[prefix] = payload
+            return facts
+        return collect_citable_facts(decoded, prefix)
     if isinstance(payload, dict):
         for key, value in payload.items():
             sub_key = f"{prefix}.{key}" if prefix else str(key)
-            citations.update(collect_citation_keys(value, sub_key))
+            facts.update(collect_citable_facts(value, sub_key))
     elif isinstance(payload, list):
         for index, item in enumerate(payload):
-            citations.update(collect_citation_keys(item, f"{prefix}[{index}]"))
-    elif isinstance(payload, int | float) and not isinstance(payload, bool):
-        citations[prefix or "value"] = float(payload)
-    return citations
+            facts.update(collect_citable_facts(item, f"{prefix}[{index}]"))
+    elif isinstance(payload, bool):
+        facts[prefix or "value"] = payload
+    elif isinstance(payload, int | float):
+        facts[prefix or "value"] = float(payload)
+    return facts
 
 
-def format_citation_value(value: float) -> str:
-    """Render a ledger value without exponent notation or trailing zeros."""
+def format_citation_value(value: Any) -> str:
+    """Render a citable value without exponent notation or trailing zeros."""
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    if isinstance(value, str):
+        return value
     if value == int(value) and abs(value) < 1e15:
         return str(int(value))
     return f"{value:.6f}".rstrip("0").rstrip(".")
 
 
-def resolve_citations(text: str, citations: dict[str, float]) -> tuple[str, list[str]]:
+def resolve_citations(text: str, citations: dict[str, Any]) -> tuple[str, list[str]]:
     """Replace `{{fact_key}}` placeholders with the ledger value of that key.
 
     Returns the resolved text and the list of keys that had no ledger entry.
@@ -323,7 +330,10 @@ class VerifiedFactsLedger(BaseModel):
         )
 
         raw_matches = re.findall(
-            r"(?<![A-Za-z0-9_])-?\d+(?:,\d{3})*(?:\.\d+)?(?![A-Za-z0-9_])", cleaned
+            # A number that follows a hyphen which follows a letter belongs to an
+            # identifier (NOAA-21, Sentinel-2), not to a quantitative claim.
+            r"(?<![A-Za-z0-9_])(?<![A-Za-z][-])-?\d+(?:,\d{3})*(?:\.\d+)?(?![A-Za-z0-9_])",
+            cleaned,
         )
         known_values = [e.numeric_value for e in self.entries]
 
@@ -358,8 +368,11 @@ class VerifiedFactsLedger(BaseModel):
             "All numerical claims verified against VerifiedFactsLedger."
             if passed
             else (
-                f"VIOLATION OF DETERMINISTIC TOOL GATE: Unverified numbers {unverified} "
-                "detected in draft. Re-synthesize strictly using numbers from Tool outputs."
+                f"VIOLATION OF DETERMINISTIC TOOL GATE: the draft contains the "
+                f"numbers {sorted(set(unverified))} that no deterministic tool "
+                "produced. Remove each of them, or replace it with a cited "
+                "fact. Re-synthesize using only numbers from the Tool outputs, "
+                "and do not repeat this draft."
             )
         )
         return VerificationReport(
@@ -376,6 +389,7 @@ def verify_grounded_draft(
     ledger: VerifiedFactsLedger,
     rel_tolerance: float = 0.008,
     ignore_literals: list[str] | None = None,
+    extra_facts: dict[str, Any] | None = None,
 ) -> tuple[str, VerificationReport]:
     """Resolve `{{fact_key}}` citations and verify the resolved text.
 
@@ -383,13 +397,15 @@ def verify_grounded_draft(
     deterministic tool produced is a grounding error and fails the report even
     when every number in the draft is verified. `ignore_literals` names
     identifiers that appear in the text but are not quantitative claims, such
-    as a model identifier in the briefing header.
+    as a model identifier in the briefing header. `extra_facts` carries the
+    non-numeric citable facts, so a boolean finding can be cited too.
     """
-    citations = {
+    citations: dict[str, Any] = {
         entry.fact_key: entry.numeric_value
         for entry in ledger.entries
         if not entry.fact_key.endswith(("_round1", "_round2"))
     }
+    citations.update(extra_facts or {})
     resolved, unresolved = resolve_citations(draft_text, citations)
     leftover = sorted(
         {
@@ -402,6 +418,15 @@ def verify_grounded_draft(
         if literal:
             scrubbed = scrubbed.replace(literal, " ")
     report = ledger.verify_draft_text(scrubbed, rel_tolerance=rel_tolerance)
+    cited = len(CITATION_PATTERN.findall(draft_text))
+    if not cited and report.checked_numbers_count == 0:
+        report.passed = False
+        report.feedback_message = (
+            "VIOLATION OF DETERMINISTIC TOOL GATE: the draft states no quantity "
+            "and cites no fact. A briefing must rest on tool output: cite the "
+            "available facts, or say that the question cannot be answered from "
+            "them."
+        )
     if unresolved or leftover:
         report.unresolved_citations = leftover or sorted(set(unresolved))
         report.passed = False
@@ -436,6 +461,8 @@ class HarnessState(TypedDict):
     cognitive_tier: str
     triage_confidence: dict[str, float]
     triage_classification: dict[str, Any]
+    triage_fallback: str
     tool_surface: list[str]
     clarification_requests: list[dict[str, Any]]
     sign_off_decision: dict[str, Any]
+    verification_rejections: list[dict[str, Any]]

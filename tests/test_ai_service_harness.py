@@ -29,7 +29,7 @@ from ai_service.schemas import (
     CognitivePath,
     UseCaseId,
     VerifiedFactsLedger,
-    collect_citation_keys,
+    collect_citable_facts,
     resolve_citations,
     verify_grounded_draft,
 )
@@ -243,7 +243,7 @@ class TestFlareChronosDualSystemHarness(unittest.TestCase):
             "total_raw_detections": 50988,
             "nested": {"divergence_pct": 1330.0},
         }
-        citations = collect_citation_keys(payload)
+        citations = collect_citable_facts(payload)
         self.assertEqual(citations["harmonized_index_2005_eq_100"], 94.2)
         self.assertEqual(citations["total_raw_detections"], 50988.0)
         self.assertEqual(citations["nested.divergence_pct"], 1330.0)
@@ -492,6 +492,65 @@ class TestFlareChronosDualSystemHarness(unittest.TestCase):
         registered = {tool.name for tool in ALL_DETERMINISTIC_TOOLS}
         self.assertNotIn(ask_user_question.name, registered)
         self.assertIn("question", ask_user_question.description)
+
+    def test_23_identifier_digits_are_not_quantitative_claims(self) -> None:
+        """A satellite name carries digits that must not be read as a claim."""
+        ledger = VerifiedFactsLedger()
+        ledger.ingest_tool_payload("tool_test", {"harmonized_index": 94.2})
+        for draft in (
+            "Retiring NOAA-20 and NOAA-21 leaves the index at 94.2.",
+            "The Sentinel-2 record shows 94.2.",
+        ):
+            _, report = verify_grounded_draft(draft, ledger)
+            self.assertTrue(report.passed, msg=report.unverified_numbers)
+            self.assertEqual(report.unverified_numbers, [])
+
+    def test_24_boolean_findings_are_citable(self) -> None:
+        """A boolean finding may be cited, not only a number."""
+        payload = {
+            "use_case_id": "UC-1.2",
+            "observed_viirs_cluster_frp_mw": 18.5,
+            "explained_by_modis_offnadir_blindness": True,
+            "is_saa_nighttime_false_alarm": False,
+        }
+        facts = collect_citable_facts(payload)
+        self.assertIs(facts["explained_by_modis_offnadir_blindness"], True)
+        self.assertIs(facts["is_saa_nighttime_false_alarm"], False)
+
+        ledger = VerifiedFactsLedger()
+        ledger.ingest_tool_payload("tool_test", payload)
+        resolved, report = verify_grounded_draft(
+            "The gap is explained by {{explained_by_modis_offnadir_blindness}} at "
+            "{{observed_viirs_cluster_frp_mw}} MW, and SAA is "
+            "{{is_saa_nighttime_false_alarm}}.",
+            ledger,
+            extra_facts=facts,
+        )
+        self.assertTrue(report.passed, msg=report.unverified_numbers)
+        self.assertEqual(report.unresolved_citations, [])
+        self.assertIn("true", resolved)
+        self.assertIn("18.5", resolved)
+
+    def test_25_a_draft_without_any_fact_is_rejected(self) -> None:
+        """A briefing that cites nothing and states no quantity must not pass."""
+        ledger = VerifiedFactsLedger()
+        ledger.ingest_tool_payload("tool_test", {"harmonized_index": 94.2})
+        _, report = verify_grounded_draft(
+            "The fire situation is unclear and needs more investigation.",
+            ledger,
+        )
+        self.assertFalse(report.passed)
+        self.assertIn("cites no fact", report.feedback_message)
+
+    def test_26_a_draft_that_cites_a_fact_passes(self) -> None:
+        """A briefing that cites a fact passes even without a bare number."""
+        ledger = VerifiedFactsLedger()
+        ledger.ingest_tool_payload("tool_test", {"harmonized_index": 94.2})
+        _, report = verify_grounded_draft(
+            "The harmonized index is {{harmonized_index}}.",
+            ledger,
+        )
+        self.assertTrue(report.passed, msg=report.feedback_message)
 
 
 if __name__ == "__main__":

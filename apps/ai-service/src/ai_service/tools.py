@@ -757,6 +757,7 @@ def tool_uc3_1_constellation_retirement_simulation(
     continuity_drift_pct = round(
         100.0 * abs(jpss_harm_eps - full_harm_eps) / max(1.0, full_harm_eps), 2
     )
+    raw_count_drop_pct = round(100.0 * (full_raw - jpss_only_raw) / max(1, full_raw), 1)
 
     return {
         "use_case_id": "UC-3.1",
@@ -766,6 +767,7 @@ def tool_uc3_1_constellation_retirement_simulation(
         "jpss_only_noaa20_detections": j1_cnt,
         "jpss_only_noaa21_detections": j2_cnt,
         "jpss_only_total_raw_detections": jpss_only_raw,
+        "raw_count_drop_pct": raw_count_drop_pct,
         "full_5sat_harmonized_episodes": full_harm_eps,
         "jpss_only_harmonized_episodes": jpss_harm_eps,
         "post_retirement_continuity_drift_pct": continuity_drift_pct,

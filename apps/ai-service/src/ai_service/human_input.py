@@ -9,6 +9,7 @@ answer.
 
 from __future__ import annotations
 
+import json
 from typing import Any
 
 from langchain_core.tools import tool
@@ -26,8 +27,11 @@ def ask_user_question(
 
     Use this only when the request is genuinely ambiguous and no tool output
     answers the ambiguity, for example an unstated area of interest or an
-    unstated epoch. State one question. Add `options` when the choice is
-    finite. The operator's answer is returned as the tool result.
+    unstated epoch. Every tool parameter has a documented default: when the
+    request does not name a value, call the tool with its default and name
+    that assumption in the narrative instead of asking. State one question.
+    Add `options` when the choice is finite. The operator's answer is returned
+    as the tool result.
     """
     request: dict[str, Any] = {
         "kind": "clarification",
@@ -37,7 +41,7 @@ def ask_user_question(
     answer = interrupt(request)
     if isinstance(answer, dict):
         answer = answer.get("answer", answer)
-    return str(answer)
+    return json.dumps({"question": question, "answer": str(answer)}, ensure_ascii=False)
 
 
 HUMAN_INPUT_TOOLS = [ask_user_question]

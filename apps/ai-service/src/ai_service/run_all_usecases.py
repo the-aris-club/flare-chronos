@@ -109,19 +109,33 @@ USE_CASE_BENCHMARK_QUERIES: list[tuple[UseCaseId, str]] = [
 ]
 
 
-def run_all_benchmarks() -> dict[str, Any]:
+def run_all_benchmarks(
+    mode: str = "deterministic", enable_sign_off: bool = False
+) -> dict[str, Any]:
     """Run all 20 use cases + 3 symbiosis stress tests through the compiled LangGraph harness."""
     harness = FlareChronosDualSystemHarness(
-        mode="deterministic", enable_cache=True, enable_sign_off=False
+        mode=mode,  # type: ignore[arg-type]
+        enable_cache=True,
+        enable_sign_off=enable_sign_off,
     )
     use_case_runs: list[dict[str, Any]] = []
 
     for idx, (uc_enum, query) in enumerate(USE_CASE_BENCHMARK_QUERIES, start=1):
-        state_out = harness.invoke_use_case(
-            user_query=query,
-            use_case_id=uc_enum,
-            thread_id=f"bench-uc-{idx:02d}",
-        )
+        try:
+            state_out = harness.invoke_to_completion(
+                user_query=query,
+                use_case_id=uc_enum,
+                thread_id=f"bench-uc-{idx:02d}",
+            )
+        except Exception as exc:  # noqa: BLE001 - one failure must not stop the batch
+            use_case_runs.append(
+                {
+                    "use_case_id": uc_enum.value,
+                    "error": f"{type(exc).__name__}: {exc}"[:400],
+                    "verification_passed": False,
+                }
+            )
+            continue
         ver_report = state_out.get("verification_report", {})
         ledger_entries = state_out.get("verified_ledger_entries", [])
         use_case_runs.append(
@@ -140,10 +154,22 @@ def run_all_benchmarks() -> dict[str, Any]:
                 "self_correction_retries": int(
                     state_out.get("self_correction_retries", 0)
                 ),
+                "clarification_requests": len(
+                    state_out.get("clarification_requests", [])
+                ),
+                "clarification_questions": [
+                    c.get("question", "")
+                    for c in state_out.get("clarification_requests", [])
+                ],
+                "tool_rounds": sum(
+                    1 for m in state_out.get("messages", []) if getattr(m, "name", None)
+                ),
+                "verification_rejections": state_out.get("verification_rejections", []),
+                "usage": (state_out.get("live_telemetry") or {}).get("usage", {}),
                 "has_system2_reasoning_trace": bool(state_out.get("reasoning_trace")),
                 "synthesis_mode": state_out.get("synthesis_mode", "unknown"),
                 "final_briefing_preview": str(state_out.get("final_briefing", ""))[
-                    :260
+                    :1200
                 ],
             }
         )
@@ -160,7 +186,7 @@ def run_all_benchmarks() -> dict[str, Any]:
 
     # Symbiosis Test 2: NumericGroundingVerifier Reject & Self-Correction Loop
     repair_harness = FlareChronosDualSystemHarness(
-        mode="deterministic",
+        mode=mode,  # type: ignore[arg-type]
         inject_unverified_number_once=True,
         enable_cache=False,
         enable_sign_off=False,
@@ -237,14 +263,36 @@ def run_all_benchmarks() -> dict[str, Any]:
         "use_case_runs": use_case_runs,
     }
 
-    out_path = REPO_ROOT / "data" / "processed" / "ai_harness_results.json"
+    out_name = (
+        "ai_harness_results_live.json" if mode == "live" else "ai_harness_results.json"
+    )
+    out_path = REPO_ROOT / "data" / "processed" / out_name
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(json.dumps(summary_payload, indent=2), encoding="utf-8")
     return summary_payload
 
 
 if __name__ == "__main__":
-    results = run_all_benchmarks()
+    import argparse
+
+    parser = argparse.ArgumentParser(
+        description="Chạy toàn bộ 20 Use Cases của Dual-System Harness."
+    )
+    parser.add_argument(
+        "--live",
+        action="store_true",
+        help="Gọi mô hình thật (tốn credit). Mặc định chạy ngoại tuyến.",
+    )
+    parser.add_argument(
+        "--sign-off",
+        action="store_true",
+        help="Bật cổng phê duyệt của con người (run sẽ dừng chờ).",
+    )
+    args = parser.parse_args()
+    results = run_all_benchmarks(
+        mode="live" if args.live else "deterministic",
+        enable_sign_off=args.sign_off,
+    )
     print(
         json.dumps(
             {
