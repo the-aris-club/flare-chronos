@@ -517,6 +517,18 @@ Nhà cung cấp công bố nhiều mô hình trên cùng một gói miễn phí;
 
 ⇒ Tầng phản xạ dùng **`gemma4:31b`**: chính xác tuyệt đối, nhanh nhất và tiết kiệm token nhất. Sai lệch tầng không ảnh hưởng định tuyến, vì **Use Case tường minh luôn thắng** ([`ADR-0008`](../docs/adr/0008-model-driven-tool-selection-sign-off-and-event-stream.md)).
 
+**Về cột độ trễ:** độ trễ đo được là thuộc tính của **nhà cung cấp và hạ tầng phục vụ tại thời điểm đo**, **không phải** thuộc tính của mô hình — nó đổi theo tải của provider, không đổi theo mô hình. Vì vậy độ trễ **không được dùng làm tiêu chí chọn mô hình**. Tiêu chí là những thứ đo được và thuộc về mô hình: **độ đúng** trên dữ liệu của chính dự án, **số token** đọc và ghi, và **mức độ tuân thủ gọi tool**.
+
+**Chi phí token — thuộc tính của kiến trúc, độc lập provider** (đo trên các use case suy luận):
+
+| Tầng | Số lượt gọi mô hình | Token đầu vào / lượt | Token đầu ra / lượt | Ghi chú |
+| --- | --- | --- | --- | --- |
+| **Tầng báo cáo (không gọi mô hình)** | **0** | **0** | **0** | chỉ chạy tool tất định; **không phụ thuộc provider** |
+| Tầng phản xạ (phân loại) | 1 | 1.007 | 52 | bề mặt tool hẹp, một lượt |
+| Tầng suy luận | 2 | **3.051** | **463** | `23` schema tool + system prompt dài + diễn giải có trích dẫn |
+
+Chênh lệch **token** là cấu trúc: lượt suy luận phải đọc toàn bộ bề mặt tool và viết diễn giải có trích dẫn. Chênh lệch **giây** là của provider: cùng một lượt gọi đo được `p50 = 1,81 s` nhưng `p95 = 7,76 s`.
+
 **Tầng suy luận (`System 2`)** — đo bằng **cả benchmark đầy đủ** cho từng mô hình:
 
 | Mô hình | Vượt kiểm chứng | Báo cáo do LLM viết | Vòng tool | Tự sửa | Hỏi làm rõ | Chạy **không** suy luận | Thời gian TB |
@@ -556,6 +568,16 @@ Cả `20` Use Case trong benchmark đều **ghi rõ mã use case**, nên quyết
 | `beam` | 20 / 20 | 1,91 s |
 | `nemotron-3-super` | 19 / 20 | 3,00 s |
 | `gpt-oss:120b` | 8 / 20 (trả *mô tả* thay vì *mã*) | 1,58 s |
+
+**Lời gọi mô hình của tầng phản xạ có gánh trọng không?** Có. Phép đo trên `8` truy vấn nêu **vị trí gián tiếp** (không chứa chữ "amazon"/"mekong"):
+
+| Cách xác định vùng | Đúng |
+| --- | --- |
+| Trích xuất theo văn bản (mặc định `mekong` khi không nhận ra tên địa danh) | **3 / 8** |
+| Mô hình phân loại (đọc tên địa danh: `Manaus`, `Pará`, `Rio Grande do Sul`, `Congo Basin`, `Red River Delta`, `Tonle Sap`) | **8 / 8** |
+
+⇒ Nếu bỏ lời gọi mô hình, một truy vấn về `Manaus` sẽ âm thầm chạy phân tích trên **dữ liệu Mekong**, và **không cơ chế nào báo lỗi**. Đây là lý do tầng phản xạ tồn tại: nó phân giải vùng từ văn bản tự nhiên, việc mà trích xuất theo mẫu không làm được.
+
 
 ⇒ **Mô hình quyết định chuyên dụng là không cần thiết.** Mô hình chat nhỏ, miễn phí, gán đúng phân tích cho cả `20` truy vấn tự nhiên trong `1,26` giây. Mô hình quyết định chuyên dụng chỉ bổ sung **xác suất hiệu chuẩn** — mà ngưỡng định tuyến hiện so sánh với một **giá trị nhị phân**, nên xác suất đó **không thay đổi bất kỳ quyết định nào**. Đổi lại phải trả tiền, thêm phụ thuộc credit, và thêm một giao thức riêng.
 

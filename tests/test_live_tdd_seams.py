@@ -281,6 +281,11 @@ class TestLiveDualSystemSeamsTDD(unittest.TestCase):
                 UseCaseId.UC_S1_3_SINGLE_HOP_LOOKUP,
                 "amazon",
             ),
+            (
+                "UC-1.3 Classify thermal source origins near Manaus in 2024.",
+                UseCaseId.UC_1_3_THERMAL_SOURCE_ORIGIN,
+                "amazon",
+            ),
         ]
         for index, (query, expected_use_case, expected_region) in enumerate(cases):
             out = harness.invoke_use_case(

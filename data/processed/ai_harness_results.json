@@ -24,7 +24,7 @@
     "calibrated"
   ],
   "zero_unverified_numbers_in_final_outputs": true,
-  "total_duration_sec": 0.05,
+  "total_duration_sec": 0.01,
   "slowest_use_cases": [
     [
       "UC-S1.1",
@@ -32,19 +32,19 @@
     ],
     [
       "UC-S1.2",
-      0.01
+      0.0
     ],
     [
       "UC-S1.3",
-      0.01
+      0.0
     ],
     [
-      "UC-2.2",
-      0.01
+      "UC-S1.4",
+      0.0
     ],
     [
-      "UC-5.3",
-      0.01
+      "UC-S1.5",
+      0.0
     ]
   ],
   "symbiosis_benchmarks": {
@@ -128,7 +128,7 @@
       },
       "has_system2_reasoning_trace": false,
       "synthesis_mode": "deterministic",
-      "duration_sec": 0.01,
+      "duration_sec": 0.0,
       "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system1_fast_lookup | System 1: gemma4:31b | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-S1.2)\n- **Tool Executed (`tool_lookup_single_epoch_metrics`)**:\n  - `use_case_id`: UC-S1.3\n  - `region`: amazon\n  - `year`: **2024**\n  - `total_raw_detections`: **112405**\n  - `modis_reference_detections`: **8151**\n  - `deduplicated_fire_episodes`: **22579**\n  - `effective_observation_effort_omega`: **2.0847**\n  - `harmonized_viirs_eq_episodes`: **7318.1**\n  - `raw_index_2005_eq_100`: **814.3**\n  - `harmonized_index_2005_eq_100`: **70.7**\n  - `raw_vs_harmonized_index_divergence_pct`: **743.6**\n  - `saa_rejected_count`: **18097**"
     },
     {
@@ -155,7 +155,7 @@
       },
       "has_system2_reasoning_trace": false,
       "synthesis_mode": "deterministic",
-      "duration_sec": 0.01,
+      "duration_sec": 0.0,
       "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system1_fast_lookup | System 1: gemma4:31b | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-S1.3)\n- **Tool Executed (`tool_lookup_single_epoch_metrics`)**:\n  - `use_case_id`: UC-S1.3\n  - `region`: mekong\n  - `year`: **2024**\n  - `total_raw_detections`: **50988**\n  - `modis_reference_detections`: **3446**\n  - `deduplicated_fire_episodes`: **22557**\n  - `effective_observation_effort_omega`: **2.0975**\n  - `harmonized_viirs_eq_episodes`: **7266.4**\n  - `raw_index_2005_eq_100`: **1424.2**\n  - `harmonized_index_2005_eq_100`: **94.2**\n  - `raw_vs_harmonized_index_divergence_pct`: **1330.0**\n  - `saa_rejected_count`: **0**"
     },
     {
@@ -349,7 +349,7 @@
       },
       "has_system2_reasoning_trace": true,
       "synthesis_mode": "deterministic",
-      "duration_sec": 0.01,
+      "duration_sec": 0.0,
       "final_briefing_preview": "[FIELD_RANGER BRIEFING | Cognitive Path: system2_deliberative | System 1: gemma4:31b | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-2.2)\n- **Tool Executed (`tool_uc2_2_uncertainty_aware_tactical_dispatch`)**:\n  - `use_case_id`: UC-2.2\n  - `modis_edge_area_km2`: **9.6875**\n  - `modis_edge_scan_km`: **4.8299**\n  - `modis_edge_track_km`: **2.0057**\n  - `ellipse_track_azimuth_deg`: **351.54**\n  - `modis_h3_res8_search_cells`: **10**\n  - `viirs_refinement_area_km2`: **0.4947**\n  - `viirs_h3_res8_search_cells`: **1**\n  - `search_area_reduction_factor`: **19.58**\n  - `afternoon_train_intervals_minutes`: **25**\n  - `episode_clustering_window_minutes`: **95**\n- **Tool Executed (`tool_compute_footprint_and_h3_allocation`)**:\n  - `sensor`: MODIS\n  - `scan_angle_deg`: **55.0**\n  - `scan_km`: **4.8299**\n  - `track_km`: **2.0057**\n  - `footprint_area_km2`: **9.6875**\n  - `aggregation_zone`: **0**\n  - `track_azimuth_deg`: **351.53**\n  - `h3_res7_cell_count`: **5**\n  - `h3_res8_cell_count`: **12**\n  - `weight_conservation_sum_res7`: **1.0**\n  - `weight_conservation_sum_res8`: **1.0**"
     },
     {
@@ -622,7 +622,7 @@
       },
       "has_system2_reasoning_trace": true,
       "synthesis_mode": "deterministic",
-      "duration_sec": 0.01,
+      "duration_sec": 0.0,
       "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: gemma4:31b | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-5.3)\n- **Tool Executed (`tool_uc5_3_transboundary_fire_propagation_forensics`)**:\n  - `use_case_id`: UC-5.3\n  - `corridor_bbox`: 100.0,11.0,109.5,23.5\n  - `h3_res7_cell_area_km2`: **5.161**\n  - `h3_res8_cell_area_km2`: **0.737**\n  - `el_nino_2016_raw_detections`: **43342**\n  - `el_nino_2016_fire_episodes`: **22573**\n  - `el_nino_2016_harmonized_episodes`: **15124.3**\n  - `2024_raw_detections`: **50988**\n  - `2024_fire_episodes`: **22557**\n  - `2024_harmonized_episodes`: **7266.4**"
     }
   ]
