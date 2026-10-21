@@ -100,3 +100,25 @@ _Avoid_: Fire risk score, anomaly percent
 **Burning Activity Calendar**:
 The two-dimensional phenological matrix ($\text{Year} \times \text{Pentad}$) and polar seasonal clock displaying Harmonized Fire Density, Harmonized Radiative Flux, and Standardized Fire Anomaly Index for an Area of Interest.
 _Avoid_: Fire heatmap, hotspot timeline
+
+### Visual Communication Artifacts
+
+**Scientific Figure**:
+A publication-grade chart rendered directly from the empirical results by `benchmark_cli.figure_renderer`, carrying measured values, units and axis labels. It is a build artifact — regenerated from code, never hand-edited, never re-labelled for narrative effect.
+_Avoid_: Chart, plot, graph, illustration
+
+**Narrative Asset**:
+A hand-authored visual — motion graphic, 3D scene, title card or map animation — produced for the pitch video to explain the science. It may depict a concept truthfully but it never substitutes for a Scientific Figure, and it is never labelled as a measurement.
+_Avoid_: Figure, chart, data viz, screenshot, mock-up
+
+**Live Visualization**:
+The interactive Deck.gl / MapLibre workbench specified in `docs/04_UI_UX_Burning_Calendar_Wireframe.md`, which renders the harmonization engine's output on demand rather than pre-rendering it. Specified but not yet implemented.
+_Avoid_: UI, dashboard, app, interactive demo
+
+**Main Submission Video**:
+The 120-second primary pitch deliverable for NASA Space Apps, cut to the shot script in `docs/05_Pitch_Deck_and_Video_Script.md` §3.1.
+_Avoid_: Demo, promo, trailer, explainer
+
+**Fast Pitch**:
+The 30-second condensed cut of the Main Submission Video, for judge screening and short-form channels. Reserved in the §3 script heading but not yet written.
+_Avoid_: Teaser, trailer, short, bumper
