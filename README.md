@@ -76,7 +76,7 @@ See [`docs/00_Project_Name_and_Acronym.md`](docs/00_Project_Name_and_Acronym.md)
 - **Spatio-temporal deduplication**: multi-satellite overpass clustering into Fire Episodes (τ = 95 min).
 - **Effort normalization**: Ω(year, latitude) prevents constellation-expansion artificial trends.
 - **Burning Activity Calendar**: 26 Years × 73 Pentads matrix of HFD / HRF / SFAI with robust seasonal Z-scores.
-- **Dual-System Cognitive AI Harness (`apps/ai-service`)**: LangGraph orchestration pairing a **System 1 typed-questions endpoint** (reflexive triage, calibrated probabilities) with a **System 2 native chat endpoint** (deliberative reasoning) across **20 Use Cases** and **23 deterministic `@tool` functions**. The model chooses its own tool calls; the harness only decides which tools each tier may reach. Every briefing is a **Grounded Narrative**: the model authors the interpretation while the harness injects every quantity from the `VerifiedFactsLedger`, checked by a `NumericGroundingVerifier`. Briefings that authorize a field action pause for a **human sign-off** before they are released. Each layer is bound through an **Endpoint Profile** (protocol, endpoint, model, API key, request options) resolved from explicit configuration only — never from the host's agent tooling configuration ([ADR-0006](docs/adr/0006-explicit-endpoint-profiles-and-grounded-narrative-assembly.md), [ADR-0007](docs/adr/0007-model-driven-tool-selection-sign-off-and-event-stream.md)).
+- **Dual-System Cognitive AI Harness (`apps/ai-service`)**: LangGraph orchestration pairing a **System 1 classifier** (reflexive triage and entity extraction) with a **System 2 native chat endpoint** (deliberative reasoning) across **20 Use Cases** and **23 deterministic `@tool` functions**. The model chooses its own tool calls; the harness only decides which tools each tier may reach. Every briefing is a **Grounded Narrative**: the model authors the interpretation while the harness injects every quantity from the `VerifiedFactsLedger`, checked by a `NumericGroundingVerifier`. Briefings that authorize a field action pause for a **human sign-off** before they are released. Each layer is bound through an **Endpoint Profile** (protocol, endpoint, model, API key, request options) resolved from explicit configuration only — never from the host's agent tooling configuration ([ADR-0006](docs/adr/0006-explicit-endpoint-profiles-and-grounded-narrative-assembly.md), [ADR-0008](docs/adr/0008-model-driven-tool-selection-sign-off-and-event-stream.md)).
 - **Deep-module monorepo**: pure core (zero I/O) behind a clean seam; ingestion adapter; benchmark CLI; dual-system AI service; PDF exports (`exports/PROPOSAL.pdf` & `exports/REPORT.pdf`).
 
 ---
@@ -223,8 +223,16 @@ uv run python -m pytest -m live  # live suite; calls a hosted model and spends c
 The live suite is excluded from the default run and from continuous integration. It runs only from the manually triggered `Live Model Tests` workflow, so provider credit is spent only on request. Configure the credentials in the environment or in the workspace `.env` file:
 
 ```bash
-export SYSTEM1_API_KEY=...   # System 1 typed-questions endpoint
-export SYSTEM2_API_KEY=...   # System 2 native chat endpoint
+export SYSTEM1_API_KEY=...   # System 1 classifier
+export SYSTEM2_API_KEY=...   # System 2 deliberative layer
+```
+
+The whole benchmark can also be run against a real model, which writes its
+measurements — tool rounds, clarifications, verification rejections, token
+usage — to `data/processed/ai_harness_results_live.json`:
+
+```bash
+uv run python apps/ai-service/src/ai_service/run_all_usecases.py --live
 ```
 
 The harness also exposes the run as a typed event stream, encodable as Server-Sent Events for a web client:

@@ -21,15 +21,16 @@ harness:
 
 models:
   system1_reflexive:
-    role: "System 1 Reflexive Layer (Fast Triage, Entity Extraction, 1-Hop Lookup, Flash NRT Alert, Stakeholder Formatting)"
-    protocol: "typed_questions"
-    endpoint: "https://opencode.ai/inference/systemone/v1/systemone"
+    role: "System 1 Reflexive Layer (Intent & Entity Classification, 1-Hop Lookup, Flash NRT Alert, Stakeholder Fact Card)"
+    protocol: "native_chat"
+    endpoint: "https://ollama.com/api/chat"
     endpoint_env: "SYSTEM1_ENDPOINT"
-    model_id: "jev-1.13-free"
+    model_id: "beam"
     model_env: "SYSTEM1_MODEL"
     api_key_env: "SYSTEM1_API_KEY"
     request:
-      timeout_ms: 30000
+      timeout_ms: 60000
+      thinking_level: false
       user_agent: "flare-chronos/2.0.0"
     assigned_use_cases:
       - "UC-S1.1"  # Reflexive Intent & Urgency Triage (<150ms routing)

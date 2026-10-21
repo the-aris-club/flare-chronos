@@ -44,6 +44,8 @@ from langchain_core.tools import BaseTool
 from langchain_core.utils.function_calling import convert_to_openai_tool
 from pydantic import BaseModel, Field
 
+from ai_service.classification import classification_answers, classify_request
+from ai_service.prompts import system1_classification_prompt
 from ai_service.schemas import (
     SpatioTemporalQueryEntity,
     UseCaseId,
@@ -699,8 +701,8 @@ class SystemOneChatModel(HarnessChatModel):
         return ChatResult(generations=[ChatGeneration(message=message)])
 
 
-class SystemTwoChatModel(HarnessChatModel):
-    """Live System 2 adapter for the native chat protocol.
+class NativeChatModel(HarnessChatModel):
+    """Live adapter for the native chat protocol, used by both cognitive tiers.
 
     The endpoint returns the model's deliberation as a dedicated `thinking`
     field, which the harness records as reasoning evidence. The model chooses
@@ -708,6 +710,10 @@ class SystemTwoChatModel(HarnessChatModel):
     visible to it. On the writing turn the model cites every quantity as a
     `{{fact_key}}` placeholder, and the harness resolves those placeholders
     against the Verified Facts Ledger, so the model never writes a number.
+
+    The Reflexive Layer uses the same transport for a different job: it answers
+    one structured classification of the request, which the harness turns into
+    the entity and the cognitive tier.
     """
 
     profile: EndpointProfile
@@ -778,12 +784,29 @@ class SystemTwoChatModel(HarnessChatModel):
             "User-Agent": self.profile.request.user_agent,
             "Authorization": f"Bearer {resolve_api_key(self.profile)}",
         }
-        return _post_json(
+        response = _post_json(
             self.profile.endpoint,
             payload,
             headers,
             self.profile.request.timeout_ms / 1000.0,
         )
+        message = response.get("message") or {}
+        produced_nothing = not (
+            message.get("content")
+            or message.get("tool_calls")
+            or message.get("thinking")
+        )
+        if produced_nothing and payload.get("think") not in (False, None):
+            # A deliberating model sometimes stops without emitting anything.
+            # Asking again without deliberation always produces a turn.
+            retry_payload = {**payload, "think": False}
+            return _post_json(
+                self.profile.endpoint,
+                retry_payload,
+                headers,
+                self.profile.request.timeout_ms / 1000.0,
+            )
+        return response
 
     @staticmethod
     def _to_langchain_tool_calls(
@@ -811,6 +834,36 @@ class SystemTwoChatModel(HarnessChatModel):
                 }
             )
         return converted
+
+    def classify(
+        self,
+        state_text: str,
+        questions: dict[str, Any],
+        entity: SpatioTemporalQueryEntity,
+    ) -> dict[str, Any]:
+        """Classify the request through the structured classification channel.
+
+        The model answers by calling `classify_request`; the harness reads the
+        call arguments. The confidence is the model's own estimate, not a
+        calibrated probability.
+        """
+        payload = self._build_payload(
+            [
+                SystemMessage(system1_classification_prompt(entity)),
+                HumanMessage(state_text),
+            ],
+            [classify_request],
+        )
+        payload["think"] = False
+        response = self._call(payload)
+        message_data = response.get("message", {})
+        calls = self._to_langchain_tool_calls(message_data.get("tool_calls") or [])
+        if not calls:
+            raise EndpointCallError(
+                "The classifier returned no classification call.", 502
+            )
+        args = dict(calls[0].get("args") or {})
+        return classification_answers(args, self.profile.model_id)
 
     def _generate(
         self,
@@ -875,15 +928,23 @@ class SystemTwoChatModel(HarnessChatModel):
 
 def build_live_system1_chat_model(
     cfg: dict[str, Any] | None = None,
-) -> SystemOneChatModel:
-    """Create the live System 1 client for the typed-questions protocol."""
+) -> HarnessChatModel:
+    """Create the live System 1 client for the configured protocol."""
     config = cfg or load_harness_config()
     profile = resolve_endpoint_profile(config, "system1_reflexive")
-    return SystemOneChatModel(
+    if profile.protocol == "typed_questions":
+        return SystemOneChatModel(
+            role="system1_reflexive",
+            model_id=profile.model_id,
+            source_label=profile.endpoint,
+            reasoning_effort="low",
+            profile=profile,
+        )
+    return NativeChatModel(
         role="system1_reflexive",
         model_id=profile.model_id,
         source_label=profile.endpoint,
-        reasoning_effort="low",
+        reasoning_effort=str(profile.request.thinking_level or "low"),
         profile=profile,
     )
 
@@ -891,11 +952,11 @@ def build_live_system1_chat_model(
 def build_live_system2_chat_model(
     cfg: dict[str, Any] | None = None,
     inject_unverified_number_once: bool = False,
-) -> SystemTwoChatModel:
+) -> NativeChatModel:
     """Create the live System 2 client for the native chat protocol."""
     config = cfg or load_harness_config()
     profile = resolve_endpoint_profile(config, "system2_deliberative")
-    return SystemTwoChatModel(
+    return NativeChatModel(
         role="system2_deliberative",
         model_id=profile.model_id,
         source_label=profile.endpoint,

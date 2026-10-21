@@ -157,6 +157,12 @@ def run_all_benchmarks(
                 "clarification_requests": len(
                     state_out.get("clarification_requests", [])
                 ),
+                "triage_fallback": (state_out.get("live_telemetry") or {}).get(
+                    "triage_fallback", ""
+                ),
+                "triage_confidence_source": (state_out.get("live_telemetry") or {}).get(
+                    "triage_confidence_source", ""
+                ),
                 "clarification_questions": [
                     c.get("question", "")
                     for c in state_out.get("clarification_requests", [])
@@ -226,6 +232,12 @@ def run_all_benchmarks(
         "deterministic_tools_registered": 23,
         "all_verifications_passed": all(
             r["verification_passed"] for r in use_case_runs
+        ),
+        "triage_fallbacks": [
+            r["use_case_id"] for r in use_case_runs if r.get("triage_fallback")
+        ],
+        "triage_confidence_sources": sorted(
+            {r.get("triage_confidence_source", "") for r in use_case_runs}
         ),
         "zero_unverified_numbers_in_final_outputs": all(
             r["unverified_numbers_count"] == 0 for r in use_case_runs

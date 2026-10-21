@@ -44,7 +44,7 @@ class TestFlareChronosDualSystemHarness(unittest.TestCase):
         s1_cfg = cfg["models"]["system1_reflexive"]
         s2_cfg = cfg["models"]["system2_deliberative"]
 
-        self.assertEqual(s1_cfg["protocol"], "typed_questions")
+        self.assertEqual(s1_cfg["protocol"], "native_chat")
         self.assertEqual(s1_cfg["api_key_env"], "SYSTEM1_API_KEY")
         self.assertTrue(s1_cfg["endpoint"].startswith("https://"))
         self.assertTrue(s1_cfg["model_id"])
@@ -551,6 +551,44 @@ class TestFlareChronosDualSystemHarness(unittest.TestCase):
             ledger,
         )
         self.assertTrue(report.passed, msg=report.feedback_message)
+
+    def test_27_the_classification_channel_is_outside_the_data_registry(self) -> None:
+        """The classification tool is a channel to the harness, not a data tool."""
+        from ai_service.classification import classify_request
+
+        registered = {tool.name for tool in ALL_DETERMINISTIC_TOOLS}
+        self.assertNotIn(classify_request.name, registered)
+        from langchain_core.utils.function_calling import convert_to_openai_tool
+
+        parameters = convert_to_openai_tool(classify_request)["function"]["parameters"][
+            "properties"
+        ]
+        self.assertEqual(
+            set(parameters),
+            {"region", "is_deliberative", "urgency", "focus_epoch", "confidence"},
+        )
+
+    def test_28_classification_answers_match_the_typed_questions_shape(self) -> None:
+        """Both protocols answer the harness in the same shape."""
+        from ai_service.classification import classification_answers
+
+        payload = classification_answers(
+            {
+                "region": "Amazon",
+                "is_deliberative": True,
+                "urgency": False,
+                "focus_epoch": 2019,
+                "confidence": 0.8,
+            },
+            "model-x",
+        )
+        answers = payload["answers"]
+        self.assertEqual(payload["confidence_source"], "self_reported")
+        self.assertEqual(answers["region"]["choice"], "amazon")
+        self.assertEqual(answers["region"]["confidence"], 0.8)
+        self.assertEqual(answers["is_deliberative"]["noul"], 1.0)
+        self.assertEqual(answers["urgency"]["noul"], 0.0)
+        self.assertEqual(answers["focus_epoch"]["choice"], "2019")
 
 
 if __name__ == "__main__":

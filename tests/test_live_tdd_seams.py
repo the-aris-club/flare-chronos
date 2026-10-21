@@ -88,16 +88,18 @@ class TestLiveDualSystemSeamsTDD(unittest.TestCase):
         self.assertEqual(out["verification_report"]["unresolved_citations"], [])
         self.assertIn("94.2", out["final_briefing"])
 
-        # The System 1 classifier answers the typed-questions payload and the
-        # harness records that classification in the run state.
+        # The System 1 classifier answers with a structured classification and
+        # the harness records it in the run state.
         classification = out["triage_classification"]
         configured_model = resolve_endpoint_profile(
             load_harness_config(), "system1_reflexive"
         ).model_id
         self.assertEqual(classification["model"], configured_model)
         self.assertEqual(classification["answers"]["region"]["choice"], "mekong")
-        self.assertGreater(out["triage_confidence"]["is_deliberative"], 0.0)
+        # A single-hop lookup is not a deliberative request, so the classifier
+        # routes it to the fast tier.
         self.assertEqual(out["cognitive_tier"], "fast")
+        self.assertLessEqual(out["triage_confidence"]["is_deliberative"], 0.5)
 
     def test_slice_3_live_system2_deliberative_attribution_seam_with_reasoning_trace(
         self,

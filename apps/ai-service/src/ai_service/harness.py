@@ -171,6 +171,15 @@ class FlareChronosDualSystemHarness:
                 reasoning_effort=str(s2_profile.request.thinking_level or "low"),
                 inject_unverified_number_once=inject_unverified_number_once,
             )
+        # The fast tier returns a fact card, not a narrative, so it never asks a
+        # model to write. It executes one Atomic Tool and formats the result.
+        self.system1_fast_model = DeterministicHarnessChatModel(
+            role="system1_reflexive",
+            model_id=s1_profile.model_id,
+            source_label=s1_profile.endpoint,
+            reasoning_effort="low",
+            inject_unverified_number_once=False,
+        )
 
         self.graph = self._compile_state_graph()
 
@@ -340,7 +349,7 @@ class FlareChronosDualSystemHarness:
             # The classifier is an enhancement over the provisional extraction.
             # A transient endpoint failure must not take the whole run down.
             triage_fallback = f"classifier_unavailable: {exc}"[:200]
-            classification = {"answers": {}}
+            classification = {"answers": {}, "confidence_source": "none"}
         answers = classification.get("answers", {}) or {}
         entity, confidence, tier = self._refine_entity(
             provisional, answers, explicit_use_case
@@ -426,7 +435,9 @@ class FlareChronosDualSystemHarness:
             str((state.get("extracted_entity") or {}).get("use_case_id", ""))
         )
         bound_tools = [TOOL_MAP[name] for name in surface if name in TOOL_MAP]
-        bound_s1 = self._apply_plan(self.system1_model.bind_tools(bound_tools), surface)
+        bound_s1 = self._apply_plan(
+            self.system1_fast_model.bind_tools(bound_tools), surface
+        )
         response = bound_s1.invoke(state["messages"])
         updates: dict[str, Any] = {"messages": [response]}
         if isinstance(response, AIMessage) and not response.tool_calls:
@@ -840,6 +851,11 @@ class FlareChronosDualSystemHarness:
             "triage_confidence": state.get("triage_confidence", {}),
             "triage_classification": state.get("triage_classification", {}),
             "triage_fallback": state.get("triage_fallback", ""),
+            "triage_confidence_source": str(
+                (state.get("triage_classification") or {}).get(
+                    "confidence_source", "calibrated"
+                )
+            ),
             "clarification_requests": state.get("clarification_requests", []),
             "sign_off_decision": state.get("sign_off_decision", {}),
             "usage": {
@@ -1031,13 +1047,16 @@ class FlareChronosDualSystemHarness:
             request = pending[0]
             if request.get("kind") != "clarification":
                 return state
-            options = request.get("options") or []
             if answers:
                 answer = answers.pop(0)
-            elif options:
-                answer = str(options[0])
             else:
-                answer = "Proceed with the documented default values."
+                # A generic instruction, never a numeric guess: a number that
+                # came from an answer rather than from a tool would fail the
+                # grounding gate.
+                answer = (
+                    "Proceed with the tool's documented default values and state "
+                    "that assumption in the narrative."
+                )
             state = self.graph.invoke(
                 Command(resume={"answer": answer}), self._run_config(thread_id)
             )

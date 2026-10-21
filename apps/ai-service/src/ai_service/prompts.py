@@ -83,6 +83,8 @@ request does not name a value, call the tool with its default and name that \
 assumption in the narrative. Do not ask the operator for a parameter default.
 - Ask the operator only when no default can stand in for a missing input, for \
 example an unstated area of interest or an unstated epoch.
+- Ask each question at most once. If the operator's answer does not settle the \
+matter, proceed with the tool defaults and name the assumption.
 - Never leave a question for the operator inside your answer. When you need the \
 operator's input, call `ask_user_question` and wait for the answer.
 - Ask at most {max_clarifications} questions in one run, one question at a time.
@@ -135,6 +137,26 @@ def system1_typed_questions(
             "criteria": dict(EPOCH_OPTIONS),
         }
     return questions
+
+
+def system1_classification_prompt(entity: SpatioTemporalQueryEntity) -> str:
+    """Build the prompt that makes the Reflexive Layer classify the request."""
+    provisional = (
+        f"EPOCHS STATED IN THE REQUEST: "
+        f"{', '.join(str(y) for y in entity.epoch_years) or 'none'}"
+    )
+    return (
+        "You are FLARE-CHRONOS System 1, the Reflexive Layer of a "
+        "dual-process fire-intelligence system.\n"
+        "\n"
+        "Classify the operator's request before any tool runs. Call "
+        "`classify_request` exactly once, with the fields the tool describes.\n"
+        "\n"
+        "You do not answer the request and you call no other tool. The harness "
+        "routes the request, chooses the tools, and writes the briefing.\n"
+        "\n"
+        f"{provisional}"
+    )
 
 
 def system2_system_prompt(

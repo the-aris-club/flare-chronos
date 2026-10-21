@@ -1,4 +1,4 @@
-# 0007. Model-Driven Tool Selection, Tiered Tool Surfaces, Human Sign-off and an Event Stream
+# 0008. Model-Driven Tool Selection, Tiered Tool Surfaces, Human Sign-off and an Event Stream
 
 **Status:** accepted
 
@@ -22,14 +22,17 @@ We also rejected building the agent loop on `create_react_agent`. It is deprecat
 
 1. **The model chooses the tools.** System 2 receives the deterministic tool surface and decides which tools to call and with which arguments, in a loop that ends when it stops calling tools. The harness bounds the loop with a reasoning-step budget and falls back to the deterministic formatter when the budget is exhausted.
 2. **The tier is defined by the tool surface, not by a use-case list.** The System 1 Reflexive Layer reaches only the Atomic Tools, so the tier that reports can never reach a derivation. The System 2 Deliberative Layer reaches the Atomic Tools, the Domain Diagnostic Tools, and the clarification tool. The raw FIRMS slice harmoniser stays outside the registry and outside the model's reach.
-3. **System 1 classifies before it routes.** The triage node asks the typed-questions endpoint for the region, the urgency, and whether the request is deliberative, and merges the calibrated answers into the entity. The model's answer may override the inferred cognitive tier only when the operator did not name a use case; an explicit use case always wins.
-4. **The System 1 fast tier stays a single hop.** The fast tier executes one Atomic Tool and returns a grounded fact card. It never writes an analytical narrative.
+3. **System 1 classifies before it routes.** The triage node asks the classifier for the region, the urgency, and whether the request is deliberative, and merges the answer into the entity. The model's answer may override the inferred cognitive tier only when the operator did not name a use case; an explicit use case always wins. The Reflexive Layer may speak either the typed-questions protocol, whose answer carries a calibrated probability, or the native chat protocol, where the model answers through a structured classification tool and its confidence is self-reported. The harness records which of the two produced the answer, so a self-reported estimate is never read as a calibrated one.
+4. **The System 1 fast tier stays a single hop.** The fast tier executes one Atomic Tool and returns a grounded fact card. It never writes an analytical narrative, and it asks no model to write: a fact card is a formatted tool output, so the tier answers without a language-model turn.
 5. **Guidance moves into a system prompt.** The domain brief, the tool discipline, the citation protocol, and the clarification rules live in one prompt per tier, in the spirit of a coding agent's system prompt. The harness no longer scripts a step-by-step plan into the conversation.
-6. **Sign-off suspends the run.** A use case listed in `requires_sign_off` pauses at a sign-off gate through LangGraph's `interrupt`. The run resumes with the human's answer. A rejected sign-off releases no briefing; the decision is recorded either way.
-7. **Clarification is a tool, not a special case.** The model may raise a clarification request through a tool that interrupts the run. It is bounded, and it authorizes nothing.
-8. **The run is an event stream.** The harness exposes typed events, and an SSE encoder turns them into frames. A paused run is one segment of the stream; the human's answer starts the next segment with the same thread identifier.
-9. **The durable checkpointer is injected.** The harness accepts a checkpointer, so an offline test injects an in-memory one and a sign-off run injects the SQLite one, which lets a paused run survive a process restart.
-10. **Retries are bounded and selective.** A model node retries a transport failure or a server error and never a client error. The deterministic tool node caches its result, because a tool's output is a pure function of its arguments.
+6. **The model is told to stop.** An early revision told it to call as many tools as the question needs, and it did: one use case burned eight tool rounds and ended on the deterministic floor. The discipline now says to start with the tool that matches the use case, to call the smallest set that answers the question, and to stop once the output answers it.
+7. **A deliberating model that says nothing is asked again.** A model in a thinking mode sometimes stops without emitting a tool call or any content. The adapter detects that and repeats the call without deliberation, which always produces a turn.
+8. **Sign-off suspends the run.** A use case listed in `requires_sign_off` pauses at a sign-off gate through LangGraph's `interrupt`. The run resumes with the human's answer. A rejected sign-off releases no briefing; the decision is recorded either way.
+9. **Clarification is a tool, not a special case.** The model may raise a clarification request through a tool that interrupts the run. It is bounded, and it authorizes nothing. A clarification is answered automatically only by a batch run, never a sign-off.
+10. **The run is an event stream.** The harness exposes typed events, and an SSE encoder turns them into frames. A paused run is one segment of the stream; the human's answer starts the next segment with the same thread identifier.
+11. **The durable checkpointer is injected.** The harness accepts a checkpointer, so an offline test injects an in-memory one and a sign-off run injects the SQLite one, which lets a paused run survive a process restart.
+12. **Retries are bounded and selective.** A model node retries a transport failure, a rate limit or a server error, and never a client error. The deterministic tool node caches its result, because a tool's output is a pure function of its arguments.
+13. **The classifier is not a single point of failure.** A rate-limited classifier would otherwise kill every run at its first node. The classification is an enhancement over the provisional extraction, so an unavailable classifier degrades to it and records why.
 
 ## Consequences
 

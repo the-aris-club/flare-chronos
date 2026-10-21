@@ -5,6 +5,7 @@ adapters, prompts, human-input tools, event stream, and the 23 deterministic
 `@tool` functions.
 """
 
+from ai_service.classification import classification_answers, classify_request
 from ai_service.events import HarnessEvent, to_sse_frames
 from ai_service.harness import (
     FlareChronosDualSystemHarness,
@@ -18,16 +19,20 @@ from ai_service.models import (
     EndpointCallError,
     EndpointProfile,
     MissingEndpointCredentialError,
+    NativeChatModel,
     RequestOptions,
     SystemOneChatModel,
-    SystemTwoChatModel,
     build_live_system1_chat_model,
     build_live_system2_chat_model,
     load_harness_config,
     resolve_api_key,
     resolve_endpoint_profile,
 )
-from ai_service.prompts import system1_typed_questions, system2_system_prompt
+from ai_service.prompts import (
+    system1_classification_prompt,
+    system1_typed_questions,
+    system2_system_prompt,
+)
 from ai_service.schemas import (
     CognitivePath,
     HarnessState,
@@ -63,11 +68,11 @@ __all__ = [
     "HarnessEvent",
     "HarnessState",
     "MissingEndpointCredentialError",
+    "NativeChatModel",
     "RequestOptions",
     "SpatioTemporalQueryEntity",
     "StakeholderTier",
     "SystemOneChatModel",
-    "SystemTwoChatModel",
     "UseCaseId",
     "VerificationReport",
     "VerifiedFactEntry",
@@ -78,11 +83,14 @@ __all__ = [
     "build_live_system1_chat_model",
     "build_live_system2_chat_model",
     "build_sqlite_checkpointer",
+    "classification_answers",
+    "classify_request",
     "collect_citable_facts",
     "load_harness_config",
     "resolve_api_key",
     "resolve_citations",
     "resolve_endpoint_profile",
+    "system1_classification_prompt",
     "system1_typed_questions",
     "system2_system_prompt",
     "to_sse_frames",
