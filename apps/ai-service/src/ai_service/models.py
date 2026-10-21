@@ -14,7 +14,8 @@ Two protocols are supported:
   Reflexive Layer, which classifies rather than writes.
 - `native_chat`: posts `{model, messages, ...}` to a chat endpoint and returns
   `{message: {content, thinking, tool_calls}}`. Used by the System 2
-  Deliberative Layer, which writes a grounded narrative.
+  Deliberative Layer, which plans its own tool calls and writes a grounded
+  narrative.
 """
 
 from __future__ import annotations
@@ -44,6 +45,7 @@ from langchain_core.utils.function_calling import convert_to_openai_tool
 from pydantic import BaseModel, Field
 
 from ai_service.schemas import (
+    SpatioTemporalQueryEntity,
     UseCaseId,
     collect_citation_keys,
     format_citation_value,
@@ -57,6 +59,8 @@ WORKSPACE_ENV_FILE = AI_SERVICE_ROOT.parents[1] / ".env"
 Protocol = Literal["typed_questions", "native_chat"]
 
 DEFAULT_USER_AGENT = "flare-chronos/2.0.0"
+
+_UNVERIFIED_NUMBER = "98765.4321"
 
 
 class MissingEndpointCredentialError(RuntimeError):
@@ -74,6 +78,15 @@ class MissingEndpointCredentialError(RuntimeError):
 
 class EndpointCallError(RuntimeError):
     """Raised when a live endpoint call fails or answers with an unusable body."""
+
+    def __init__(self, message: str, status_code: int | None = None) -> None:
+        super().__init__(message)
+        self.status_code = status_code
+
+    @property
+    def retryable(self) -> bool:
+        """True for transport failures and server errors, false for client errors."""
+        return self.status_code is None or self.status_code >= 500
 
 
 class RequestOptions(BaseModel):
@@ -123,6 +136,8 @@ def read_workspace_env(env_file: Path | None = None) -> dict[str, str]:
 
 def _lookup_env(env_name: str, workspace_env: dict[str, str]) -> str:
     """Return the first non-empty value of `env_name` from env, then `.env`."""
+    if not env_name:
+        return ""
     for candidate in (os.environ.get(env_name), workspace_env.get(env_name)):
         if candidate and candidate.strip():
             return candidate.strip()
@@ -178,8 +193,11 @@ def _post_json(
             body = response.read().decode("utf-8", errors="replace")
     except urllib.error.HTTPError as exc:
         detail = exc.read().decode("utf-8", errors="replace")[:400]
+        status_code = int(exc.code)
         exc.close()
-        raise EndpointCallError(f"HTTP {exc.code} from {url}: {detail}") from exc
+        raise EndpointCallError(
+            f"HTTP {status_code} from {url}: {detail}", status_code
+        ) from exc
     except urllib.error.URLError as exc:
         raise EndpointCallError(f"Cannot reach {url}: {exc.reason}") from exc
     try:
@@ -196,8 +214,9 @@ def synthesize_grounded_response(
 ) -> str:
     """Format a strictly grounded narrative citing only numbers from tool output.
 
-    This is the deterministic floor used by the offline harness and as the
-    fallback when a model-authored narrative fails numeric verification.
+    This is the deterministic floor used by the offline harness, by the System 1
+    fast tier, and as the fallback when a model-authored narrative fails numeric
+    verification.
     """
     parsed_payloads: list[tuple[str, dict[str, Any]]] = []
     for tool_message in tool_messages:
@@ -232,6 +251,14 @@ def build_citation_table(tool_messages: list[ToolMessage]) -> dict[str, float]:
     return citations
 
 
+def format_citation_table(citations: dict[str, float]) -> str:
+    """Render the citation table the model may cite from."""
+    return "\n".join(
+        f"- {key} = {format_citation_value(value)}"
+        for key, value in sorted(citations.items())
+    )
+
+
 class HarnessChatModel(BaseChatModel):
     """Shared tool-argument mapping and grounded synthesis for every harness model."""
 
@@ -240,6 +267,8 @@ class HarnessChatModel(BaseChatModel):
     source_label: str = Field(default="")
     reasoning_effort: str = Field(default="low")
     bound_tool_names: list[str] = Field(default_factory=list)
+    bound_tools: list[Any] = Field(default_factory=list)
+    planned_tool_names: list[str] = Field(default_factory=list)
     inject_unverified_number_once: bool = Field(default=False)
     _injected_once: bool = False
 
@@ -255,6 +284,7 @@ class HarnessChatModel(BaseChatModel):
         **kwargs: Any,
     ) -> HarnessChatModel:
         names: list[str] = []
+        bound: list[Any] = []
         for tool in tools:
             if isinstance(tool, dict) and "name" in tool:
                 names.append(str(tool["name"]))
@@ -262,7 +292,19 @@ class HarnessChatModel(BaseChatModel):
                 tool_name = getattr(tool, "name", None)
                 if tool_name is not None:
                     names.append(str(tool_name))
-        return self.model_copy(update={"bound_tool_names": names})
+                    bound.append(tool)
+        return self.model_copy(update={"bound_tool_names": names, "bound_tools": bound})
+
+    def classify(
+        self,
+        state_text: str,
+        questions: dict[str, Any],
+        entity: SpatioTemporalQueryEntity,
+    ) -> dict[str, Any]:
+        """Return the typed-questions answers payload for the System 1 tier."""
+        raise NotImplementedError(
+            f"{type(self).__name__} does not support the typed-questions protocol."
+        )
 
     def _infer_use_case_and_params_from_messages(
         self, messages: list[BaseMessage]
@@ -342,6 +384,10 @@ class HarnessChatModel(BaseChatModel):
             "tool_emit_flash_nrt_alert": {
                 "region": region,
             },
+            "tool_assemble_stakeholder_briefing_card": {
+                "region": region,
+                "year": year,
+            },
             "tool_uc1_1_regime_shift_attribution": {
                 "region": region,
                 "baseline_year": 2005,
@@ -365,10 +411,6 @@ class HarnessChatModel(BaseChatModel):
                 "latitude": 14.2,
                 "longitude": 108.1,
             },
-            "tool_uc2_3_verified_multistakeholder_briefing_data": {
-                "region": region,
-                "year": year,
-            },
             "tool_uc3_1_constellation_retirement_simulation": {
                 "region": region,
                 "year": year,
@@ -391,10 +433,21 @@ class HarnessChatModel(BaseChatModel):
     def _selected_tools(
         self, use_case_id: str, bound_tool_names: list[str]
     ) -> list[str]:
-        target_tools = bound_tool_names or USE_CASE_PRIMARY_TOOLS.get(
-            UseCaseId(use_case_id), ["tool_lookup_single_epoch_metrics"]
-        )
-        return target_tools[:2]
+        """Pick the tools the scripted agent calls.
+
+        The use case's primary tools win, but never outside the surface the
+        harness exposed. The fast tier therefore cannot reach a Domain
+        Diagnostic Tool even when the use case names one.
+        """
+        try:
+            primary = list(USE_CASE_PRIMARY_TOOLS.get(UseCaseId(use_case_id), []))
+        except ValueError:
+            primary = []
+        if bound_tool_names:
+            allowed = set(bound_tool_names)
+            chosen = [name for name in primary if name in allowed]
+            return chosen[:2] or bound_tool_names[:1]
+        return primary[:2] or ["tool_lookup_single_epoch_metrics"]
 
     def _tool_call_message(
         self, use_case_id: str, tool_names: list[str], params: dict[str, Any]
@@ -418,12 +471,61 @@ class DeterministicHarnessChatModel(HarnessChatModel):
     Provides the offline sandbox used by CI and by the local benchmark run. The
     same StateGraph, ToolNode, and Verified Facts Ledger are exercised as in
     live mode, so the offline suite proves graph and gate behaviour without
-    calling any network service.
+    calling any network service. The scripted agent stands in for the model: it
+    classifies like System 1, calls the use case's primary tools, and then
+    writes the deterministic briefing.
     """
 
     @property
     def _llm_type(self) -> str:
         return f"flare-chronos-deterministic-{self.role}"
+
+    def classify(
+        self,
+        state_text: str,
+        questions: dict[str, Any],
+        entity: SpatioTemporalQueryEntity,
+    ) -> dict[str, Any]:
+        """Simulate the typed-questions answers without a network call."""
+        lowered = state_text.lower()
+        is_deliberative = not entity.use_case_id.value.startswith("UC-S1")
+        is_urgent = "flash" in lowered or "urgent" in lowered
+        answers: dict[str, Any] = {}
+        for key, spec in questions.items():
+            question_type = spec.get("type")
+            if key == "region":
+                choice = "amazon" if "amazon" in lowered else "mekong"
+                answers[key] = {
+                    "type": "choice",
+                    "choice": choice,
+                    "confidence": 0.95,
+                    "probabilities": {
+                        option: (0.95 if option == choice else 0.05)
+                        for option in spec.get("criteria", {})
+                    },
+                }
+            elif key == "is_deliberative":
+                answers[key] = {
+                    "type": "noul",
+                    "noul": 0.9 if is_deliberative else 0.1,
+                }
+            elif key == "urgency":
+                answers[key] = {
+                    "type": "noul",
+                    "noul": 0.9 if is_urgent else 0.05,
+                }
+            elif key == "focus_epoch":
+                years = entity.epoch_years
+                choice = str(years[-1]) if years else "2024"
+                answers[key] = {
+                    "type": "choice",
+                    "choice": choice,
+                    "confidence": 0.9,
+                    "probabilities": {choice: 0.9},
+                }
+            elif question_type == "noul":
+                answers[key] = {"type": "noul", "noul": 0.5}
+        return {"model": self.model_id, "answers": answers}
 
     def _generate(
         self,
@@ -439,16 +541,15 @@ class DeterministicHarnessChatModel(HarnessChatModel):
             and "[NUMERIC_VERIFIER_REJECTION]" in str(m.content)
             for m in messages
         )
-        has_escalated_msg = any(
-            "[ESCALATED_S1_TO_S2]" in str(m.content) for m in messages
-        )
         already_called_names = {tm.name for tm in tool_messages if tm.name}
-        missing_bound_tools = [
-            t for t in self.bound_tool_names if t not in already_called_names
-        ]
 
-        if not tool_messages or (has_escalated_msg and missing_bound_tools):
-            selected_tools = self._selected_tools(use_case_id, missing_bound_tools)
+        planned = self.planned_tool_names or self._selected_tools(
+            use_case_id, self.bound_tool_names
+        )
+        missing_planned = [name for name in planned if name not in already_called_names]
+
+        if not tool_messages or missing_planned:
+            selected_tools = missing_planned or planned[:2]
             additional_kwargs: dict[str, Any] = {}
             if self.role == "system2_deliberative":
                 additional_kwargs["reasoning_content"] = (
@@ -474,8 +575,8 @@ class DeterministicHarnessChatModel(HarnessChatModel):
         ):
             self._injected_once = True
             content += (
-                "\n- **Speculative Unverified Extrapolation**: "
-                "Estimated anomaly of **98765.4321** MW."
+                f"\n- **Speculative Unverified Extrapolation**: "
+                f"Estimated anomaly of **{_UNVERIFIED_NUMBER}** MW."
             )
         additional_kwargs = {}
         if self.role == "system2_deliberative":
@@ -501,8 +602,8 @@ class SystemOneChatModel(HarnessChatModel):
 
     The protocol evaluates a `state` against typed questions and returns
     calibrated probabilities instead of free text, so it fits the System 1
-    Reflexive Layer: intent triage, entity classification, and verification of
-    the deterministic tool output. It is not an OpenAI-shaped chat API, so it
+    Reflexive Layer: intent classification, entity extraction, and verification
+    of the deterministic tool output. It is not an OpenAI-shaped chat API, so it
     is implemented directly over HTTP.
     """
 
@@ -532,6 +633,15 @@ class SystemOneChatModel(HarnessChatModel):
             self.profile.request.timeout_ms / 1000.0,
         )
 
+    def classify(
+        self,
+        state_text: str,
+        questions: dict[str, Any],
+        entity: SpatioTemporalQueryEntity,
+    ) -> dict[str, Any]:
+        """Ask the classifier and return its answers payload."""
+        return self.evaluate(state_text=state_text, questions=questions)
+
     def _generate(
         self,
         messages: list[BaseMessage],
@@ -543,34 +653,8 @@ class SystemOneChatModel(HarnessChatModel):
         tool_messages = [m for m in messages if isinstance(m, ToolMessage)]
 
         if not tool_messages:
-            user_text = "\n".join(
-                str(m.content) for m in messages if not isinstance(m, ToolMessage)
-            )
-            response = self.evaluate(
-                state_text=user_text,
-                questions={
-                    "region": {
-                        "type": "choice",
-                        "instructions": "Which geographical study region is queried in the state?",
-                        "criteria": {
-                            "mekong": "Mekong river basin or Mainland Southeast Asia",
-                            "amazon": "Amazon basin or South America",
-                        },
-                    },
-                    "is_deliberative": {
-                        "type": "noul",
-                        "instructions": "Does this query require multi-step System 2 causal attribution?",
-                    },
-                },
-            )
-            answers = response.get("answers", {})
-            region_choice = answers.get("region", {}).get("choice")
-            if region_choice in ("mekong", "amazon"):
-                params["region"] = region_choice
-
             selected_tools = self._selected_tools(use_case_id, self.bound_tool_names)
             message = self._tool_call_message(use_case_id, selected_tools, params)
-            message.additional_kwargs["systemone_result"] = response
             return ChatResult(generations=[ChatGeneration(message=message)])
 
         tool_summary = "\n".join(str(tm.content) for tm in tool_messages)
@@ -606,9 +690,10 @@ class SystemTwoChatModel(HarnessChatModel):
     """Live System 2 adapter for the native chat protocol.
 
     The endpoint returns the model's deliberation as a dedicated `thinking`
-    field, which the harness records as reasoning evidence. On the synthesis
-    turn the model writes the analytical narrative and cites every quantity as
-    a `{{fact_key}}` placeholder; the harness resolves those placeholders
+    field, which the harness records as reasoning evidence. The model chooses
+    which deterministic tools to call; the harness only decides which tools are
+    visible to it. On the writing turn the model cites every quantity as a
+    `{{fact_key}}` placeholder, and the harness resolves those placeholders
     against the Verified Facts Ledger, so the model never writes a number.
     """
 
@@ -687,6 +772,33 @@ class SystemTwoChatModel(HarnessChatModel):
             self.profile.request.timeout_ms / 1000.0,
         )
 
+    @staticmethod
+    def _to_langchain_tool_calls(
+        raw_calls: list[dict[str, Any]],
+    ) -> list[dict[str, Any]]:
+        """Convert native tool calls into the LangChain `tool_calls` shape."""
+        converted: list[dict[str, Any]] = []
+        for index, raw in enumerate(raw_calls):
+            function = raw.get("function") or {}
+            name = str(function.get("name") or "")
+            if not name:
+                continue
+            arguments = function.get("arguments")
+            if isinstance(arguments, str):
+                try:
+                    arguments = json.loads(arguments)
+                except ValueError:
+                    arguments = {}
+            converted.append(
+                {
+                    "name": name,
+                    "args": arguments if isinstance(arguments, dict) else {},
+                    "id": str(raw.get("id") or f"call_{index}_{name}"),
+                    "type": "tool_call",
+                }
+            )
+        return converted
+
     def _generate(
         self,
         messages: list[BaseMessage],
@@ -694,64 +806,28 @@ class SystemTwoChatModel(HarnessChatModel):
         run_manager: CallbackManagerForLLMRun | None = None,
         **kwargs: Any,
     ) -> ChatResult:
-        use_case_id, params = self._infer_use_case_and_params_from_messages(messages)
         tool_messages = [m for m in messages if isinstance(m, ToolMessage)]
-        has_escalated_msg = any(
-            "[ESCALATED_S1_TO_S2]" in str(m.content) for m in messages
-        )
-        already_called_names = {tm.name for tm in tool_messages if tm.name}
-        missing_bound_tools = [
-            t for t in self.bound_tool_names if t not in already_called_names
-        ]
-
-        if not tool_messages or (has_escalated_msg and missing_bound_tools):
-            selected_tools = self._selected_tools(use_case_id, missing_bound_tools)
-            payload = self._build_payload(messages, None)
-            payload["messages"] = payload["messages"] + [
-                {
-                    "role": "user",
-                    "content": (
-                        f"Decompose FLARE-CHRONOS use case {use_case_id} for "
-                        f"region={params.get('region')} year={params.get('year')} "
-                        f"using deterministic tools {selected_tools}."
-                    ),
-                }
-            ]
-            response = self._call(payload)
-            message_data = response.get("message", {})
-            thinking = str(message_data.get("thinking") or "")
-            message = self._tool_call_message(use_case_id, selected_tools, params)
-            message.additional_kwargs["reasoning_content"] = (
-                f"[Live System 2 ({self.model_id})]: {thinking}"
-            )
-            message.additional_kwargs["model_used"] = self.model_id
-            return ChatResult(generations=[ChatGeneration(message=message)])
-
         citations = build_citation_table(tool_messages)
-        citation_lines = "\n".join(
-            f"- {key} = {format_citation_value(value)}"
-            for key, value in sorted(citations.items())
-        )
-        narrative_prompt = (
-            "Write the analytical briefing for the FLARE-CHRONOS System 2 "
-            "Deliberative Layer.\n"
-            "Rules:\n"
-            "1. Cite EVERY quantity as {{fact_key}} using exactly the keys listed "
-            "below. Never write a digit yourself.\n"
-            "2. Never introduce a quantity, percentage, or ratio that is not in "
-            "the list.\n"
-            "3. Explain the physical interpretation: what the deterministic tool "
-            "outputs imply about the process, and what the caller should do.\n"
-            f"Available facts:\n{citation_lines}\n"
-        )
-        payload = self._build_payload(messages, None)
-        payload["messages"] = payload["messages"] + [
-            {"role": "user", "content": narrative_prompt}
-        ]
+
+        conversation = list(messages)
+        if citations:
+            conversation = [
+                *conversation,
+                HumanMessage(
+                    content=(
+                        "AVAILABLE FACTS (cite each quantity as {{fact_key}} using "
+                        "exactly these key names):\n" + format_citation_table(citations)
+                    )
+                ),
+            ]
+
+        payload = self._build_payload(conversation, self.bound_tools)
         response = self._call(payload)
         message_data = response.get("message", {})
         thinking = str(message_data.get("thinking") or "")
         content = str(message_data.get("content") or "")
+        tool_calls = self._to_langchain_tool_calls(message_data.get("tool_calls") or [])
+
         is_repair_turn = any(
             isinstance(m, HumanMessage)
             and "[NUMERIC_VERIFIER_REJECTION]" in str(m.content)
@@ -761,14 +837,17 @@ class SystemTwoChatModel(HarnessChatModel):
             self.inject_unverified_number_once
             and not self._injected_once
             and not is_repair_turn
+            and not tool_calls
         ):
             self._injected_once = True
             content += (
-                "\n- Speculative Unverified Extrapolation: estimated anomaly "
-                "of 98765.4321 MW."
+                f"\n- Speculative Unverified Extrapolation: estimated anomaly "
+                f"of {_UNVERIFIED_NUMBER} MW."
             )
+
         message = AIMessage(
             content=content,
+            tool_calls=tool_calls,
             additional_kwargs={
                 "reasoning_content": f"[Live System 2 ({self.model_id})]: {thinking}",
                 "model_used": self.model_id,

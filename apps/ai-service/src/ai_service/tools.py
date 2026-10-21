@@ -63,7 +63,7 @@ def _load_fetch_manifest() -> dict[str, int]:
 
 
 # ==============================================================================
-# TIER 1: ATOMIC PHYSICS, GEOMETRY & DATA RETRIEVAL TOOLS (8 TOOLS)
+# TIER 1: ATOMIC PHYSICS, GEOMETRY & DATA RETRIEVAL TOOLS (9 TOOLS)
 # ==============================================================================
 
 
@@ -467,7 +467,42 @@ def tool_emit_flash_nrt_alert(region: str = "amazon") -> dict[str, Any]:
 
 
 # ==============================================================================
-# TIER 2: 15 SYSTEM-2 DOMAIN DIAGNOSTIC, FORENSIC & SIMULATION TOOLS
+@tool
+def tool_assemble_stakeholder_briefing_card(
+    region: str = "mekong",
+    year: int = 2024,
+) -> dict[str, Any]:
+    """[UC-S1.5 / UC-2.3] Assemble a cross-verified fact card for Field Rangers, Forestry Executives, and Climate Scientists.
+
+    Retrieval-only: it re-exports stored metrics and two stored scan-angle
+    constants, and derives nothing. Serves both the System 1 fast tier and the
+    System 2 deliberative tier.
+    """
+    lookup = tool_lookup_single_epoch_metrics.invoke({"region": region, "year": year})
+    scan_phys = _load_empirical_results().get("scan_angle_physics", {})
+    return {
+        "use_case_id": "UC-S1.5",
+        "region": lookup["region"],
+        "year": year,
+        "total_raw_detections": lookup["total_raw_detections"],
+        "deduplicated_fire_episodes": lookup["deduplicated_fire_episodes"],
+        "harmonized_viirs_eq_episodes": lookup["harmonized_viirs_eq_episodes"],
+        "raw_index_2005_eq_100": lookup["raw_index_2005_eq_100"],
+        "harmonized_index_2005_eq_100": lookup["harmonized_index_2005_eq_100"],
+        "effective_observation_effort_omega": lookup[
+            "effective_observation_effort_omega"
+        ],
+        "saa_rejected_count": lookup["saa_rejected_count"],
+        "modis_mean_footprint_area_km2": scan_phys.get(
+            "empirical_modis_mean_area_km2", 2.155
+        ),
+        "viirs_mean_footprint_area_km2": scan_phys.get(
+            "empirical_viirs_mean_area_km2", 0.221
+        ),
+    }
+
+
+# TIER 2: 14 SYSTEM-2 DOMAIN DIAGNOSTIC, FORENSIC & SIMULATION TOOLS
 # ==============================================================================
 
 
@@ -527,8 +562,8 @@ def tool_uc1_1_regime_shift_attribution(
         ),
         "baseline_harmonized_episodes": harm_base,
         "comparison_harmonized_episodes": harm_comp,
-        "comparison_raw_index_2005_eq_100": round(100.0 + raw_pct_jump, 1),
-        "comparison_harmonized_index_2005_eq_100": harm_index_comp,
+        f"comparison_raw_index_{baseline_year}_eq_100": round(100.0 + raw_pct_jump, 1),
+        f"comparison_harmonized_index_{baseline_year}_eq_100": harm_index_comp,
         "true_physical_fire_pct_change": true_physical_pct_change,
     }
 
@@ -694,36 +729,6 @@ def tool_uc2_2_uncertainty_aware_tactical_dispatch(
         ),
         "afternoon_train_intervals_minutes": 25,
         "episode_clustering_window_minutes": 95,
-    }
-
-
-@tool
-def tool_uc2_3_verified_multistakeholder_briefing_data(
-    region: str = "mekong",
-    year: int = 2024,
-) -> dict[str, Any]:
-    """[UC-2.3] Assemble cross-verified numerical metrics for Field Rangers, Forestry Executives, and Climate Scientists."""
-    lookup = tool_lookup_single_epoch_metrics.invoke({"region": region, "year": year})
-    scan_phys = _load_empirical_results().get("scan_angle_physics", {})
-    return {
-        "use_case_id": "UC-2.3",
-        "region": lookup["region"],
-        "year": year,
-        "total_raw_detections": lookup["total_raw_detections"],
-        "deduplicated_fire_episodes": lookup["deduplicated_fire_episodes"],
-        "harmonized_viirs_eq_episodes": lookup["harmonized_viirs_eq_episodes"],
-        "raw_index_2005_eq_100": lookup["raw_index_2005_eq_100"],
-        "harmonized_index_2005_eq_100": lookup["harmonized_index_2005_eq_100"],
-        "effective_observation_effort_omega": lookup[
-            "effective_observation_effort_omega"
-        ],
-        "saa_rejected_count": lookup["saa_rejected_count"],
-        "modis_mean_footprint_area_km2": scan_phys.get(
-            "empirical_modis_mean_area_km2", 2.155
-        ),
-        "viirs_mean_footprint_area_km2": scan_phys.get(
-            "empirical_viirs_mean_area_km2", 0.221
-        ),
     }
 
 
@@ -1040,6 +1045,35 @@ def tool_harmonize_real_firms_csv_slice(
     }
 
 
+ATOMIC_TOOLS: list[BaseTool] = [
+    tool_compute_footprint_and_h3_allocation,
+    tool_compute_solar_sza_and_daynight,
+    tool_evaluate_detection_probability_and_saa,
+    tool_calibrate_cross_sensor_frp,
+    tool_deduplicate_overpass_episodes,
+    tool_lookup_single_epoch_metrics,
+    tool_query_seasonal_phenology_12m,
+    tool_emit_flash_nrt_alert,
+    tool_assemble_stakeholder_briefing_card,
+]
+
+DOMAIN_DIAGNOSTIC_TOOLS: list[BaseTool] = [
+    tool_uc1_1_regime_shift_attribution,
+    tool_uc1_2_cross_sensor_discrepancy_forensics,
+    tool_uc1_3_thermal_source_origin_classification,
+    tool_uc2_1_phenological_phase_shift_detection,
+    tool_uc2_2_uncertainty_aware_tactical_dispatch,
+    tool_uc3_1_constellation_retirement_simulation,
+    tool_uc3_2_multihop_spatiotemporal_cube_query,
+    tool_uc3_3_autonomous_biome_recalibration,
+    tool_uc4_1_orbital_drift_and_sza_audit,
+    tool_uc4_2_nrt_vs_sp_fidelity_audit,
+    tool_uc4_3_adaptive_firms_rate_limit_planner,
+    tool_uc5_1_redd_plus_carbon_mrv_baseline_audit,
+    tool_uc5_2_burn_ban_policy_counterfactual_audit,
+    tool_uc5_3_transboundary_fire_propagation_forensics,
+]
+
 ALL_DETERMINISTIC_TOOLS: list[BaseTool] = [
     tool_compute_footprint_and_h3_allocation,
     tool_compute_solar_sza_and_daynight,
@@ -1049,12 +1083,12 @@ ALL_DETERMINISTIC_TOOLS: list[BaseTool] = [
     tool_lookup_single_epoch_metrics,
     tool_query_seasonal_phenology_12m,
     tool_emit_flash_nrt_alert,
+    tool_assemble_stakeholder_briefing_card,
     tool_uc1_1_regime_shift_attribution,
     tool_uc1_2_cross_sensor_discrepancy_forensics,
     tool_uc1_3_thermal_source_origin_classification,
     tool_uc2_1_phenological_phase_shift_detection,
     tool_uc2_2_uncertainty_aware_tactical_dispatch,
-    tool_uc2_3_verified_multistakeholder_briefing_data,
     tool_uc3_1_constellation_retirement_simulation,
     tool_uc3_2_multihop_spatiotemporal_cube_query,
     tool_uc3_3_autonomous_biome_recalibration,
@@ -1074,7 +1108,7 @@ USE_CASE_PRIMARY_TOOLS: dict[UseCaseId, list[str]] = {
     UseCaseId.UC_S1_3_SINGLE_HOP_LOOKUP: ["tool_lookup_single_epoch_metrics"],
     UseCaseId.UC_S1_4_FLASH_NRT_ALERT: ["tool_emit_flash_nrt_alert"],
     UseCaseId.UC_S1_5_STAKEHOLDER_SYNTHESIS: [
-        "tool_uc2_3_verified_multistakeholder_briefing_data"
+        "tool_assemble_stakeholder_briefing_card"
     ],
     UseCaseId.UC_1_1_REGIME_SHIFT_ATTRIBUTION: [
         "tool_uc1_1_regime_shift_attribution",
@@ -1097,7 +1131,7 @@ USE_CASE_PRIMARY_TOOLS: dict[UseCaseId, list[str]] = {
         "tool_compute_footprint_and_h3_allocation",
     ],
     UseCaseId.UC_2_3_VERIFIED_BRIEFING: [
-        "tool_uc2_3_verified_multistakeholder_briefing_data",
+        "tool_assemble_stakeholder_briefing_card",
     ],
     UseCaseId.UC_3_1_CONSTELLATION_RETIREMENT: [
         "tool_uc3_1_constellation_retirement_simulation",

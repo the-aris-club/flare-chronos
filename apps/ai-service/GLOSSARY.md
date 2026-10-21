@@ -7,15 +7,15 @@ Dual-process cognitive decision-support and autonomous scientific reasoning cont
 ### Cognitive Architecture & Harness
 
 **System 1 Reflexive Layer**:
-The low-latency cognitive path responsible for intent classification, spatio-temporal entity extraction, single-hop metric lookup, flash alert emission, and stakeholder-tailored briefing synthesis.
+The tier that reports. It classifies intent and extracts the spatio-temporal entity with a calibrated classifier, retrieves facts through the Atomic Tools, and returns a grounded fact card or a flash alert. It never derives an analysis, never orchestrates a tool sequence, and never writes an analytical narrative.
 _Avoid_: Fast chatbot, simple prompt, router-only agent
 
 **System 2 Deliberative Layer**:
-The multi-step reasoning path that formulates scientific hypotheses, orchestrates sequences of deterministic tool invocations, performs counterfactual constellation simulations, and validates causal attributions before concluding.
+The tier that explains. It chooses and orchestrates the deterministic tools — atomic and domain diagnostic — until the question is answered, asks the operator when the request is ambiguous, and writes the analytical narrative whose quantities are injected from the Verified Facts Ledger.
 _Avoid_: Slow model, chain-of-thought prompt, free-form reasoner
 
 **Dual-Process Symbiosis**:
-The bidirectional cooperation protocol in which the System 1 Reflexive Layer prunes context and emits immediate flash warnings for the System 2 Deliberative Layer, while the System 2 Deliberative Layer distills verified causal patterns back into the System 1 Reflexive Layer.
+The bidirectional cooperation protocol in which the System 1 Reflexive Layer classifies and prunes the tool surface for the System 2 Deliberative Layer, while the System 2 Deliberative Layer distills verified causal patterns back into the System 1 Reflexive Layer's cache.
 _Avoid_: Model fallback, simple routing, agent handoff
 
 **Deterministic Tool Gate**:
@@ -27,7 +27,7 @@ The immutable per-session registry recording every numerical metric, physical un
 _Avoid_: Tool log, scratchpad memory, context history
 
 **Numeric Grounding Verifier**:
-The post-synthesis validation gate that cross-checks every numerical claim in a draft response against the Verified Facts Ledger and triggers self-correction whenever an unverified number is detected.
+The post-synthesis validation gate that resolves a draft's fact citations against the Verified Facts Ledger, cross-checks every numerical claim in the resolved text, and triggers self-correction whenever an unverified number or an unresolved citation is detected.
 _Avoid_: Output filter, regex sanitizer, hallucination prompt
 
 **Endpoint Profile**:
@@ -38,9 +38,37 @@ _Avoid_: Provider config, machine config, ambient credential, agent connection
 A briefing whose every quantity is injected by the harness from the Verified Facts Ledger and never written by the language model, which authors only the interpretation.
 _Avoid_: LLM-written report, generated summary, AI briefing
 
+**Briefing Assembly**:
+The deterministic step that stamps a verified result with its stakeholder tier, its cognitive path, and its synthesis mode.
+_Avoid_: Synthesis mode, formatting, templating
+
 **Synthesis Mode**:
 The record of which author produced a briefing: the language model, the deterministic formatter, or the deterministic formatter after the Numeric Grounding Verifier rejected the model output.
 _Avoid_: Generation mode, output source
+
+### Deterministic Tool Tiers
+
+**Atomic Tool**:
+A deterministic tool that returns one physical, geometric or radiometric quantity, or one already-computed record. Atomic Tools are the whole surface of the System 1 Reflexive Layer.
+_Avoid_: Basic tool, simple tool, primitive
+
+**Domain Diagnostic Tool**:
+A deterministic tool that derives a multi-input analysis, forensic result, simulation or audit from the Atomic Tools. Domain Diagnostic Tools are reachable only by the System 2 Deliberative Layer.
+_Avoid_: Complex tool, analysis tool, advanced tool
+
+### Human In The Loop
+
+**Sign-off Request**:
+A structured request for a human to authorize one proposed operational action, carrying the grounded evidence that justifies it and the decision the answer must take.
+_Avoid_: Approval prompt, confirmation dialog, human review
+
+**Sign-off Decision**:
+The recorded answer to a Sign-off Request, naming who decided, when, and on what grounds.
+_Avoid_: Approval log, audit trail, sign-off record
+
+**Clarification Request**:
+A request for a human to supply information the analysis cannot infer, raised without authorizing any action.
+_Avoid_: Question, prompt, clarification
 
 ### Analytical & Tactical Use-Case Concepts
 

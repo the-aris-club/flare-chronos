@@ -84,6 +84,27 @@ symbiosis_protocol:
     enable_verified_pattern_cache: true
     cache_ttl_seconds: 86400
 
+cognition:
+  # System 2 tool surface. "all" exposes every registered deterministic tool to
+  # the model; "use_case" narrows it to the use case's primary tools.
+  deliberative_tool_surface: "all"
+  # System 1 tool surface. "atomic" exposes the Atomic Tools only, so the fast
+  # tier can never reach a Domain Diagnostic Tool.
+  fast_tier_tool_surface: "atomic"
+  # Probability of "is_deliberative" above which an unrequested query is routed
+  # to the deliberative tier.
+  deliberative_threshold: 0.5
+  # Probability of "is_urgent" above which the request is a flash crisis.
+  urgency_threshold: 0.6
+  # Maximum clarification questions the model may ask in one run.
+  max_clarifications: 2
+  # Use cases whose briefing must be authorized by a human before it is released.
+  requires_sign_off:
+    - "UC-S1.4"
+    - "UC-2.2"
+  # LangGraph recursion limit for one run.
+  recursion_limit: 24
+
 deterministic_tool_gate:
   strict_tool_only_numerics: true
   forbid_freeform_llm_arithmetic: true

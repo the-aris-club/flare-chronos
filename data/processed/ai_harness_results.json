@@ -111,7 +111,7 @@
       "use_case_id": "UC-S1.5",
       "cognitive_path": "system1_fast_lookup",
       "pruned_tool_names": [
-        "tool_uc2_3_verified_multistakeholder_briefing_data"
+        "tool_assemble_stakeholder_briefing_card"
       ],
       "verified_facts_ingested": 31,
       "verification_passed": true,
@@ -120,7 +120,7 @@
       "self_correction_retries": 0,
       "has_system2_reasoning_trace": false,
       "synthesis_mode": "deterministic",
-      "final_briefing_preview": "[FORESTRY_EXECUTIVE BRIEFING | Cognitive Path: system1_fast_lookup | System 1: jev-1.13-free | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-S1.5)\n- **Tool Executed (`tool_uc2_3_verified_multistakeholder_briefing_data`)**:\n  - `us"
+      "final_briefing_preview": "[FORESTRY_EXECUTIVE BRIEFING | Cognitive Path: system1_fast_lookup | System 1: jev-1.13-free | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-S1.5)\n- **Tool Executed (`tool_assemble_stakeholder_briefing_card`)**:\n  - `use_case_id`:"
     },
     {
       "use_case_id": "UC-1.1",
@@ -206,7 +206,7 @@
       "use_case_id": "UC-2.3",
       "cognitive_path": "system2_deliberative",
       "pruned_tool_names": [
-        "tool_uc2_3_verified_multistakeholder_briefing_data"
+        "tool_assemble_stakeholder_briefing_card"
       ],
       "verified_facts_ingested": 31,
       "verification_passed": true,
@@ -215,7 +215,7 @@
       "self_correction_retries": 0,
       "has_system2_reasoning_trace": true,
       "synthesis_mode": "deterministic",
-      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: jev-1.13-free | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-2.3)\n- **Tool Executed (`tool_uc2_3_verified_multistakeholder_briefing_data`)**:\n  - `use"
+      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: jev-1.13-free | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-2.3)\n- **Tool Executed (`tool_assemble_stakeholder_briefing_card`)**:\n  - `use_case_id`: "
     },
     {
       "use_case_id": "UC-3.1",

@@ -111,7 +111,9 @@ USE_CASE_BENCHMARK_QUERIES: list[tuple[UseCaseId, str]] = [
 
 def run_all_benchmarks() -> dict[str, Any]:
     """Run all 20 use cases + 3 symbiosis stress tests through the compiled LangGraph harness."""
-    harness = FlareChronosDualSystemHarness(mode="deterministic", enable_cache=True)
+    harness = FlareChronosDualSystemHarness(
+        mode="deterministic", enable_cache=True, enable_sign_off=False
+    )
     use_case_runs: list[dict[str, Any]] = []
 
     for idx, (uc_enum, query) in enumerate(USE_CASE_BENCHMARK_QUERIES, start=1):
@@ -161,6 +163,7 @@ def run_all_benchmarks() -> dict[str, Any]:
         mode="deterministic",
         inject_unverified_number_once=True,
         enable_cache=False,
+        enable_sign_off=False,
     )
     repair_out = repair_harness.invoke_use_case(
         user_query="UC-1.1 Decompose the 2005 to 2024 fire regime shift in mekong.",

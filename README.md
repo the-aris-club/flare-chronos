@@ -76,7 +76,7 @@ See [`docs/00_Project_Name_and_Acronym.md`](docs/00_Project_Name_and_Acronym.md)
 - **Spatio-temporal deduplication**: multi-satellite overpass clustering into Fire Episodes (τ = 95 min).
 - **Effort normalization**: Ω(year, latitude) prevents constellation-expansion artificial trends.
 - **Burning Activity Calendar**: 26 Years × 73 Pentads matrix of HFD / HRF / SFAI with robust seasonal Z-scores.
-- **Dual-System Cognitive AI Harness (`apps/ai-service`)**: LangGraph orchestration pairing a **System 1 typed-questions endpoint** (reflexive triage, calibrated probabilities) with a **System 2 native chat endpoint** (deliberative reasoning) across **20 Use Cases** and **24 deterministic `@tool` functions**. Every briefing is a **Grounded Narrative**: the model authors the interpretation while the harness injects every quantity from the `VerifiedFactsLedger`, checked by a `NumericGroundingVerifier`. Each layer is bound through an **Endpoint Profile** (protocol, endpoint, model, API key, request options) resolved from explicit configuration only — never from the host's agent tooling configuration ([ADR-0006](docs/adr/0006-explicit-endpoint-profiles-and-grounded-narrative-assembly.md)).
+- **Dual-System Cognitive AI Harness (`apps/ai-service`)**: LangGraph orchestration pairing a **System 1 typed-questions endpoint** (reflexive triage, calibrated probabilities) with a **System 2 native chat endpoint** (deliberative reasoning) across **20 Use Cases** and **23 deterministic `@tool` functions**. The model chooses its own tool calls; the harness only decides which tools each tier may reach. Every briefing is a **Grounded Narrative**: the model authors the interpretation while the harness injects every quantity from the `VerifiedFactsLedger`, checked by a `NumericGroundingVerifier`. Briefings that authorize a field action pause for a **human sign-off** before they are released. Each layer is bound through an **Endpoint Profile** (protocol, endpoint, model, API key, request options) resolved from explicit configuration only — never from the host's agent tooling configuration ([ADR-0006](docs/adr/0006-explicit-endpoint-profiles-and-grounded-narrative-assembly.md), [ADR-0007](docs/adr/0007-model-driven-tool-selection-sign-off-and-event-stream.md)).
 - **Deep-module monorepo**: pure core (zero I/O) behind a clean seam; ingestion adapter; benchmark CLI; dual-system AI service; PDF exports (`exports/PROPOSAL.pdf` & `exports/REPORT.pdf`).
 
 ---
@@ -210,7 +210,7 @@ Raw NASA FIRMS CSVs are cached under `data/raw/` (Amazon & Mekong AOIs, 2000–2
 
 - `tests/test_harmonization_suite.py` — 7 tests covering the 5 core scientific equations.
 - `tests/test_core_coverage.py` — 7 additional tests for previously untested public seams.
-- `tests/test_ai_service_harness.py` — 13 tests verifying the Dual-System (System 1 + System 2) LangGraph harness, 24 deterministic `@tool` functions, `NumericGroundingVerifier`, Endpoint Profile resolution, citation grounding, and the absence of any ambient agent-tooling read.
+- `tests/test_ai_service_harness.py` — 22 tests verifying the Dual-System (System 1 + System 2) LangGraph harness, the Atomic / Domain Diagnostic tool tiers, Endpoint Profile resolution, citation grounding, human sign-off, the SSE event stream, and the absence of any ambient agent-tooling read.
 - `tests/test_live_tdd_seams.py` — 4 live TDD vertical slice tests (marked `live`) verifying the typed-questions and native-chat adapters against a real hosted model, real NASA FIRMS CSV harmonization, and live telemetry.
 
 Run with:
@@ -225,6 +225,18 @@ The live suite is excluded from the default run and from continuous integration.
 ```bash
 export SYSTEM1_API_KEY=...   # System 1 typed-questions endpoint
 export SYSTEM2_API_KEY=...   # System 2 native chat endpoint
+```
+
+The harness also exposes the run as a typed event stream, encodable as Server-Sent Events for a web client:
+
+```python
+from ai_service import FlareChronosDualSystemHarness, to_sse_frames
+
+harness = FlareChronosDualSystemHarness(mode="live")
+async for frame in to_sse_frames(
+    harness.astream_use_case("UC-1.1 Why did Mekong detections jump in 2024?")
+):
+    ...  # bytes: b"event: node_completed\ndata: {...}\n\n"
 ```
 
 ---

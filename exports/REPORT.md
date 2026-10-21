@@ -12,7 +12,7 @@
 
 > **Mục đích tài liệu:** Báo cáo toàn diện kết quả hiện thực hóa hệ thống **Flare-Chronos** từ đặc tả toán học – vật lý sang kiến trúc phần mềm **Monorepo Deep-Module** và tầng điều phối trí tuệ nhân tạo nhận thức kép (**Dual-System LangGraph Harness**) hoạt động thực tế.
 
-> Tài liệu trình bày chi tiết mô hình miền nghiệp vụ đa ngữ cảnh, lý do lựa chọn các quyết định kiến trúc (`ADR-0001` đến `ADR-0006`), giải phẫu từng gói mã nguồn (`packages/*`, `apps/*`, `src/*`, `tests/*`), lược đồ cơ sở dữ liệu không-thời gian `DuckDB / Uber H3`, nhật ký thu thập **$1.609.182$ bản ghi điểm nóng thực tế (`134` lát cắt CSV phủ trọn 26 năm liên tục `2001–2026` và 12 tháng mùa vụ) từ NASA LANCE FIRMS API**, kiến trúc điều phối **System 1 (giao thức typed-questions) $\leftrightarrow$ System 2 (giao thức native chat)** thực thi **20 Use Cases** thông qua **24 `@tool` tất định**, **Grounded Narrative** (mô hình viết diễn giải, harness chèn mọi định lượng từ `VerifiedFactsLedger`), và hướng dẫn kiểm chứng tự động khép kín (`27/27` bài kiểm thử ngoại tuyến).
+> Tài liệu trình bày chi tiết mô hình miền nghiệp vụ đa ngữ cảnh, lý do lựa chọn các quyết định kiến trúc (`ADR-0001` đến `ADR-0007`), giải phẫu từng gói mã nguồn (`packages/*`, `apps/*`, `src/*`, `tests/*`), lược đồ cơ sở dữ liệu không-thời gian `DuckDB / Uber H3`, nhật ký thu thập **$1.609.182$ bản ghi điểm nóng thực tế (`134` lát cắt CSV phủ trọn 26 năm liên tục `2001–2026` và 12 tháng mùa vụ) từ NASA LANCE FIRMS API**, kiến trúc điều phối **System 1 (giao thức typed-questions) $\leftrightarrow$ System 2 (giao thức native chat)** thực thi **20 Use Cases** thông qua **24 `@tool` tất định**, **Grounded Narrative** (mô hình viết diễn giải, harness chèn mọi định lượng từ `VerifiedFactsLedger`), và hướng dẫn kiểm chứng tự động khép kín (`27/27` bài kiểm thử ngoại tuyến).
 
 ---
 
@@ -42,7 +42,7 @@ Song hành cùng bản thuyết minh dự án [`exports/PROPOSAL.md`](PROPOSAL.m
    - Khớp thành công **$N = 11.553$ cặp ô lưới đẳng diện tích đồng thời** giữa vệ tinh **Aqua (MODIS)** và **Suomi-NPP (VIIRS)** giai đoạn `2012–2026`, giảm **$79,7\%$** khoảng cách phân phối Kolmogorov-Smirnov ($D_{\text{KS}}$ từ $0.1166$ xuống $0.0237$, $R^2$ tăng từ $0.7330$ lên $0.7470$) và xuất tự động 5 biểu đồ khoa học độ phân giải cao (`1800×1080 px`) trong [`docs/figures/`](../docs/figures/fig1_scan_angle_footprint_physics.png).
 4. **Hiện thực hóa Tầng Điều phối Nhận thức Kép (`apps/ai-service` — LangGraph Dual-System Harness):**
    - Sử dụng framework chuẩn công nghiệp **`LangGraph` (`StateGraph`, `ToolNode`, `MemorySaver`) + `LangChain Core` + `Pydantic v2`** kết hợp cộng sinh giữa **System 1 (giao thức typed-questions, trả về phân phối xác suất)** và **System 2 (giao thức native chat, `thinking_level="xhigh"`)**, trong đó mỗi tầng được gắn qua **Endpoint Profile** (`protocol`, `endpoint`, `model_id`, `api_key_env`, `request`) chỉ đọc từ cấu hình tường minh — không đọc cấu hình agent trên máy người dùng ([`ADR-0006`](../docs/adr/0006-explicit-endpoint-profiles-and-grounded-narrative-assembly.md)).
-   - Đóng gói **24 hàm `@tool` tất định** (`8` công cụ vật lý/dữ liệu nguyên tử + `15` công cụ chuyên sâu theo miền + `1` công cụ đồng bộ hóa trực tiếp tệp CSV thô `data/raw/`) để phục vụ trọn vẹn **20 Use Cases** (`5` Use Cases phản xạ nhanh của System 1 + `15` Use Cases suy luận nhân quả sâu của System 2), kèm cổng kiểm chứng số học **`VerifiedFactsLedger` + `NumericGroundingVerifier`** đảm bảo LLM **không bao giờ tự tính toán nhẩm số liệu**.
+   - Đóng gói **24 hàm `@tool` tất định**: `9` **Atomic Tool** (vật lý/geometry/truy xuất dữ liệu) + `14` **Domain Diagnostic Tool** (phân tích/giám định/mô phỏng theo miền) + `1` công cụ đồng bộ hóa trực tiếp tệp CSV thô `data/raw/` **nằm ngoài registry** (mô hình không bao giờ chạm tới). Chỉ `23` tool được đưa vào bề mặt gọi của mô hình. để phục vụ trọn vẹn **20 Use Cases** (`5` Use Cases phản xạ nhanh của System 1 + `15` Use Cases suy luận nhân quả sâu của System 2), kèm cổng kiểm chứng số học **`VerifiedFactsLedger` + `NumericGroundingVerifier`** đảm bảo LLM **không bao giờ tự tính toán nhẩm số liệu**.
 5. **Đạt $100\%$ Kiểm thử Đơn vị, Bất biến Vật lý, LangGraph & Live TDD Seams (`26/26` Tests):**
    - Toàn bộ `27/27` bài kiểm thử **ngoại tuyến** trong `tests/test_harmonization_suite.py`, `tests/test_core_coverage.py` và `tests/test_ai_service_harness.py` đều chạy thành công (`100% PASS`, không gọi mạng, không tốn credit). Bộ `tests/test_live_tdd_seams.py` (`4/4`) được đánh dấu `live`, chạy trên **model thật** và chỉ kích hoạt thủ công qua workflow `Live Model Tests`.
 
@@ -72,6 +72,7 @@ Song hành cùng bản thuyết minh dự án [`exports/PROPOSAL.md`](PROPOSAL.m
 | [**ADR-0004**](../docs/adr/0004-monorepo-deep-module-architecture.md) | Kiến trúc **Monorepo Deep-Module** tách biệt Lõi Vật lý Thuần túy (`Zero-I/O`) và Tầng Kết nối (`Seam`) | Cho phép kiểm thử toàn bộ 5 phương trình vật lý – thống kê trong `0.010 giây` không cần kết nối mạng, đồng thời hỗ trợ cả CLI thực nghiệm và Facade chấm điểm tự động. |
 | [**ADR-0005**](../docs/adr/0005-dual-system-langgraph-harness-and-deterministic-tool-gate.md) | Điều phối Nhận thức Kép **`LangGraph`** (System 1 $\leftrightarrow$ System 2) & Cổng Kiểm chứng Số học **`VerifiedFactsLedger`** | Cấm tuyệt đối LLM tự tính toán nhẩm; bắt buộc $100\%$ phép tính đi qua 23 `@tool` tất định và kiểm chứng từng con số trong phản hồi thông qua cạnh lặp tự sửa lỗi (`NumericGroundingVerifier`). |
 | [**ADR-0006**](../docs/adr/0006-explicit-endpoint-profiles-and-grounded-narrative-assembly.md) | Gắn mô hình bằng **Endpoint Profile** tường minh & **Grounded Narrative Assembly** | Cấm đọc cấu hình/credential agent trên máy người dùng; mọi tầng chỉ nhận `protocol` + `endpoint` + `model_id` + `api_key` + tham số. Mô hình viết diễn giải, **harness chèn mọi định lượng** từ `VerifiedFactsLedger`; thiếu key → lỗi ngay, không bao giờ bịa kết quả. |
+| [**ADR-0007**](../docs/adr/0007-model-driven-tool-selection-sign-off-and-event-stream.md) | **Mô hình tự chọn tool**, phân tầng bề mặt tool, **phê duyệt của con người** & **luồng sự kiện SSE** | Tách **System 1 = tầng báo cáo** (chỉ `9` Atomic Tool) khỏi **System 2 = tầng giải thích** (`23` tool); mô hình tự chọn tool theo **system prompt** thay vì kịch bản từng bước; run **dừng chờ `interrupt()`** để con người phê duyệt các hành động hiện trường (`UC-S1.4`, `UC-2.2`); toàn bộ run phát ra thành **event có kiểu** mã hoá được thành khung **SSE**. |
 
 ---
 
@@ -201,7 +202,10 @@ flare-chronos/
 │           ├── schemas.py                        # 20 UseCaseId, SpatioTemporalQueryEntity, VerifiedFactsLedger, HarnessState
 │           ├── tools.py                          # 23 hàm @tool tất định (8 công cụ vật lý nguyên tử + 15 công cụ Use Case)
 │           ├── models.py                         # `EndpointProfile` + `SystemOneChatModel` (typed-questions) + `SystemTwoChatModel` (native chat) + `DeterministicHarnessChatModel`
-│           ├── harness.py                        # Đồ thị trạng thái 7 nút LangGraph StateGraph + ToolNode + MemorySaver
+│           ├── harness.py                        # Đồ thị trạng thái 8 nút LangGraph StateGraph + ToolNode + checkpointer
+│           ├── prompts.py                        # System prompt của System 2 & payload typed-questions của System 1
+│           ├── human_input.py                    # Tool `ask_user_question` (interrupt) cho làm rõ yêu cầu
+│           ├── events.py                         # Event stream có kiểu + bộ mã hoá Server-Sent Events
 │           └── run_all_usecases.py               # Thực thi toàn bộ 20 Use Cases & 3 bài đo kiểm cộng sinh -> ai_harness_results.json
 ├── src/
 │   └── harmonization/
@@ -212,7 +216,7 @@ flare-chronos/
 └── tests/
     ├── test_harmonization_suite.py               # 7 bài kiểm thử bất biến vật lý & thống kê cốt lõi
     ├── test_core_coverage.py                     # 7 bài kiểm thử bao phủ hàm biên & lịch cháy
-    ├── test_ai_service_harness.py                # 13 bài kiểm thử tích hợp LangGraph (Endpoint Profile, 20 Use Cases, Escalation, Verifier, Grounding, Cache)
+    ├── test_ai_service_harness.py                # 22 bài kiểm thử tích hợp LangGraph (Endpoint Profile, phân tầng tool, Sign-off, SSE, Grounding, Cache)
 ```
 
 ### 3.4. Giải phẫu Chi tiết Từng Mô-đun Trong `packages/harmonization-core`
@@ -401,37 +405,44 @@ Trong quá trình chạy thực nghiệm trên $1.609.182$ bản ghi thực tế
 
 1. **Tầng Phản xạ Nhanh — System 1 (`system1_reflexive` — `SystemOneChatModel`):**
    - **Mô hình & Giao thức:** giao thức **typed-questions** (`POST {endpoint}` với `{model, state, questions}` → `{answers}`) qua **Endpoint Profile** (`harness_config.yaml` + biến môi trường `SYSTEM1_ENDPOINT` / `SYSTEM1_MODEL` / `SYSTEM1_API_KEY`). Thay vì sinh văn bản tự do dễ phát sinh ảo giác, mô hình đánh giá `state` đầu vào thông qua các câu hỏi có kiểu chặt chẽ (`noul` cho mệnh đề nhị phân, `choice` với từ điển `criteria` cho phân loại miền/năm, và `score` cho thang đo mức độ khẩn cấp) để trả về phân phối xác suất hiệu chuẩn trong `answers`.
-   - **Vai trò:** Phân loại ý định & mức độ khẩn cấp (`UC-S1.1`), trích xuất thực thể không-thời gian có cấu trúc `SpatioTemporalQueryEntity` (`UC-S1.2`), cắt tỉa danh sách công cụ (`Context & Tool Pruning`), tra cứu nhanh 1 bước (`UC-S1.3`), phát cảnh báo khẩn NRT (`UC-S1.4`), và biên dịch báo cáo đầu ra theo đúng ngôn ngữ từng nhóm đối tượng thụ hưởng (`UC-S1.5`).
+   - **Vai trò (tầng *báo cáo*):** Phân loại ý định & mức độ khẩn cấp (`UC-S1.1`), trích xuất thực thể không-thời gian có cấu trúc `SpatioTemporalQueryEntity` (`UC-S1.2`), tra cứu nhanh 1 bước (`UC-S1.3`), phát cảnh báo khẩn NRT (`UC-S1.4`), và dựng thẻ dữ kiện theo đối tượng (`UC-S1.5`). Tầng này **chỉ chạm tới `9` Atomic Tool**, **không** suy diễn phân tích, và **không** viết diễn giải.
+   - **Phân loại trước, định tuyến sau:** nút `system1_triage_node` **gọi mô hình typed-questions trước khi định tuyến**. Câu trả lời có xác suất hiệu chuẩn (`region`, `urgency`, `is_deliberative`) được ghi vào `HarnessState["triage_confidence"]`. Mô hình chỉ được **ghi đè** tầng nhận thức khi người dùng **không** chỉ định use case; use case được chỉ định tường minh luôn thắng ([`ADR-0007`](../docs/adr/0007-model-driven-tool-selection-sign-off-and-event-stream.md)).
 2. **Tầng Suy luận Sâu — System 2 (`system2_deliberative` — `SystemTwoChatModel`):**
    - **Mô hình & Giao thức:** giao thức **native chat** (`POST {endpoint}` với `{model, messages, think, options}` → `{message: {content, thinking, tool_calls}}`) qua **Endpoint Profile** (`harness_config.yaml` + `SYSTEM2_ENDPOINT` / `SYSTEM2_MODEL` / `SYSTEM2_API_KEY`; `options.num_predict` = `max_output_tokens`, `options.temperature` = `temperature`, `think` = `thinking_level`, trích xuất chuỗi suy luận `message.thinking` vào `HarnessState["reasoning_trace"]`). **Không còn nhánh dự phòng:** lỗi kết nối hoặc thiếu credential được ném ra ngay, không được che bằng kết quả giả.
-   - **Vai trò:** Thực thi **15 Use Cases suy luận đa bước (`UC-1.1` đến `UC-5.3`)** bằng cách lập kế hoạch gọi chuỗi công cụ `@tool` tất định, tổng hợp bằng chứng khoa học và tự sửa lỗi nếu bị cổng kiểm chứng số học từ chối.
+   - **Vai trò (tầng *giải thích*):** Thực thi **15 Use Cases suy luận đa bước (`UC-1.1` đến `UC-5.3`)**. **Mô hình tự chọn công cụ `@tool`** trong bề mặt được mở (`23` tool tất định + `ask_user_question`) — harness chỉ quyết định *tầng nào được chạm tới bề mặt nào*, không viết kịch bản từng bước. Định hướng trước được giao bằng **system prompt** (`prompts.py`) theo đúng tinh thần các hệ thống agent mã nguồn mở: mô tả miền, kỷ luật dùng tool, giao thức trích dẫn, và ngưỡng hỏi làm rõ. Lỗi vận chuyển và lỗi `5xx` được **retry có giới hạn** (`RetryPolicy`, tối đa `3` lần); lỗi `4xx` thì không retry.
 3. **Cổng Công cụ Tất định & Sổ cái Số liệu Đã Xác thực (`Deterministic Tool Gate` & `VerifiedFactsLedger`):**
-   - Toàn bộ **24 hàm `@tool`** trong [`tools.py`](../apps/ai-service/src/ai_service/tools.py) (bao gồm `tool_harmonize_real_firms_csv_slice` xử lý trực tiếp các tệp CSV thô trong `data/raw/`) thực thi tính toán trực tiếp trên lõi vật lý `flare_chronos_core` và kho kết quả thực nghiệm `data/processed/empirical_results.json`.
-   - Mọi giá trị số trả về từ `ToolNode` được tự động ghi nhận vào `VerifiedFactsLedger`. Trước khi trả kết quả tới người dùng, nút `numeric_verifier_node` đối chiếu từng con số trong bản thảo với sổ cái; nếu xuất hiện bất kỳ con số nào không có nguồn gốc từ `@tool`, cạnh điều kiện sẽ trả ngược về `system2_planner_node` kèm thông báo lỗi cụ thể để tổng hợp lại.
+   - Toàn bộ **24 hàm `@tool`** trong [`tools.py`](../apps/ai-service/src/ai_service/tools.py) thực thi tính toán trực tiếp trên lõi vật lý `flare_chronos_core` và kho kết quả thực nghiệm `data/processed/empirical_results.json`. Registry mà mô hình chạm tới gồm **23 tool**; `tool_harmonize_real_firms_csv_slice` (đọc CSV thô) **cố ý nằm ngoài registry** để mô hình không thể tự gọi đường dữ liệu thô.
+   - Mọi giá trị số trả về từ `ToolNode` được tự động ghi nhận vào `VerifiedFactsLedger`. Trước khi trả kết quả tới người dùng, nút `numeric_verifier_node` **resolve placeholder** rồi đối chiếu từng con số trong bản thảo với sổ cái; nếu xuất hiện bất kỳ con số nào không có nguồn gốc từ `@tool`, **hoặc còn placeholder chưa resolve**, cạnh điều kiện sẽ trả ngược về `system2_agent_node` kèm thông báo lỗi cụ thể để tổng hợp lại. Ngân sách bước suy luận (`max_reasoning_steps`) chặn vòng lặp vô hạn và buộc lùi về bộ sinh tất định.
 4. **Grounded Narrative Assembly ([`ADR-0006`](../docs/adr/0006-explicit-endpoint-profiles-and-grounded-narrative-assembly.md)):**
    - System 2 nhận **bảng trích dẫn** (`fact_key` → giá trị) của `VerifiedFactsLedger` và viết diễn giải bằng **placeholder `{{fact_key}}`** — **mô hình không bao giờ tự viết một chữ số nào**. `numeric_verifier_node` resolve placeholder từ sổ cái rồi mới kiểm chứng phần còn lại; một `fact_key` không tồn tại là **lỗi grounding** chứ không phải lỗi định dạng.
    - Nếu vòng lặp tự sửa cạn, harness **lùi về bộ sinh tất định** để luôn có báo cáo hợp lệ. Trường telemetry `synthesis_mode` (`llm` / `deterministic` / `deterministic_fallback`) ghi lại ai thực sự viết báo cáo, nên không báo cáo nào có thể vượt quá claim của mình.
+5. **Phê Duyệt Của Con Người & Luồng Sự Kiện ([`ADR-0007`](../docs/adr/0007-model-driven-tool-selection-sign-off-and-event-stream.md)):**
+   - **Sign-off Request:** các use case trong `requires_sign_off` (`UC-S1.4` cảnh báo khẩn NRT, `UC-2.2` điều phối tác chiến) **dừng run** tại `sign_off_gate_node` bằng `interrupt()`. Yêu cầu mang theo **bằng chứng đã xác thực** (bản thảo + báo cáo kiểm chứng). **Sign-off Decision** được ghi lại kèm người quyết định, thời điểm và lý do. Nếu **từ chối**, **không báo cáo nào được phát ra** (`final_briefing` rỗng, `synthesis_mode = sign_off_declined`) — nhưng quyết định vẫn được ghi.
+   - **Clarification Request:** mô hình có thể gọi tool `ask_user_question` để hỏi làm rõ AOI/kỳ chưa nêu; người dùng trả lời được nối ngược vào ngữ cảnh. Ngưỡng `max_clarifications` chặn hỏi vô hạn; clarification **không** uỷ quyền hành động nào.
+   - **Luồng sự kiện:** toàn bộ run được phát ra dưới dạng **event có kiểu** (`astream_use_case`) và mã hoá thành khung **Server-Sent Events** (`to_sse_frames`). Một run đang chờ là **một đoạn** của luồng; câu trả lời của con người mở **đoạn tiếp theo** với cùng `thread_id`. Checkpoint SQLite bền vững cho phép run đó sống sót qua việc khởi động lại tiến trình.
 
 ```mermaid
 flowchart TB
-    START((Bắt đầu Truy vấn)) --> S1_TRIAGE["1. system1_triage_node (System 1 / typed-questions)<br/>UC-S1.1 Phân loại Ý định + UC-S1.2 Trích xuất SpatioTemporalQueryEntity<br/>Kiểm tra VerifiedPatternCache & Cắt tỉa danh sách @tool"]
-    S1_TRIAGE -->|"Cache Hit (distilled_cache_hit)"| END_NODE((Trả Báo cáo Đã Xác thực))
-    S1_TRIAGE -->|"Truy vấn 1 bước / Cảnh báo khẩn"| S1_FAST["2. system1_fast_node (System 1 / typed-questions)<br/>UC-S1.3 Tra cứu nhanh 1 bước / UC-S1.4 Cảnh báo NRT"]
-    S1_TRIAGE -->|"Truy vấn nhân quả / Phản thực tế đa bước"| S2_PLAN["3. system2_planner_node (System 2 / native chat)<br/>Suy luận sâu (thinking_level='xhigh') & Phát lệnh gọi @tool"]
+    START((Bắt đầu Truy vấn)) --> S1_TRIAGE["1. system1_triage_node (System 1 / typed-questions)<br/>UC-S1.1 Phân loại Ý định + UC-S1.2 Trích xuất SpatioTemporalQueryEntity<br/>Phân loại TRƯỚC khi định tuyến (xác suất hiệu chuẩn)"]
+    S1_TRIAGE -->|"Cache Hit (distilled_cache_hit)"| END_NODE((Trả Báo Cáo Đã Xác Thực))
+    S1_TRIAGE -->|"Tầng báo cáo (1 bước / cảnh báo khẩn)"| S1_FAST["2. system1_fast_node (System 1 / typed-questions)<br/>UC-S1.3 Tra cứu nhanh 1 bước / UC-S1.4 Cảnh báo NRT<br/>Chỉ chạm tới 9 Atomic Tool"]
+    S1_TRIAGE -->|"Tầng giải thích (nhân quả / đa bước)"| S2_PLAN["3. system2_agent_node (System 2 / native chat)<br/>Mô hình TỰ CHỌN tool trong bề mặt 23 tool<br/>Suy luận sâu (thinking_level) theo system prompt"]
 
-    S1_FAST -->|"AIMessage.tool_calls"| TOOL_NODE["4. deterministic_tool_node (LangGraph ToolNode)<br/>Thực thi 23 hàm @tool tất định & Nạp số liệu vào VerifiedFactsLedger"]
-    S2_PLAN -->|"AIMessage.tool_calls"| TOOL_NODE
+    S1_FAST -->|"AIMessage.tool_calls"| TOOL_NODE["4. deterministic_tool_node (LangGraph ToolNode)<br/>Thực thi @tool tất định & Nạp số liệu vào VerifiedFactsLedger"]
+    S2_PLAN -->|"AIMessage.tool_calls (vòng lặp agent)"| TOOL_NODE
 
-    TOOL_NODE -->|"Luồng System 1"| ESC_GATE["5. escalation_gate_node (Cổng Leo thang Động)<br/>Kiểm tra xung đột vật lý: Sai lệch Thô vs Chuẩn hóa >= 200% hoặc Nhiễu SAA > 0"]
+    TOOL_NODE -->|"Luồng System 1"| ESC_GATE["5. escalation_gate_node (Cổng Leo thang Động)<br/>Kiểm tra xung đột vật lý: Sai lệch Thô vs Chuẩn hóa >= 200% hoặc Nhiễm SAA > 0"]
     ESC_GATE -->|"Phát hiện xung đột (escalated_s1_to_s2)"| S2_PLAN
     ESC_GATE -->|"Không có xung đột"| S1_FAST
     TOOL_NODE -->|"Luồng System 2"| S2_PLAN
 
-    S1_FAST -->|"Bản thảo phản hồi"| VERIFIER["6. numeric_verifier_node (NumericGroundingVerifier)<br/>Đối chiếu 100% con số trong bản thảo với VerifiedFactsLedger"]
+    S1_FAST -->|"Bản thảo phản hồi"| VERIFIER["6. numeric_verifier_node (NumericGroundingVerifier)<br/>Resolve placeholder + đối chiếu 100% con số với VerifiedFactsLedger"]
     S2_PLAN -->|"Bản thảo phản hồi"| VERIFIER
 
     VERIFIER -->|"Phát hiện số liệu tự suy diễn (Self-Correction Loop)"| S2_PLAN
-    VERIFIER -->|"Passed (0 số liệu chưa xác thực)"| S1_SYNTH["7. system1_synthesizer_node<br/>UC-S1.5 Chuẩn hóa theo Đối tượng (Ranger/Executive/Scientist) & Lưu Cache"]
+    VERIFIER -->|"Passed (0 số liệu chưa xác thực)"| SIGN_GATE["7. sign_off_gate_node (Phê Duyệt Con Người)<br/>UC-S1.4 & UC-2.2: interrupt() chờ quyết định<br/>Từ chối => không phát báo cáo"]
+    SIGN_GATE -->|"Bị từ chối"| END_DECLINED((Dừng Run - Không Phát Báo Cáo))
+    SIGN_GATE -->|"Được duyệt"| S1_SYNTH["8. system1_synthesizer_node (Briefing Assembly)<br/>Dán đối tượng + cognitive path + synthesis mode & Lưu Cache"]
     S1_SYNTH --> END_NODE
 ```
 
@@ -445,13 +456,13 @@ Kết quả thực thi toàn trình qua [`run_all_usecases.py`](../apps/ai-servi
 | **`UC-S1.2`** | **System 1** (typed-questions) | Trích xuất Thực thể Không-Thời gian (`Entity & Schema Extraction`) | `tool_lookup_single_epoch_metrics` | 30 | **PASS (`0` lỗi)** |
 | **`UC-S1.3`** | **System 1** (typed-questions) | Tra cứu Nhanh Chỉ số Đơn Kỳ (`Single-Hop Metric Lookup`) | `tool_lookup_single_epoch_metrics` | 30 | **PASS (`0` lỗi)** |
 | **`UC-S1.4`** | **System 1** (typed-questions) | Phát Cảnh báo Nhanh Điểm nóng NRT (`Flash NRT Alert`) | `tool_emit_flash_nrt_alert` | 21 | **PASS (`0` lỗi)** |
-| **`UC-S1.5`** | **System 1** (typed-questions) | Biên dịch Báo cáo Đa Đối tượng (`Multi-Stakeholder Synthesis`) | `tool_uc2_3_verified_multistakeholder_briefing_data` | 30 | **PASS (`0` lỗi)** |
+| **`UC-S1.5`** | **System 1** (typed-questions) | Thẻ Dữ Kiện Theo Đối Tượng (`Stakeholder Brief`) | `tool_assemble_stakeholder_briefing_card` | 30 | **PASS (`0` lỗi)** |
 | **`UC-1.1`** | **System 2** (native chat) | Phân rã Nhân quả Bước nhảy Dị thường (`Regime-Shift Attribution`) | `tool_uc1_1_regime_shift_attribution`, `tool_deduplicate_overpass_episodes` | 72 | **PASS (`0` lỗi)** |
 | **`UC-1.2`** | **System 2** (native chat) | Giám định Bất đồng Chéo MODIS vs VIIRS (`Cross-Sensor Forensics`) | `tool_uc1_2_cross_sensor_discrepancy_forensics`, `tool_compute_footprint_and_h3_allocation` | 51 | **PASS (`0` lỗi)** |
 | **`UC-1.3`** | **System 2** (native chat) | Phân loại Nguồn gốc Nhiệt Đa Bằng chứng (`Thermal Source Origin`) | `tool_uc1_3_thermal_source_origin_classification`, `tool_evaluate_detection_probability_and_saa` | 33 | **PASS (`0` lỗi)** |
 | **`UC-2.1`** | **System 2** (native chat) | Phát hiện Dịch pha Mùa cháy Sớm El Niño (`Phenology Phase-Shift`) | `tool_uc2_1_phenological_phase_shift_detection`, `tool_query_seasonal_phenology_12m` | 129 | **PASS (`0` lỗi)** |
 | **`UC-2.2`** | **System 2** (native chat) | Điều phối Tác chiến Có Nhận thức Bất định (`Tactical Dispatch`) | `tool_uc2_2_uncertainty_aware_tactical_dispatch`, `tool_compute_footprint_and_h3_allocation` | 60 | **PASS (`0` lỗi)** |
-| **`UC-2.3`** | **System 2** (native chat) | Tổng hợp Báo cáo Tự Kiểm chứng 3 Cấp (`Verified Situation Briefing`) | `tool_uc2_3_verified_multistakeholder_briefing_data` | 30 | **PASS (`0` lỗi)** |
+| **`UC-2.3`** | **System 2** (native chat) | Tổng hợp Báo Cáo Tự Kiểm Chứng 3 Cấp (`Verified Situation Briefing`) | `tool_assemble_stakeholder_briefing_card` | 30 | **PASS (`0` lỗi)** |
 | **`UC-3.1`** | **System 2** (native chat) | Mô phỏng Phản thực tế Ngừng hoạt động Vệ tinh 2026+ (`Retirement Sim`) | `tool_uc3_1_constellation_retirement_simulation` | 24 | **PASS (`0` lỗi)** |
 | **`UC-3.2`** | **System 2** (native chat) | Truy vấn Phân tích Đa Bước Khối 26 Năm (`Multi-Hop Cube Analytics`) | `tool_uc3_2_multihop_spatiotemporal_cube_query`, `tool_query_seasonal_phenology_12m` | 132 | **PASS (`0` lỗi)** |
 | **`UC-3.3`** | **System 2** (native chat) | Kiểm định Hiệu chuẩn Lượng tử $N=11.553$ (`Biome Recalibration`) | `tool_uc3_3_autonomous_biome_recalibration`, `tool_calibrate_cross_sensor_frp` | 66 | **PASS (`0` lỗi)** |
@@ -482,7 +493,7 @@ Kết quả thực thi toàn trình qua [`run_all_usecases.py`](../apps/ai-servi
 | :--- | :---: | :--- | :---: |
 | **[`tests/test_harmonization_suite.py`](../tests/test_harmonization_suite.py)** | **7 / 7** | Hình học cầu MODIS ($1.00\text{ km}^2 \to 9.69\text{ km}^2$), 3 vùng gom cụm VIIRS ($\le 0.65\text{ km}^2$), bảo toàn năng lượng cầu phương 13 điểm Uber H3 ($\sum w = 1.0000$), góc $\text{SZA} < 85^\circ$, lọc nhiễu hạt ban đêm vùng SAA, gom cụm đoàn tàu 4 vệ tinh chiều thành 1 `FireEpisode`, và hiệu chuẩn 2 giai đoạn giảm $D_{\text{KS}}$. | **PASS** |
 | **[`tests/test_core_coverage.py`](../tests/test_core_coverage.py)** | **7 / 7** | Kiểm chứng khoảng cách trắc địa Haversine, ánh xạ lưới H3, kiểm tra biên hộp tọa độ SAA, hàm nỗ lực quan sát cơ sở $\Omega(y, \phi)$, phân loại ngưỡng cảnh báo $\text{SFAI}$, và động cơ Lịch Hoạt Động Cháy trên tập rỗng / tập thực. | **PASS** |
-| **[`tests/test_ai_service_harness.py`](../tests/test_ai_service_harness.py)** | **13 / 13** | Kiểm chứng **Endpoint Profile** (thứ tự ưu tiên env → `.env` → YAML), lỗi ngay khi thiếu API key, độ phủ 24 `@tool` tất định, thực thi toàn trình **20/20 Use Cases** qua `LangGraph`, leo thang động `S1 -> S2`, vòng lặp tự sửa lỗi `NumericGroundingVerifier`, grounding placeholder `{{fact_key}}`, và hai chốt chặn hồi quy: **không đọc cấu hình agent trên máy** & **không có tên provider trong mã nguồn**. | **PASS** |
+| **[`tests/test_ai_service_harness.py`](../tests/test_ai_service_harness.py)** | **22 / 22** | Kiểm chứng **Endpoint Profile** (thứ tự ưu tiên env → `.env` → YAML), lỗi ngay khi thiếu API key, độ phủ 24 `@tool` tất định, thực thi toàn trình **20/20 Use Cases** qua `LangGraph`, leo thang động `S1 -> S2`, vòng lặp tự sửa lỗi `NumericGroundingVerifier`, grounding placeholder `{{fact_key}}`, và hai chốt chặn hồi quy: **không đọc cấu hình agent trên máy** & **không có tên provider trong mã nguồn**. | **PASS** |
 | **[`tests/test_live_tdd_seams.py`](../tests/test_live_tdd_seams.py)** | **4 / 4** | Kiểm thử TDD (`Red -> Green`) trực tiếp trên dữ liệu thô `mekong__MODIS_SP__2024-03-15__5d.csv` (`3.446` dòng) và trên **model thật** của cả hai tầng (giao thức typed-questions & native chat): `reasoning_trace`, `live_telemetry`, leo thang động `1.330,0% >= 200%`, tự sửa lỗi số ảo `98765.4321`, và bản tin **Grounded Narrative** do mô hình soạn (`synthesis_mode = llm`). Bộ test này **được đánh dấu `live`**, bị loại khỏi lần chạy mặc định và chỉ chạy từ workflow kích hoạt thủ công. | **PASS** |
 | **TỔNG CỘNG TOÀN WORKSPACE** | **26 / 26** | **100% vượt qua kiểm chứng toán học, vật lý và suy luận thực tế (`OK`)** | **100% PASS** |
 

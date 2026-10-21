@@ -11,7 +11,7 @@ from langchain_core.messages import BaseMessage
 from langgraph.graph.message import add_messages
 from pydantic import BaseModel, Field
 
-CITATION_PATTERN = re.compile(r"\{\{([A-Za-z0-9_.\[\]-]+)\}\}")
+CITATION_PATTERN = re.compile(r"\{+([A-Za-z0-9_.\[\]-]+)\}+")
 
 
 def collect_citation_keys(payload: Any, prefix: str = "") -> dict[str, float]:
@@ -375,12 +375,15 @@ def verify_grounded_draft(
     draft_text: str,
     ledger: VerifiedFactsLedger,
     rel_tolerance: float = 0.008,
+    ignore_literals: list[str] | None = None,
 ) -> tuple[str, VerificationReport]:
     """Resolve `{{fact_key}}` citations and verify the resolved text.
 
     Returns the resolved text and the verification report. A citation that no
     deterministic tool produced is a grounding error and fails the report even
-    when every number in the draft is verified.
+    when every number in the draft is verified. `ignore_literals` names
+    identifiers that appear in the text but are not quantitative claims, such
+    as a model identifier in the briefing header.
     """
     citations = {
         entry.fact_key: entry.numeric_value
@@ -388,14 +391,25 @@ def verify_grounded_draft(
         if not entry.fact_key.endswith(("_round1", "_round2"))
     }
     resolved, unresolved = resolve_citations(draft_text, citations)
-    report = ledger.verify_draft_text(resolved, rel_tolerance=rel_tolerance)
-    if unresolved:
-        report.unresolved_citations = sorted(set(unresolved))
+    leftover = sorted(
+        {
+            re.sub(r"^\{+|\}+$", "", token)
+            for token in re.findall(r"\{+[A-Za-z0-9_.\[\]-]+", resolved)
+        }
+    )
+    scrubbed = resolved
+    for literal in ignore_literals or []:
+        if literal:
+            scrubbed = scrubbed.replace(literal, " ")
+    report = ledger.verify_draft_text(scrubbed, rel_tolerance=rel_tolerance)
+    if unresolved or leftover:
+        report.unresolved_citations = leftover or sorted(set(unresolved))
         report.passed = False
         report.feedback_message = (
-            "VIOLATION OF DETERMINISTIC TOOL GATE: the draft cited "
-            f"{report.unresolved_citations} which no deterministic tool produced. "
-            "Cite only the keys listed in the available facts list."
+            "VIOLATION OF DETERMINISTIC TOOL GATE: the draft left citation "
+            f"placeholders {report.unresolved_citations} that no deterministic "
+            "tool produced. Cite only the keys listed in the available facts "
+            "list, using exactly those key names."
         )
     return resolved, report
 
@@ -419,3 +433,9 @@ class HarnessState(TypedDict):
     reasoning_trace: list[str]
     live_telemetry: dict[str, Any]
     synthesis_mode: str
+    cognitive_tier: str
+    triage_confidence: dict[str, float]
+    triage_classification: dict[str, Any]
+    tool_surface: list[str]
+    clarification_requests: list[dict[str, Any]]
+    sign_off_decision: dict[str, Any]

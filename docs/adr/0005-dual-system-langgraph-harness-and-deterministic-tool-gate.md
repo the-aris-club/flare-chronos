@@ -17,5 +17,5 @@ We orchestrate all 20 AI decision-support and scientific reasoning use cases (5 
    - **System 2 (native chat endpoint):** Handles all 15 multi-step causal, forensic, counterfactual, QA/QC, and policy auditing use cases (`UC-1.1` through `UC-5.3`), with an explicit deliberation level and `reasoning_content` extraction.
    - **Mutual Support Protocol:** System 1 prunes the tool surface and escalates dynamically to System 2 whenever raw-vs-harmonized divergence exceeds $200\%$ or South Atlantic Anomaly (`SAA`) flags trigger; System 2 distills verified causal conclusions back into System 1's `VerifiedPatternCache`.
 3. **Zero-Math-By-LLM Rule (`Deterministic Tool Gate` & `VerifiedFactsLedger`):**
-   - Every numerical calculation and data retrieval is exposed as a strict `@tool` (8 atomic physics/data tools + 15 domain diagnostic/simulation tools).
+   - Every numerical calculation and data retrieval is exposed as a strict `@tool` (9 atomic physics/data tools + 14 domain diagnostic/simulation tools; the raw CSV harmoniser stays outside the model-facing registry).
    - Every tool call records its exact numeric outputs into the session's `VerifiedFactsLedger`, and the `NumericGroundingVerifier` node blocks any response containing unverified numbers.

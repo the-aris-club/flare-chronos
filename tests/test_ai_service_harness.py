@@ -294,6 +294,205 @@ class TestFlareChronosDualSystemHarness(unittest.TestCase):
                     offenders.append(f"{path.name}: {needle}")
         self.assertEqual(offenders, [], msg=f"provider names found: {offenders}")
 
+    def test_14_tool_tiers_partition_the_registry(self) -> None:
+        """The Atomic and Domain Diagnostic tiers cover the registry exactly."""
+        from ai_service.tools import ATOMIC_TOOLS, DOMAIN_DIAGNOSTIC_TOOLS
+
+        atomic = {tool.name for tool in ATOMIC_TOOLS}
+        diagnostic = {tool.name for tool in DOMAIN_DIAGNOSTIC_TOOLS}
+        registered = {tool.name for tool in ALL_DETERMINISTIC_TOOLS}
+        self.assertEqual(atomic | diagnostic, registered)
+        self.assertEqual(atomic & diagnostic, set())
+        self.assertEqual(len(registered), 23)
+
+    def test_15_raw_firms_harmoniser_is_outside_the_model_registry(self) -> None:
+        """The raw CSV harmoniser stays unreachable by the model."""
+        from ai_service.tools import tool_harmonize_real_firms_csv_slice
+
+        registered = {tool.name for tool in ALL_DETERMINISTIC_TOOLS}
+        self.assertNotIn(tool_harmonize_real_firms_csv_slice.name, registered)
+
+    def test_16_fast_tier_surface_excludes_domain_diagnostic_tools(self) -> None:
+        """The tier that reports can never reach a derivation."""
+        from ai_service.tools import ATOMIC_TOOLS, DOMAIN_DIAGNOSTIC_TOOLS
+
+        harness = FlareChronosDualSystemHarness(
+            mode="deterministic", enable_cache=False
+        )
+        atomic = {tool.name for tool in ATOMIC_TOOLS}
+        diagnostic = {tool.name for tool in DOMAIN_DIAGNOSTIC_TOOLS}
+
+        fast_surface = harness._fast_tier_tools("UC-S1.4")
+        self.assertTrue(fast_surface)
+        self.assertTrue(set(fast_surface) <= atomic)
+        self.assertEqual(set(fast_surface) & diagnostic, set())
+
+        deliberative_surface = harness._deliberative_tools("UC-1.1")
+        self.assertTrue(set(deliberative_surface) & diagnostic)
+        self.assertIn("ask_user_question", deliberative_surface)
+
+    def test_17_system1_classification_drives_the_cognitive_tier(self) -> None:
+        """The tier comes from the calibrated classification, not from a regex."""
+        harness = FlareChronosDualSystemHarness(
+            mode="deterministic", enable_cache=False
+        )
+
+        fast = harness.invoke_use_case(
+            "UC-S1.3 Fast single-hop metric lookup for 2024 mekong.",
+            use_case_id=UseCaseId.UC_S1_3_SINGLE_HOP_LOOKUP,
+            thread_id="tier-fast",
+        )
+        self.assertEqual(fast.get("cognitive_tier"), "fast")
+        self.assertGreater(fast.get("triage_confidence", {}).get("region", 0), 0.0)
+        self.assertEqual(
+            fast.get("triage_classification", {}).get("model"),
+            harness.s1_profile.model_id,
+        )
+
+        deliberative = harness.invoke_use_case(
+            "UC-1.1 Decompose the 2005 to 2024 fire regime shift in mekong.",
+            use_case_id=UseCaseId.UC_1_1_REGIME_SHIFT_ATTRIBUTION,
+            thread_id="tier-deliberative",
+        )
+        self.assertEqual(deliberative.get("cognitive_tier"), "deliberative")
+        self.assertGreater(
+            deliberative.get("triage_confidence", {}).get("is_deliberative", 0), 0.5
+        )
+
+    def test_18_sign_off_pauses_the_run_and_resumes_with_the_decision(self) -> None:
+        """A use case that authorizes an action pauses for a human."""
+        from langgraph.types import Command
+
+        harness = FlareChronosDualSystemHarness(
+            mode="deterministic", enable_cache=False, enable_sign_off=True
+        )
+        thread_id = "sign-off-approve"
+        harness.invoke_use_case(
+            "UC-S1.4 Generate flash NRT tactical ranger alert for amazon in 2026.",
+            use_case_id=UseCaseId.UC_S1_4_FLASH_NRT_ALERT,
+            thread_id=thread_id,
+        )
+        snapshot = harness.graph.get_state({"configurable": {"thread_id": thread_id}})
+        self.assertTrue(snapshot.interrupts)
+        request = snapshot.interrupts[0].value
+        self.assertEqual(request["kind"], "sign_off")
+        self.assertEqual(request["use_case_id"], "UC-S1.4")
+        self.assertIn("final_briefing", request["evidence"])
+
+        resumed = harness.graph.invoke(
+            Command(
+                resume={
+                    "approved": True,
+                    "reason": "verified on the ground",
+                    "decided_by": "ranger-01",
+                }
+            ),
+            {"configurable": {"thread_id": thread_id}},
+        )
+        decision = resumed["sign_off_decision"]
+        self.assertTrue(decision["approved"])
+        self.assertEqual(decision["decided_by"], "ranger-01")
+        self.assertIn("TIER_1_ACTIVE_MONITORING", resumed["final_briefing"])
+
+    def test_19_rejected_sign_off_releases_no_briefing(self) -> None:
+        """A declined action publishes nothing, and the decision is still recorded."""
+        from langgraph.types import Command
+
+        harness = FlareChronosDualSystemHarness(
+            mode="deterministic", enable_cache=False, enable_sign_off=True
+        )
+        thread_id = "sign-off-reject"
+        harness.invoke_use_case(
+            "UC-S1.4 Generate flash NRT tactical ranger alert for amazon in 2026.",
+            use_case_id=UseCaseId.UC_S1_4_FLASH_NRT_ALERT,
+            thread_id=thread_id,
+        )
+        resumed = harness.graph.invoke(
+            Command(resume={"approved": False, "reason": "duplicate alert"}),
+            {"configurable": {"thread_id": thread_id}},
+        )
+        decision = resumed["sign_off_decision"]
+        self.assertFalse(decision["approved"])
+        self.assertEqual(decision["reason"], "duplicate alert")
+        self.assertEqual(resumed["final_briefing"], "")
+        self.assertEqual(resumed["synthesis_mode"], "sign_off_declined")
+
+    def test_20_event_stream_and_sse_frames(self) -> None:
+        """The run is observable as typed events and encodable as SSE frames."""
+        import asyncio
+
+        from ai_service.events import HarnessEvent, to_sse_frames
+
+        async def collect() -> list[HarnessEvent]:
+            harness = FlareChronosDualSystemHarness(
+                mode="deterministic", enable_cache=False
+            )
+            return [
+                event
+                async for event in harness.astream_use_case(
+                    "UC-S1.3 Fast single-hop metric lookup for 2024 mekong.",
+                    use_case_id=UseCaseId.UC_S1_3_SINGLE_HOP_LOOKUP,
+                    thread_id="event-stream",
+                )
+            ]
+
+        events = asyncio.run(collect())
+        types = [event.type for event in events]
+        self.assertEqual(types[0], "run_started")
+        self.assertIn("node_completed", types)
+        self.assertIn("verification", types)
+        self.assertIn("briefing", types)
+        self.assertEqual(types[-1], "run_completed")
+
+        frame = events[0].to_sse()
+        self.assertTrue(frame.startswith(b"event: run_started\ndata: {"))
+        self.assertTrue(frame.endswith(b"\n\n"))
+
+        async def frames() -> list[bytes]:
+            harness = FlareChronosDualSystemHarness(
+                mode="deterministic", enable_cache=False
+            )
+            return [
+                frame
+                async for frame in to_sse_frames(
+                    harness.astream_use_case(
+                        "UC-S1.3 Fast single-hop metric lookup for 2024 mekong.",
+                        use_case_id=UseCaseId.UC_S1_3_SINGLE_HOP_LOOKUP,
+                        thread_id="sse-frames",
+                    )
+                )
+            ]
+
+        encoded = asyncio.run(frames())
+        self.assertTrue(encoded)
+        self.assertTrue(all(b"event: " in frame for frame in encoded))
+
+    def test_21_citation_placeholder_forms_and_leftovers(self) -> None:
+        """One or two braces both resolve; a leftover placeholder fails the report."""
+        ledger = VerifiedFactsLedger()
+        ledger.ingest_tool_payload("tool_test", {"harmonized_index": 94.2})
+
+        for draft in (
+            "Index {{harmonized_index}} rose.",
+            "Index {harmonized_index} rose.",
+        ):
+            resolved, report = verify_grounded_draft(draft, ledger)
+            self.assertIn("94.2", resolved)
+            self.assertTrue(report.passed)
+            self.assertEqual(report.unresolved_citations, [])
+
+        _, report = verify_grounded_draft("Index {{invented_metric}} rose.", ledger)
+        self.assertFalse(report.passed)
+        self.assertEqual(report.unresolved_citations, ["invented_metric"])
+
+    def test_22_clarification_tool_is_outside_the_deterministic_registry(self) -> None:
+        """The clarification tool interrupts the run; it is not a data tool."""
+        from ai_service.human_input import ask_user_question
+
+        registered = {tool.name for tool in ALL_DETERMINISTIC_TOOLS}
+        self.assertNotIn(ask_user_question.name, registered)
+        self.assertIn("question", ask_user_question.description)
+
 
 if __name__ == "__main__":
     unittest.main()
