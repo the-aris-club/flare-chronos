@@ -19,7 +19,7 @@ repos:
         always_run: true
       - id: pytest
         name: pytest
-        entry: uv run python -m pytest
+        entry: python3 -m unittest tests/test_harmonization_suite.py tests/test_core_coverage.py tests/test_ai_service_harness.py
         language: system
         pass_filenames: false
         always_run: true

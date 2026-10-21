@@ -1,0 +1,339 @@
+{
+  "harness_framework": "LangGraph StateGraph + ToolNode + MemorySaver + Pydantic v2",
+  "models": {
+    "system1_reflexive": {
+      "provider": "opencode-v2",
+      "model_id": "jev",
+      "base_url": "https://opencode.ai/zen/v1"
+    },
+    "system2_deliberative": {
+      "provider": "qwen-local",
+      "model_id": "qwen3.8-flash-next",
+      "base_url": "http://100.67.91.54:8888/v1",
+      "reasoning_effort": "xhigh",
+      "reasoning_field": "reasoning_content"
+    }
+  },
+  "total_use_cases_executed": 20,
+  "system1_use_cases_count": 5,
+  "system2_use_cases_count": 15,
+  "deterministic_tools_registered": 23,
+  "all_verifications_passed": true,
+  "zero_unverified_numbers_in_final_outputs": true,
+  "symbiosis_benchmarks": {
+    "s1_to_s2_dynamic_escalation": {
+      "initial_use_case": "UC-S1.3",
+      "resulting_cognitive_path": "escalated_s1_to_s2",
+      "escalated_from_system1": true,
+      "escalation_reason": "Physical divergence 1330.0% (>= 200.0%) or SAA anomalies (0) detected in tool_lookup_single_epoch_metrics.",
+      "escalated_tools": [
+        "tool_lookup_single_epoch_metrics",
+        "tool_uc1_1_regime_shift_attribution",
+        "tool_deduplicate_overpass_episodes"
+      ],
+      "verification_passed": true
+    },
+    "numeric_verifier_self_correction_loop": {
+      "injected_unverified_number": 98765.4321,
+      "self_correction_retries_triggered": 1,
+      "final_verification_passed": true,
+      "final_unverified_numbers": []
+    },
+    "s2_to_s1_verified_pattern_cache": {
+      "use_case_id": "UC-1.1",
+      "cognitive_path": "distilled_cache_hit",
+      "distilled_cache_hit": true,
+      "cached_patterns_total": 20
+    }
+  },
+  "use_case_runs": [
+    {
+      "use_case_id": "UC-S1.1",
+      "cognitive_path": "system1_fast_lookup",
+      "pruned_tool_names": [
+        "tool_lookup_single_epoch_metrics"
+      ],
+      "verified_facts_ingested": 31,
+      "verification_passed": true,
+      "checked_numbers_count": 10,
+      "unverified_numbers_count": 0,
+      "self_correction_retries": 0,
+      "has_system2_reasoning_trace": false,
+      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system1_fast_lookup | System 1: opencode-v2/jev | System 2: qwen-local/qwen3.8-flash-next]\n### Verified Analysis Report (UC-S1.1)\n- **Tool Executed (`tool_lookup_single_epoch_metrics`)**:\n  - `use_case_id`: UC-S1.3"
+    },
+    {
+      "use_case_id": "UC-S1.2",
+      "cognitive_path": "system1_fast_lookup",
+      "pruned_tool_names": [
+        "tool_lookup_single_epoch_metrics"
+      ],
+      "verified_facts_ingested": 31,
+      "verification_passed": true,
+      "checked_numbers_count": 10,
+      "unverified_numbers_count": 0,
+      "self_correction_retries": 0,
+      "has_system2_reasoning_trace": false,
+      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system1_fast_lookup | System 1: opencode-v2/jev | System 2: qwen-local/qwen3.8-flash-next]\n### Verified Analysis Report (UC-S1.2)\n- **Tool Executed (`tool_lookup_single_epoch_metrics`)**:\n  - `use_case_id`: UC-S1.3"
+    },
+    {
+      "use_case_id": "UC-S1.3",
+      "cognitive_path": "system1_fast_lookup",
+      "pruned_tool_names": [
+        "tool_lookup_single_epoch_metrics"
+      ],
+      "verified_facts_ingested": 31,
+      "verification_passed": true,
+      "checked_numbers_count": 10,
+      "unverified_numbers_count": 0,
+      "self_correction_retries": 0,
+      "has_system2_reasoning_trace": false,
+      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system1_fast_lookup | System 1: opencode-v2/jev | System 2: qwen-local/qwen3.8-flash-next]\n### Verified Analysis Report (UC-S1.3)\n- **Tool Executed (`tool_lookup_single_epoch_metrics`)**:\n  - `use_case_id`: UC-S1.3"
+    },
+    {
+      "use_case_id": "UC-S1.4",
+      "cognitive_path": "system1_flash_alert",
+      "pruned_tool_names": [
+        "tool_emit_flash_nrt_alert"
+      ],
+      "verified_facts_ingested": 22,
+      "verification_passed": true,
+      "checked_numbers_count": 7,
+      "unverified_numbers_count": 0,
+      "self_correction_retries": 0,
+      "has_system2_reasoning_trace": false,
+      "final_briefing_preview": "[FIELD_RANGER BRIEFING | Cognitive Path: system1_flash_alert | System 1: opencode-v2/jev | System 2: qwen-local/qwen3.8-flash-next]\n### Verified Analysis Report (UC-S1.4)\n- **Tool Executed (`tool_emit_flash_nrt_alert`)**:\n  - `use_case_id`: UC-S1.4\n  - `region"
+    },
+    {
+      "use_case_id": "UC-S1.5",
+      "cognitive_path": "system1_fast_lookup",
+      "pruned_tool_names": [
+        "tool_uc2_3_verified_multistakeholder_briefing_data"
+      ],
+      "verified_facts_ingested": 31,
+      "verification_passed": true,
+      "checked_numbers_count": 10,
+      "unverified_numbers_count": 0,
+      "self_correction_retries": 0,
+      "has_system2_reasoning_trace": false,
+      "final_briefing_preview": "[FORESTRY_EXECUTIVE BRIEFING | Cognitive Path: system1_fast_lookup | System 1: opencode-v2/jev | System 2: qwen-local/qwen3.8-flash-next]\n### Verified Analysis Report (UC-S1.5)\n- **Tool Executed (`tool_uc2_3_verified_multistakeholder_briefing_data`)**:\n  - `us"
+    },
+    {
+      "use_case_id": "UC-1.1",
+      "cognitive_path": "system2_deliberative",
+      "pruned_tool_names": [
+        "tool_uc1_1_regime_shift_attribution",
+        "tool_deduplicate_overpass_episodes"
+      ],
+      "verified_facts_ingested": 73,
+      "verification_passed": true,
+      "checked_numbers_count": 24,
+      "unverified_numbers_count": 0,
+      "self_correction_retries": 0,
+      "has_system2_reasoning_trace": true,
+      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: opencode-v2/jev | System 2: qwen-local/qwen3.8-flash-next]\n### Verified Analysis Report (UC-1.1)\n- **Tool Executed (`tool_uc1_1_regime_shift_attribution`)**:\n  - `use_case_id`: UC-1"
+    },
+    {
+      "use_case_id": "UC-1.2",
+      "cognitive_path": "system2_deliberative",
+      "pruned_tool_names": [
+        "tool_uc1_2_cross_sensor_discrepancy_forensics",
+        "tool_compute_footprint_and_h3_allocation"
+      ],
+      "verified_facts_ingested": 52,
+      "verification_passed": true,
+      "checked_numbers_count": 17,
+      "unverified_numbers_count": 0,
+      "self_correction_retries": 0,
+      "has_system2_reasoning_trace": true,
+      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: opencode-v2/jev | System 2: qwen-local/qwen3.8-flash-next]\n### Verified Analysis Report (UC-1.2)\n- **Tool Executed (`tool_uc1_2_cross_sensor_discrepancy_forensics`)**:\n  - `use_case"
+    },
+    {
+      "use_case_id": "UC-1.3",
+      "cognitive_path": "system2_deliberative",
+      "pruned_tool_names": [
+        "tool_uc1_3_thermal_source_origin_classification",
+        "tool_evaluate_detection_probability_and_saa"
+      ],
+      "verified_facts_ingested": 34,
+      "verification_passed": true,
+      "checked_numbers_count": 11,
+      "unverified_numbers_count": 0,
+      "self_correction_retries": 0,
+      "has_system2_reasoning_trace": true,
+      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: opencode-v2/jev | System 2: qwen-local/qwen3.8-flash-next]\n### Verified Analysis Report (UC-1.3)\n- **Tool Executed (`tool_uc1_3_thermal_source_origin_classification`)**:\n  - `use_ca"
+    },
+    {
+      "use_case_id": "UC-2.1",
+      "cognitive_path": "system2_deliberative",
+      "pruned_tool_names": [
+        "tool_uc2_1_phenological_phase_shift_detection",
+        "tool_query_seasonal_phenology_12m"
+      ],
+      "verified_facts_ingested": 142,
+      "verification_passed": true,
+      "checked_numbers_count": 15,
+      "unverified_numbers_count": 0,
+      "self_correction_retries": 0,
+      "has_system2_reasoning_trace": true,
+      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: opencode-v2/jev | System 2: qwen-local/qwen3.8-flash-next]\n### Verified Analysis Report (UC-2.1)\n- **Tool Executed (`tool_uc2_1_phenological_phase_shift_detection`)**:\n  - `use_case"
+    },
+    {
+      "use_case_id": "UC-2.2",
+      "cognitive_path": "system2_deliberative",
+      "pruned_tool_names": [
+        "tool_uc2_2_uncertainty_aware_tactical_dispatch",
+        "tool_compute_footprint_and_h3_allocation"
+      ],
+      "verified_facts_ingested": 61,
+      "verification_passed": true,
+      "checked_numbers_count": 20,
+      "unverified_numbers_count": 0,
+      "self_correction_retries": 0,
+      "has_system2_reasoning_trace": true,
+      "final_briefing_preview": "[FIELD_RANGER BRIEFING | Cognitive Path: system2_deliberative | System 1: opencode-v2/jev | System 2: qwen-local/qwen3.8-flash-next]\n### Verified Analysis Report (UC-2.2)\n- **Tool Executed (`tool_uc2_2_uncertainty_aware_tactical_dispatch`)**:\n  - `use_case_id`"
+    },
+    {
+      "use_case_id": "UC-2.3",
+      "cognitive_path": "system2_deliberative",
+      "pruned_tool_names": [
+        "tool_uc2_3_verified_multistakeholder_briefing_data"
+      ],
+      "verified_facts_ingested": 31,
+      "verification_passed": true,
+      "checked_numbers_count": 10,
+      "unverified_numbers_count": 0,
+      "self_correction_retries": 0,
+      "has_system2_reasoning_trace": true,
+      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: opencode-v2/jev | System 2: qwen-local/qwen3.8-flash-next]\n### Verified Analysis Report (UC-2.3)\n- **Tool Executed (`tool_uc2_3_verified_multistakeholder_briefing_data`)**:\n  - `use"
+    },
+    {
+      "use_case_id": "UC-3.1",
+      "cognitive_path": "system2_deliberative",
+      "pruned_tool_names": [
+        "tool_uc3_1_constellation_retirement_simulation"
+      ],
+      "verified_facts_ingested": 25,
+      "verification_passed": true,
+      "checked_numbers_count": 8,
+      "unverified_numbers_count": 0,
+      "self_correction_retries": 0,
+      "has_system2_reasoning_trace": true,
+      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: opencode-v2/jev | System 2: qwen-local/qwen3.8-flash-next]\n### Verified Analysis Report (UC-3.1)\n- **Tool Executed (`tool_uc3_1_constellation_retirement_simulation`)**:\n  - `use_cas"
+    },
+    {
+      "use_case_id": "UC-3.2",
+      "cognitive_path": "system2_deliberative",
+      "pruned_tool_names": [
+        "tool_uc3_2_multihop_spatiotemporal_cube_query",
+        "tool_query_seasonal_phenology_12m"
+      ],
+      "verified_facts_ingested": 139,
+      "verification_passed": true,
+      "checked_numbers_count": 14,
+      "unverified_numbers_count": 0,
+      "self_correction_retries": 0,
+      "has_system2_reasoning_trace": true,
+      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: opencode-v2/jev | System 2: qwen-local/qwen3.8-flash-next]\n### Verified Analysis Report (UC-3.2)\n- **Tool Executed (`tool_uc3_2_multihop_spatiotemporal_cube_query`)**:\n  - `use_case"
+    },
+    {
+      "use_case_id": "UC-3.3",
+      "cognitive_path": "system2_deliberative",
+      "pruned_tool_names": [
+        "tool_uc3_3_autonomous_biome_recalibration",
+        "tool_calibrate_cross_sensor_frp"
+      ],
+      "verified_facts_ingested": 67,
+      "verification_passed": true,
+      "checked_numbers_count": 22,
+      "unverified_numbers_count": 0,
+      "self_correction_retries": 0,
+      "has_system2_reasoning_trace": true,
+      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: opencode-v2/jev | System 2: qwen-local/qwen3.8-flash-next]\n### Verified Analysis Report (UC-3.3)\n- **Tool Executed (`tool_uc3_3_autonomous_biome_recalibration`)**:\n  - `use_case_id`"
+    },
+    {
+      "use_case_id": "UC-4.1",
+      "cognitive_path": "system2_deliberative",
+      "pruned_tool_names": [
+        "tool_uc4_1_orbital_drift_and_sza_audit",
+        "tool_compute_solar_sza_and_daynight"
+      ],
+      "verified_facts_ingested": 52,
+      "verification_passed": true,
+      "checked_numbers_count": 15,
+      "unverified_numbers_count": 0,
+      "self_correction_retries": 0,
+      "has_system2_reasoning_trace": true,
+      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: opencode-v2/jev | System 2: qwen-local/qwen3.8-flash-next]\n### Verified Analysis Report (UC-4.1)\n- **Tool Executed (`tool_uc4_1_orbital_drift_and_sza_audit`)**:\n  - `use_case_id`: U"
+    },
+    {
+      "use_case_id": "UC-4.2",
+      "cognitive_path": "system2_deliberative",
+      "pruned_tool_names": [
+        "tool_uc4_2_nrt_vs_sp_fidelity_audit"
+      ],
+      "verified_facts_ingested": 28,
+      "verification_passed": true,
+      "checked_numbers_count": 9,
+      "unverified_numbers_count": 0,
+      "self_correction_retries": 0,
+      "has_system2_reasoning_trace": true,
+      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: opencode-v2/jev | System 2: qwen-local/qwen3.8-flash-next]\n### Verified Analysis Report (UC-4.2)\n- **Tool Executed (`tool_uc4_2_nrt_vs_sp_fidelity_audit`)**:\n  - `use_case_id`: UC-4"
+    },
+    {
+      "use_case_id": "UC-4.3",
+      "cognitive_path": "system2_deliberative",
+      "pruned_tool_names": [
+        "tool_uc4_3_adaptive_firms_rate_limit_planner"
+      ],
+      "verified_facts_ingested": 22,
+      "verification_passed": true,
+      "checked_numbers_count": 7,
+      "unverified_numbers_count": 0,
+      "self_correction_retries": 0,
+      "has_system2_reasoning_trace": true,
+      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: opencode-v2/jev | System 2: qwen-local/qwen3.8-flash-next]\n### Verified Analysis Report (UC-4.3)\n- **Tool Executed (`tool_uc4_3_adaptive_firms_rate_limit_planner`)**:\n  - `use_case_"
+    },
+    {
+      "use_case_id": "UC-5.1",
+      "cognitive_path": "system2_deliberative",
+      "pruned_tool_names": [
+        "tool_uc5_1_redd_plus_carbon_mrv_baseline_audit"
+      ],
+      "verified_facts_ingested": 25,
+      "verification_passed": true,
+      "checked_numbers_count": 8,
+      "unverified_numbers_count": 0,
+      "self_correction_retries": 0,
+      "has_system2_reasoning_trace": true,
+      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: opencode-v2/jev | System 2: qwen-local/qwen3.8-flash-next]\n### Verified Analysis Report (UC-5.1)\n- **Tool Executed (`tool_uc5_1_redd_plus_carbon_mrv_baseline_audit`)**:\n  - `use_cas"
+    },
+    {
+      "use_case_id": "UC-5.2",
+      "cognitive_path": "system2_deliberative",
+      "pruned_tool_names": [
+        "tool_uc5_2_burn_ban_policy_counterfactual_audit"
+      ],
+      "verified_facts_ingested": 28,
+      "verification_passed": true,
+      "checked_numbers_count": 9,
+      "unverified_numbers_count": 0,
+      "self_correction_retries": 0,
+      "has_system2_reasoning_trace": true,
+      "final_briefing_preview": "[FORESTRY_EXECUTIVE BRIEFING | Cognitive Path: system2_deliberative | System 1: opencode-v2/jev | System 2: qwen-local/qwen3.8-flash-next]\n### Verified Analysis Report (UC-5.2)\n- **Tool Executed (`tool_uc5_2_burn_ban_policy_counterfactual_audit`)**:\n  - `use_c"
+    },
+    {
+      "use_case_id": "UC-5.3",
+      "cognitive_path": "system2_deliberative",
+      "pruned_tool_names": [
+        "tool_uc5_3_transboundary_fire_propagation_forensics"
+      ],
+      "verified_facts_ingested": 29,
+      "verification_passed": true,
+      "checked_numbers_count": 12,
+      "unverified_numbers_count": 0,
+      "self_correction_retries": 0,
+      "has_system2_reasoning_trace": true,
+      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: opencode-v2/jev | System 2: qwen-local/qwen3.8-flash-next]\n### Verified Analysis Report (UC-5.3)\n- **Tool Executed (`tool_uc5_3_transboundary_fire_propagation_forensics`)**:\n  - `us"
+    }
+  ]
+}

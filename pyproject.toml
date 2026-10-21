@@ -17,6 +17,7 @@ members = [
     "packages/harmonization-core",
     "packages/firms-ingestion",
     "apps/benchmark-cli",
+    "apps/ai-service",
 ]
 
 [dependency-groups]
@@ -27,6 +28,16 @@ pythonpath = [
     "packages/harmonization-core/src",
     "packages/firms-ingestion/src",
     "apps/benchmark-cli/src",
+    "apps/ai-service/src",
     "src",
 ]
 testpaths = ["tests"]
+
+[tool.pyright]
+extraPaths = [
+    "packages/harmonization-core/src",
+    "packages/firms-ingestion/src",
+    "apps/benchmark-cli/src",
+    "apps/ai-service/src",
+    "src",
+]

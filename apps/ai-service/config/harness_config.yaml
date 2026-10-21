@@ -1,0 +1,137 @@
+# ==============================================================================
+# FLARE-CHRONOS DUAL-SYSTEM (SYSTEM 1 <-> SYSTEM 2) LANGGRAPH HARNESS CONFIG
+# ==============================================================================
+# Governed by ADR-0005: Zero LLM arithmetic; 100% of physical, geometric,
+# radiometric, and statistical metrics MUST be computed via @tool invocations
+# and verified against the per-session VerifiedFactsLedger.
+
+harness:
+  name: "flare-chronos-dual-cognitive-harness"
+  version: "1.0.0"
+  framework: "langgraph"
+  state_checkpointer: "memory_saver"
+
+models:
+  system1_reflexive:
+    role: "System 1 Reflexive Layer (Fast Triage, Entity Extraction, 1-Hop Lookup, Flash NRT Alert, Stakeholder Formatting)"
+    provider: "opencode-v2"
+    model_id: "jev-1.13-free"
+    model_alias: "jev"
+    base_url: "https://opencode.ai/zen/v1"
+    systemone_endpoint: "https://opencode.ai/zen/v1/systemone"
+    api_key_env: "OPENCODE_API_KEY"
+    default_key_if_free: "public"
+    auth_fallback_file: "~/.local/share/opencode/auth.json"
+    auth_fallback_provider_key: "opencode-go"
+    temperature: 0.0
+    max_output_tokens: 4096
+    timeout_ms: 30000
+    capabilities:
+      tools: true
+      structured_output: true
+      systemone_primitives: ["noul", "choice", "score"]
+    assigned_use_cases:
+      - "UC-S1.1"  # Reflexive Intent & Urgency Triage (<150ms routing)
+      - "UC-S1.2"  # Spatio-Temporal Entity & Schema Extraction (Pydantic v2)
+      - "UC-S1.3"  # Single-Hop Deterministic Metric Lookup
+      - "UC-S1.4"  # Flash NRT Anomaly Alerting (SFAI >= +2.5 sigma)
+      - "UC-S1.5"  # Ubiquitous Language & Multi-Stakeholder Briefing Synthesis
+
+  system2_deliberative:
+    role: "System 2 Deliberative Layer (Multi-Step Causal Attribution, Sensor Forensics, Counterfactual Simulation, Policy & QA/QC Auditing)"
+    provider: "qwen-local"
+    name: "Qwen3.8-Flash-Next NVFP4 (TP2+MTP3, 262K native)"
+    model_id: "qwen3.8-flash-next"
+    base_url: "http://100.67.91.54:8888/v1"
+    api_key_env: "QWEN_LOCAL_API_KEY"
+    opencode_config_file: "~/.config/opencode/opencode.jsonc"
+    opencode_provider_key: "qwen-local"
+    temperature: 0.0
+    # Qwen3.8 chat template strictly accepts xhigh | medium | low (default xhigh)
+    reasoning_effort: "xhigh"
+    variants:
+      default:
+        reasoning_effort: "xhigh"
+      fast:
+        reasoning_effort: "medium"
+      low:
+        reasoning_effort: "low"
+    compatibility:
+      reasoning_field: "reasoning_content"
+    capabilities:
+      tools: true
+      input_modalities: ["text", "image"]
+      output_modalities: ["text"]
+    limits:
+      context_window: 262144
+      max_output_tokens: 65536
+    timeout_ms: 300000
+    chunk_timeout_ms: 60000
+    assigned_use_cases:
+      - "UC-1.1"  # Regime-Shift Attribution (Sensor Artifact vs Real Fire)
+      - "UC-1.2"  # Cross-Sensor Discrepancy Forensics (MODIS vs VIIRS)
+      - "UC-1.3"  # Multi-Evidence Thermal Source Origin Classification
+      - "UC-2.1"  # Phenological Phase-Shift & Early-Onset El Nino Detection
+      - "UC-2.2"  # Uncertainty-Aware Tactical Dispatch (Elliptical Footprint)
+      - "UC-2.3"  # Self-Verifying Multi-Stakeholder Situation Briefing
+      - "UC-3.1"  # Counterfactual Constellation Retirement Simulation (2026+)
+      - "UC-3.2"  # Multi-Hop Spatio-Temporal Cube Analytics
+      - "UC-3.3"  # Autonomous Biome-Specific Operator Recalibration
+      - "UC-4.1"  # End-of-Life Orbital Drift & Solar Zenith Angle Audit
+      - "UC-4.2"  # Near-Real-Time (URT/RT/NRT) vs Standard (SP) Fidelity Audit
+      - "UC-4.3"  # Adaptive NASA FIRMS Rate-Limit & Transaction Budgeting
+      - "UC-5.1"  # Sensor-Invariant REDD+ Carbon MRV Baseline Audit
+      - "UC-5.2"  # Agricultural Burn-Ban Policy Counterfactual Evaluation
+      - "UC-5.3"  # Transboundary Smoke & Fire Propagation Forensics (H3 Rings)
+
+symbiosis_protocol:
+  context_pruning_enabled: true
+  max_tools_per_system2_turn: 6
+  dynamic_escalation:
+    escalate_on_raw_vs_harmonized_pct_diff: 200.0
+    escalate_on_saa_nighttime_anomaly: true
+    escalate_on_sfai_crisis_sigma: 2.2
+    escalate_on_multi_hop_causal_why: true
+  pattern_distillation:
+    enable_verified_pattern_cache: true
+    cache_ttl_seconds: 86400
+
+deterministic_tool_gate:
+  strict_tool_only_numerics: true
+  forbid_freeform_llm_arithmetic: true
+  require_verified_facts_ledger: true
+  numeric_tolerance_rel: 0.005
+  max_reasoning_steps: 8
+  max_self_correction_retries: 2
+  allow_exempt_structural_numbers:
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 7
+    - 8
+    - 12
+    - 13
+    - 15
+    - 20
+    - 26
+    - 73
+    - 85
+    - 95
+    - 100
+    - 375
+    - 2000
+    - 2001
+    - 2005
+    - 2007
+    - 2010
+    - 2012
+    - 2016
+    - 2018
+    - 2019
+    - 2020
+    - 2023
+    - 2024
+    - 2025
+    - 2026
