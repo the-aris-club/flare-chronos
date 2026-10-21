@@ -27,6 +27,8 @@ from ai_service.models import (
 from ai_service.run_all_usecases import USE_CASE_BENCHMARK_QUERIES
 from ai_service.schemas import (
     CognitivePath,
+    SpatioTemporalQueryEntity,
+    StakeholderTier,
     UseCaseId,
     VerifiedFactsLedger,
     collect_citable_facts,
@@ -589,6 +591,74 @@ class TestFlareChronosDualSystemHarness(unittest.TestCase):
         self.assertEqual(answers["is_deliberative"]["noul"], 1.0)
         self.assertEqual(answers["urgency"]["noul"], 0.0)
         self.assertEqual(answers["focus_epoch"]["choice"], "2019")
+
+    def test_32_a_paused_run_survives_a_process_restart(self) -> None:
+        """A run waiting for a human resumes from disk, not from memory."""
+        from ai_service.harness import build_sqlite_checkpointer
+        from langgraph.types import Command
+
+        with tempfile.TemporaryDirectory() as tmp:
+            checkpoint_path = Path(tmp) / "checkpoints.sqlite"
+            thread_id = "durable-sign-off"
+
+            first = FlareChronosDualSystemHarness(
+                mode="deterministic",
+                enable_cache=False,
+                enable_sign_off=True,
+                checkpointer=build_sqlite_checkpointer(checkpoint_path),
+            )
+            first.invoke_use_case(
+                "UC-S1.4 Generate flash NRT tactical ranger alert for amazon in 2026.",
+                use_case_id=UseCaseId.UC_S1_4_FLASH_NRT_ALERT,
+                thread_id=thread_id,
+            )
+            snapshot = first.graph.get_state({"configurable": {"thread_id": thread_id}})
+            self.assertTrue(snapshot.interrupts)
+
+            # A new harness on the same file stands in for a restarted process.
+            second = FlareChronosDualSystemHarness(
+                mode="deterministic",
+                enable_cache=False,
+                enable_sign_off=True,
+                checkpointer=build_sqlite_checkpointer(checkpoint_path),
+            )
+            resumed = second.graph.invoke(
+                Command(resume={"approved": True, "reason": "confirmed"}),
+                {"configurable": {"thread_id": thread_id}},
+            )
+            self.assertTrue(resumed["sign_off_decision"]["approved"])
+            self.assertIn("TIER_1_ACTIVE_MONITORING", resumed["final_briefing"])
+
+    def test_31_every_stakeholder_tier_reaches_the_narrative_guidance(self) -> None:
+        """Each tier's guidance reaches the model, not only the generic fallback."""
+        from ai_service.prompts import system2_system_prompt
+        from ai_service.schemas import StakeholderTier
+
+        expected = {
+            StakeholderTier.FIELD_RANGER: "operational implication",
+            StakeholderTier.FORESTRY_EXECUTIVE: "policy consequence",
+            StakeholderTier.CLIMATE_SCIENTIST: "name every assumption",
+        }
+        for tier, marker in expected.items():
+            prompt = system2_system_prompt(
+                entity=self._entity_for_tier(tier),
+                requested_use_case="UC-2.2",
+                tier=tier.value,
+            )
+            self.assertIn(marker, prompt)
+            self.assertNotIn("a technical reader", prompt)
+
+    def _entity_for_tier(self, tier: StakeholderTier) -> SpatioTemporalQueryEntity:
+        return SpatioTemporalQueryEntity(
+            use_case_id=UseCaseId.UC_2_2_TACTICAL_DISPATCH,
+            cognitive_path=CognitivePath.SYSTEM2_DELIBERATIVE.value,
+            region="mekong",
+            epoch_years=[2024],
+            pentad_range=(11, 22),
+            h3_resolution=7,
+            stakeholder_tier=tier,
+            urgency_level="nominal",
+        )
 
     def test_29_an_unsupported_deliberation_level_does_not_lose_the_run(self) -> None:
         """A model that refuses the configured thinking level still answers."""

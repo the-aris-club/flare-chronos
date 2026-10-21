@@ -91,6 +91,29 @@ operator's input, call `ask_user_question` and wait for the answer.
 - State the question, and add the candidate answers when the choice is finite.
 """
 
+# The stakeholder tier decides what the narrative leads with. The keys are the
+# canonical tier values, so the guidance reaches the model for every tier.
+_TIER_DETAIL = {
+    "field_ranger": (
+        "a ranger who needs to know where to go and what confidence to hold; "
+        "lead with the operational implication and the footprint uncertainty"
+    ),
+    "forestry_executive": (
+        "an executive who needs the trend, the scale and the policy "
+        "consequence; lead with the magnitude and the decision it implies"
+    ),
+    "climate_scientist": (
+        "a scientist who needs the mechanism, the evidence and the limits; "
+        "lead with the physical interpretation and name every assumption"
+    ),
+}
+
+_TIER_LABEL = {
+    "field_ranger": "field ranger",
+    "forestry_executive": "forestry executive",
+    "climate_scientist": "climate scientist",
+}
+
 
 def system1_typed_questions(
     entity: SpatioTemporalQueryEntity,
@@ -162,24 +185,15 @@ def system1_classification_prompt(entity: SpatioTemporalQueryEntity) -> str:
 def system2_system_prompt(
     entity: SpatioTemporalQueryEntity,
     requested_use_case: str | None = None,
-    tier: str = "climate scientist",
+    tier: str = "climate_scientist",
     max_clarifications: int = 2,
 ) -> str:
     """Build the system prompt that guides the System 2 Deliberative Layer."""
-    tier_detail = {
-        "field ranger": (
-            "a ranger who needs to know where to go and what confidence to hold; "
-            "lead with the operational implication and the footprint uncertainty"
-        ),
-        "forestry executive": (
-            "an executive who needs the trend, the scale and the policy "
-            "consequence; lead with the magnitude and the decision it implies"
-        ),
-        "climate scientist": (
-            "a scientist who needs the mechanism, the evidence and the limits; "
-            "lead with the physical interpretation and name every assumption"
-        ),
-    }.get(tier, "a technical reader; lead with the physical interpretation")
+    tier_key = tier.strip().lower().replace(" ", "_")
+    tier_detail = _TIER_DETAIL.get(
+        tier_key, "a technical reader; lead with the physical interpretation"
+    )
+    tier_label = _TIER_LABEL.get(tier_key, tier)
 
     context = [
         f"ACTIVE USE CASE: {requested_use_case or entity.use_case_id}",
@@ -187,7 +201,7 @@ def system2_system_prompt(
         f"EPOCHS: {', '.join(str(year) for year in entity.epoch_years) or 'unstated'}",
         f"PENTAD RANGE: {entity.pentad_range[0]}-{entity.pentad_range[1]}",
         f"H3 RESOLUTION: {entity.h3_resolution}",
-        f"STAKEHOLDER TIER: {tier}",
+        f"STAKEHOLDER TIER: {tier_label}",
     ]
 
     return "\n".join(
@@ -201,7 +215,7 @@ def system2_system_prompt(
             "",
             _TOOL_DISCIPLINE.strip(),
             "",
-            _CITATION_PROTOCOL.format(tier=tier, tier_detail=tier_detail).strip(),
+            _CITATION_PROTOCOL.format(tier=tier_label, tier_detail=tier_detail).strip(),
             "",
             _CLARIFICATION_PROTOCOL.format(
                 max_clarifications=max_clarifications

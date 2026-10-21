@@ -3,7 +3,7 @@
   "models": {
     "system1_reflexive": {
       "protocol": "native_chat",
-      "model_id": "beam",
+      "model_id": "gemma4:31b",
       "endpoint": "https://ollama.com/api/chat"
     },
     "system2_deliberative": {
@@ -24,6 +24,29 @@
     "calibrated"
   ],
   "zero_unverified_numbers_in_final_outputs": true,
+  "total_duration_sec": 0.13,
+  "slowest_use_cases": [
+    [
+      "UC-S1.1",
+      0.01
+    ],
+    [
+      "UC-S1.2",
+      0.01
+    ],
+    [
+      "UC-S1.4",
+      0.01
+    ],
+    [
+      "UC-S1.5",
+      0.01
+    ],
+    [
+      "UC-1.1",
+      0.01
+    ]
+  ],
   "symbiosis_benchmarks": {
     "s1_to_s2_dynamic_escalation": {
       "initial_use_case": "UC-S1.3",
@@ -35,19 +58,22 @@
         "tool_uc1_1_regime_shift_attribution",
         "tool_deduplicate_overpass_episodes"
       ],
-      "verification_passed": true
+      "verification_passed": true,
+      "error": ""
     },
     "numeric_verifier_self_correction_loop": {
       "injected_unverified_number": 98765.4321,
       "self_correction_retries_triggered": 1,
       "final_verification_passed": true,
-      "final_unverified_numbers": []
+      "final_unverified_numbers": [],
+      "error": ""
     },
     "s2_to_s1_verified_pattern_cache": {
       "use_case_id": "UC-1.1",
       "cognitive_path": "distilled_cache_hit",
       "distilled_cache_hit": true,
-      "cached_patterns_total": 20
+      "cached_patterns_total": 20,
+      "error": ""
     }
   },
   "use_case_runs": [
@@ -65,6 +91,7 @@
       "clarification_requests": 0,
       "triage_fallback": "",
       "triage_confidence_source": "calibrated",
+      "thinking_level_supported": true,
       "clarification_questions": [],
       "tool_rounds": 1,
       "verification_rejections": [],
@@ -74,7 +101,8 @@
       },
       "has_system2_reasoning_trace": false,
       "synthesis_mode": "deterministic",
-      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system1_fast_lookup | System 1: beam | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-S1.1)\n- **Tool Executed (`tool_lookup_single_epoch_metrics`)**:\n  - `use_case_id`: UC-S1.3\n  - `region`: mekong\n  - `year`: **2024**\n  - `total_raw_detections`: **50988**\n  - `modis_reference_detections`: **3446**\n  - `deduplicated_fire_episodes`: **22557**\n  - `effective_observation_effort_omega`: **2.0975**\n  - `harmonized_viirs_eq_episodes`: **7266.4**\n  - `raw_index_2005_eq_100`: **1424.2**\n  - `harmonized_index_2005_eq_100`: **94.2**\n  - `raw_vs_harmonized_index_divergence_pct`: **1330.0**\n  - `saa_rejected_count`: **0**"
+      "duration_sec": 0.01,
+      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system1_fast_lookup | System 1: gemma4:31b | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-S1.1)\n- **Tool Executed (`tool_lookup_single_epoch_metrics`)**:\n  - `use_case_id`: UC-S1.3\n  - `region`: mekong\n  - `year`: **2024**\n  - `total_raw_detections`: **50988**\n  - `modis_reference_detections`: **3446**\n  - `deduplicated_fire_episodes`: **22557**\n  - `effective_observation_effort_omega`: **2.0975**\n  - `harmonized_viirs_eq_episodes`: **7266.4**\n  - `raw_index_2005_eq_100`: **1424.2**\n  - `harmonized_index_2005_eq_100`: **94.2**\n  - `raw_vs_harmonized_index_divergence_pct`: **1330.0**\n  - `saa_rejected_count`: **0**"
     },
     {
       "use_case_id": "UC-S1.2",
@@ -90,6 +118,7 @@
       "clarification_requests": 0,
       "triage_fallback": "",
       "triage_confidence_source": "calibrated",
+      "thinking_level_supported": true,
       "clarification_questions": [],
       "tool_rounds": 1,
       "verification_rejections": [],
@@ -99,7 +128,8 @@
       },
       "has_system2_reasoning_trace": false,
       "synthesis_mode": "deterministic",
-      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system1_fast_lookup | System 1: beam | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-S1.2)\n- **Tool Executed (`tool_lookup_single_epoch_metrics`)**:\n  - `use_case_id`: UC-S1.3\n  - `region`: amazon\n  - `year`: **2024**\n  - `total_raw_detections`: **112405**\n  - `modis_reference_detections`: **8151**\n  - `deduplicated_fire_episodes`: **22579**\n  - `effective_observation_effort_omega`: **2.0847**\n  - `harmonized_viirs_eq_episodes`: **7318.1**\n  - `raw_index_2005_eq_100`: **814.3**\n  - `harmonized_index_2005_eq_100`: **70.7**\n  - `raw_vs_harmonized_index_divergence_pct`: **743.6**\n  - `saa_rejected_count`: **18097**"
+      "duration_sec": 0.01,
+      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system1_fast_lookup | System 1: gemma4:31b | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-S1.2)\n- **Tool Executed (`tool_lookup_single_epoch_metrics`)**:\n  - `use_case_id`: UC-S1.3\n  - `region`: amazon\n  - `year`: **2024**\n  - `total_raw_detections`: **112405**\n  - `modis_reference_detections`: **8151**\n  - `deduplicated_fire_episodes`: **22579**\n  - `effective_observation_effort_omega`: **2.0847**\n  - `harmonized_viirs_eq_episodes`: **7318.1**\n  - `raw_index_2005_eq_100`: **814.3**\n  - `harmonized_index_2005_eq_100`: **70.7**\n  - `raw_vs_harmonized_index_divergence_pct`: **743.6**\n  - `saa_rejected_count`: **18097**"
     },
     {
       "use_case_id": "UC-S1.3",
@@ -115,6 +145,7 @@
       "clarification_requests": 0,
       "triage_fallback": "",
       "triage_confidence_source": "calibrated",
+      "thinking_level_supported": true,
       "clarification_questions": [],
       "tool_rounds": 1,
       "verification_rejections": [],
@@ -124,7 +155,8 @@
       },
       "has_system2_reasoning_trace": false,
       "synthesis_mode": "deterministic",
-      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system1_fast_lookup | System 1: beam | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-S1.3)\n- **Tool Executed (`tool_lookup_single_epoch_metrics`)**:\n  - `use_case_id`: UC-S1.3\n  - `region`: mekong\n  - `year`: **2024**\n  - `total_raw_detections`: **50988**\n  - `modis_reference_detections`: **3446**\n  - `deduplicated_fire_episodes`: **22557**\n  - `effective_observation_effort_omega`: **2.0975**\n  - `harmonized_viirs_eq_episodes`: **7266.4**\n  - `raw_index_2005_eq_100`: **1424.2**\n  - `harmonized_index_2005_eq_100`: **94.2**\n  - `raw_vs_harmonized_index_divergence_pct`: **1330.0**\n  - `saa_rejected_count`: **0**"
+      "duration_sec": 0.0,
+      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system1_fast_lookup | System 1: gemma4:31b | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-S1.3)\n- **Tool Executed (`tool_lookup_single_epoch_metrics`)**:\n  - `use_case_id`: UC-S1.3\n  - `region`: mekong\n  - `year`: **2024**\n  - `total_raw_detections`: **50988**\n  - `modis_reference_detections`: **3446**\n  - `deduplicated_fire_episodes`: **22557**\n  - `effective_observation_effort_omega`: **2.0975**\n  - `harmonized_viirs_eq_episodes`: **7266.4**\n  - `raw_index_2005_eq_100`: **1424.2**\n  - `harmonized_index_2005_eq_100`: **94.2**\n  - `raw_vs_harmonized_index_divergence_pct`: **1330.0**\n  - `saa_rejected_count`: **0**"
     },
     {
       "use_case_id": "UC-S1.4",
@@ -140,6 +172,7 @@
       "clarification_requests": 0,
       "triage_fallback": "",
       "triage_confidence_source": "calibrated",
+      "thinking_level_supported": true,
       "clarification_questions": [],
       "tool_rounds": 1,
       "verification_rejections": [],
@@ -149,7 +182,8 @@
       },
       "has_system2_reasoning_trace": false,
       "synthesis_mode": "deterministic",
-      "final_briefing_preview": "[FIELD_RANGER BRIEFING | Cognitive Path: system1_flash_alert | System 1: beam | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-S1.4)\n- **Tool Executed (`tool_emit_flash_nrt_alert`)**:\n  - `use_case_id`: UC-S1.4\n  - `region`: amazon\n  - `modis_nrt_count`: **965**\n  - `viirs_snpp_nrt_count`: **4061**\n  - `viirs_noaa20_nrt_count`: **4898**\n  - `viirs_noaa21_nrt_count`: **4045**\n  - `total_live_nrt_detections`: **13969**\n  - `estimated_unique_fire_episodes`: **2805**\n  - `effective_observation_effort_omega`: **2.0847**\n  - `flash_alert_tier`: TIER_1_ACTIVE_MONITORING"
+      "duration_sec": 0.01,
+      "final_briefing_preview": "[FIELD_RANGER BRIEFING | Cognitive Path: system1_flash_alert | System 1: gemma4:31b | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-S1.4)\n- **Tool Executed (`tool_emit_flash_nrt_alert`)**:\n  - `use_case_id`: UC-S1.4\n  - `region`: amazon\n  - `modis_nrt_count`: **965**\n  - `viirs_snpp_nrt_count`: **4061**\n  - `viirs_noaa20_nrt_count`: **4898**\n  - `viirs_noaa21_nrt_count`: **4045**\n  - `total_live_nrt_detections`: **13969**\n  - `estimated_unique_fire_episodes`: **2805**\n  - `effective_observation_effort_omega`: **2.0847**\n  - `flash_alert_tier`: TIER_1_ACTIVE_MONITORING"
     },
     {
       "use_case_id": "UC-S1.5",
@@ -165,6 +199,7 @@
       "clarification_requests": 0,
       "triage_fallback": "",
       "triage_confidence_source": "calibrated",
+      "thinking_level_supported": true,
       "clarification_questions": [],
       "tool_rounds": 1,
       "verification_rejections": [],
@@ -174,7 +209,8 @@
       },
       "has_system2_reasoning_trace": false,
       "synthesis_mode": "deterministic",
-      "final_briefing_preview": "[FORESTRY_EXECUTIVE BRIEFING | Cognitive Path: system1_fast_lookup | System 1: beam | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-S1.5)\n- **Tool Executed (`tool_assemble_stakeholder_briefing_card`)**:\n  - `use_case_id`: UC-S1.5\n  - `region`: mekong\n  - `year`: **2024**\n  - `total_raw_detections`: **50988**\n  - `deduplicated_fire_episodes`: **22557**\n  - `harmonized_viirs_eq_episodes`: **7266.4**\n  - `raw_index_2005_eq_100`: **1424.2**\n  - `harmonized_index_2005_eq_100`: **94.2**\n  - `effective_observation_effort_omega`: **2.0975**\n  - `saa_rejected_count`: **0**\n  - `modis_mean_footprint_area_km2`: **2.155**\n  - `viirs_mean_footprint_area_km2`: **0.221**"
+      "duration_sec": 0.01,
+      "final_briefing_preview": "[FORESTRY_EXECUTIVE BRIEFING | Cognitive Path: system1_fast_lookup | System 1: gemma4:31b | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-S1.5)\n- **Tool Executed (`tool_assemble_stakeholder_briefing_card`)**:\n  - `use_case_id`: UC-S1.5\n  - `region`: mekong\n  - `year`: **2024**\n  - `total_raw_detections`: **50988**\n  - `deduplicated_fire_episodes`: **22557**\n  - `harmonized_viirs_eq_episodes`: **7266.4**\n  - `raw_index_2005_eq_100`: **1424.2**\n  - `harmonized_index_2005_eq_100`: **94.2**\n  - `effective_observation_effort_omega`: **2.0975**\n  - `saa_rejected_count`: **0**\n  - `modis_mean_footprint_area_km2`: **2.155**\n  - `viirs_mean_footprint_area_km2`: **0.221**"
     },
     {
       "use_case_id": "UC-1.1",
@@ -191,6 +227,7 @@
       "clarification_requests": 0,
       "triage_fallback": "",
       "triage_confidence_source": "calibrated",
+      "thinking_level_supported": true,
       "clarification_questions": [],
       "tool_rounds": 2,
       "verification_rejections": [],
@@ -200,7 +237,8 @@
       },
       "has_system2_reasoning_trace": true,
       "synthesis_mode": "deterministic",
-      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: beam | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-1.1)\n- **Tool Executed (`tool_uc1_1_regime_shift_attribution`)**:\n  - `use_case_id`: UC-1.1\n  - `region`: mekong\n  - `baseline_year`: **2005**\n  - `comparison_year`: **2024**\n  - `baseline_raw_detections`: **3580**\n  - `comparison_raw_detections`: **50988**\n  - `raw_apparent_step_jump_pct`: **1324.2**\n  - `baseline_modis_reference_count`: **3580**\n  - `comparison_modis_reference_count`: **3446**\n  - `modis_reference_pct_change`: **-3.7**\n  - `comparison_deduplicated_episodes`: **22557**\n  - `comparison_dedup_compression_ratio`: **2.26**\n  - `baseline_effort_omega`: **1.0084**\n  - `comparison_effort_omega`: **2.0975**\n  - `baseline_harmonized_episodes`: **7717.0**\n  - `comparison_harmonized_episodes`: **7266.4**\n  - `comparison_raw_index_2005_eq_100`: **1424.2**\n  - `comparison_harmonized_index_2005_eq_100`: **94.2**\n  - `true_physical_fire_pct_change`: **-5.8**\n- **Tool Executed (`tool_deduplicate_overpass_episodes`)**:\n  - `year`: **2024**\n  - `latitude_deg`: **17.2**\n  - `raw_detection_count`: **50988**\n  - `deduplicated"
+      "duration_sec": 0.01,
+      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: gemma4:31b | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-1.1)\n- **Tool Executed (`tool_uc1_1_regime_shift_attribution`)**:\n  - `use_case_id`: UC-1.1\n  - `region`: mekong\n  - `baseline_year`: **2005**\n  - `comparison_year`: **2024**\n  - `baseline_raw_detections`: **3580**\n  - `comparison_raw_detections`: **50988**\n  - `raw_apparent_step_jump_pct`: **1324.2**\n  - `baseline_modis_reference_count`: **3580**\n  - `comparison_modis_reference_count`: **3446**\n  - `modis_reference_pct_change`: **-3.7**\n  - `comparison_deduplicated_episodes`: **22557**\n  - `comparison_dedup_compression_ratio`: **2.26**\n  - `baseline_effort_omega`: **1.0084**\n  - `comparison_effort_omega`: **2.0975**\n  - `baseline_harmonized_episodes`: **7717.0**\n  - `comparison_harmonized_episodes`: **7266.4**\n  - `comparison_raw_index_2005_eq_100`: **1424.2**\n  - `comparison_harmonized_index_2005_eq_100`: **94.2**\n  - `true_physical_fire_pct_change`: **-5.8**\n- **Tool Executed (`tool_deduplicate_overpass_episodes`)**:\n  - `year`: **2024**\n  - `latitude_deg`: **17.2**\n  - `raw_detection_count`: **50988**\n  - `dedupl"
     },
     {
       "use_case_id": "UC-1.2",
@@ -217,6 +255,7 @@
       "clarification_requests": 0,
       "triage_fallback": "",
       "triage_confidence_source": "calibrated",
+      "thinking_level_supported": true,
       "clarification_questions": [],
       "tool_rounds": 2,
       "verification_rejections": [],
@@ -226,7 +265,8 @@
       },
       "has_system2_reasoning_trace": true,
       "synthesis_mode": "deterministic",
-      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: beam | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-1.2)\n- **Tool Executed (`tool_uc1_2_cross_sensor_discrepancy_forensics`)**:\n  - `use_case_id`: UC-1.2\n  - `modis_scan_angle_deg`: **52.0**\n  - `modis_footprint_area_km2`: **6.7515**\n  - `viirs_footprint_area_km2`: **0.3273**\n  - `area_asymmetry_ratio`: **20.63**\n  - `modis_frp_detection_limit_mw`: **56.83**\n  - `viirs_frp_detection_limit_mw`: **2.42**\n  - `observed_viirs_cluster_frp_mw`: **18.5**\n- **Tool Executed (`tool_compute_footprint_and_h3_allocation`)**:\n  - `sensor`: MODIS\n  - `scan_angle_deg`: **55.0**\n  - `scan_km`: **4.8299**\n  - `track_km`: **2.0057**\n  - `footprint_area_km2`: **9.6875**\n  - `aggregation_zone`: **0**\n  - `track_azimuth_deg`: **351.53**\n  - `h3_res7_cell_count`: **5**\n  - `h3_res8_cell_count`: **12**\n  - `weight_conservation_sum_res7`: **1.0**\n  - `weight_conservation_sum_res8`: **1.0**"
+      "duration_sec": 0.0,
+      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: gemma4:31b | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-1.2)\n- **Tool Executed (`tool_uc1_2_cross_sensor_discrepancy_forensics`)**:\n  - `use_case_id`: UC-1.2\n  - `modis_scan_angle_deg`: **52.0**\n  - `modis_footprint_area_km2`: **6.7515**\n  - `viirs_footprint_area_km2`: **0.3273**\n  - `area_asymmetry_ratio`: **20.63**\n  - `modis_frp_detection_limit_mw`: **56.83**\n  - `viirs_frp_detection_limit_mw`: **2.42**\n  - `observed_viirs_cluster_frp_mw`: **18.5**\n- **Tool Executed (`tool_compute_footprint_and_h3_allocation`)**:\n  - `sensor`: MODIS\n  - `scan_angle_deg`: **55.0**\n  - `scan_km`: **4.8299**\n  - `track_km`: **2.0057**\n  - `footprint_area_km2`: **9.6875**\n  - `aggregation_zone`: **0**\n  - `track_azimuth_deg`: **351.53**\n  - `h3_res7_cell_count`: **5**\n  - `h3_res8_cell_count`: **12**\n  - `weight_conservation_sum_res7`: **1.0**\n  - `weight_conservation_sum_res8`: **1.0**"
     },
     {
       "use_case_id": "UC-1.3",
@@ -243,6 +283,7 @@
       "clarification_requests": 0,
       "triage_fallback": "",
       "triage_confidence_source": "calibrated",
+      "thinking_level_supported": true,
       "clarification_questions": [],
       "tool_rounds": 2,
       "verification_rejections": [],
@@ -252,7 +293,8 @@
       },
       "has_system2_reasoning_trace": true,
       "synthesis_mode": "deterministic",
-      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: beam | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-1.3)\n- **Tool Executed (`tool_uc1_3_thermal_source_origin_classification`)**:\n  - `use_case_id`: UC-1.3\n  - `region`: mekong\n  - `agricultural_small_fire_subpixel_multiplier_mekong`: **3.65**\n  - `deforestation_front_subpixel_multiplier_amazon`: **2.55**\n  - `coincident_viirs_to_modis_count_ratio`: **3.56**\n  - `coincident_viirs_to_modis_frp_ratio`: **1.371**\n  - `static_industrial_persistence_min_days`: **18**\n  - `static_industrial_span_days`: **120**\n  - `saa_night_false_alarms_filtered_snpp_7d`: **2674**\n  - `saa_night_false_alarms_filtered_noaa20_7d`: **2130**\n- **Tool Executed (`tool_evaluate_detection_probability_and_saa`)**:\n  - `sensor`: VIIRS\n  - `delta_t45_k`: **13.0**\n  - `frp_mw`: **1.4**\n  - `detection_probability_p_fire`: **0.0977**"
+      "duration_sec": 0.01,
+      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: gemma4:31b | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-1.3)\n- **Tool Executed (`tool_uc1_3_thermal_source_origin_classification`)**:\n  - `use_case_id`: UC-1.3\n  - `region`: mekong\n  - `agricultural_small_fire_subpixel_multiplier_mekong`: **3.65**\n  - `deforestation_front_subpixel_multiplier_amazon`: **2.55**\n  - `coincident_viirs_to_modis_count_ratio`: **3.56**\n  - `coincident_viirs_to_modis_frp_ratio`: **1.371**\n  - `static_industrial_persistence_min_days`: **18**\n  - `static_industrial_span_days`: **120**\n  - `saa_night_false_alarms_filtered_snpp_7d`: **2674**\n  - `saa_night_false_alarms_filtered_noaa20_7d`: **2130**\n- **Tool Executed (`tool_evaluate_detection_probability_and_saa`)**:\n  - `sensor`: VIIRS\n  - `delta_t45_k`: **13.0**\n  - `frp_mw`: **1.4**\n  - `detection_probability_p_fire`: **0.0977**"
     },
     {
       "use_case_id": "UC-2.1",
@@ -269,6 +311,7 @@
       "clarification_requests": 0,
       "triage_fallback": "",
       "triage_confidence_source": "calibrated",
+      "thinking_level_supported": true,
       "clarification_questions": [],
       "tool_rounds": 2,
       "verification_rejections": [],
@@ -278,7 +321,8 @@
       },
       "has_system2_reasoning_trace": true,
       "synthesis_mode": "deterministic",
-      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: beam | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-2.1)\n- **Tool Executed (`tool_uc2_1_phenological_phase_shift_detection`)**:\n  - `use_case_id`: UC-2.1\n  - `region`: mekong\n  - `normal_peak_pentad_start`: **11**\n  - `normal_peak_pentad_end`: **22**\n  - `el_nino_early_onset_pentad`: **8**\n  - `phase_shift_advance_pentads`: **3**\n  - `phase_shift_advance_days`: **15**\n  - `el_nino_2010_feb05_modis_detections`: **3175**\n  - `2024_feb05_snpp_detections`: **10471**\n  - `drought_2007_mar15_modis_detections`: **11296**\n  - `baseline_2005_mar15_modis_detections`: **3580**\n  - `peak_sfai_zscore_mekong_sigma`: **3.1**\n  - `peak_sfai_zscore_amazon_sigma`: **2.9**\n- **Tool Executed (`tool_query_seasonal_phenology_12m`)**:\n  - `mekong_peak_window`: 2024-04-05\n  - `mekong_peak_count`: **26462**\n  - `mekong_trough_window`: 2024-07-15\n  - `mekong_trough_count`: **57**\n  - `amazon_peak_window`: 2024-09-05\n  - `amazon_peak_count`: **82079**\n  - `amazon_trough_window`: 2024-04-15\n  - `amazon_trough_count`: **71**"
+      "duration_sec": 0.01,
+      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: gemma4:31b | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-2.1)\n- **Tool Executed (`tool_uc2_1_phenological_phase_shift_detection`)**:\n  - `use_case_id`: UC-2.1\n  - `region`: mekong\n  - `normal_peak_pentad_start`: **11**\n  - `normal_peak_pentad_end`: **22**\n  - `el_nino_early_onset_pentad`: **8**\n  - `phase_shift_advance_pentads`: **3**\n  - `phase_shift_advance_days`: **15**\n  - `el_nino_2010_feb05_modis_detections`: **3175**\n  - `2024_feb05_snpp_detections`: **10471**\n  - `drought_2007_mar15_modis_detections`: **11296**\n  - `baseline_2005_mar15_modis_detections`: **3580**\n  - `peak_sfai_zscore_mekong_sigma`: **3.1**\n  - `peak_sfai_zscore_amazon_sigma`: **2.9**\n- **Tool Executed (`tool_query_seasonal_phenology_12m`)**:\n  - `mekong_peak_window`: 2024-04-05\n  - `mekong_peak_count`: **26462**\n  - `mekong_trough_window`: 2024-07-15\n  - `mekong_trough_count`: **57**\n  - `amazon_peak_window`: 2024-09-05\n  - `amazon_peak_count`: **82079**\n  - `amazon_trough_window`: 2024-04-15\n  - `amazon_trough_count`: **71**"
     },
     {
       "use_case_id": "UC-2.2",
@@ -295,6 +339,7 @@
       "clarification_requests": 0,
       "triage_fallback": "",
       "triage_confidence_source": "calibrated",
+      "thinking_level_supported": true,
       "clarification_questions": [],
       "tool_rounds": 2,
       "verification_rejections": [],
@@ -304,7 +349,8 @@
       },
       "has_system2_reasoning_trace": true,
       "synthesis_mode": "deterministic",
-      "final_briefing_preview": "[FIELD_RANGER BRIEFING | Cognitive Path: system2_deliberative | System 1: beam | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-2.2)\n- **Tool Executed (`tool_uc2_2_uncertainty_aware_tactical_dispatch`)**:\n  - `use_case_id`: UC-2.2\n  - `modis_edge_area_km2`: **9.6875**\n  - `modis_edge_scan_km`: **4.8299**\n  - `modis_edge_track_km`: **2.0057**\n  - `ellipse_track_azimuth_deg`: **351.54**\n  - `modis_h3_res8_search_cells`: **10**\n  - `viirs_refinement_area_km2`: **0.4947**\n  - `viirs_h3_res8_search_cells`: **1**\n  - `search_area_reduction_factor`: **19.58**\n  - `afternoon_train_intervals_minutes`: **25**\n  - `episode_clustering_window_minutes`: **95**\n- **Tool Executed (`tool_compute_footprint_and_h3_allocation`)**:\n  - `sensor`: MODIS\n  - `scan_angle_deg`: **55.0**\n  - `scan_km`: **4.8299**\n  - `track_km`: **2.0057**\n  - `footprint_area_km2`: **9.6875**\n  - `aggregation_zone`: **0**\n  - `track_azimuth_deg`: **351.53**\n  - `h3_res7_cell_count`: **5**\n  - `h3_res8_cell_count`: **12**\n  - `weight_conservation_sum_res7`: **1.0**\n  - `weight_conservation_sum_res8`: **1.0**"
+      "duration_sec": 0.01,
+      "final_briefing_preview": "[FIELD_RANGER BRIEFING | Cognitive Path: system2_deliberative | System 1: gemma4:31b | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-2.2)\n- **Tool Executed (`tool_uc2_2_uncertainty_aware_tactical_dispatch`)**:\n  - `use_case_id`: UC-2.2\n  - `modis_edge_area_km2`: **9.6875**\n  - `modis_edge_scan_km`: **4.8299**\n  - `modis_edge_track_km`: **2.0057**\n  - `ellipse_track_azimuth_deg`: **351.54**\n  - `modis_h3_res8_search_cells`: **10**\n  - `viirs_refinement_area_km2`: **0.4947**\n  - `viirs_h3_res8_search_cells`: **1**\n  - `search_area_reduction_factor`: **19.58**\n  - `afternoon_train_intervals_minutes`: **25**\n  - `episode_clustering_window_minutes`: **95**\n- **Tool Executed (`tool_compute_footprint_and_h3_allocation`)**:\n  - `sensor`: MODIS\n  - `scan_angle_deg`: **55.0**\n  - `scan_km`: **4.8299**\n  - `track_km`: **2.0057**\n  - `footprint_area_km2`: **9.6875**\n  - `aggregation_zone`: **0**\n  - `track_azimuth_deg`: **351.53**\n  - `h3_res7_cell_count`: **5**\n  - `h3_res8_cell_count`: **12**\n  - `weight_conservation_sum_res7`: **1.0**\n  - `weight_conservation_sum_res8`: **1.0**"
     },
     {
       "use_case_id": "UC-2.3",
@@ -320,6 +366,7 @@
       "clarification_requests": 0,
       "triage_fallback": "",
       "triage_confidence_source": "calibrated",
+      "thinking_level_supported": true,
       "clarification_questions": [],
       "tool_rounds": 1,
       "verification_rejections": [],
@@ -329,7 +376,8 @@
       },
       "has_system2_reasoning_trace": true,
       "synthesis_mode": "deterministic",
-      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: beam | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-2.3)\n- **Tool Executed (`tool_assemble_stakeholder_briefing_card`)**:\n  - `use_case_id`: UC-S1.5\n  - `region`: mekong\n  - `year`: **2024**\n  - `total_raw_detections`: **50988**\n  - `deduplicated_fire_episodes`: **22557**\n  - `harmonized_viirs_eq_episodes`: **7266.4**\n  - `raw_index_2005_eq_100`: **1424.2**\n  - `harmonized_index_2005_eq_100`: **94.2**\n  - `effective_observation_effort_omega`: **2.0975**\n  - `saa_rejected_count`: **0**\n  - `modis_mean_footprint_area_km2`: **2.155**\n  - `viirs_mean_footprint_area_km2`: **0.221**"
+      "duration_sec": 0.01,
+      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: gemma4:31b | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-2.3)\n- **Tool Executed (`tool_assemble_stakeholder_briefing_card`)**:\n  - `use_case_id`: UC-S1.5\n  - `region`: mekong\n  - `year`: **2024**\n  - `total_raw_detections`: **50988**\n  - `deduplicated_fire_episodes`: **22557**\n  - `harmonized_viirs_eq_episodes`: **7266.4**\n  - `raw_index_2005_eq_100`: **1424.2**\n  - `harmonized_index_2005_eq_100`: **94.2**\n  - `effective_observation_effort_omega`: **2.0975**\n  - `saa_rejected_count`: **0**\n  - `modis_mean_footprint_area_km2`: **2.155**\n  - `viirs_mean_footprint_area_km2`: **0.221**"
     },
     {
       "use_case_id": "UC-3.1",
@@ -345,6 +393,7 @@
       "clarification_requests": 0,
       "triage_fallback": "",
       "triage_confidence_source": "calibrated",
+      "thinking_level_supported": true,
       "clarification_questions": [],
       "tool_rounds": 1,
       "verification_rejections": [],
@@ -354,7 +403,8 @@
       },
       "has_system2_reasoning_trace": true,
       "synthesis_mode": "deterministic",
-      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: beam | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-3.1)\n- **Tool Executed (`tool_uc3_1_constellation_retirement_simulation`)**:\n  - `use_case_id`: UC-3.1\n  - `region`: mekong\n  - `year`: **2026**\n  - `full_5sat_raw_detections`: **34652**\n  - `jpss_only_noaa20_detections`: **11173**\n  - `jpss_only_noaa21_detections`: **10315**\n  - `jpss_only_total_raw_detections`: **21488**\n  - `raw_count_drop_pct`: **38.0**\n  - `full_5sat_harmonized_episodes`: **5072.3**\n  - `jpss_only_harmonized_episodes`: **4906.9**\n  - `post_retirement_continuity_drift_pct`: **3.26**"
+      "duration_sec": 0.0,
+      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: gemma4:31b | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-3.1)\n- **Tool Executed (`tool_uc3_1_constellation_retirement_simulation`)**:\n  - `use_case_id`: UC-3.1\n  - `region`: mekong\n  - `year`: **2026**\n  - `full_5sat_raw_detections`: **34652**\n  - `jpss_only_noaa20_detections`: **11173**\n  - `jpss_only_noaa21_detections`: **10315**\n  - `jpss_only_total_raw_detections`: **21488**\n  - `raw_count_drop_pct`: **38.0**\n  - `full_5sat_harmonized_episodes`: **5072.3**\n  - `jpss_only_harmonized_episodes`: **4906.9**\n  - `post_retirement_continuity_drift_pct`: **3.26**"
     },
     {
       "use_case_id": "UC-3.2",
@@ -371,6 +421,7 @@
       "clarification_requests": 0,
       "triage_fallback": "",
       "triage_confidence_source": "calibrated",
+      "thinking_level_supported": true,
       "clarification_questions": [],
       "tool_rounds": 2,
       "verification_rejections": [],
@@ -380,7 +431,8 @@
       },
       "has_system2_reasoning_trace": true,
       "synthesis_mode": "deterministic",
-      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: beam | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-3.2)\n- **Tool Executed (`tool_uc3_2_multihop_spatiotemporal_cube_query`)**:\n  - `use_case_id`: UC-3.2\n  - `total_cached_slices`: **134**\n  - `total_verified_thermal_detections`: **1609182**\n  - `mekong_max_raw_year`: **2019**\n  - `mekong_max_raw_count`: **51974**\n  - `mekong_max_harmonized_year`: **2007**\n  - `mekong_max_harmonized_index`: **297.8**\n  - `amazon_max_raw_2024_count`: **112405**\n  - `amazon_2024_saa_rejected_count`: **18097**\n  - `amazon_2024_dedup_compression_ratio`: **4.978**\n  - `amazon_2024_harmonized_index`: **70.7**\n- **Tool Executed (`tool_query_seasonal_phenology_12m`)**:\n  - `mekong_peak_window`: 2024-04-05\n  - `mekong_peak_count`: **26462**\n  - `mekong_trough_window`: 2024-07-15\n  - `mekong_trough_count`: **57**\n  - `amazon_peak_window`: 2024-09-05\n  - `amazon_peak_count`: **82079**\n  - `amazon_trough_window`: 2024-04-15\n  - `amazon_trough_count`: **71**"
+      "duration_sec": 0.01,
+      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: gemma4:31b | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-3.2)\n- **Tool Executed (`tool_uc3_2_multihop_spatiotemporal_cube_query`)**:\n  - `use_case_id`: UC-3.2\n  - `total_cached_slices`: **134**\n  - `total_verified_thermal_detections`: **1609182**\n  - `mekong_max_raw_year`: **2019**\n  - `mekong_max_raw_count`: **51974**\n  - `mekong_max_harmonized_year`: **2007**\n  - `mekong_max_harmonized_index`: **297.8**\n  - `amazon_max_raw_2024_count`: **112405**\n  - `amazon_2024_saa_rejected_count`: **18097**\n  - `amazon_2024_dedup_compression_ratio`: **4.978**\n  - `amazon_2024_harmonized_index`: **70.7**\n- **Tool Executed (`tool_query_seasonal_phenology_12m`)**:\n  - `mekong_peak_window`: 2024-04-05\n  - `mekong_peak_count`: **26462**\n  - `mekong_trough_window`: 2024-07-15\n  - `mekong_trough_count`: **57**\n  - `amazon_peak_window`: 2024-09-05\n  - `amazon_peak_count`: **82079**\n  - `amazon_trough_window`: 2024-04-15\n  - `amazon_trough_count`: **71**"
     },
     {
       "use_case_id": "UC-3.3",
@@ -397,6 +449,7 @@
       "clarification_requests": 0,
       "triage_fallback": "",
       "triage_confidence_source": "calibrated",
+      "thinking_level_supported": true,
       "clarification_questions": [],
       "tool_rounds": 2,
       "verification_rejections": [],
@@ -406,7 +459,8 @@
       },
       "has_system2_reasoning_trace": true,
       "synthesis_mode": "deterministic",
-      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: beam | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-3.3)\n- **Tool Executed (`tool_uc3_3_autonomous_biome_recalibration`)**:\n  - `use_case_id`: UC-3.3\n  - `coincident_cell_pairs_n`: **11553**\n  - `power_law_alpha`: **1.7121**\n  - `power_law_beta`: **0.9271**\n  - `scan_tail_kappa`: **0.1**\n  - `raw_r2`: **0.733**\n  - `harmonized_r2`: **0.747**\n  - `raw_rmse_mw`: **149.104**\n  - `harmonized_rmse_mw`: **145.155**\n  - `ks_distance_before`: **0.1166**\n  - `ks_distance_after`: **0.0237**\n  - `ks_error_reduction_pct`: **79.7**\n- **Tool Executed (`tool_calibrate_cross_sensor_frp`)**:\n  - `raw_modis_frp_mw`: **35.0**\n  - `scan_angle_deg`: **48.0**\n  - `modis_footprint_area_km2`: **4.6118**\n  - `modis_frp_detection_limit_mw`: **38.235**\n  - `stage1_scan_corrected_frp_mw`: **51.586**\n  - `stage2_calibrated_viirs_eq_frp_mw`: **72.016**\n  - `calibrated_viirs_eq_subpixel_count`: **5.095**\n  - `benchmark_coincident_pairs_n`: **11553**\n  - `benchmark_ks_before`: **0.1166**\n  - `benchmark_ks_after`: **0.0237**\n  - `benchmark_r2_after`: **0.747**"
+      "duration_sec": 0.01,
+      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: gemma4:31b | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-3.3)\n- **Tool Executed (`tool_uc3_3_autonomous_biome_recalibration`)**:\n  - `use_case_id`: UC-3.3\n  - `coincident_cell_pairs_n`: **11553**\n  - `power_law_alpha`: **1.7121**\n  - `power_law_beta`: **0.9271**\n  - `scan_tail_kappa`: **0.1**\n  - `raw_r2`: **0.733**\n  - `harmonized_r2`: **0.747**\n  - `raw_rmse_mw`: **149.104**\n  - `harmonized_rmse_mw`: **145.155**\n  - `ks_distance_before`: **0.1166**\n  - `ks_distance_after`: **0.0237**\n  - `ks_error_reduction_pct`: **79.7**\n- **Tool Executed (`tool_calibrate_cross_sensor_frp`)**:\n  - `raw_modis_frp_mw`: **35.0**\n  - `scan_angle_deg`: **48.0**\n  - `modis_footprint_area_km2`: **4.6118**\n  - `modis_frp_detection_limit_mw`: **38.235**\n  - `stage1_scan_corrected_frp_mw`: **51.586**\n  - `stage2_calibrated_viirs_eq_frp_mw`: **72.016**\n  - `calibrated_viirs_eq_subpixel_count`: **5.095**\n  - `benchmark_coincident_pairs_n`: **11553**\n  - `benchmark_ks_before`: **0.1166**\n  - `benchmark_ks_after`: **0.0237**\n  - `benchmark_r2_after`: **0.747**"
     },
     {
       "use_case_id": "UC-4.1",
@@ -423,6 +477,7 @@
       "clarification_requests": 0,
       "triage_fallback": "",
       "triage_confidence_source": "calibrated",
+      "thinking_level_supported": true,
       "clarification_questions": [],
       "tool_rounds": 2,
       "verification_rejections": [],
@@ -432,7 +487,8 @@
       },
       "has_system2_reasoning_trace": true,
       "synthesis_mode": "deterministic",
-      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: beam | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-4.1)\n- **Tool Executed (`tool_uc4_1_orbital_drift_and_sza_audit`)**:\n  - `use_case_id`: UC-4.1\n  - `terra_only_2001_effort_omega0`: **0.52**\n  - `dual_modis_2005_effort_omega0`: **1.0**\n  - `five_sat_2026_effort_omega0`: **2.08**\n  - `mekong_modis_2001_terra_only`: **229**\n  - `mekong_modis_2005_baseline`: **3580**\n  - `mekong_modis_2024`: **3446**\n  - `mekong_modis_2026`: **2016**\n  - `amazon_modis_2001_terra_only`: **3364**\n  - `amazon_modis_2005_baseline`: **13804**\n  - `amazon_modis_2024`: **8151**\n  - `amazon_modis_2026`: **3555**\n- **Tool Executed (`tool_compute_solar_sza_and_daynight`)**:\n  - `latitude`: **14.5**\n  - `longitude`: **108.0**\n  - `utc_timestamp`: 2024-03-15T06:30:00+00:00\n  - `solar_zenith_angle_deg`: **28.332**\n  - `sza_threshold_deg`: **85.0**\n  - `raw_daynight`: D\n  - `harmonized_daynight`: D"
+      "duration_sec": 0.01,
+      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: gemma4:31b | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-4.1)\n- **Tool Executed (`tool_uc4_1_orbital_drift_and_sza_audit`)**:\n  - `use_case_id`: UC-4.1\n  - `terra_only_2001_effort_omega0`: **0.52**\n  - `dual_modis_2005_effort_omega0`: **1.0**\n  - `five_sat_2026_effort_omega0`: **2.08**\n  - `mekong_modis_2001_terra_only`: **229**\n  - `mekong_modis_2005_baseline`: **3580**\n  - `mekong_modis_2024`: **3446**\n  - `mekong_modis_2026`: **2016**\n  - `amazon_modis_2001_terra_only`: **3364**\n  - `amazon_modis_2005_baseline`: **13804**\n  - `amazon_modis_2024`: **8151**\n  - `amazon_modis_2026`: **3555**\n- **Tool Executed (`tool_compute_solar_sza_and_daynight`)**:\n  - `latitude`: **14.5**\n  - `longitude`: **108.0**\n  - `utc_timestamp`: 2024-03-15T06:30:00+00:00\n  - `solar_zenith_angle_deg`: **28.332**\n  - `sza_threshold_deg`: **85.0**\n  - `raw_daynight`: D\n  - `harmonized_daynight`: D"
     },
     {
       "use_case_id": "UC-4.2",
@@ -448,6 +504,7 @@
       "clarification_requests": 0,
       "triage_fallback": "",
       "triage_confidence_source": "calibrated",
+      "thinking_level_supported": true,
       "clarification_questions": [],
       "tool_rounds": 1,
       "verification_rejections": [],
@@ -457,7 +514,8 @@
       },
       "has_system2_reasoning_trace": true,
       "synthesis_mode": "deterministic",
-      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: beam | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-4.2)\n- **Tool Executed (`tool_uc4_2_nrt_vs_sp_fidelity_audit`)**:\n  - `use_case_id`: UC-4.2\n  - `south_america_snpp_7d_rows`: **57713**\n  - `south_america_snpp_saa_filtered`: **2674**\n  - `south_america_snpp_saa_pct`: **4.633**\n  - `south_america_noaa20_7d_rows`: **60052**\n  - `south_america_noaa20_saa_filtered`: **2130**\n  - `south_america_noaa20_saa_pct`: **3.547**\n  - `southeast_asia_snpp_7d_rows`: **73555**\n  - `southeast_asia_snpp_saa_filtered`: **0**\n  - `total_saa_false_alarms_rejected_7d`: **4804**"
+      "duration_sec": 0.0,
+      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: gemma4:31b | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-4.2)\n- **Tool Executed (`tool_uc4_2_nrt_vs_sp_fidelity_audit`)**:\n  - `use_case_id`: UC-4.2\n  - `south_america_snpp_7d_rows`: **57713**\n  - `south_america_snpp_saa_filtered`: **2674**\n  - `south_america_snpp_saa_pct`: **4.633**\n  - `south_america_noaa20_7d_rows`: **60052**\n  - `south_america_noaa20_saa_filtered`: **2130**\n  - `south_america_noaa20_saa_pct`: **3.547**\n  - `southeast_asia_snpp_7d_rows`: **73555**\n  - `southeast_asia_snpp_saa_filtered`: **0**\n  - `total_saa_false_alarms_rejected_7d`: **4804**"
     },
     {
       "use_case_id": "UC-4.3",
@@ -473,6 +531,7 @@
       "clarification_requests": 0,
       "triage_fallback": "",
       "triage_confidence_source": "calibrated",
+      "thinking_level_supported": true,
       "clarification_questions": [],
       "tool_rounds": 1,
       "verification_rejections": [],
@@ -482,7 +541,8 @@
       },
       "has_system2_reasoning_trace": true,
       "synthesis_mode": "deterministic",
-      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: beam | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-4.3)\n- **Tool Executed (`tool_uc4_3_adaptive_firms_rate_limit_planner`)**:\n  - `use_case_id`: UC-4.3\n  - `firms_rate_limit_tx_per_10min`: **5000**\n  - `min_request_pacing_sec`: **0.35**\n  - `total_cached_slices`: **134**\n  - `api_area_slices_count`: **128**\n  - `zero_cost_open7d_slices_count`: **6**\n  - `total_cached_detections`: **1609182**\n  - `mean_rows_per_slice`: **12008.8**"
+      "duration_sec": 0.0,
+      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: gemma4:31b | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-4.3)\n- **Tool Executed (`tool_uc4_3_adaptive_firms_rate_limit_planner`)**:\n  - `use_case_id`: UC-4.3\n  - `firms_rate_limit_tx_per_10min`: **5000**\n  - `min_request_pacing_sec`: **0.35**\n  - `total_cached_slices`: **134**\n  - `api_area_slices_count`: **128**\n  - `zero_cost_open7d_slices_count`: **6**\n  - `total_cached_detections`: **1609182**\n  - `mean_rows_per_slice`: **12008.8**"
     },
     {
       "use_case_id": "UC-5.1",
@@ -498,6 +558,7 @@
       "clarification_requests": 0,
       "triage_fallback": "",
       "triage_confidence_source": "calibrated",
+      "thinking_level_supported": true,
       "clarification_questions": [],
       "tool_rounds": 1,
       "verification_rejections": [],
@@ -507,7 +568,8 @@
       },
       "has_system2_reasoning_trace": true,
       "synthesis_mode": "deterministic",
-      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: beam | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-5.1)\n- **Tool Executed (`tool_uc5_1_redd_plus_carbon_mrv_baseline_audit`)**:\n  - `use_case_id`: UC-5.1\n  - `region`: amazon\n  - `baseline_2005_raw_frp_mw`: **917080.2**\n  - `baseline_2005_harmonized_frp_mw`: **1130862.5**\n  - `transition_2012_raw_frp_mw`: **864588.6**\n  - `transition_2012_harmonized_frp_mw`: **973432.6**\n  - `drought_2024_raw_frp_mw`: **1990752.4**\n  - `drought_2024_harmonized_frp_mw`: **814613.6**\n  - `post_drought_2025_raw_frp_mw`: **401081.2**\n  - `post_drought_2025_harmonized_frp_mw`: **68321.5**"
+      "duration_sec": 0.01,
+      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: gemma4:31b | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-5.1)\n- **Tool Executed (`tool_uc5_1_redd_plus_carbon_mrv_baseline_audit`)**:\n  - `use_case_id`: UC-5.1\n  - `region`: amazon\n  - `baseline_2005_raw_frp_mw`: **917080.2**\n  - `baseline_2005_harmonized_frp_mw`: **1130862.5**\n  - `transition_2012_raw_frp_mw`: **864588.6**\n  - `transition_2012_harmonized_frp_mw`: **973432.6**\n  - `drought_2024_raw_frp_mw`: **1990752.4**\n  - `drought_2024_harmonized_frp_mw`: **814613.6**\n  - `post_drought_2025_raw_frp_mw`: **401081.2**\n  - `post_drought_2025_harmonized_frp_mw`: **68321.5**"
     },
     {
       "use_case_id": "UC-5.2",
@@ -523,6 +585,7 @@
       "clarification_requests": 0,
       "triage_fallback": "",
       "triage_confidence_source": "calibrated",
+      "thinking_level_supported": true,
       "clarification_questions": [],
       "tool_rounds": 1,
       "verification_rejections": [],
@@ -532,7 +595,8 @@
       },
       "has_system2_reasoning_trace": true,
       "synthesis_mode": "deterministic",
-      "final_briefing_preview": "[FORESTRY_EXECUTIVE BRIEFING | Cognitive Path: system2_deliberative | System 1: beam | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-5.2)\n- **Tool Executed (`tool_uc5_2_burn_ban_policy_counterfactual_audit`)**:\n  - `use_case_id`: UC-5.2\n  - `region`: mekong\n  - `raw_index_2019`: **1451.8**\n  - `harmonized_index_2019`: **147.3**\n  - `raw_index_2024`: **1424.2**\n  - `harmonized_index_2024`: **94.2**\n  - `raw_index_2025`: **878.4**\n  - `harmonized_index_2025`: **59.5**\n  - `raw_index_2026`: **967.9**\n  - `harmonized_index_2026`: **56.3**\n  - `net_harmonized_reduction_2019_to_2026_pct`: **61.8**"
+      "duration_sec": 0.0,
+      "final_briefing_preview": "[FORESTRY_EXECUTIVE BRIEFING | Cognitive Path: system2_deliberative | System 1: gemma4:31b | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-5.2)\n- **Tool Executed (`tool_uc5_2_burn_ban_policy_counterfactual_audit`)**:\n  - `use_case_id`: UC-5.2\n  - `region`: mekong\n  - `raw_index_2019`: **1451.8**\n  - `harmonized_index_2019`: **147.3**\n  - `raw_index_2024`: **1424.2**\n  - `harmonized_index_2024`: **94.2**\n  - `raw_index_2025`: **878.4**\n  - `harmonized_index_2025`: **59.5**\n  - `raw_index_2026`: **967.9**\n  - `harmonized_index_2026`: **56.3**\n  - `net_harmonized_reduction_2019_to_2026_pct`: **61.8**"
     },
     {
       "use_case_id": "UC-5.3",
@@ -548,6 +612,7 @@
       "clarification_requests": 0,
       "triage_fallback": "",
       "triage_confidence_source": "calibrated",
+      "thinking_level_supported": true,
       "clarification_questions": [],
       "tool_rounds": 1,
       "verification_rejections": [],
@@ -557,7 +622,8 @@
       },
       "has_system2_reasoning_trace": true,
       "synthesis_mode": "deterministic",
-      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: beam | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-5.3)\n- **Tool Executed (`tool_uc5_3_transboundary_fire_propagation_forensics`)**:\n  - `use_case_id`: UC-5.3\n  - `corridor_bbox`: 100.0,11.0,109.5,23.5\n  - `h3_res7_cell_area_km2`: **5.161**\n  - `h3_res8_cell_area_km2`: **0.737**\n  - `el_nino_2016_raw_detections`: **43342**\n  - `el_nino_2016_fire_episodes`: **22573**\n  - `el_nino_2016_harmonized_episodes`: **15124.3**\n  - `2024_raw_detections`: **50988**\n  - `2024_fire_episodes`: **22557**\n  - `2024_harmonized_episodes`: **7266.4**"
+      "duration_sec": 0.0,
+      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: gemma4:31b | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-5.3)\n- **Tool Executed (`tool_uc5_3_transboundary_fire_propagation_forensics`)**:\n  - `use_case_id`: UC-5.3\n  - `corridor_bbox`: 100.0,11.0,109.5,23.5\n  - `h3_res7_cell_area_km2`: **5.161**\n  - `h3_res8_cell_area_km2`: **0.737**\n  - `el_nino_2016_raw_detections`: **43342**\n  - `el_nino_2016_fire_episodes`: **22573**\n  - `el_nino_2016_harmonized_episodes`: **15124.3**\n  - `2024_raw_detections`: **50988**\n  - `2024_fire_episodes`: **22557**\n  - `2024_harmonized_episodes`: **7266.4**"
     }
   ]
 }
