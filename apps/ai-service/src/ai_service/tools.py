@@ -576,7 +576,7 @@ def tool_uc1_2_cross_sensor_discrepancy_forensics(
     longitude: float = -54.2,
     daynight: str = "D",
 ) -> dict[str, Any]:
-    """[UC-1.2] Investigate why VIIRS detects an active fire cluster while co-incident Aqua-MODIS misses it (or vice versa) using scan-angle FRP_lim, SAA box, and NRT geolocation risk."""
+    """[UC-1.2] Investigate why VIIRS detects an active fire cluster while co-incident Aqua-MODIS misses it (or vice versa) using scan-angle FRP_lim, SAA box, and NRT geolocation risk. The parameters describe the representative co-incident detection to analyse: use the defaults unless the request names a specific detection."""
     th_rad = math.radians(modis_scan_angle_deg)
     ds, dt = modis_dimensions_from_scan_angle(th_rad)
     area = ds * dt

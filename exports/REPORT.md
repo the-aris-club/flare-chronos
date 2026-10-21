@@ -475,10 +475,32 @@ Kết quả thực thi toàn trình qua [`run_all_usecases.py`](../apps/ai-servi
 | **`UC-5.2`** | **System 2** (native chat) | Đánh giá Phản thực tế Chính sách Cấm đốt Phụ phẩm (`Burn-Ban Audit`) | `tool_uc5_2_burn_ban_policy_counterfactual_audit` | 27 | **PASS (`0` lỗi)** |
 | **`UC-5.3`** | **System 2** (native chat) | Giám định Lan truyền Cháy Xuyên Biên giới (`Transboundary Forensics`) | `tool_uc5_3_transboundary_fire_propagation_forensics` | 36 | **PASS (`0` lỗi)** |
 
-### 7.3. Kết quả Đo kiểm 3 Cơ chế Cộng sinh (`System 1` $\leftrightarrow$ `System 2` Symbiosis)
+### 7.3. Kiểm Chứng Trên Mô Hình Thật (`Live Benchmark`)
+
+Bộ kiểm thử ngoại tuyến chứng minh hành vi đồ thị và cổng kiểm chứng, nhưng **không** chứng minh chất lượng diễn giải. Vì vậy còn một chế độ chạy toàn bộ `20` Use Case trên **mô hình thật**, ghi lại đo lường từng Use Case vào [`data/processed/ai_harness_results_live.json`](../data/processed/ai_harness_results_live.json):
+
+```bash
+uv run python apps/ai-service/src/ai_service/run_all_usecases.py --live
+```
+
+Kết quả sau **5 lần chạy liên tiếp** trên mô hình thật (cùng một endpoint cho cả hai tầng):
+
+| Chỉ số | Kết quả |
+| --- | --- |
+| Use Case vượt qua cổng kiểm chứng | **20 / 20** (mọi lần chạy) |
+| Số liệu chưa xác thực trong báo cáo cuối | **0** |
+| Vòng tool trên mỗi Use Case suy luận | **1** (không thừa, không thiếu) |
+| Lần tự sửa lỗi do cổng kiểm chứng | **0** |
+| Yêu cầu làm rõ từ mô hình | **0** |
+| Lần suy giảm khi classifier không sẵn sàng | **0** |
+| Chi phí mỗi lần chạy đầy đủ | **~$0.022** (~$90K token đầu vào + ~$13K token đầu ra) |
+
+Bốn lỗi của chính **cổng kiểm chứng** được phát hiện nhờ chế độ này và đã sửa: chữ số trong tên vệ tinh (`NOAA-21`) bị đọc như một phép tính; một bản thảo **không trích dẫn gì** vẫn được coi là sạch; một phát hiện kiểu **boolean** không thể trích dẫn được; và một lần dừng im lặng của mô hình trong chế độ suy luận làm mất lượt gọi.
+
+### 7.4. Kết quả Đo kiểm 3 Cơ chế Cộng sinh (`System 1` $\leftrightarrow$ `System 2` Symbiosis)
 
 1. **Cơ chế Leo thang Động khi Phát hiện Xung đột Vật lý (`Dynamic S1 -> S2 Escalation`):**
-   - Khi System 1 (typed-questions) thực hiện tra cứu nhanh `UC-S1.3` cho năm 2024 tại Tiểu vùng Mekong kèm cờ giám sát xung đột, công cụ `tool_lookup_single_epoch_metrics` phát hiện độ lệch giữa chỉ số điểm nóng thô (`1.424,2`) và chỉ số chuẩn hóa (`94,2`) lên tới **`1.330,0%`** ($\ge 200\%$).
+   - Khi System 1 (tầng báo cáo) thực hiện tra cứu nhanh `UC-S1.3` cho năm 2024 tại Tiểu vùng Mekong kèm cờ giám sát xung đột, công cụ `tool_lookup_single_epoch_metrics` phát hiện độ lệch giữa chỉ số điểm nóng thô (`1.424,2`) và chỉ số chuẩn hóa (`94,2`) lên tới **`1.330,0%`** ($\ge 200\%$).
    - Nút `escalation_gate_node` lập tức chuyển luồng nhận thức sang `escalated_s1_to_s2`, tự động bổ sung 2 công cụ nhân quả sâu (`tool_uc1_1_regime_shift_attribution`, `tool_deduplicate_overpass_episodes`) và đánh thức System 2 (native chat) để giải thích nguyên nhân do sự gia tăng vệ tinh (`NOAA-21`) chứ không phải cháy rừng tăng đột biến.
 2. **Cơ chế Chặn Số liệu Tự Suy diễn & Vòng lặp Tự sửa lỗi (`NumericGroundingVerifier Loopback`):**
    - Trong bài kiểm thử chịu tải, khi một con số giả định chưa qua công cụ (`98765.4321 MW`) được cố tình tiêm vào bản thảo đầu tiên của System 2, `VerifiedFactsLedger.verify_draft_text()` lập tức phát hiện `unverified_numbers = [98765.4321]`, từ chối bản thảo và kích hoạt cạnh lặp quay lại `system2_planner_node` (`self_correction_retries = 1`). Bản thảo tái tổng hợp loại bỏ hoàn toàn con số giả định và đạt `verification_passed = True`.
