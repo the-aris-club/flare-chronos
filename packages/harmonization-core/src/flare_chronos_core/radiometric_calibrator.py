@@ -66,7 +66,6 @@ def compute_frp_detection_limit(
 
 def default_calibration_model() -> CrossSensorCalibrationModel:
     """Return baseline physical-statistical calibration parameters prior to local AOI refit."""
-    np.linspace(0.01, 0.99, 25)
     # Baseline log-normal quantiles for co-incident H3 Res 7 cells
     modis_q = [round(float(val), 3) for val in np.exp(np.linspace(1.6, 6.2, 25))]
     viirs_q = [round(float(val * 1.28 + 3.8), 3) for val in modis_q]

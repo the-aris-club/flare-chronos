@@ -82,7 +82,7 @@ $$\text{FRP}_{\text{lim, VIIRS}}(A_p, \text{SZA}) = \left( 0.50 + 0.65 \cdot \ma
 
 ### 3.2. Hiệu Chuẩn Chéo Hai Giai Đoạn Trên Cặp Quỹ Đạo Đồng Thời Aqua–SNPP (`13:30 / 01:30 MLT`)
 
-Vệ tinh **Aqua (MODIS)** và **Suomi-NPP (VIIRS)** có cùng giờ địa phương bay qua xích đạo ($\sim 13\text{:}30\text{ MLT}$ ban ngày và $01\text{:}30\text{ MLT}$ ban đêm). Trong [`fit_coincident_aqua_snpp_model`](file:///Users/xirothedev/workspace/flare-chronos/packages/harmonization-core/src/flare_chronos_core/radiometric_calibrator.py), chúng tôi trích xuất **$N = 5.769$ cặp ô lưới đẳng diện tích đồng thời (Co-Incident Iso-Area Cells)** từ dữ liệu thực tế NASA FIRMS tại Tiểu vùng Mekong và Amazon trong giai đoạn chồng lấn `2012–2024`:
+Vệ tinh **Aqua (MODIS)** và **Suomi-NPP (VIIRS)** có cùng giờ địa phương bay qua xích đạo ($\sim 13\text{:}30\text{ MLT}$ ban ngày và $01\text{:}30\text{ MLT}$ ban đêm). Trong [`fit_coincident_aqua_snpp_model`](file:///Users/xirothedev/workspace/flare-chronos/packages/harmonization-core/src/flare_chronos_core/radiometric_calibrator.py), chúng tôi trích xuất **$N = 11.553$ cặp ô lưới đẳng diện tích đồng thời (Co-Incident Iso-Area Cells)** từ dữ liệu thực tế NASA FIRMS tại Tiểu vùng Mekong và Amazon trong giai đoạn chồng lấn `2012–2024`:
 
 1. **Giai đoạn 1 — Bù khuyết đuôi phân phối theo góc quét (Scan-Angle Observation Operator)**:
    $$\widetilde{\text{FRP}}_{\text{MODIS}}(\theta) = \text{FRP}_{\text{MODIS}} \cdot \left[ 1 + \kappa \cdot \ln\left(\max(1, A_p(\theta))\right) \right]$$
@@ -93,12 +93,12 @@ Vệ tinh **Aqua (MODIS)** và **Suomi-NPP (VIIRS)** có cùng giờ địa phư
 
 | Chỉ Số Kiểm Định Thống Kê | Trước Đồng Bộ Hóa (Raw Aqua-MODIS vs. S-NPP VIIRS) | Sau Đồng Bộ Hóa (`Flare-Chronos` Two-Stage Operator) | Mức Cải Thiện Định Lượng |
 | :--- | :---: | :---: | :---: |
-| **Số cặp ô lưới đồng thời ($N_{\text{pairs}}$)** | $5.769\text{ ô lưới}$ | $5.769\text{ ô lưới}$ | Tập kiểm chứng thực tế NASA FIRMS |
-| **Tỷ số số điểm nóng trung bình ($\bar{N}_{\text{VIIRS}} / \bar{N}_{\text{MODIS}}$)** | $3.751\times$ | $1.000\times$ (Đã chuẩn hóa tương đương) | Khử sạch độ lệch mật độ $+275.1\%$ |
-| **Tỷ số tổng FRP trung bình ($\sum \text{FRP}_{\text{VIIRS}} / \sum \text{FRP}_{\text{MODIS}}$)** | $1.377\times$ | $1.004\times$ | Khử độ lệch thiếu hụt năng lượng $-27.4\%$ |
-| **Hệ số xác định ($R^2$)** | $0.7349$ | **$0.7463$** | Tăng độ tương quan giải thích phương sai |
-| **Sai số toàn phương trung bình ($\text{RMSE}$, $\text{MW/cell}$)** | $161.995\text{ MW}$ | **$158.479\text{ MW}$** | Giảm sai số bậc hai trên toàn dải |
-| **Khoảng cách phân phối Kolmogorov-Smirnov ($D_{\text{KS}}$)** | $0.1180$ | **$0.0205$** | **Giảm $82.6\%$ sai lệch phân phối xác suất!** |
+| **Số cặp ô lưới đồng thời ($N_{\text{pairs}}$)** | $11.553\text{ ô lưới}$ | $11.553\text{ ô lưới}$ | Tập kiểm chứng thực tế NASA FIRMS |
+| **Tỷ số số điểm nóng trung bình ($\bar{N}_{\text{VIIRS}} / \bar{N}_{\text{MODIS}}$)** | $3.560\times$ | $1.000\times$ (Đã chuẩn hóa tương đương) | Khử sạch độ lệch mật độ $+256.0\%$ |
+| **Tỷ số tổng FRP trung bình ($\sum \text{FRP}_{\text{VIIRS}} / \sum \text{FRP}_{\text{MODIS}}$)** | $1.371\times$ | $1.004\times$ | Khử độ lệch thiếu hụt năng lượng $-27.1\%$ |
+| **Hệ số xác định ($R^2$)** | $0.7330$ | **$0.7470$** | Tăng độ tương quan giải thích phương sai |
+| **Sai số toàn phương trung bình ($\text{RMSE}$, $\text{MW/cell}$)** | $149.104\text{ MW}$ | **$145.155\text{ MW}$** | Giảm sai số bậc hai trên toàn dải |
+| **Khoảng cách phân phối Kolmogorov-Smirnov ($D_{\text{KS}}$)** | $0.1166$ | **$0.0237$** | **Giảm $79.7\%$ sai lệch phân phối xác suất!** |
 
 ![Cross Sensor FRP Calibration](file:///Users/xirothedev/workspace/flare-chronos/docs/figures/fig3_cross_sensor_frp_quantile_mapping.png)
 
