@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Flare-Chronos — Dual-Cognitive Harness</title>
+    <style>
+      :root {
+        --bg: #0b1220;
+        --panel: #131c2f;
+        --line: #22304d;
+        --text: #dce6f7;
+        --muted: #8fa3c4;
+        --accent: #4fd1c5;
+        --warn: #f6ad55;
+        --bad: #fc8181;
+        --good: #68d391;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font: 14px/1.55 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+      }
+      header {
+        padding: 14px 20px;
+        border-bottom: 1px solid var(--line);
+        display: flex;
+        align-items: baseline;
+        gap: 14px;
+        flex-wrap: wrap;
+      }
+      header h1 { font-size: 16px; margin: 0; letter-spacing: 0.02em; }
+      header span { color: var(--muted); font-size: 12px; }
+      main {
+        display: grid;
+        grid-template-columns: 320px minmax(360px, 1fr) minmax(360px, 1.1fr);
+        gap: 14px;
+        padding: 14px;
+        align-items: start;
+      }
+      @media (max-width: 1100px) { main { grid-template-columns: 1fr; } }
+      section {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 14px;
+        min-height: 120px;
+      }
+      h2 {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        color: var(--muted);
+        margin: 0 0 10px;
+      }
+      select, textarea, button {
+        width: 100%;
+        background: #0e1626;
+        color: var(--text);
+        border: 1px solid var(--line);
+        border-radius: 7px;
+        padding: 8px;
+        font: inherit;
+      }
+      textarea { min-height: 88px; resize: vertical; }
+      button {
+        background: var(--accent);
+        color: #06201f;
+        border: 0;
+        font-weight: 650;
+        cursor: pointer;
+        margin-top: 8px;
+      }
+      button.secondary { background: var(--line); color: var(--text); }
+      button.danger { background: var(--bad); color: #2b0b0b; }
+      label { display: block; font-size: 12px; color: var(--muted); margin: 10px 0 4px; }
+      #log { font: 12px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+      .ev {
+        border-left: 2px solid var(--line);
+        padding: 4px 0 4px 9px;
+        margin-bottom: 6px;
+        color: var(--muted);
+        word-break: break-word;
+      }
+      .ev b { color: var(--text); font-weight: 600; }
+      .ev.tool_result, .ev.briefing { border-left-color: var(--accent); }
+      .ev.reasoning { border-left-color: #9f7aea; }
+      .ev.verification { border-left-color: var(--good); }
+      .ev.sign_off_required { border-left-color: var(--warn); }
+      .ev.run_failed { border-left-color: var(--bad); color: var(--bad); }
+      pre {
+        white-space: pre-wrap;
+        word-break: break-word;
+        font: 12px/1.55 ui-monospace, SFMono-Regular, Menlo, monospace;
+        margin: 0;
+      }
+      .row { display: flex; gap: 8px; }
+      .row button { margin-top: 8px; }
+      .hide { display: none; }
+      .meta { color: var(--muted); font-size: 12px; margin-bottom: 8px; }
+      .ok { color: var(--good); }
+      .bad { color: var(--bad); }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>FLARE-CHRONOS · Dual-Cognitive Harness</h1>
+      <span
+        >decision model assigns the analysis → deterministic tools produce every
+        number → chat model writes the briefing → every number is checked
+        against the ledger</span
+      >
+    </header>
+    <main>
+      <section>
+        <h2>Request</h2>
+        <label for="uc">Use case</label>
+        <select id="uc"></select>
+        <label for="q">Operator request</label>
+        <textarea id="q">
+Audit the orbital drift of Terra and Aqua from 2001 to 2026 in the Mekong.</textarea
+        >
+        <button id="run">Run</button>
+        <div class="meta" style="margin-top: 10px">
+          The use case selector fills the request. Clearing the selection sends a
+          free-form request, which the Reflexive Layer must assign an analysis to.
+        </div>
+      </section>
+
+      <section>
+        <h2>Run events</h2>
+        <div id="log"></div>
+      </section>
+
+      <section>
+        <h2>Briefing</h2>
+        <div class="meta" id="state">no run yet</div>
+        <pre id="out"></pre>
+        <div id="approval" class="hide" style="margin-top: 12px">
+          <h2>Human sign-off</h2>
+          <div class="meta">
+            This run authorizes a field action, so it waits for a decision. A
+            refusal releases nothing.
+          </div>
+          <div class="row">
+            <button id="approve">Approve</button>
+            <button id="decline" class="danger">Decline</button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      const log = document.getElementById("log");
+      const out = document.getElementById("out");
+      const state = document.getElementById("state");
+      const approval = document.getElementById("approval");
+      const q = document.getElementById("q");
+      const uc = document.getElementById("uc");
+      let threadId = null;
+
+      const SAMPLES = {
+        "UC-1.1": "UC-1.1 Decompose the 2005 to 2024 fire regime shift in mekong between sensor multiplicity and physical trend.",
+        "UC-1.2": "UC-1.2 Diagnose cross-sensor MODIS vs VIIRS discrepancy forensics in 2024.",
+        "UC-S1.3": "UC-S1.3 Fast single-hop metric lookup for 2024 mekong harmonized index.",
+        "UC-S1.4": "UC-S1.4 Generate flash NRT tactical ranger alert for amazon in 2026.",
+      };
+
+      async function loadUseCases() {
+        const response = await fetch("/api/v1/analysis/use-cases");
+        const data = await response.json();
+        for (const item of data.use_cases) {
+          const option = document.createElement("option");
+          option.value = item.id;
+          option.textContent = item.id;
+          option.dataset.sample = SAMPLES[item.id] || "";
+          uc.appendChild(option);
+        }
+        uc.value = "UC-1.1";
+        q.value = SAMPLES["UC-1.1"];
+      }
+
+      function line(kind, text) {
+        const row = document.createElement("div");
+        row.className = "ev " + kind;
+        row.innerHTML = "<b>" + kind + "</b> " + text;
+        log.appendChild(row);
+        log.scrollTop = log.scrollHeight;
+      }
+
+      function show(payload) {
+        if (payload.text) out.textContent = payload.text;
+        const report = payload.verification || {};
+        if (report.passed !== undefined) {
+          state.innerHTML =
+            "verification: <span class='" +
+            (report.passed ? "ok" : "bad") +
+            "'>" +
+            (report.passed ? "passed" : "rejected") +
+            "</span> · " +
+            (report.checked_numbers_count || 0) +
+            " numbers checked · synthesis: " +
+            (payload.synthesis_mode || "-");
+        }
+      }
+
+      async function readStream(response) {
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = "";
+        let kind = "message";
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          let split;
+          while ((split = buffer.indexOf("\n\n")) >= 0) {
+            const frame = buffer.slice(0, split);
+            buffer = buffer.slice(split + 2);
+            let data = "{}";
+            for (const row of frame.split("\n")) {
+              if (row.startsWith("event:")) kind = row.slice(6).trim();
+              if (row.startsWith("data:")) data = row.slice(5).trim();
+            }
+            let payload = {};
+            try {
+              payload = JSON.parse(data);
+            } catch (err) {
+              payload = { text: data };
+            }
+            line(kind, JSON.stringify(payload).slice(0, 420));
+            if (kind === "run_paused") {
+              threadId = payload.thread_id;
+              approval.classList.remove("hide");
+            }
+            if (kind === "briefing" || kind === "verification") show(payload);
+            if (kind === "run_completed") approval.classList.add("hide");
+          }
+        }
+      }
+
+      async function run() {
+        log.innerHTML = "";
+        out.textContent = "";
+        state.textContent = "running…";
+        approval.classList.add("hide");
+        const params = new URLSearchParams({ query: q.value });
+        if (uc.value) params.set("use_case_id", uc.value);
+        const response = await fetch("/api/v1/analysis/stream?" + params.toString());
+        await readStream(response);
+      }
+
+      async function answer(approved) {
+        if (!threadId) return;
+        approval.classList.add("hide");
+        const response = await fetch("/api/v1/analysis/resume", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            thread_id: threadId,
+            approved: approved,
+            reason: approved ? "verified on the ground" : "duplicate alert",
+            decided_by: "demo-operator",
+          }),
+        });
+        await readStream(response);
+      }
+
+      document.getElementById("run").onclick = run;
+      document.getElementById("approve").onclick = () => answer(true);
+      document.getElementById("decline").onclick = () => answer(false);
+      uc.onchange = () => {
+        if (uc.selectedIndex >= 0 && uc.options[uc.selectedIndex].dataset.sample) {
+          q.value = uc.options[uc.selectedIndex].dataset.sample;
+        }
+      };
+      loadUseCases();
+    </script>
+  </body>
+</html>

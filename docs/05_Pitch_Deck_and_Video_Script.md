@@ -71,6 +71,7 @@
   - **Báo cáo Grounded Narrative**: mô hình viết diễn giải theo đúng ngôn ngữ từng đối tượng (lực lượng kiểm lâm / lãnh đạo lâm nghiệp / nhà khoa học khí hậu), còn **mọi định lượng do harness chèn từ sổ cái** — mô hình không được tự tính bất kỳ con số nào.
   - **Bản tin kèm theo**: mọi lần chạy phát ra **luồng sự kiện có kiểu** (Server-Sent Events) để giao diện hiển thị từng bước: phân loại → gọi tool → suy luận → kiểm chứng → phê duyệt → báo cáo.
   - **Phê duyệt của con người** cho mọi báo cáo có hành động hiện trường; bị từ chối thì không có gì được phát hành, nhưng quyết định vẫn được ghi lại.
+* **Chạy thật, xem thật:** máy chủ đi kèm phục vụ luồng sự kiện của từng run và một trang demo — người đánh giá thấy phân loại, gọi tool, kiểm chứng từng con số, báo cáo, và **nút phê duyệt** khi run cần người quyết định.
 * **Hình ảnh trực quan:** Nhúng [fig5_harmonized_burning_calendar.png](figures/fig5_harmonized_burning_calendar.png).
 
 ### Slide 7 — Open-Source Monorepo Architecture & 2027+ Multi-Sensor Roadmap (Kiến Trúc Mở & Tầm Nhìn)

@@ -107,6 +107,24 @@ NASA FIRMS (MODIS / VIIRS / NRT) ──► firms-ingestion (rate-limited, cached
 
 ---
 
+## Watch a Run
+
+The harness is the product; the demo puts a browser in front of it.
+
+```bash
+uv run python -m ai_service.serve            # http://127.0.0.1:8765
+```
+
+The page shows one run as it happens: the classification, the tool calls, the
+reasoning, the numeric verification and the briefing, with the approval buttons
+when the run asks for a human. The default mode is the deterministic harness,
+so the demo needs no credential; `--mode live` runs the real models.
+
+The two endpoints the architecture document specifies are implemented here:
+`GET /api/v1/analysis/stream` and `POST /api/v1/analysis/resume`.
+
+---
+
 ## Repository Layout
 
 ```
@@ -119,7 +137,7 @@ flare-chronos/
 │   └── firms-ingestion/               # [Adapter Seam] NASA LANCE FIRMS client + cache
 ├── apps/
 │   ├── benchmark-cli/                 # [Application] data fetch, experiments, figures
-│   └── ai-service/                    # [Cognitive Layer] LangGraph System 1 + System 2 (20 UCs, 24 @tools)
+│   └── ai-service/                    # [Cognitive Layer] LangGraph System 1 + System 2 (20 UCs, 24 @tools) + event-stream server
 ├── exports/
 │   ├── PROPOSAL.md / PROPOSAL.pdf     # Official Technical Proposal (Vietnamese A4 PDF)
 │   ├── REPORT.md / REPORT.pdf         # Codebase Architecture & Empirical Report (A4 PDF)
