@@ -16,6 +16,7 @@
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="License" /></a>
   <a href="exports/PROPOSAL.pdf"><img src="https://img.shields.io/badge/PDF-PROPOSAL-ea580c" alt="Proposal PDF" /></a>
   <a href="exports/REPORT.pdf"><img src="https://img.shields.io/badge/PDF-REPORT-1d4ed8" alt="Report PDF" /></a>
+  <a href="exports/MODEL_FLOW.pdf"><img src="https://img.shields.io/badge/PDF-MODEL_FLOW-4c6ef5" alt="Model Flow Report PDF" /></a>
 </p>
 
 ---
@@ -122,6 +123,7 @@ flare-chronos/
 ├── exports/
 │   ├── PROPOSAL.md / PROPOSAL.pdf     # Official Technical Proposal (Vietnamese A4 PDF)
 │   ├── REPORT.md / REPORT.pdf         # Codebase Architecture & Empirical Report (A4 PDF)
+│   ├── MODEL_FLOW.md / MODEL_FLOW.pdf # Báo cáo riêng về mô hình luồng hai thế hệ
 │   └── export_pdf.py                  # Vector SVG + WeasyPrint A4 PDF compiler
 ├── src/harmonization/                 # [Compat Seam] facade for auto-grading
 ├── tests/                             # 26 unit, invariant, harness & live TDD seam tests
