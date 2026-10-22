@@ -36,6 +36,12 @@ jobs:
         run: uv run python -m pytest -m live -v
         env:
           PYTEST_ADDOPTS: ${{ inputs.pytest_args }}
+          # The Reflexive Layer prefers a decision endpoint that runs on the
+          # project's own inference node. A hosted runner cannot reach that
+          # private network, so the classifier chain steps down to its chat
+          # fallback, which uses SYSTEM1_API_KEY. Set both secrets to the
+          # credential of the chat provider; no private host or tunnel is
+          # involved here.
           SYSTEM1_API_KEY: ${{ secrets.SYSTEM1_API_KEY }}
           SYSTEM2_API_KEY: ${{ secrets.SYSTEM2_API_KEY }}
 

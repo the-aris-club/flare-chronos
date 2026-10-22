@@ -7,6 +7,7 @@ import os
 import sys
 import tempfile
 import unittest
+from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, Self
 
@@ -106,7 +107,7 @@ def _stub_model(url: str) -> Any:
         protocol="typed_questions",
         endpoint=url,
         model_id="stub-model",
-        api_key_env="SYSTEM1_API_KEY",
+        api_key_env="STUB_ENDPOINT_API_KEY",
         request=RequestOptions(timeout_ms=5000),
     )
     return SystemOneChatModel(
@@ -116,6 +117,44 @@ def _stub_model(url: str) -> Any:
         reasoning_effort="low",
         profile=profile,
     )
+
+
+def _stub_model_without_credential(url: str) -> Any:
+    """Build a typed-questions client whose credential is never configured."""
+    from ai_service.models import EndpointProfile, RequestOptions, SystemOneChatModel
+
+    profile = EndpointProfile(
+        protocol="typed_questions",
+        endpoint=url,
+        model_id="stub-model",
+        api_key_env="STUB_ENDPOINT_MISSING_KEY",
+        request=RequestOptions(timeout_ms=5000),
+    )
+    return SystemOneChatModel(
+        role="system1_reflexive",
+        model_id="stub-model",
+        source_label=url,
+        reasoning_effort="low",
+        profile=profile,
+    )
+
+
+@contextmanager
+def _stub_credential() -> Any:
+    """Give the stub endpoint a credential for the duration of one test.
+
+    The offline suite must never need a real credential, so the stub names its
+    own environment variable and this restores whatever was there before.
+    """
+    previous = os.environ.get("STUB_ENDPOINT_API_KEY")
+    os.environ["STUB_ENDPOINT_API_KEY"] = "stub-key"
+    try:
+        yield
+    finally:
+        if previous is None:
+            os.environ.pop("STUB_ENDPOINT_API_KEY", None)
+        else:
+            os.environ["STUB_ENDPOINT_API_KEY"] = previous
 
 
 class TestFlareChronosDualSystemHarness(unittest.TestCase):
@@ -919,7 +958,7 @@ class TestFlareChronosDualSystemHarness(unittest.TestCase):
 
     def test_33_the_decision_protocol_answers_the_entity(self) -> None:
         """A decision endpoint answers the entity, and its answer wins."""
-        with _DecisionStub() as stub:
+        with _DecisionStub() as stub, _stub_credential():
             harness = FlareChronosDualSystemHarness(
                 mode="live", enable_cache=False, enable_sign_off=False
             )
@@ -944,7 +983,7 @@ class TestFlareChronosDualSystemHarness(unittest.TestCase):
         self,
     ) -> None:
         """The classifier chain ends at the text extraction, never below it."""
-        with _DecisionStub() as alive:
+        with _DecisionStub() as alive, _stub_credential():
             harness = FlareChronosDualSystemHarness(
                 mode="live", enable_cache=False, enable_sign_off=False
             )
@@ -958,6 +997,24 @@ class TestFlareChronosDualSystemHarness(unittest.TestCase):
         self.assertEqual(out["extracted_entity"]["region"], "amazon")
         self.assertEqual(len(alive.received), 1)
         self.assertIn("unavailable", str(out.get("triage_fallback", "")))
+
+    def test_35_a_classifier_without_a_credential_falls_back(self) -> None:
+        """An endpoint with no credential is the next step down, not a failure."""
+        with _DecisionStub() as alive, _stub_credential():
+            harness = FlareChronosDualSystemHarness(
+                mode="live", enable_cache=False, enable_sign_off=False
+            )
+            # The primary endpoint names an environment variable that is not
+            # set, so it cannot be called at all.
+            harness.system1_model = _stub_model_without_credential(alive.url)
+            harness.system1_fallback_model = _stub_model(alive.url)
+            out = harness.invoke_use_case(
+                "how many fires were detected near Manaus in 2024?",
+                thread_id="classifier-missing-credential",
+            )
+
+        self.assertEqual(out["extracted_entity"]["region"], "amazon")
+        self.assertIn("api key", str(out.get("triage_fallback", "")).lower())
 
 
 if __name__ == "__main__":

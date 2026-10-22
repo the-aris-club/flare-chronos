@@ -44,6 +44,7 @@ from ai_service.models import (
     DeterministicHarnessChatModel,
     EndpointCallError,
     HarnessChatModel,
+    MissingEndpointCredentialError,
     build_citation_table,
     build_live_system1_chat_model,
     build_live_system1_fallback_model,
@@ -370,7 +371,9 @@ class FlareChronosDualSystemHarness:
                     ),
                     "; ".join(reasons),
                 )
-            except EndpointCallError as exc:
+            except (EndpointCallError, MissingEndpointCredentialError) as exc:
+                # An endpoint that cannot be reached, or that has no
+                # credential, is simply the next step down the chain.
                 reasons.append(f"{type(model).__name__}_unavailable: {exc}"[:160])
         # Every classifier was unavailable. The provisional extraction is the
         # floor, and the reason is recorded so no report overclaims.
