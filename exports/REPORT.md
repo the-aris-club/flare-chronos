@@ -12,7 +12,7 @@
 
 > **Mục đích tài liệu:** Báo cáo toàn diện kết quả hiện thực hóa hệ thống **Flare-Chronos** từ đặc tả toán học – vật lý sang kiến trúc phần mềm **Monorepo Deep-Module** và tầng điều phối trí tuệ nhân tạo nhận thức kép (**Dual-System LangGraph Harness**) hoạt động thực tế.
 
-> Tài liệu trình bày chi tiết mô hình miền nghiệp vụ đa ngữ cảnh, lý do lựa chọn các quyết định kiến trúc (`ADR-0001` đến `ADR-0008`), giải phẫu từng gói mã nguồn (`packages/*`, `apps/*`, `src/*`, `tests/*`), lược đồ cơ sở dữ liệu không-thời gian `DuckDB / Uber H3`, nhật ký thu thập **$1.609.182$ bản ghi điểm nóng thực tế (`134` lát cắt CSV phủ trọn 26 năm liên tục `2001–2026` và 12 tháng mùa vụ) từ NASA LANCE FIRMS API**, kiến trúc điều phối **System 1 (phân loại có cấu trúc) $\leftrightarrow$ System 2 (native chat)** thực thi **20 Use Cases** thông qua **24 `@tool` tất định**, **Grounded Narrative** (mô hình viết diễn giải, harness chèn mọi định lượng từ `VerifiedFactsLedger`), và hướng dẫn kiểm chứng tự động khép kín (`27/27` bài kiểm thử ngoại tuyến).
+> Tài liệu trình bày chi tiết mô hình miền nghiệp vụ đa ngữ cảnh, lý do lựa chọn các quyết định kiến trúc (`ADR-0001` đến `ADR-0009`), giải phẫu từng gói mã nguồn (`packages/*`, `apps/*`, `src/*`, `tests/*`), lược đồ cơ sở dữ liệu không-thời gian `DuckDB / Uber H3`, nhật ký thu thập **$1.609.182$ bản ghi điểm nóng thực tế (`134` lát cắt CSV phủ trọn 26 năm liên tục `2001–2026` và 12 tháng mùa vụ) từ NASA LANCE FIRMS API**, kiến trúc điều phối **System 1 (phân loại có cấu trúc) $\leftrightarrow$ System 2 (native chat)** thực thi **20 Use Cases** thông qua **24 `@tool` tất định**, **Grounded Narrative** (mô hình viết diễn giải, harness chèn mọi định lượng từ `VerifiedFactsLedger`), và hướng dẫn kiểm chứng tự động khép kín (`27/27` bài kiểm thử ngoại tuyến).
 
 ---
 
@@ -72,6 +72,7 @@ Song hành cùng bản thuyết minh dự án [`exports/PROPOSAL.md`](PROPOSAL.m
 | [**ADR-0004**](../docs/adr/0004-monorepo-deep-module-architecture.md) | Kiến trúc **Monorepo Deep-Module** tách biệt Lõi Vật lý Thuần túy (`Zero-I/O`) và Tầng Kết nối (`Seam`) | Cho phép kiểm thử toàn bộ 5 phương trình vật lý – thống kê trong `0.010 giây` không cần kết nối mạng, đồng thời hỗ trợ cả CLI thực nghiệm và Facade chấm điểm tự động. |
 | [**ADR-0005**](../docs/adr/0005-dual-system-langgraph-harness-and-deterministic-tool-gate.md) | Điều phối Nhận thức Kép **`LangGraph`** (System 1 $\leftrightarrow$ System 2) & Cổng Kiểm chứng Số học **`VerifiedFactsLedger`** | Cấm tuyệt đối LLM tự tính toán nhẩm; bắt buộc $100\%$ phép tính đi qua 23 `@tool` tất định và kiểm chứng từng con số trong phản hồi thông qua cạnh lặp tự sửa lỗi (`NumericGroundingVerifier`). |
 | [**ADR-0006**](../docs/adr/0006-explicit-endpoint-profiles-and-grounded-narrative-assembly.md) | Gắn mô hình bằng **Endpoint Profile** tường minh & **Grounded Narrative Assembly** | Cấm đọc cấu hình/credential agent trên máy người dùng; mọi tầng chỉ nhận `protocol` + `endpoint` + `model_id` + `api_key` + tham số. Mô hình viết diễn giải, **harness chèn mọi định lượng** từ `VerifiedFactsLedger`; thiếu key → lỗi ngay, không bao giờ bịa kết quả. |
+| [**ADR-0009**](../docs/adr/0009-measured-epochs-and-interpolated-years.md) | **Năm đo & năm nội suy** | Lịch 26 năm gồm **11/26 năm có lát cắt thực tế** (Mekong) và **9/26** (Amazon) — phần còn lại là **nội suy mô hình hóa** từ số điểm MODIS quan sát được và đường bao mùa thực nghiệm của vùng. Hệ số `×1.55` từng được áp **sau** khi chuẩn hóa mà không có giải thích đã bị gỡ: một hệ số làm đổi kết luận không thể được biện minh bằng sự im lặng. |
 | [**ADR-0008**](../docs/adr/0008-model-driven-tool-selection-sign-off-and-event-stream.md) | **Mô hình tự chọn tool**, phân tầng bề mặt tool, **phê duyệt của con người** & **luồng sự kiện SSE** | Tách **System 1 = tầng báo cáo** (chỉ `9` Atomic Tool) khỏi **System 2 = tầng giải thích** (`23` tool); mô hình tự chọn tool theo **system prompt** thay vì kịch bản từng bước; run **dừng chờ `interrupt()`** để con người phê duyệt các hành động hiện trường (`UC-S1.4`, `UC-2.2`); toàn bộ run phát ra thành **event có kiểu** mã hoá được thành khung **SSE**. |
 
 ---
@@ -400,6 +401,17 @@ Trong quá trình chạy thực nghiệm trên $1.609.182$ bản ghi thực tế
 ---
 
 ## 7. Hệ thống Điều phối Nhận thức Kép (`apps/ai-service` — Dual-System LangGraph Harness & 20 Use Cases)
+
+### 6.9. Năm Đo & Năm Nội Suy Trong Lịch 26 Năm (*Measured Epochs & Interpolated Years*)
+
+Lịch Hoạt Động Cháy 26 năm **không phải toàn bộ là quan sát**. Với mỗi vùng, một phần năm có **lát cắt thực tế (Measured Epoch)** — số điểm được chuẩn hóa trực tiếp từ dữ liệu NASA FIRMS quan sát được — và phần còn lại là **năm nội suy (Interpolated Year)**, với thang năm mô hình hóa từ số điểm MODIS quan sát được và đường bao mùa thực nghiệm của vùng. **Nội suy là mô hình, không phải quan sát**; các bảng công bố chỉ liệt kê năm có lát cắt thực tế.
+
+| Vùng | Năm đo được (Measured Epoch) | Năm nội suy (Interpolated Year) | Tổng |
+| --- | --- | --- | --- |
+| Tiểu vùng sông Mekong & Việt Nam | **11 / 26** | **15 / 26** | 26 |
+| Vành đai cháy rừng nhiệt đới Amazon | **9 / 26** | **17 / 26** | 26 |
+
+Một hệ số nhân `×1.55` từng được áp **sau** khi chuẩn hóa mà không có commit, chú thích hay tài liệu nào giải thích nó biện minh cho điều gì, và nó là lý do duy nhất khiến năm 2024 tại Amazon đọc ra như một bất thường nghiêm trọng. **Một hệ số làm đổi kết luận không thể được biện minh bằng sự im lặng** — nên nó đã bị gỡ, và giá trị chuẩn hóa của chính artifact được công bố thay thế. Các hằng số mô hình còn lại giờ được gọi tên và tài liệu hoá như **mô hình** chứ không phải **đo lường**: `_AMAZON_CLIMATOLOGY_BASELINE_FRACTION`, `_EL_NINO_PEAK_AMPLITUDE`, `_TERRA_ONLY_CORRECTION`, cùng hạt giống nhiễu / độ lệch chuẩn / sàn nhiễu ([`ADR-0009`](../docs/adr/0009-measured-epochs-and-interpolated-years.md)).
 
 ### 7.1. Kiến trúc Đồ thị Trạng thái Nhận thức Kép (`LangGraph StateGraph` — [`ADR-0005`](../docs/adr/0005-dual-system-langgraph-harness-and-deterministic-tool-gate.md))
 

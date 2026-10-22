@@ -127,7 +127,7 @@ flare-chronos/
 │   └── export_pdf.py                  # Vector SVG + WeasyPrint A4 PDF compiler
 ├── src/harmonization/                 # [Compat Seam] facade for auto-grading
 ├── tests/                             # 67 offline unit/invariant/harness tests + 6 live TDD seam tests
-├── docs/                              # Proposal, specs, ADRs (0001-0008), figures & logo
+├── docs/                              # Proposal, specs, ADRs (0001-0009), figures & logo
 │   └── media/SOURCES.md               # Editorial deliverable index & naming convention
 └── .github/workflows/ci.yml           # CI
 ```

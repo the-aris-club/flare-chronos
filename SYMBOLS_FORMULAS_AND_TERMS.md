@@ -449,7 +449,7 @@ Sau audit, các số liệu sau đã được hiệu chỉnh cho khớp với `d
 - MODIS nadir area: **1.000 km²**; edge (55°): **9.688 km²**.
 - VIIRS nadir area: **0.1305 km²**; edge (56.28°): **0.615 km²**.
 
-Các claim trong `PROPOSAL.md`/`REPORT.md` đã được cập nhật tương ứng. Lịch 26 năm gồm **11/26 năm đo được (Measured Epoch)** cho Mekong và **9/26 năm** cho Amazon; các năm còn lại là **năm nội suy (Interpolated Year)** — thang năm được mô hình hóa từ số điểm MODIS quan sát được và đường bao mùa thực nghiệm của vùng (nhiễu rng có seed cố định, hệ số đỉnh El Niño `1.85`, nền khí hậu Amazon `0.58`, hiệu chỉnh single-Terra `1.92/1.32`). Nội suy là **mô hình, không phải quan sát**, và tài liệu đánh dấu rõ. Xem `docs/adr/0008-measured-epochs-and-interpolated-years.md`.
+Các claim trong `PROPOSAL.md`/`REPORT.md` đã được cập nhật tương ứng. Lịch 26 năm gồm **11/26 năm đo được (Measured Epoch)** cho Mekong và **9/26 năm** cho Amazon; các năm còn lại là **năm nội suy (Interpolated Year)** — thang năm được mô hình hóa từ số điểm MODIS quan sát được và đường bao mùa thực nghiệm của vùng (nhiễu rng có seed cố định, hệ số đỉnh El Niño `1.85`, nền khí hậu Amazon `0.58`, hiệu chỉnh single-Terra `1.92/1.32`). Nội suy là **mô hình, không phải quan sát**, và tài liệu đánh dấu rõ. Xem `docs/adr/0009-measured-epochs-and-interpolated-years.md`.
 
 Hệ số `1.55` từng nhân vào chỉ số chuẩn hóa của Amazon 2024 *sau* khi chuẩn hóa mà không có giải thích nào được ghi lại; nó là lý do duy nhất khiến năm đó hiện ra là một năm dữ dội. Đã loại bỏ — chỉ số công bố là **45,6**, và bộ kiểm thử chặn việc nhân hệ số lên một năm đo được.
 

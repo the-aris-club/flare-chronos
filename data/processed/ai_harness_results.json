@@ -129,7 +129,7 @@
       "has_system2_reasoning_trace": false,
       "synthesis_mode": "deterministic",
       "duration_sec": 0.01,
-      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system1_fast_lookup | System 1: clef-flash | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-S1.2)\n- **Tool Executed (`tool_lookup_single_epoch_metrics`)**:\n  - `use_case_id`: UC-S1.3\n  - `region`: amazon\n  - `year`: **2024**\n  - `total_raw_detections`: **112405**\n  - `modis_reference_detections`: **8151**\n  - `deduplicated_fire_episodes`: **22579**\n  - `effective_observation_effort_omega`: **2.0847**\n  - `harmonized_viirs_eq_episodes`: **7318.1**\n  - `raw_index_2005_eq_100`: **814.3**\n  - `harmonized_index_2005_eq_100`: **70.7**\n  - `raw_vs_harmonized_index_divergence_pct`: **743.6**\n  - `saa_rejected_count`: **18097**"
+      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system1_fast_lookup | System 1: clef-flash | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-S1.2)\n- **Tool Executed (`tool_lookup_single_epoch_metrics`)**:\n  - `use_case_id`: UC-S1.3\n  - `region`: amazon\n  - `year`: **2024**\n  - `total_raw_detections`: **112405**\n  - `modis_reference_detections`: **8151**\n  - `deduplicated_fire_episodes`: **22579**\n  - `effective_observation_effort_omega`: **2.0847**\n  - `harmonized_viirs_eq_episodes`: **7318.1**\n  - `raw_index_2005_eq_100`: **814.3**\n  - `harmonized_index_2005_eq_100`: **45.6**\n  - `raw_vs_harmonized_index_divergence_pct`: **768.7**\n  - `saa_rejected_count`: **18097**"
     },
     {
       "use_case_id": "UC-S1.3",

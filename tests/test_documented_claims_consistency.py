@@ -205,7 +205,11 @@ class DocumentedClaimsConsistencyTest(unittest.TestCase):
         """The number of cached FIRMS CSV slices is quoted where stated."""
         _, slices = self._manifest_record_count()
         pattern = re.compile(rf"(?<!\d){slices}(?!\d)")
-        for doc in ("docs/01_NASA_SpaceApps_Proposal.md", "exports/PROPOSAL.md"):
+        for doc in (
+            "docs/01_NASA_SpaceApps_Proposal.md",
+            "exports/PROPOSAL.md",
+            "exports/REPORT.md",
+        ):
             self.assertTrue(
                 pattern.search(self.docs[doc]),
                 f"{doc}: cached CSV slice count ({slices}) is missing.",
