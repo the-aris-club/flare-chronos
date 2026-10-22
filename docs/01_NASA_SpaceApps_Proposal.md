@@ -88,6 +88,9 @@ Khu vực Đông Nam Á lục địa (bao gồm Tây Nguyên, Tây Bắc Việt 
 
 #### Bảng Số Liệu Thực Tế NASA FIRMS (Cửa Sổ 5 Ngày Cao Điểm Giữa Tháng 3: `15/03 – 19/03`)
 
+> **Ghi chú về năm đo và năm nội suy:** Lịch 26 năm bao gồm **11 năm có lát cắt thực tế (Measured Epoch)** — nơi số điểm được chuẩn hóa trực tiếp từ dữ liệu NASA FIRMS quan sát được — và **15 năm nội suy (Interpolated Year)**, với thang năm được mô hình hóa từ số điểm MODIS quan sát được và đường bao mùa thực nghiệm của vùng. Nội suy là **mô hình, không phải quan sát**; các bảng dưới đây chỉ liệt kê năm có lát cắt thực tế.
+
+
 | Năm (Epoch) | Tổ Hợp Cảm Biến Hoạt Động | Điểm Nóng Thô Theo Từng Nguồn (`Raw Counts`) | Tổng Điểm Nóng Thô (`Raw Sum`) | Sự Kiện Cháy Độc Lập (`Fire Episodes`) | Hệ Số Nén Trùng Lặp | Nỗ Lực Quan Sát $\Omega(y, \phi)$ | Sự Kiện Chuẩn Hóa `Flare-Chronos` (`VIIRS-eq`) | Chỉ Số Thô (`2005=100`) | Chỉ Số Chuẩn Hóa (`2005=100`) |
 | :---: | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | **2005** | `MODIS_SP` (Terra+Aqua) | MODIS: `3.580` | **3.580** | 2.132 | $1.68\times$ | $1.0084$ | **7.717,0** | `100,0` | **`100,0`** |
@@ -110,6 +113,9 @@ Khu vực phía Nam lưu vực Amazon (bang Mato Grosso và Pará, Brazil) đạ
 
 #### Bảng Số Liệu Thực Tế NASA FIRMS (Cửa Sổ 5 Ngày Cao Điểm Cuối Tháng 8: `20/08 – 24/08`)
 
+> **Ghi chú về năm đo và năm nội suy:** Lịch 26 năm bao gồm **9 năm có lát cắt thực tế (Measured Epoch)** — nơi số điểm được chuẩn hóa trực tiếp từ dữ liệu NASA FIRMS quan sát được — và **17 năm nội suy (Interpolated Year)**, với thang năm được mô hình hóa từ số điểm MODIS quan sát được và đường bao mùa thực nghiệm của vùng. Nội suy là **mô hình, không phải quan sát**; các bảng dưới đây chỉ liệt kê năm có lát cắt thực tế.
+
+
 | Năm (Epoch) | Tổ Hợp Cảm Biến Hoạt Động | Điểm Nóng Thô Theo Từng Nguồn (`Raw Counts`) | Tổng Điểm Nóng Thô (`Raw Sum`) | Sự Kiện Cháy Độc Lập (`Fire Episodes`) | Hệ Số Nén Trùng Lặp | Xung Nhiễu SAA Đêm Đã Lọc | Sự Kiện Chuẩn Hóa `Flare-Chronos` (`VIIRS-eq`) | Chỉ Số Thô (`2005=100`) | Chỉ Số Chuẩn Hóa (`2005=100`) |
 | :---: | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | **2005** *(Hạn lớn)* | `MODIS_SP` (Terra+Aqua) | MODIS: `13.804` | **13.804** | 6.303 | $2.19\times$ | 626 | **16.037,4** | `100,0` | **`100,0`** |
@@ -117,7 +123,7 @@ Khu vực phía Nam lưu vực Amazon (bang Mato Grosso và Pará, Brazil) đạ
 | **2012** *(+S-NPP)* | `MODIS_SP` + `SNPP_SP` | MODIS: `6.677`<br/>SNPP: `26.807` | **33.484** | 10.793 | $3.10\times$ | 4.145 | **7.276,3** | `242,6` *(Tăng ảo)* | **`45,4`** *(Giảm phá rừng thực tế)* |
 | **2019** | `MODIS_SP` + `SNPP_SP` + `NOAA20_SP` | MODIS: `4.770`<br/>SNPP: `16.882`<br/>NOAA20: `17.099` | **38.751** | 9.748 | $3.98\times$ | 5.024 | **4.406,6** | `280,7` | **`27,5`** |
 | **2020** | `MODIS_SP` + `SNPP_SP` + `NOAA20_SP` | MODIS: `3.506`<br/>SNPP: `22.031`<br/>NOAA20: `20.575` | **46.112** | 11.156 | $4.13\times$ | 7.347 | **5.043,0** | `334,0` | **`31,4`** |
-| **2024** *(Hạn 2024 + 4 luồng)* | `MODIS_SP` + `SNPP_SP` + `NOAA20_SP` + `NOAA21_NRT` | MODIS: `8.151`<br/>SNPP: `35.647`<br/>NOAA20: `35.765`<br/>NOAA21: `32.842` | **112.405** | 22.579 | **$4.98\times$** | **18.097** | **11.343,1** | **`814,3`** *(+714,3% ảo!)* | **`70,7`** *(Đỉnh hạn thế kỷ 2020s)* |
+| **2024** *(Hạn 2024 + 4 luồng)* | `MODIS_SP` + `SNPP_SP` + `NOAA20_SP` + `NOAA21_NRT` | MODIS: `8.151`<br/>SNPP: `35.647`<br/>NOAA20: `35.765`<br/>NOAA21: `32.842` | **112.405** | 22.579 | **$4.98\times$** | **18.097** | **7.318,1** | **`814,3`** *(+714,3% ảo!)* | **`45,6`** *(đo được, không phải đỉnh 2020s)* |
 
 ![Figure 4 - Regime Shift Elimination](figures/fig4_regime_shift_elimination.png)
 

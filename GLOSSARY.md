@@ -105,6 +105,14 @@ _Avoid_: Fire heatmap, hotspot timeline
 The operational severity band of a Standardized Fire Anomaly Index value, assigned in five ordered bands — QUIET ($< -0.5$), BASELINE ($-0.5 \le \text{SFAI} < 1.0$), ELEVATED ($1.0 \le \text{SFAI} < 1.75$), SEVERE ($1.75 \le \text{SFAI} < 2.5$), and CRISIS ($\ge 2.5$). SEVERE mobilises patrols; CRISIS raises an out-of-season crisis alarm.
 _Avoid_: Risk level, alert level, severity score, crisis threshold
 
+**Measured Epoch**:
+A year for which the archive holds a real NASA FIRMS slice set — the harmonized count for that year is computed from observed detections. Eleven of the twenty-six Mekong years and nine of the twenty-six Amazon years are Measured Epochs.
+_Avoid_: Real year, hard data, ground truth, anchor year
+
+**Interpolated Year**:
+A year with no archived slice set, whose annual scale is modelled from the observed MODIS-only count and the region's empirical seasonal envelope. The interpolation is deterministic but it is a model, not an observation, and published documents mark these years as such.
+_Avoid_: Estimated year, synthetic year, filled year, projection
+
 **Severe Anomaly Outline**:
 The cyan frame drawn on a Burning Activity Calendar cell whose Standardized Fire Anomaly Index reaches the display threshold of $+2.2\sigma$. It is a rendering convention for a *display* threshold, deliberately below the CRISIS Anomaly Tier so the calendar highlights severe anomalies before a crisis alarm is raised.
 _Avoid_: Crisis anomaly, crisis outline, alarm outline, threshold
@@ -126,10 +134,6 @@ _Avoid_: Dashboard, UI, app, interactive demo, live visualization
 **Main Submission Video**:
 The 120-second primary pitch deliverable for NASA Space Apps, cut to the shot script in `docs/05_Pitch_Deck_and_Video_Script.md` §3.1.
 _Avoid_: Demo, promo, trailer, explainer
-
-**Fast Pitch**:
-The 30-second condensed cut of the Main Submission Video, for judge screening and short-form channels. Reserved in the §3 script heading but not yet written.
-_Avoid_: Teaser, trailer, short, bumper
 
 **Pitch Deck**:
 The 7-slide presentation mirroring the `docs/05_Pitch_Deck_and_Video_Script.md` §2 blueprint — the still counterpart of the Main Submission Video, carrying the same argument in slide form.

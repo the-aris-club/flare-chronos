@@ -375,6 +375,27 @@ class DocumentedClaimsConsistencyTest(unittest.TestCase):
                 ("+1.324%", "+1,324%"),
             )
 
+    def test_early_warning_claim_uses_the_display_threshold(self) -> None:
+        """The early-warning claim must name the threshold the figure draws.
+
+        The pitch script claimed "SFAI > +3 sigma" for the early-February
+        window in 2010 and 2016. The measured peaks there are +2.58 and
+        +2.47, and the cyan outline is drawn at +2.2 -- so "+3 sigma" was
+        both unsupported by the data and inconsistent with the figure it
+        describes.
+        """
+        for doc in ("docs/05_Pitch_Deck_and_Video_Script.md",):
+            with self.subTest(doc=doc):
+                self._assert_none_present(
+                    doc, "unsupported +3 sigma early-warning claim", ("+3 sigma",)
+                )
+                self._assert_present_with_context(
+                    doc,
+                    "early-warning display threshold",
+                    ("+2,2", "+2.2"),
+                    r"viền xanh|outline|ngưỡng hiển thị|display threshold",
+                )
+
     def test_sfai_thresholds_are_single_sourced_and_documented(self) -> None:
         """The SFAI thresholds are named, single-sourced, and agree with the docs.
 
@@ -480,6 +501,99 @@ class DocumentedClaimsConsistencyTest(unittest.TestCase):
                     min(inflations), 380.0, delta=1.0, msg=f"{region}: +380%?"
                 )
                 self.assertAlmostEqual(max(inflations), expected_max[region], delta=0.5)
+
+    def test_no_unexplained_multiplier_on_measured_epochs(self) -> None:
+        """A measured epoch's harmonized value must equal the artifact's.
+
+        The published Amazon 2024 index (70.7) once carried an unexplained
+        ``x1.55`` multiplier applied *after* harmonization, with no commit,
+        comment or document recording what it compensated for. It was the only
+        reason that year read as a severe anomaly: without it the index is
+        45.6 and the year produces no outlined cells at all. Such a factor
+        changes a conclusion, so it may not be reintroduced silently.
+        """
+        for region in ("mekong", "amazon"):
+            with self.subTest(region=region):
+                base = next(
+                    e
+                    for e in self.results[f"{region}_empirical_epochs"]
+                    if e["year"] == 2005
+                )["harmonized_viirs_eq_episodes"]
+                series = self.results["regime_shift_series"][region]
+                for epoch in self.results[f"{region}_empirical_epochs"]:
+                    year = epoch["year"]
+                    if year == 2026:
+                        # 2026 is NRT-only; the calendar anchors it to the
+                        # observed MODIS count rather than the harmonized
+                        # episode count, so it is not comparable.
+                        continue
+                    harm = epoch["harmonized_viirs_eq_episodes"]
+                    idx = series["harmonized_index_2005_eq_100"][
+                        series["years"].index(year)
+                    ]
+                    expected = round(100.0 * harm / base, 1)
+                    self.assertAlmostEqual(
+                        idx,
+                        expected,
+                        delta=0.15,
+                        msg=(
+                            f"{region} {year}: published index {idx} != the "
+                            f"artifact's own harmonized value ({expected}). "
+                            "A measured epoch must not be scaled after "
+                            "harmonization."
+                        ),
+                    )
+
+    def test_measured_and_interpolated_years_are_disclosed(self) -> None:
+        """Documents must say which years are measured and which are modelled.
+
+        The 26-year calendar is built from real annual slices for a subset of
+        years only; the rest are interpolated from the observed MODIS counts and
+        the regional seasonal envelope. A reader cannot tell an observation
+        from a model output unless the documents say so.
+        """
+        expected = {"mekong": (11, 15), "amazon": (9, 17)}
+        for region, (n_measured, n_interpolated) in expected.items():
+            with self.subTest(region=region):
+                series = self.results["regime_shift_series"][region]
+                self.assertEqual(len(series["measured_years"]), n_measured)
+                self.assertEqual(len(series["interpolated_years"]), n_interpolated)
+                self.assertEqual(
+                    len(series["measured_years"]) + len(series["interpolated_years"]),
+                    len(series["years"]),
+                )
+                self.assertFalse(
+                    set(series["measured_years"]) & set(series["interpolated_years"])
+                )
+
+        for doc in ("docs/01_NASA_SpaceApps_Proposal.md", "exports/PROPOSAL.md"):
+            text = self.docs[doc]
+            with self.subTest(doc=doc):
+                self.assertIn("Measured Epoch", text)
+                self.assertIn("Interpolated Year", text)
+
+    def test_published_epoch_tables_list_only_measured_years(self) -> None:
+        """Every measured epoch's harmonized value is published verbatim.
+
+        The epoch tables are presented as observed NASA FIRMS data, so each
+        measured epoch's harmonized count must appear in the documents exactly
+        as the artifact records it -- no rescaling, and no year that is really
+        an interpolation presented as an observation.
+        """
+        published = "".join(self.docs.values())
+        for region in ("mekong", "amazon"):
+            for epoch in self.results[f"{region}_empirical_epochs"]:
+                year = epoch["year"]
+                harm = epoch["harmonized_viirs_eq_episodes"]
+                with self.subTest(region=region, year=year):
+                    self.assertIn(
+                        vi(harm, 1),
+                        published,
+                        msg=(
+                            f"{region} {year}: harmonized {harm} is not "
+                            "published as the artifact records it."
+                        ),
+                    )
 
 
 if __name__ == "__main__":

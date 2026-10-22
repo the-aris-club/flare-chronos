@@ -705,6 +705,30 @@ def render_fig4_regime_shift_elimination(
     c.save(out_path)
 
 
+def _wrap_caption(caption: str, max_width: float) -> list[str]:
+    """Wrap a figure caption to ``max_width`` pixels.
+
+    Prefers to break on the ``" | "`` separator the captions use, so the
+    "Peak Fire Window" and "Anomalies" halves stay on their own lines, and
+    falls back to word wrapping for a half that is still too wide.
+    """
+    font = _get_font(16, bold=False)
+    lines: list[str] = []
+    for segment in caption.split(" | "):
+        words = segment.split(" ")
+        current = ""
+        for word in words:
+            candidate = f"{current} {word}".strip()
+            if current and font.getlength(candidate) > max_width:
+                lines.append(current)
+                current = word
+            else:
+                current = candidate
+        if current:
+            lines.append(current)
+    return lines
+
+
 def _heatmap_color(norm_val: float) -> tuple[int, int, int]:
     """YlOrRd / Inferno scientific perceptual colormap for norm_val in [0, 1]."""
     v = max(0.0, min(1.0, norm_val))
@@ -808,11 +832,19 @@ def render_fig5_burning_activity_calendar(
             c.draw.text((mx - 10, py1 + 12), m_lbl, fill=TEXT_DARK, font=c.f_small)
 
         c.draw.rectangle([px0, py0, px1, py1], outline=TEXT_DARK, width=2)
-        c.draw.text(
-            (px0 + 10, py1 + 42),
-            rdata["summary_caption"],
-            fill=TEXT_DARK,
-            font=c.f_small,
-        )
+        # The caption names every anomaly year, so it is wider than a single
+        # panel. Split it on the " | " separator and wrap, rather than letting
+        # it run off the edge of the figure.
+        caption_x = px0 + 10
+        caption_width = px1 - 10 - caption_x
+        for line_no, line in enumerate(
+            _wrap_caption(rdata["summary_caption"], caption_width)
+        ):
+            c.draw.text(
+                (caption_x, py1 + 42 + line_no * 24),
+                line,
+                fill=TEXT_DARK,
+                font=c.f_small,
+            )
 
     c.save(out_path)

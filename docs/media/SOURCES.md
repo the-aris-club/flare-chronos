@@ -4,7 +4,7 @@ The repository holds the **science**. The rendered **story** lives outside it.
 
 This file is the index for the editorial deliverables described in
 [`docs/05_Pitch_Deck_and_Video_Script.md`](../05_Pitch_Deck_and_Video_Script.md)
-and the glossary terms **Main Submission Video** and **Fast Pitch** in
+and the glossary term **Main Submission Video** in
 [`GLOSSARY.md`](../../GLOSSARY.md).
 
 ## Why nothing binary is committed
@@ -30,7 +30,6 @@ generates.
 |---|---|---|---|
 | Main Submission Video (120 s, EN) | `v0.1.0` | external storage | Primary NASA Space Apps submission |
 | Main Submission Video (120 s, VI) | `v0.1.0` | external storage | Separate cut, separate timing |
-| Fast Pitch (30 s, EN) | `v0.1.0` | external storage | Reserved in `docs/05` §3 — **not yet written** |
 | Pitch Deck (7 slides) | `v0.1.0` | external storage | Mirrors `docs/05` §2 blueprint |
 
 ## Naming convention
@@ -44,7 +43,6 @@ flare-chronos-<artifact>-<variant>-<version>.<ext>
 | Artifact | Slug | Example |
 |---|---|---|
 | Main Submission Video | `main-video` | `flare-chronos-main-video-en-v0.1.0.mp4` |
-| Fast Pitch | `fast-pitch` | `flare-chronos-fast-pitch-en-v0.1.0.mp4` |
 | Pitch Deck | `pitch-deck` | `flare-chronos-pitch-deck-v0.1.0.pdf` |
 | Narrative Asset | `asset-<subject>` | `flare-chronos-asset-footprint-ellipse-v0.1.0.mov` |
 
