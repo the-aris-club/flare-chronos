@@ -1,8 +1,12 @@
+<p align="center">
+  <img src="figures/flare-chronos-logo.png" alt="Flare-Chronos Official Logo" width="220" />
+</p>
+
 # 04. Đặc Tả Giao Diện Người Dùng & Trực Quan Hóa Lịch Hoạt Động Cháy (UI/UX & Burning Activity Calendar Wireframe Specification)
 
 **Dự án:** **Flare-Chronos** — *26-Year Cross-Sensor Harmonized Active Fire Intelligence & Phenology Calendar*  
 **Cuộc thi:** 2026 NASA Space Apps Challenge — *Harmonization of MODIS and VIIRS Hot Spots*  
-**Tài liệu liên kết:** [GLOSSARY.md](file:///Users/xirothedev/workspace/flare-chronos/GLOSSARY.md) | [02_Cross_Sensor_Harmonization_Spec.md](file:///Users/xirothedev/workspace/flare-chronos/docs/02_Cross_Sensor_Harmonization_Spec.md) | [03_System_Architecture_and_Data_Pipeline.md](file:///Users/xirothedev/workspace/flare-chronos/docs/03_System_Architecture_and_Data_Pipeline.md)
+**Tài liệu liên kết:** [GLOSSARY.md](../GLOSSARY.md) | [02_Cross_Sensor_Harmonization_Spec.md](02_Cross_Sensor_Harmonization_Spec.md) | [03_System_Architecture_and_Data_Pipeline.md](03_System_Architecture_and_Data_Pipeline.md)
 
 ---
 
@@ -16,7 +20,7 @@ Giao diện **Flare-Chronos Workbench** giải quyết triệt để hai ảo gi
 
 ---
 
-## 2. Bố Cục Wireframe Tổng Thể (Full-Screen Analytical Dashboard)
+## 2. Bố Cục Wireframe Tổng Thể (Full-Screen Workbench)
 
 ```text
 +----------------------------------------------------------------------------------------------------------------------+
@@ -26,8 +30,8 @@ Giao diện **Flare-Chronos Workbench** giải quyết triệt để hai ảo gi
 |                                                       |  [BẢNG ĐIỀU KHIỂN ĐỐI CHỨNG TRƯỚC / SAU ĐỒNG BỘ HÓA]         |
 |   [KHUNG BẢN ĐỒ KHÔNG GIAN ĐA TẦNG - DECK.GL/MAPLIBRE]|  +----------------+----------------+----------------+        |
 |                                                       |  | Raw Detections | Fire Episodes  | SFAI Z-Score   |        |
-|      _.-""""-._      (Elip MODIS Rìa Quét: 4.8x2.0km) |  |  50,988 (Thô)  |  18,412 (Chuẩn)|  +2.84 sigma   |        |
-|    .'          '.     o o (Cụm VIIRS 375m bên trong)  |  |  (+1,324% ảo)  |  (Khử trùng lặp|  [SEVERE RISK] |        |
+|      _.-""""-._      (Elip MODIS Rìa Quét: 4.8x2.0km) |  |  43,342 (Thô)  |  22,573 (Chuẩn)|  +2.64 sigma   |        |
+|    .'          '.     o o (Cụm VIIRS 375m bên trong)  |  | (+1.110,7% ảo) |  (Khử trùng lặp|  [SEVERE RISK] |        |
 |   /   o  o  o    \                                    |  +----------------+----------------+----------------+        |
 |  |       o        |   / \ / \ / \ (Lưới Lục Giác     |                                                              |
 |   \              /   | H3| H3| H3|  Đẳng Diện Tích)   |  [ĐỒNG HỒ MÙA VỤ CHÁY - POLAR PHENOLOGY CLOCK (365 NGÀY)]    |
@@ -42,7 +46,7 @@ Giao diện **Flare-Chronos Workbench** giải quyết triệt để hai ảo gi
 |                                                       |              Pentad 37 (02/07)                               |
 +-------------------------------------------------------+--------------------------------------------------------------+
 | [MA TRẬN LỊCH HOẠT ĐỘNG CHÁY THỐNG NHẤT 26 NĂM - HARMONIZED BURNING ACTIVITY CALENDAR (26 YEARS x 73 PENTADS)]       |
-| Chỉ số hiển thị: (•) HFD (Sự kiện/100km2/ngày)   ( ) HRF (MW/km2)   ( ) SFAI Anomaly Z-Score   [x] Viền xanh Crisis  |
+| Chỉ số hiển thị: (•) HFD (Sự kiện/100km2/ngày)   ( ) HRF (MW/km2)   ( ) SFAI Anomaly Z-Score   [x] Viền xanh Severe Anomaly  |
 |                                                                                                                      |
 | Năm   | Jan (P01-06) | Feb (P07-12) | Mar (P13-18) | Apr (P19-24) | May-Jul (P25-42) | Aug-Oct (P43-60) | Nov-Dec    |
 | ------+--------------+--------------+--------------+--------------+------------------+------------------+----------- |
@@ -89,7 +93,7 @@ Giao diện **Flare-Chronos Workbench** giải quyết triệt để hai ảo gi
   3. **$\text{SFAI}$ (*Standardized Fire Anomaly Index*)**: Chỉ số Z-score phi tham số đo độ lệch của Pentad hiện tại so với đường cơ sở 25 năm của chính Pentad đó:
      $$\text{SFAI}_{y,p} = \frac{\text{HRF}_{y,p} - \text{Median}_y(\text{HRF}_{\cdot, p})}{\sigma_{\text{robust}}(\text{HRF}_{\cdot, p})}$$
 * **Nhận diện Tự động "Giai đoạn Cao điểm" & "Dị thường Ngoài mùa vụ"**:
-  - Các ô có $\text{SFAI}_{y,p} \ge +2.25\sigma$ được đóng khung viền xanh lơ phát sáng (*Crisis Anomaly Outline*), giúp chỉ huy cứu hỏa nhận ra ngay các đợt cháy rừng bùng phát sớm hơn quy luật mùa vụ (như đầu tháng 2 năm 2016 tại Tây Nguyên và Tiểu vùng Mekong).
+  - Các ô có $\text{SFAI}_{y,p} \ge +2.2\sigma$ được đóng khung viền xanh lơ phát sáng (*Severe Anomaly Outline*), giúp chỉ huy cứu hỏa nhận ra ngay các đợt cháy rừng bùng phát sớm hơn quy luật mùa vụ (như đầu tháng 2 năm 2016 tại Tây Nguyên và Tiểu vùng Mekong). Ngưỡng này là **ngưỡng hiển thị** (khớp với chú thích của Hình 5), thấp hơn ngưỡng **báo động khủng hoảng** là $\text{SFAI} \ge +2.5\sigma$ (xem `docs/01` §6.1) — tức lịch cháy làm nổi bật dị thường nghiêm trọng *trước khi* báo động được kích hoạt.
 
 ### 3.3. Đồng Hồ Mùa Vụ Cháy Cực (`Polar Phenology Clock`)
 * Biểu diễn chu kỳ $365\text{ ngày}$ ($73\text{ Pentads}$) trên hệ tọa độ cực $\psi_p = \frac{2\pi(p - 0.5)}{73}$:
@@ -102,10 +106,18 @@ Giao diện **Flare-Chronos Workbench** giải quyết triệt để hai ảo gi
   - **Đường Đỏ Cam (Raw Unharmonized Sum)**: Tổng điểm nóng thô khi cộng gộp MODIS + S-NPP + NOAA-20 + NOAA-21 (bị nhảy bậc giả tạo năm 2012, 2020, 2024).
   - **Đường Xanh Ngọc (Flare-Chronos Harmonized Series)**: Đường xu thế vật lý sau khi qua bộ hiệu chuẩn hình học H3, toán tử quan sát góc quét, khử trùng lặp quỹ đạo 95 phút và chuẩn hóa nỗ lực quan sát $\Omega(y, \phi)$.
 
+### 3.5. Bảng Báo Cáo Có Căn Cứ & Cổng Phê Duyệt (`Grounded Briefing & Human Sign-off Panel`)
+* Bảng báo cáo là **thành phần thứ năm**, nối trực tiếp với luồng sự kiện của tầng nhận thức (`GET /api/v1/analysis/stream`):
+  - **Dòng tiến trình run**: hiển thị từng sự kiện theo thứ tự — *phân loại* (vùng + mức khẩn cấp kèm **xác suất hiệu chuẩn**) → *gọi tool* → *suy luận* → *kiểm chứng* → *phê duyệt* → *báo cáo*. Người dùng thấy báo cáo **đang được kiểm chứng** chứ không phải bản văn bịa sẵn.
+  - **Diễn giải theo đối tượng**: cùng một phân tích được viết theo ngôn ngữ của **lực lượng kiểm lâm** (đi đâu, tin tưởng bao nhiêu), **lãnh đạo lâm nghiệp** (quy mô và hệ quả chính sách) hoặc **nhà khoa học khí hậu** (cơ chế và giả định).
+  - **Con số luôn bám theo nguồn**: mỗi định lượng trong báo cáo đến từ **sổ cái số liệu đã xác thực**; bảng kiểm chứng hiển thị trạng thái (`đã xác thực` / `đang sửa lại` / `không có nguồn`) và báo cáo chỉ được xuất bản khi **mọi con số đã xác thực**.
+  - **Cổng phê duyệt**: với báo cáo có hành động hiện trường, giao diện hiện nút **Duyệt / Từ chối** kèm lý do; run **dừng** cho tới khi có quyết định. Từ chối ⇒ không có báo cáo nào được phát hành, nhưng quyết định vẫn được ghi lại.
+  - **Trạng thái suy giảm hiển thị rõ**: nếu bất kỳ thành phần nào của tầng nhận thức không sẵn sàng, giao diện hiển thị đúng cấp suy giảm đang dùng, **không** trình bày như thể mọi thứ đều bình thường.
+
 ---
 
 ## 4. Minh Chứng Trực Quan Kết Xuất Thực Tế Từ Engine Python
 
 Hình ảnh dưới đây được kết xuất trực tiếp từ `apps/benchmark-cli/src/benchmark_cli/run_experiments.py` trên dữ liệu thực tế NASA FIRMS cho **Tiểu vùng sông Mekong & Việt Nam** và **Rừng Amazon**:
 
-![Harmonized Burning Activity Calendar](file:///Users/xirothedev/workspace/flare-chronos/docs/figures/fig5_harmonized_burning_calendar.png)
+![Harmonized Burning Activity Calendar](figures/fig5_harmonized_burning_calendar.png)

@@ -1,8 +1,18 @@
-# 00. Tên Dự Án & Chú Thích Viết Tắt (Project Name & Acronym)
+<p align="center">
+  <img src="figures/flare-chronos-logo.png" alt="Flare-Chronos Official Logo" width="280" />
+</p>
+
+# 00. Tên Dự Án, Bộ Nhận Diện Thương Hiệu & Chú Thích Viết Tắt (Project Name, Brand Identity & Acronym)
 
 **Dự án:** **Flare-Chronos**
 
 **Chú thích viết tắt (full name):** *Fire Long-term Archive Resolution & Cross-sensor Harmonization for Operational Near-real-time Observation System*
+
+## Ý nghĩa Biểu trưng (Official Logo Symbolism)
+
+- **Ngọn lửa nhiệt đa tầng (Multi-Band Thermal Flame)**: Tượng trưng cho tín hiệu bức xạ hồng ngoại trung $4\,\mu\text{m}$ ($\text{FRP}$) được chuẩn hóa giữa hai thế hệ cảm biến MODIS (`1 km`) và VIIRS (`375 m`).
+- **Lưới lục giác đẳng diện tích Uber H3 (Hexagonal Global Grid Base)**: Khối lục giác xanh dương và cam bên dưới ngọn lửa đại diện cho phép phân bổ trọng số diện tích elip dải quét ($\Delta S(\theta)\times\Delta T(\theta)$) lên hệ lưới lục giác kép **Uber H3 Resolution 7 & 8**.
+- **Quỹ đạo vệ tinh cực & Dải băng `26 YEARS`**: Biểu thị chuỗi quan sát liên tục 26 năm (`2000–2026+`) kết nối dữ liệu từ 5 vệ tinh (`Terra`, `Aqua`, `Suomi-NPP`, `NOAA-20`, `NOAA-21`) thành **Lịch Hoạt Động Cháy Thống Nhất (*26-Year Harmonized Burning Activity Calendar*)**.
 
 ## Ý nghĩa tên gọi
 

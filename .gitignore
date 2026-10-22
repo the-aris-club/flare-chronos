@@ -23,3 +23,31 @@ build/
 .DS_Store
 .idea/
 .vscode/
+
+# Runtime state (durable graph checkpoints for human sign-off)
+data/runtime/
+
+# Editorial / Media Build Artifacts
+# Rendered deliverables are published as GitHub Releases, not committed.
+# Source projects (After Effects, Blender, ...) live in external storage;
+# see docs/media/SOURCES.md for the index and naming convention.
+*.mp4
+*.mov
+*.mkv
+*.avi
+*.webm
+*.prproj
+*.aep
+*.aepproject
+*.blend
+*.blend1
+*.fbx
+*.gltf
+*.glb
+*.obj
+*.mtl
+*.wav
+*.mp3
+*.aiff
+*.srt
+*.vtt

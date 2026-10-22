@@ -1,12 +1,23 @@
-# Flare-Chronos
+<p align="center">
+  <img src="docs/figures/flare-chronos-logo.png" alt="Flare-Chronos Official Logo — 26-Year Harmonized Burning Activity Calendar" width="320" />
+</p>
 
-**Fire Long-term Archive Resolution & Cross-sensor Harmonization for Operational Near-real-time Observation System**
+<h1 align="center">Flare-Chronos</h1>
 
-> A 26-year, cross-sensor (MODIS + VIIRS) harmonized Burning Activity Calendar built on NASA FIRMS data — turning 25+ years of heterogeneous satellite active-fire observations into a single, physics-calibrated, sensor-invariant record.
+<p align="center">
+  <strong>Fire Long-term Archive Resolution &amp; Cross-sensor Harmonization for Operational Near-real-time Observation System</strong>
+</p>
 
-[![CI](https://github.com/the-aris-club/flare-chronos/actions/workflows/ci.yml/badge.svg)](https://github.com/the-aris-club/flare-chronos/actions/workflows/ci.yml)
-[![Python](https://img.shields.io/badge/python-3.11%2B-blue)](https://www.python.org/)
-[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+> A 26-year, cross-sensor (MODIS + VIIRS) harmonized Burning Activity Calendar & Dual-System Cognitive AI Harness built on NASA FIRMS data — turning 25+ years of heterogeneous satellite active-fire observations into a single, physics-calibrated, sensor-invariant record.
+
+<p align="center">
+  <a href="https://github.com/the-aris-club/flare-chronos/actions/workflows/ci.yml"><img src="https://github.com/the-aris-club/flare-chronos/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
+  <a href="https://www.python.org/"><img src="https://img.shields.io/badge/python-3.11%2B-blue" alt="Python" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="License" /></a>
+  <a href="exports/PROPOSAL.pdf"><img src="https://img.shields.io/badge/PDF-PROPOSAL-ea580c" alt="Proposal PDF" /></a>
+  <a href="exports/REPORT.pdf"><img src="https://img.shields.io/badge/PDF-REPORT-1d4ed8" alt="Report PDF" /></a>
+  <a href="exports/MODEL_FLOW.pdf"><img src="https://img.shields.io/badge/PDF-MODEL_FLOW-4c6ef5" alt="Model Flow Report PDF" /></a>
+</p>
 
 ---
 
@@ -66,13 +77,14 @@ See [`docs/00_Project_Name_and_Acronym.md`](docs/00_Project_Name_and_Acronym.md)
 - **Spatio-temporal deduplication**: multi-satellite overpass clustering into Fire Episodes (τ = 95 min).
 - **Effort normalization**: Ω(year, latitude) prevents constellation-expansion artificial trends.
 - **Burning Activity Calendar**: 26 Years × 73 Pentads matrix of HFD / HRF / SFAI with robust seasonal Z-scores.
-- **Deep-module monorepo**: pure core (zero I/O) behind a clean seam; ingestion adapter; benchmark CLI.
+- **Dual-System Cognitive AI Harness (`apps/ai-service`)**: LangGraph orchestration pairing a **System 1 decision model** (assigns the analysis, the region and the urgency with calibrated probabilities) with a **System 2 native chat endpoint** (deliberative reasoning) across **20 Use Cases** and **23 deterministic `@tool` functions**. The Reflexive Layer runs a chain — decision model, then chat model, then deterministic extraction — so a run never depends on one service being up ([MODEL_FLOW](exports/MODEL_FLOW.md)). The model chooses its own tool calls; the harness only decides which tools each tier may reach. Every briefing is a **Grounded Narrative**: the model authors the interpretation while the harness injects every quantity from the `VerifiedFactsLedger`, checked by a `NumericGroundingVerifier`. Briefings that authorize a field action pause for a **human sign-off** before they are released. Each layer is bound through an **Endpoint Profile** (protocol, endpoint, model, API key, request options) resolved from explicit configuration only — never from the host's agent tooling configuration ([ADR-0006](docs/adr/0006-explicit-endpoint-profiles-and-grounded-narrative-assembly.md), [ADR-0008](docs/adr/0008-model-driven-tool-selection-sign-off-and-event-stream.md)).
+- **Deep-module monorepo**: pure core (zero I/O) behind a clean seam; ingestion adapter; benchmark CLI; dual-system AI service; PDF exports (`exports/PROPOSAL.pdf` & `exports/REPORT.pdf`).
 
 ---
 
 ## Architecture
 
-See [`docs/03_System_Architecture_and_Data_Pipeline.md`](docs/03_System_Architecture_and_Data_Pipeline.md) for the full end-to-end pipeline, DuckDB/H3 schema, and REST API specification.
+See [`docs/03_System_Architecture_and_Data_Pipeline.md`](docs/03_System_Architecture_and_Data_Pipeline.md) and [`exports/REPORT.md`](exports/REPORT.md) for the full end-to-end pipeline, DuckDB/H3 schema, Dual-System LangGraph Harness, and REST API specification.
 
 High-level flow:
 
@@ -84,6 +96,10 @@ NASA FIRMS (MODIS / VIIRS / NRT) ──► firms-ingestion (rate-limited, cached
         SZA unification → P(fire) filtering → footprint reconstruction →
         H3 allocation → two-stage FRP calibration → episode clustering →
         effort normalization → Burning Activity Calendar
+                                            │
+                                            ▼
+                     ai-service (LangGraph System 1 ↔ System 2)
+        24 deterministic @tools → VerifiedFactsLedger → NumericGroundingVerifier
                                             │
                                             ▼
                               DuckDB / Parquet cube + REST API + Deck.gl UI
@@ -102,10 +118,17 @@ flare-chronos/
 │   ├── harmonization-core/            # [Deep Module] pure physics/math (zero I/O)
 │   └── firms-ingestion/               # [Adapter Seam] NASA LANCE FIRMS client + cache
 ├── apps/
-│   └── benchmark-cli/                 # [Application] data fetch, experiments, figures
+│   ├── benchmark-cli/                 # [Application] data fetch, experiments, figures
+│   └── ai-service/                    # [Cognitive Layer] LangGraph System 1 + System 2 (20 UCs, 24 @tools)
+├── exports/
+│   ├── PROPOSAL.md / PROPOSAL.pdf     # Official Technical Proposal (Vietnamese A4 PDF)
+│   ├── REPORT.md / REPORT.pdf         # Codebase Architecture & Empirical Report (A4 PDF)
+│   ├── MODEL_FLOW.md / MODEL_FLOW.pdf # Báo cáo riêng về mô hình luồng hai thế hệ
+│   └── export_pdf.py                  # Vector SVG + WeasyPrint A4 PDF compiler
 ├── src/harmonization/                 # [Compat Seam] facade for auto-grading
-├── tests/                             # Unit & invariant tests
-├── docs/                              # Proposal, specs, ADRs, figures
+├── tests/                             # 67 offline unit/invariant/harness tests + 6 live TDD seam tests
+├── docs/                              # Proposal, specs, ADRs (0001-0009), figures & logo
+│   └── media/SOURCES.md               # Editorial deliverable index & naming convention
 └── .github/workflows/ci.yml           # CI
 ```
 
@@ -189,11 +212,57 @@ Raw NASA FIRMS CSVs are cached under `data/raw/` (Amazon & Mekong AOIs, 2000–2
 
 - `tests/test_harmonization_suite.py` — 7 tests covering the 5 core scientific equations.
 - `tests/test_core_coverage.py` — 7 additional tests for previously untested public seams.
+- `tests/test_ai_service_harness.py` — 22 tests verifying the Dual-System (System 1 + System 2) LangGraph harness, the Atomic / Domain Diagnostic tool tiers, Endpoint Profile resolution, citation grounding, human sign-off, the SSE event stream, and the absence of any ambient agent-tooling read.
+- `tests/test_live_tdd_seams.py` — 6 live TDD vertical slice tests (marked `live`) verifying the native-chat adapters, the reasoning trace, the symbiosis escalation, the human sign-off gate and the analysis assignment of a free-form request against a real hosted model, real NASA FIRMS CSV harmonization, and live telemetry.
 
 Run with:
 
 ```bash
-uv run python -m pytest
+uv run python -m pytest          # offline suite; no network, no provider spend
+uv run python -m pytest -m live  # live suite; calls a hosted model and spends credit
+```
+
+The live suite is excluded from the default run and from continuous integration. It runs only from the manually triggered `Live Model Tests` workflow, so provider credit is spent only on request. Configure the credentials in the environment or in the workspace `.env` file:
+
+```bash
+export SYSTEM1_API_KEY=...   # System 1 classifier
+export SYSTEM2_API_KEY=...   # System 2 deliberative layer
+```
+
+The Reflexive Layer's primary classifier is a decision model served by the
+project's own inference node. Reach it over a tunnel when the node sits on a
+private network:
+
+```bash
+ssh -f -N -o ServerAliveInterval=30 -o ServerAliveCountMax=10 \
+  -L 11434:<decision-node>:11434 <alias>
+```
+
+The tunnel is a convenience, not a requirement: when it drops, the classifier
+chain falls back to the chat model and the run records that it did.
+
+When the decision endpoint cannot be reached, the chain falls back to the chat
+model and then to the deterministic extraction, and the run records which one
+answered.
+
+The whole benchmark can also be run against a real model, which writes its
+measurements — tool rounds, clarifications, verification rejections, token
+usage — to `data/processed/ai_harness_results_live.json`:
+
+```bash
+uv run python apps/ai-service/src/ai_service/run_all_usecases.py --live
+```
+
+The harness also exposes the run as a typed event stream, encodable as Server-Sent Events for a web client:
+
+```python
+from ai_service import FlareChronosDualSystemHarness, to_sse_frames
+
+harness = FlareChronosDualSystemHarness(mode="live")
+async for frame in to_sse_frames(
+    harness.astream_use_case("UC-1.1 Why did Mekong detections jump in 2024?")
+):
+    ...  # bytes: b"event: node_completed\ndata: {...}\n\n"
 ```
 
 ---
@@ -223,8 +292,9 @@ Branches are auto-deleted after merge.
 ## Domain Glossary & ADRs
 
 - [`GLOSSARY.md`](GLOSSARY.md) / [`GLOSSARY-MAP.md`](GLOSSARY-MAP.md) — ubiquitous language (multi-context).
-- [`docs/adr/`](docs/adr/) — Architecture Decision Records (0001–0004).
+- [`docs/adr/`](docs/adr/) — Architecture Decision Records (0001–0008).
 - [`docs/agents/`](docs/agents/) — agent skills config (issue tracker, triage labels, domain docs).
+- [`docs/media/SOURCES.md`](docs/media/SOURCES.md) — editorial deliverable index, naming convention, and the rules that keep the pitch honest about the data.
 
 ---
 

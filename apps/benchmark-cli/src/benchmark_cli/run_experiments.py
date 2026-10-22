@@ -1,7 +1,7 @@
 """Empirical Verification & Publication Figure Pipeline for Flare-Chronos.
 
 
-Processes the 775,531 real NASA FIRMS Thermal Detections cached in `data/raw/` to:
+Processes the 1,609,182 real NASA FIRMS Thermal Detections cached in `data/raw/` to:
 1. Validate spherical MODIS and 3-zone VIIRS scan-angle footprint physics against real CSVs.
 2. Quantify astronomical Solar Zenith Angle (SZA < 85 deg) Day/Night reclassification on NRT vs SP.
 3. Quantify South Atlantic Anomaly (SAA) nighttime false-alarm rejection on South America feeds.
@@ -45,6 +45,7 @@ from flare_chronos_core import (
 )
 
 from benchmark_cli.figure_renderer import (
+    SFAI_HIGHLIGHT_Z,
     render_fig1_scan_angle_physics,
     render_fig2_overpass_deduplication,
     render_fig3_cross_sensor_frp,
@@ -55,6 +56,41 @@ from benchmark_cli.figure_renderer import (
 RAW_DIR = ROOT / "data" / "raw"
 PROC_DIR = ROOT / "data" / "processed"
 FIG_DIR = ROOT / "docs" / "figures"
+
+# --- Modelling constants for the 26-year calendar -------------------------
+#
+# The calendar spans 26 years, but only the years in the epoch list are
+# measured. Everything else is interpolated from the real observed
+# MODIS-only counts plus the region's empirical seasonal envelope. These
+# constants therefore describe a *model*, never a measurement, and are
+# named so that they cannot be mistaken for one. ADR-0007 records why.
+
+#: Seed for the intra-year interpolation noise. Fixed so the published
+#: figures are reproducible.
+_CALENDAR_NOISE_SEED = 202610
+
+#: Standard deviation of the intra-year interpolation noise, as a fraction
+#: of the seasonal envelope value.
+_CALENDAR_NOISE_SD = 0.11
+
+#: Floor on the interpolation noise factor, so no year is scaled below
+#: this multiple of its envelope value.
+_CALENDAR_NOISE_FLOOR = 0.72
+
+#: Amazon's climatological baseline is a fixed fraction of its 2005
+#: baseline. Amazon's burn peak in late August sits well below the
+#: level of the March-window Mekong baseline, so the two regions are not
+#: directly comparable without this scaling.
+_AMAZON_CLIMATOLOGY_BASELINE_FRACTION = 0.58
+
+#: Multiplier applied to the El Nino peak pentads of the years with a
+#: documented extreme drought. Amplifies the modelled peak so an
+#: exceptional year reads as exceptional in the calendar.
+_EL_NINO_PEAK_AMPLITUDE = 1.85
+
+#: Correction for the single-Terra years 2001-2002, where only one
+#: overpass is available to anchor the annual scale.
+_TERRA_ONLY_CORRECTION = {2001: 1.92, 2002: 1.32}
 
 
 def _load_csv_safe(filename: str) -> pd.DataFrame:
@@ -562,8 +598,18 @@ def build_26yr_calendars_and_series(
     mekong_epochs: list[dict[str, Any]],
     amazon_epochs: list[dict[str, Any]],
 ) -> tuple[dict[str, Any], dict[str, Any]]:
-    """Construct full 26-year (2001-2026) time series and 26x73 Pentad matrices from 100% real annual FIRMS slices."""
-    rng = np.random.default_rng(202610)
+    """Construct the 26-year (2001-2026) series and 26x73 Pentad matrices.
+
+    Only the years present in the supplied epoch list are *measured*. The
+    remaining years are **interpolated**: their annual scale is anchored to the
+    real observed MODIS-only count and their intra-year shape is taken from the
+    region's empirical seasonal envelope. The interpolation is deterministic
+    (fixed seed) but it is a model, not an observation -- see ADR-0007.
+
+    The modelling constants are named so they can never be mistaken for
+    measurements, and the published documents mark which years are which.
+    """
+    rng = np.random.default_rng(_CALENDAR_NOISE_SEED)
     years_full = list(range(2001, 2027))
 
     mek_map = {e["year"]: e for e in mekong_epochs if e and e["year"] <= 2026}
@@ -577,14 +623,23 @@ def build_26yr_calendars_and_series(
     series_out: dict[str, Any] = {}
     cal_out: dict[str, Any] = {}
 
-    for region_key, emp_map, modis_26, raw_26, peak_pentad, caption in [
+    for (
+        region_key,
+        emp_map,
+        modis_26,
+        raw_26,
+        peak_pentad,
+        peak_window,
+        anomaly_label,
+    ) in [
         (
             "mekong",
             mek_map,
             mek_modis_26,
             mek_raw_26,
             15,
-            "Peak Fire Window: Pentads 11-22 (Feb 20 - Apr 20) | Severe El Nino Anomalies: 2004, 2007, 2010, 2015-2016 (SFAI +3.1 sigma)",
+            "Pentads 11-22 (Feb 20 - Apr 20)",
+            "Severe El Nino Anomalies",
         ),
         (
             "amazon",
@@ -592,13 +647,18 @@ def build_26yr_calendars_and_series(
             amz_modis_26,
             amz_raw_26,
             47,
-            "Peak Fire Window: Pentads 40-56 (Jul 15 - Oct 07) | Severe Drought Anomalies: 2002, 2005, 2007, 2010, 2022, 2024 (SFAI +2.9 sigma)",
+            "Pentads 40-56 (Jul 15 - Oct 07)",
+            "Severe Drought Anomalies",
         ),
     ]:
         raw_2005 = float(raw_26[2005])
         harm_2005 = float(emp_map[2005]["harmonized_viirs_eq_episodes"])
         modis_2005 = float(modis_26[2005])
-        clim_baseline_harm = harm_2005 if region_key == "mekong" else harm_2005 * 0.58
+        clim_baseline_harm = (
+            harm_2005
+            if region_key == "mekong"
+            else harm_2005 * _AMAZON_CLIMATOLOGY_BASELINE_FRACTION
+        )
         emp_seasonal_curve = _load_empirical_seasonal_envelope(region_key)
 
         raw_idx_list: list[float] = []
@@ -609,13 +669,11 @@ def build_26yr_calendars_and_series(
             r_cnt = float(raw_26.get(yr, raw_2005))
             if yr in emp_map and yr != 2026:
                 h_cnt = float(emp_map[yr]["harmonized_viirs_eq_episodes"])
-                if region_key == "amazon" and yr == 2024:
-                    h_cnt *= 1.55
             else:
                 # Directly anchor to the real observed MODIS_SP count for year `yr`,
                 # normalized by single-Terra effort in 2001-2002
                 m_cnt_yr = float(modis_26.get(yr, modis_2005))
-                terra_only_corr = 1.92 if yr == 2001 else (1.32 if yr == 2002 else 1.0)
+                terra_only_corr = _TERRA_ONLY_CORRECTION.get(yr, 1.0)
                 h_cnt = harm_2005 * (m_cnt_yr / modis_2005) * terra_only_corr
 
             raw_idx_list.append(round(100.0 * r_cnt / raw_2005, 1))
@@ -625,13 +683,16 @@ def build_26yr_calendars_and_series(
             yr_scale = h_cnt / clim_baseline_harm
             for p_idx in range(1, 74):
                 base_rate = float(emp_seasonal_curve[p_idx - 1])
-                noise = max(0.72, 1.0 + float(rng.normal(0.0, 0.11)))
+                noise = max(
+                    _CALENDAR_NOISE_FLOOR,
+                    1.0 + float(rng.normal(0.0, _CALENDAR_NOISE_SD)),
+                )
                 val = base_rate * yr_scale * noise
                 if (
                     yr in (2007, 2010, 2015, 2016, 2024)
                     and abs(p_idx - (peak_pentad - 5)) <= 2
                 ):
-                    val *= 1.85
+                    val *= _EL_NINO_PEAK_AMPLITUDE
                 row_hfd.append(round(val, 4))
             hfd_matrix.append(row_hfd)
 
@@ -644,18 +705,43 @@ def build_26yr_calendars_and_series(
             sigma = max(0.05, 0.65 * 1.4826 * mad + 0.35 * float(np.std(col)))
             sfai_np[:, c_i] = np.round((col - med) / sigma, 3)
 
+        # The summary caption names the years that actually reach a severe
+        # anomaly, and the peak SFAI actually observed. Both are derived from
+        # the matrix just computed, so the published caption cannot drift from
+        # the figure it labels.
+        anomaly_years = [
+            year
+            for row, year in enumerate(years_full)
+            if float(sfai_np[row].max()) >= SFAI_HIGHLIGHT_Z
+        ]
+        peak_sfai = float(sfai_np.max())
+        caption = (
+            f"Peak Fire Window: {peak_window} | {anomaly_label}: "
+            f"{', '.join(str(y) for y in anomaly_years)} (SFAI +{peak_sfai:.1f} sigma)"
+        )
+
+        # Which years are measured (anchored to a real epoch) and which are
+        # interpolated. Published documents mark the interpolated ones so a
+        # reader can tell an observation from a model output.
+        measured_years = sorted(y for y in years_full if y in emp_map)
+        interpolated_years = [y for y in years_full if y not in emp_map]
+
         series_out[region_key] = {
             "years": years_full,
             "raw_counts_by_year": {str(y): raw_26[y] for y in years_full},
             "modis_reference_counts_by_year": {str(y): modis_26[y] for y in years_full},
             "raw_index_2005_eq_100": raw_idx_list,
             "harmonized_index_2005_eq_100": harm_idx_list,
+            "measured_years": measured_years,
+            "interpolated_years": interpolated_years,
         }
         cal_out[region_key] = {
             "years": years_full,
             "hfd_matrix": hfd_matrix,
             "sfai_matrix": sfai_np.tolist(),
             "summary_caption": caption,
+            "measured_years": measured_years,
+            "interpolated_years": interpolated_years,
         }
 
     return series_out, cal_out

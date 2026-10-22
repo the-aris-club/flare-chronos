@@ -18,8 +18,28 @@ import base64
 import html
 import os
 import re
+import shutil
 import subprocess
 from pathlib import Path
+
+
+def _resolve_binary(name: str) -> str:
+    """Locate a CLI dependency on ``PATH``, falling back to the Homebrew prefix.
+
+    The exporter was originally macOS-only because it hardcoded
+    ``/opt/homebrew/bin``. Resolving from ``PATH`` first keeps the macOS
+    behaviour while letting the PDF be regenerated on Linux (CI, contributors).
+    """
+    found = shutil.which(name)
+    if found:
+        return found
+    homebrew = Path("/opt/homebrew/bin") / name
+    if homebrew.exists():
+        return str(homebrew)
+    raise FileNotFoundError(
+        f"Required tool {name!r} was not found on PATH or in /opt/homebrew/bin."
+    )
+
 
 # ==============================================================================
 # 1A. CONCEPTUAL VECTOR SVG DIAGRAMS FOR STANDALONE PROPOSAL.PDF (ZERO CODEBASE REFS)
@@ -151,7 +171,7 @@ PROPOSAL_ARCH_SVG = """
   <text x="804" y="364" text-anchor="middle" font-size="8.5" font-weight="700" fill="#c2410c">τ = 95 phút → Sự kiện cháy</text>
   <text x="804" y="382" text-anchor="middle" font-size="8.5" fill="#475569">Chia hệ số nỗ lực quét</text>
   <text x="804" y="396" text-anchor="middle" font-size="8.5" font-weight="700" fill="#15803d">Ω(y, φ) ∈ [0.52, 2.10]</text>
-  <text x="804" y="410" text-anchor="middle" font-size="8.5" fill="#475569">Khử bước nhảy +1.324%</text>
+  <text x="804" y="410" text-anchor="middle" font-size="8.5" fill="#475569">Khử bước nhảy +1.324,2%</text>
 
   <line x1="196" y1="367" x2="206" y2="367" stroke="#ea580c" stroke-width="1.8" marker-end="url(#arrowOrange)"/>
   <line x1="368" y1="367" x2="378" y2="367" stroke="#ea580c" stroke-width="1.8" marker-end="url(#arrowOrange)"/>
@@ -406,7 +426,7 @@ REPORT_ARCH_SVG = """
   <text x="804" y="364" text-anchor="middle" font-size="8.5" font-weight="700" fill="#c2410c">τ = 95 phút → FireEpisode</text>
   <text x="804" y="382" text-anchor="middle" font-size="8.5" fill="#475569">Chia hệ số nỗ lực quét</text>
   <text x="804" y="396" text-anchor="middle" font-size="8.5" font-weight="700" fill="#15803d">Ω(y, φ) ∈ [0.52, 2.10]</text>
-  <text x="804" y="410" text-anchor="middle" font-size="8.5" fill="#475569">Khử bước nhảy +1.324%</text>
+  <text x="804" y="410" text-anchor="middle" font-size="8.5" fill="#475569">Khử bước nhảy +1.324,2%</text>
 
   <line x1="196" y1="367" x2="206" y2="367" stroke="#ea580c" stroke-width="1.8" marker-end="url(#arrowOrange)"/>
   <line x1="368" y1="367" x2="378" y2="367" stroke="#ea580c" stroke-width="1.8" marker-end="url(#arrowOrange)"/>
@@ -742,9 +762,12 @@ def preprocess_markdown_for_weasyprint(
         md_content = md_content.replace(f"@@CODE_BLOCK_{idx}@@", block)
 
     figures_dir = (workspace_root / "docs" / "figures").resolve()
-    md_content = md_content.replace(
-        "](docs/figures/", f"](file://{figures_dir}/"
-    ).replace("](../docs/figures/", f"](file://{figures_dir}/")
+    md_content = (
+        md_content.replace("](docs/figures/", f"](file://{figures_dir}/")
+        .replace("](../docs/figures/", f"](file://{figures_dir}/")
+        .replace('src="docs/figures/', f'src="file://{figures_dir}/')
+        .replace('src="../docs/figures/', f'src="file://{figures_dir}/')
+    )
 
     return md_content, html_injections
 
@@ -804,6 +827,23 @@ body {
     text-transform: uppercase;
     display: inline-block;
     margin-bottom: 8px;
+}
+
+.brand-logo-container {
+    text-align: center;
+    margin: 4px 0 8px 0;
+    page-break-inside: avoid;
+    page-break-after: avoid;
+}
+
+img.brand-logo-img {
+    width: 175px;
+    max-width: 175px;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+    border: none;
+    border-radius: 10px;
 }
 
 h1 {
@@ -1134,7 +1174,7 @@ def build_pdf(
 
     print("[2/4] Đang biên dịch Markdown sang cấu trúc HTML5 qua Pandoc...")
     pandoc_cmd = [
-        "/opt/homebrew/bin/pandoc",
+        _resolve_binary("pandoc"),
         str(temp_md),
         "-f",
         "markdown+gfm_auto_identifiers+fenced_divs+pipe_tables+backtick_code_blocks+raw_html-tex_math_dollars",
@@ -1147,7 +1187,7 @@ def build_pdf(
     res = subprocess.run(pandoc_cmd, capture_output=True, text=True, check=False)
     if res.returncode != 0:
         pandoc_cmd = [
-            "/opt/homebrew/bin/pandoc",
+            _resolve_binary("pandoc"),
             str(temp_md),
             "-f",
             "markdown-tex_math_dollars",
@@ -1203,7 +1243,7 @@ def build_pdf(
         f"[3/4] Đang kết xuất PDF Vector độ phân giải cao qua WeasyPrint -> {pdf_path.name}..."
     )
     weasy_cmd = [
-        "/opt/homebrew/bin/weasyprint",
+        _resolve_binary("weasyprint"),
         "--base-url",
         str(workspace_root.resolve()),
         str(temp_html),
