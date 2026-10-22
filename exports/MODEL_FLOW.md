@@ -153,7 +153,7 @@ Xác suất `urgency` **tách được**:
 
 | Hỏng ở đâu | Hệ quả | Cơ chế bảo vệ |
 | --- | --- | --- |
-| Decision endpoint không sẵn sàng | Tầng phản xạ dùng chat model | Chuỗi phân loại; ghi `triage_fallback` |
+| Decision endpoint không sẵn sàng (node tắt, tunnel SSH rớt, credit hết) | Tầng phản xạ dùng chat model; độ tin cậy chuyển từ `calibrated` sang `self_reported` | Chuỗi phân loại; ghi `triage_fallback` và `triage_confidence_source`; run vẫn hoàn tất |
 | Cả hai classifier không sẵn sàng | Dùng trích xuất tất định | Sàn của chuỗi; ghi lý do; chạy vẫn hoàn tất |
 | Mô hình suy luận dừng im lặng | Mất một lượt | Adapter hỏi lại không kèm suy luận |
 | Endpoint từ chối mức suy luận | Mất suy luận, không mất run | Hỏi lại không kèm suy luận; telemetry báo `thinking_level_supported = false` |

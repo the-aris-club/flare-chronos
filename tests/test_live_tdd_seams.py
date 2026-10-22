@@ -29,7 +29,11 @@ for pkg_src in (
         sys.path.insert(0, str(pkg_src))
 
 from ai_service.harness import FlareChronosDualSystemHarness
-from ai_service.models import load_harness_config, resolve_endpoint_profile
+from ai_service.models import (
+    load_harness_config,
+    resolve_endpoint_profile,
+    resolve_fallback_profile,
+)
 from ai_service.schemas import CognitivePath, UseCaseId
 
 
@@ -89,12 +93,29 @@ class TestLiveDualSystemSeamsTDD(unittest.TestCase):
         self.assertIn("94.2", out["final_briefing"])
 
         # The System 1 classifier answers with a structured classification and
-        # the harness records it in the run state.
+        # the harness records it in the run state. The contract is the shape and
+        # the source, not which endpoint answered: the chain falls back when
+        # the decision endpoint cannot be reached, and the run still classifies.
         classification = out["triage_classification"]
-        configured_model = resolve_endpoint_profile(
-            load_harness_config(), "system1_reflexive"
-        ).model_id
-        self.assertEqual(classification["model"], configured_model)
+        config = load_harness_config()
+        fallback_profile = resolve_fallback_profile(config, "system1_reflexive")
+        self.assertIsNotNone(fallback_profile)
+        chain_models = {
+            resolve_endpoint_profile(config, "system1_reflexive").model_id,
+            fallback_profile.model_id if fallback_profile else "",
+        }
+        self.assertIn(classification["model"], chain_models)
+        # A decision endpoint answers with a calibrated probability; a chat
+        # endpoint answers with its own estimate. The run must say which.
+        expected_source = (
+            "calibrated"
+            if classification["model"]
+            == resolve_endpoint_profile(config, "system1_reflexive").model_id
+            else "self_reported"
+        )
+        self.assertEqual(
+            out["live_telemetry"]["triage_confidence_source"], expected_source
+        )
         self.assertEqual(classification["answers"]["region"]["choice"], "mekong")
         # A single-hop lookup is not a deliberative request, so the classifier
         # routes it to the fast tier.

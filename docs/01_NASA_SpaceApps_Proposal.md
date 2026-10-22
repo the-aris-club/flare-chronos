@@ -144,6 +144,12 @@ Khu vực phía Nam lưu vực Amazon (bang Mato Grosso và Pará, Brazil) đạ
    - Khi $\text{SFAI}_{y,p} \in [-0.5, +1.0)$: Hoạt động đốt sinh khối nằm trong ngưỡng mùa vụ bình thường (*Normal Seasonal Baseline*).
    - Khi $\text{SFAI}_{y,p} \in [1.75, 2.5)$: Cảnh báo mùa cháy nghiêm trọng (*Severe Fire Period*) — huy động lực lượng tuần tra rừng.
    - Khi $\text{SFAI}_{y,p} \ge +2.5\sigma$: Kích hoạt **Báo động Khủng hoảng Cháy Ngoài Mùa Vụ (*Out-of-Season Crisis Anomaly*)**.
+4. **Tầng nhận thức kép trả lời và kiểm chứng câu hỏi vận hành** (`apps/ai-service`):
+   - **Tầng phản xạ** dùng **mô hình quyết định** để gán phân tích, định vùng và đánh giá mức khẩn cấp bằng **xác suất hiệu chuẩn**; mô hình này phục vụ **cục bộ** trên node suy luận của dự án nên **không tốn credit đám mây**, và có **chuỗi dự phòng** (decision → chat → trích xuất tất định) để một run không phụ thuộc dịch vụ nào còn sống.
+   - **Tầng báo cáo** tra cứu một bước bằng công cụ tất định, **không gọi mô hình** và **không** chạm công cụ chẩn đoán chuyên môn — thẻ dữ kiện và cảnh báo khẩn trả về trong vài mili giây.
+   - **Tầng suy luận** để mô hình **tự chọn** công cụ trong bề mặt `23` công cụ tất định và tự viết diễn giải theo ngôn ngữ của từng đối tượng.
+   - **Cổng kiểm chứng định lượng**: mọi con số trong bản thảo báo cáo được đối chiếu với **sổ cái số liệu đã xác thực**; số không có nguồn thì báo cáo bị trả về để viết lại, không bao giờ xuất bản.
+   - **Cổng phê duyệt của con người**: mọi báo cáo có hành động hiện trường **dừng run** chờ quyết định; bị từ chối thì **không phát hành** báo cáo nào, còn quyết định luôn được ghi lại.
 
 ### 6.2. Lộ Trình Mở Rộng Đa Cảm Biến Giai Đoạn 2027+ (Multi-Sensor Roadmap)
 1. **Tích hợp Vệ tinh Địa tĩnh Thế hệ mới (Geostationary 10-Minute Fire Diurnal Cycle)**:
@@ -168,4 +174,13 @@ python3 apps/benchmark-cli/src/benchmark_cli/fetch_real_firms.py
 
 # 3. Thực thi toàn bộ pipeline đồng bộ hóa trên 1.609.182 bản ghi thực tế & xuất 5 biểu đồ khoa học
 python3 apps/benchmark-cli/src/benchmark_cli/run_experiments.py
+
+# 4. Kiểm chứng tầng nhận thức kép: 67 bài kiểm thử ngoại tuyến (không gọi mô hình) + 6 bài trên mô hình thật
+python3 -m pytest -q
+python3 -m pytest -m live -q
+
+# 5. Chạy toàn bộ 20 Use Case trên mô hình thật và ghi đo lường từng Use Case
+python3 apps/ai-service/src/ai_service/run_all_usecases.py --live
 ```
+
+> **Lưu ý về hạ tầng:** tầng phản xạ ưu tiên **mô hình quyết định** phục vụ cục bộ. Khi endpoint đó không sẵn sàng, chuỗi phân loại tự lùi về mô hình chat rồi tới trích xuất tất định, và mỗi lần lùi bậc được ghi lại trong telemetry — nên bộ kiểm thử ngoại tuyến **luôn** chạy được, còn bộ kiểm thử trên mô hình thật cần khoá API của nhà cung cấp.

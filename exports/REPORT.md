@@ -201,7 +201,7 @@ flare-chronos/
 │           ├── __init__.py
 │           ├── schemas.py                        # 20 UseCaseId, SpatioTemporalQueryEntity, VerifiedFactsLedger, HarnessState
 │           ├── tools.py                          # 23 hàm @tool tất định (8 công cụ vật lý nguyên tử + 15 công cụ Use Case)
-│           ├── models.py                         # `EndpointProfile` + `NativeChatModel` (native chat, cả hai tầng) + `SystemOneChatModel` (typed-questions) + `DeterministicHarnessChatModel`
+│           ├── models.py                         # `EndpointProfile` + `SystemOneChatModel` (typed-questions — decision model của tầng phản xạ) + `NativeChatModel` (native chat — tầng suy luận & nhánh dự phòng) + `DeterministicHarnessChatModel`
 │           ├── harness.py                        # Đồ thị trạng thái 8 nút LangGraph StateGraph + ToolNode + checkpointer
 │           ├── prompts.py                        # System prompt của System 2 (theo tầng đối tượng) & prompt phân loại của System 1
 │           ├── classification.py                 # Tool `classify_request` — kênh phân loại có cấu trúc của System 1

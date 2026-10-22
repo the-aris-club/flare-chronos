@@ -126,8 +126,8 @@ flare-chronos/
 │   ├── MODEL_FLOW.md / MODEL_FLOW.pdf # Báo cáo riêng về mô hình luồng hai thế hệ
 │   └── export_pdf.py                  # Vector SVG + WeasyPrint A4 PDF compiler
 ├── src/harmonization/                 # [Compat Seam] facade for auto-grading
-├── tests/                             # 26 unit, invariant, harness & live TDD seam tests
-├── docs/                              # Proposal, specs, ADRs (0001-0007), figures & logo
+├── tests/                             # 67 offline unit/invariant/harness tests + 6 live TDD seam tests
+├── docs/                              # Proposal, specs, ADRs (0001-0008), figures & logo
 │   └── media/SOURCES.md               # Editorial deliverable index & naming convention
 └── .github/workflows/ci.yml           # CI
 ```
@@ -234,8 +234,12 @@ project's own inference node. Reach it over a tunnel when the node sits on a
 private network:
 
 ```bash
-ssh -f -N -L 11434:<decision-node>:11434 <alias>
+ssh -f -N -o ServerAliveInterval=30 -o ServerAliveCountMax=10 \
+  -L 11434:<decision-node>:11434 <alias>
 ```
+
+The tunnel is a convenience, not a requirement: when it drops, the classifier
+chain falls back to the chat model and the run records that it did.
 
 When the decision endpoint cannot be reached, the chain falls back to the chat
 model and then to the deterministic extraction, and the run records which one

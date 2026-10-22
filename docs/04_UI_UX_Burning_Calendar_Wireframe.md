@@ -106,6 +106,14 @@ Giao diện **Flare-Chronos Workbench** giải quyết triệt để hai ảo gi
   - **Đường Đỏ Cam (Raw Unharmonized Sum)**: Tổng điểm nóng thô khi cộng gộp MODIS + S-NPP + NOAA-20 + NOAA-21 (bị nhảy bậc giả tạo năm 2012, 2020, 2024).
   - **Đường Xanh Ngọc (Flare-Chronos Harmonized Series)**: Đường xu thế vật lý sau khi qua bộ hiệu chuẩn hình học H3, toán tử quan sát góc quét, khử trùng lặp quỹ đạo 95 phút và chuẩn hóa nỗ lực quan sát $\Omega(y, \phi)$.
 
+### 3.5. Bảng Báo Cáo Có Căn Cứ & Cổng Phê Duyệt (`Grounded Briefing & Human Sign-off Panel`)
+* Bảng báo cáo là **thành phần thứ năm**, nối trực tiếp với luồng sự kiện của tầng nhận thức (`GET /api/v1/analysis/stream`):
+  - **Dòng tiến trình run**: hiển thị từng sự kiện theo thứ tự — *phân loại* (vùng + mức khẩn cấp kèm **xác suất hiệu chuẩn**) → *gọi tool* → *suy luận* → *kiểm chứng* → *phê duyệt* → *báo cáo*. Người dùng thấy báo cáo **đang được kiểm chứng** chứ không phải bản văn bịa sẵn.
+  - **Diễn giải theo đối tượng**: cùng một phân tích được viết theo ngôn ngữ của **lực lượng kiểm lâm** (đi đâu, tin tưởng bao nhiêu), **lãnh đạo lâm nghiệp** (quy mô và hệ quả chính sách) hoặc **nhà khoa học khí hậu** (cơ chế và giả định).
+  - **Con số luôn bám theo nguồn**: mỗi định lượng trong báo cáo đến từ **sổ cái số liệu đã xác thực**; bảng kiểm chứng hiển thị trạng thái (`đã xác thực` / `đang sửa lại` / `không có nguồn`) và báo cáo chỉ được xuất bản khi **mọi con số đã xác thực**.
+  - **Cổng phê duyệt**: với báo cáo có hành động hiện trường, giao diện hiện nút **Duyệt / Từ chối** kèm lý do; run **dừng** cho tới khi có quyết định. Từ chối ⇒ không có báo cáo nào được phát hành, nhưng quyết định vẫn được ghi lại.
+  - **Trạng thái suy giảm hiển thị rõ**: nếu bất kỳ thành phần nào của tầng nhận thức không sẵn sàng, giao diện hiển thị đúng cấp suy giảm đang dùng, **không** trình bày như thể mọi thứ đều bình thường.
+
 ---
 
 ## 4. Minh Chứng Trực Quan Kết Xuất Thực Tế Từ Engine Python
