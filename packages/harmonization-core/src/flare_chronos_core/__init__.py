@@ -8,6 +8,8 @@ from datetime import UTC, datetime
 import pandas as pd
 
 from .calendar_engine import (
+    SFAI_CRISIS_THRESHOLD_Z,
+    SFAI_SEVERE_THRESHOLD_Z,
     build_burning_activity_calendar,
     classify_sfai_tier,
     day_of_year_to_pentad,
@@ -238,6 +240,8 @@ __all__ = [
     "DAYNIGHT_SZA_THRESHOLD_DEG",
     "H3_RES7_AREA_KM2",
     "H3_RES8_AREA_KM2",
+    "SFAI_CRISIS_THRESHOLD_Z",
+    "SFAI_SEVERE_THRESHOLD_Z",
     "AnomalyTier",
     "BurningCalendarCell",
     "CrossSensorCalibrationModel",

@@ -1,8 +1,12 @@
+<p align="center">
+  <img src="figures/flare-chronos-logo.png" alt="Flare-Chronos Official Logo" width="220" />
+</p>
+
 # 03. Kiến Trúc Hệ Thống & Đường Ống Dữ Liệu Không-Thời Gian (System Architecture & Spatio-Temporal Data Pipeline)
 
 **Dự án:** **Flare-Chronos** — *Fire Long-term Archive Resolution & Cross-sensor Harmonization for Operational Near-real-time Observation System* (*26-Year Cross-Sensor Harmonized Active Fire Intelligence & Phenology Calendar*)  
 **Cuộc thi:** 2026 NASA Space Apps Challenge — *Harmonization of MODIS and VIIRS Hot Spots*  
-**Tài liệu liên kết:** [GLOSSARY.md](file:///Users/xirothedev/workspace/flare-chronos/GLOSSARY.md) | [ADR-0001](file:///Users/xirothedev/workspace/flare-chronos/docs/adr/0001-dual-resolution-h3-fractional-allocation.md) | [ADR-0002](file:///Users/xirothedev/workspace/flare-chronos/docs/adr/0002-two-stage-physics-guided-frp-harmonization.md) | [ADR-0003](file:///Users/xirothedev/workspace/flare-chronos/docs/adr/0003-spatio-temporal-episode-deduplication-and-effort-normalization.md) | [ADR-0004](file:///Users/xirothedev/workspace/flare-chronos/docs/adr/0004-monorepo-deep-module-architecture.md)
+**Tài liệu liên kết:** [GLOSSARY.md](../GLOSSARY.md) | [ADR-0001](adr/0001-dual-resolution-h3-fractional-allocation.md) | [ADR-0002](adr/0002-two-stage-physics-guided-frp-harmonization.md) | [ADR-0003](adr/0003-spatio-temporal-episode-deduplication-and-effort-normalization.md) | [ADR-0004](adr/0004-monorepo-deep-module-architecture.md)
 
 ---
 
@@ -28,7 +32,7 @@ flare-chronos/
 │   ├── 02_Cross_Sensor_Harmonization_Spec.md     # Đặc tả toán học & vật lý cảm biến MODIS - VIIRS
 │   ├── 03_System_Architecture_and_Data_Pipeline.md
 │   ├── 04_UI_UX_Burning_Calendar_Wireframe.md    # Thiết kế giao diện & Trực quan hóa Lịch Hoạt động Cháy
-│   └── 05_Pitch_Deck_and_Video_Script.md         # Kịch bản Pitch 7 slides & Video Demo từng giây
+│   └── 05_Pitch_Deck_and_Video_Script.md         # Kịch bản Pitch Deck 7 slides & Main Submission Video từng giây
 ├── packages/
 │   ├── harmonization-core/                       # [Deep Module] Lõi vật lý & toán học thuần túy (Zero I/O)
 │   │   ├── pyproject.toml
@@ -49,7 +53,7 @@ flare-chronos/
 │       ├── pyproject.toml
 │       └── src/benchmark_cli/
 │           ├── fetch_real_firms.py               # Tiến trình tải dữ liệu lịch sử & NRT từ NASA FIRMS
-│           ├── run_experiments.py                # Thực thi kiểm chứng định lượng trên 1.609.194 điểm nóng thực tế
+│           ├── run_experiments.py                # Thực thi kiểm chứng định lượng trên 1.609.182 điểm nóng thực tế
 │           └── figure_renderer.py                # Động cơ kết xuất đồ họa khoa học độ phân giải cao
 ├── src/
 │   └── harmonization/
@@ -73,7 +77,7 @@ flowchart TB
 
     subgraph INGESTION_SEAM["2. Tầng Thu Thập & Lưu Đệm (packages/firms-ingestion)"]
         API_ADAPTER["FIRMSClient Adapter<br/>Quản lý hạn mức 5.000 tx / 10 phút & Pacing 0.35s"]
-        RAW_CACHE["Kho Lưu Trữ Dữ Liệu Thô (data/raw/*.csv & GeoParquet)<br/>1.609.194 bản ghi thực tế đã xác thực"]
+        RAW_CACHE["Kho Lưu Trữ Dữ Liệu Thô (data/raw/*.csv & GeoParquet)<br/>1.609.182 bản ghi thực tế đã xác thực"]
     end
 
     subgraph CORE_ENGINE["3. Lõi Đồng Bộ Hóa Vật Lý Liên Cảm Biến (packages/harmonization-core)"]
@@ -94,12 +98,43 @@ flowchart TB
         DECKGL["MapLibre GL + Deck.gl Footprint Layer<br/>Hiển thị Elip ΔS×ΔT, Lưới H3 Res 7/8 & Lịch Nhiệt 26 Năm"]
     end
 
+    subgraph COGNITION["6. Tầng Nhận Thức Kép (apps/ai-service — LangGraph)"]
+        S1_LAYER["Tầng Phản Xạ — Decision Model<br/>Gán phân tích + vùng + khẩn cấp (xác suất hiệu chuẩn)"]
+        FAST_TIER["Tầng Báo Cáo<br/>1 Atomic Tool · 0 mô hình · ~5 ms"]
+        S2_LAYER["Tầng Suy Luận — Chat Model<br/>Tự chọn tool trong bề mặt 23 tool"]
+        GATE["Cổng Công Cụ Tất Định & Sổ Cái Số Liệu<br/>Mọi số trong báo cáo phải có trong ledger"]
+        SIGNOFF["Cổng Phê Duyệt Của Con Người<br/>Run dừng, chờ quyết định trước khi phát hành"]
+        STREAM["Luồng Sự Kiện SSE<br/>Typed events cho mọi lần chạy"]
+    end
+
     MODIS_SP & VIIRS_SP & NRT_STREAMS & OPEN_FEEDS --> API_ADAPTER
     API_ADAPTER --> RAW_CACHE
     RAW_CACHE --> STEP1 --> STEP2 --> STEP3 --> STEP4 --> STEP5
     STEP5 --> DUCKDB --> CAL_ENGINE
     CAL_ENGINE --> FASTAPI --> DECKGL
+    CAL_ENGINE --> S1_LAYER
+    S1_LAYER --> FAST_TIER
+    S1_LAYER --> S2_LAYER
+    S2_LAYER --> GATE --> SIGNOFF --> STREAM
+    FAST_TIER --> STREAM
+    STREAM --> DECKGL
 ```
+
+#### 2.1. Tầng Nhận Thức Kép (`apps/ai-service`)
+
+Tầng nhận thức không tính toán vật lý — lõi đồng bộ hóa đã làm việc đó. Tầng nhận thức **trả lời câu hỏi vận hành** mà không để mô hình tự bịa số liệu:
+
+| Thành phần | Trách nhiệm | Bất biến |
+| :--- | :--- | :--- |
+| **Tầng phản xạ** | Gán phân tích (`1` trong `20`), định vùng, đánh giá khẩn cấp | Trả lời bằng xác suất **hiệu chuẩn**; chạy chuỗi *decision model → chat model → trích xuất tất định*; mỗi lần lùi bậc được ghi lại |
+| **Tầng báo cáo** | Tra cứu `1` bước, thẻ dữ kiện, cảnh báo khẩn | **Không** gọi mô hình · **không** chạm Domain Diagnostic Tool · **không** viết diễn giải |
+| **Tầng suy luận** | Chọn tool, suy luận nhiều bước, viết diễn giải | Bề mặt `23` tool tất định (trong tổng `24` hàm `@tool`; máy đọc CSV thô cố ý nằm ngoài registry để mô hình không chạm dữ liệu thô); mọi định lượng phải đến từ tool và được ghi vào `VerifiedFactsLedger` |
+| **Cổng công cụ tất định** | Đối chiếu từng con số trong bản thảo với sổ cái trước khi phát hành | Số không có nguồn ⇒ trả về mô hình viết lại; hết ngân sách ⇒ rơi về bộ sinh tất định |
+| **Cổng phê duyệt con người** | Run dừng chờ quyết định cho báo cáo có hành động hiện trường | Bị từ chối ⇒ **không phát hành** báo cáo nào; quyết định luôn được ghi lại |
+
+Mỗi tầng được gắn qua **Endpoint Profile** (giao thức, endpoint, model, khoá API, tuỳ chọn request) đọc từ cấu hình tường minh — **không** đọc cấu hình agent trên máy người dùng. Mô hình quyết định phục vụ tầng phản xạ chạy trên **node suy luận của chính dự án**, nên tầng này **không tốn credit đám mây** và vẫn hoạt động khi dịch vụ lưu trữ không sẵn sàng.
+
+Chi tiết mô hình luồng, số đo hiệu chuẩn và bảng chi phí: [`exports/MODEL_FLOW.md`](../exports/MODEL_FLOW.md).
 
 ---
 
@@ -244,3 +279,5 @@ Hệ thống kết nối trực tiếp với các endpoint chính thức của N
 | `GET /api/v1/calendar/matrix` | Xuất ma trận **Harmonized Burning Activity Calendar** (`26 Năm × 73 Pentads`) cho vùng AOI. | `bbox` hoặc `h3_cells[]`, `metric` (`hfd`, `hrf`, `sfai`) | Ma trận 2 chiều `26 × 73`, đường cơ sở khí hậu theo từng Pentad, danh sách các kỳ dị thường cực đoan ($\text{SFAI} \ge 2.5$). |
 | `GET /api/v1/calibration/diagnostics` | Trả về bộ tham số hiệu chuẩn chéo Aqua–SNPP trên vùng AOI và chỉ số kiểm định ($R^2, \text{RMSE}, D_{\text{KS}}$). | `region_tag` hoặc `bbox` | Tham số `CrossSensorCalibrationModel`, đường cong Quantile Mapping và phân phối xác suất tích lũy (ECDF). |
 | `GET /api/v1/export/geojson` | Xuất dữ liệu điểm nóng & elip footprint `Scan × Track` chuẩn GeoJSON để nạp vào QGIS / ArcGIS / Deck.gl. | `bbox`, `date_window`, `include_footprints=true` | `FeatureCollection` gồm các đa giác elip định hướng theo góc phương vị quỹ đạo $\alpha_{\text{track}}$. |
+| `GET /api/v1/analysis/stream` | Chạy một Use Case của tầng nhận thức kép và **phát sự kiện trực tiếp** (Server-Sent Events) khi run tiến triển: phân loại, tool, suy luận, kiểm chứng, yêu cầu phê duyệt, báo cáo cuối. | `use_case_id`, `query`, `thread_id` | Chuỗi khung SSE `event: <loại sự kiện>` + `data: <JSON>`; các loại: `run_started`, `node_completed`, `tool_result`, `reasoning`, `message`, `clarification_requested`, `sign_off_required`, `verification`, `briefing`, `run_paused`, `run_completed`, `run_failed`. |
+| `POST /api/v1/analysis/resume` | Tiếp tục một run đang **dừng chờ** (chờ phê duyệt của con người hoặc chờ làm rõ) bằng câu trả lời của con người. | `thread_id`, `approved`, `reason`, `decided_by` | Kết quả run đã tiếp tục: `sign_off_decision`, `final_briefing`, `verification_report`. |

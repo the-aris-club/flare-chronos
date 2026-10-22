@@ -28,23 +28,38 @@ COL_WARN = (230, 159, 0)  # Amber / Threshold
 COL_PURPLE = (148, 82, 165)  # NOAA-20 / 21 Accent
 COL_GRAY = (130, 140, 155)
 
+# SFAI Z-score above which a calendar cell is outlined in Figure 5.
+# This is a *display* threshold, published as "+2.2" in the figure caption,
+# and is deliberately below the operational CRISIS tier (2.5) so the
+# calendar highlights severe anomalies before a crisis alarm is raised.
+SFAI_HIGHLIGHT_Z = 2.2
+
+# Font candidates, in priority order. The macOS paths come first so the
+# published figures stay byte-comparable on the reference machine; the
+# Linux paths let any contributor regenerate them instead of silently
+# falling back to Pillow's bitmap default font.
+_FONT_CANDIDATES_BOLD = (
+    "/System/Library/Fonts/Supplemental/Arial Bold.ttf",
+    "/Library/Fonts/Arial Bold.ttf",
+    "/System/Library/Fonts/Helvetica.ttc",
+    "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf",
+    "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+    "/usr/share/fonts/truetype/ubuntu/Ubuntu-Bold.ttf",
+)
+_FONT_CANDIDATES_REGULAR = (
+    "/System/Library/Fonts/Supplemental/Arial.ttf",
+    "/Library/Fonts/Arial.ttf",
+    "/System/Library/Fonts/Helvetica.ttc",
+    "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
+    "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+    "/usr/share/fonts/truetype/ubuntu/Ubuntu-R.ttf",
+)
+
 
 def _get_font(
     size: int, bold: bool = False
 ) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
-    candidates = (
-        [
-            "/System/Library/Fonts/Supplemental/Arial Bold.ttf",
-            "/System/Library/Fonts/Helvetica.ttc",
-            "/Library/Fonts/Arial Bold.ttf",
-        ]
-        if bold
-        else [
-            "/System/Library/Fonts/Supplemental/Arial.ttf",
-            "/System/Library/Fonts/Helvetica.ttc",
-            "/Library/Fonts/Arial.ttf",
-        ]
-    )
+    candidates = _FONT_CANDIDATES_BOLD if bold else _FONT_CANDIDATES_REGULAR
     for path in candidates:
         if Path(path).exists():
             try:
@@ -665,9 +680,18 @@ def render_fig4_regime_shift_elimination(
         for pt in pts_harm:
             c.draw.ellipse([pt[0] - 5, pt[1] - 5, pt[0] + 5, pt[1] + 5], fill=COL_HARM)
 
+        # The step-bias range is derived from this panel's own raw index at the
+        # years a satellite was added, so the annotation cannot drift from the
+        # curve it labels.
+        step_years = [y for y in (2012, 2020, 2024) if y in years]
+        inflations = [raw_idx[years.index(y)] - 100.0 for y in step_years]
+        step_lo = f"{min(inflations):,.0f}"
+        step_hi = f"{max(inflations):,.0f}"
+
         c.draw.text(
             (box[0] + 125, 295),
-            "Raw Unharmonized Sum (Artificial +380% to +1,324% Sensor Step Bias!)",
+            f"Raw Unharmonized Sum (Artificial +{step_lo}% to +{step_hi}% "
+            "Sensor Step Bias!)",
             fill=COL_MODIS,
             font=c.f_annot,
         )
@@ -679,6 +703,30 @@ def render_fig4_regime_shift_elimination(
         )
 
     c.save(out_path)
+
+
+def _wrap_caption(caption: str, max_width: float) -> list[str]:
+    """Wrap a figure caption to ``max_width`` pixels.
+
+    Prefers to break on the ``" | "`` separator the captions use, so the
+    "Peak Fire Window" and "Anomalies" halves stay on their own lines, and
+    falls back to word wrapping for a half that is still too wide.
+    """
+    font = _get_font(16, bold=False)
+    lines: list[str] = []
+    for segment in caption.split(" | "):
+        words = segment.split(" ")
+        current = ""
+        for word in words:
+            candidate = f"{current} {word}".strip()
+            if current and font.getlength(candidate) > max_width:
+                lines.append(current)
+                current = word
+            else:
+                current = candidate
+        if current:
+            lines.append(current)
+    return lines
 
 
 def _heatmap_color(norm_val: float) -> tuple[int, int, int]:
@@ -735,7 +783,7 @@ def render_fig5_burning_activity_calendar(
         p = c.draw_panel_box(
             box,
             title_str,
-            "Rows: Years (2001-2026) | Columns: 73 Climatological Pentads (Jan 1 - Dec 31) | Cyan Outline = SFAI Crisis Anomaly (Z >= +2.2)",
+            f"Rows: Years (2001-2026) | Columns: 73 Climatological Pentads (Jan 1 - Dec 31) | Cyan Outline = Severe Anomaly (Z >= +{SFAI_HIGHLIGHT_Z})",
         )
         px0, py0, px1, py1 = p
         n_rows, n_cols = matrix.shape
@@ -758,7 +806,7 @@ def render_fig5_burning_activity_calendar(
                 val = matrix[r_idx, c_idx]
                 col = _heatmap_color(val / max(1e-6, vmax))
                 c.draw.rectangle([cx0, cy0, cx1, cy1], fill=col)
-                if sfai_mat[r_idx, c_idx] >= 2.15 and val >= 0.35 * vmax:
+                if sfai_mat[r_idx, c_idx] >= SFAI_HIGHLIGHT_Z and val >= 0.35 * vmax:
                     c.draw.rectangle(
                         [cx0, cy0, cx1, cy1], outline=(0, 210, 255), width=2
                     )
@@ -784,11 +832,19 @@ def render_fig5_burning_activity_calendar(
             c.draw.text((mx - 10, py1 + 12), m_lbl, fill=TEXT_DARK, font=c.f_small)
 
         c.draw.rectangle([px0, py0, px1, py1], outline=TEXT_DARK, width=2)
-        c.draw.text(
-            (px0 + 10, py1 + 42),
-            rdata["summary_caption"],
-            fill=TEXT_DARK,
-            font=c.f_small,
-        )
+        # The caption names every anomaly year, so it is wider than a single
+        # panel. Split it on the " | " separator and wrap, rather than letting
+        # it run off the edge of the figure.
+        caption_x = px0 + 10
+        caption_width = px1 - 10 - caption_x
+        for line_no, line in enumerate(
+            _wrap_caption(rdata["summary_caption"], caption_width)
+        ):
+            c.draw.text(
+                (caption_x, py1 + 42 + line_no * 24),
+                line,
+                fill=TEXT_DARK,
+                font=c.f_small,
+            )
 
     c.save(out_path)

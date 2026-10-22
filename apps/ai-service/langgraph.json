@@ -1,0 +1,11 @@
+{
+  "dependencies": [
+    ".",
+    "../../packages/harmonization-core",
+    "../../packages/firms-ingestion"
+  ],
+  "graphs": {
+    "flare_chronos_dual_system": "./src/ai_service/harness.py:build_dual_system_graph"
+  },
+  "env": "../../.env"
+}

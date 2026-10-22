@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/figures/flare-chronos-logo.png" alt="Flare-Chronos Official Logo" width="220" />
+</p>
+
 # Flare-Chronos
 
 **Full name (abbreviation note):** *Fire Long-term Archive Resolution & Cross-sensor Harmonization for Operational Near-real-time Observation System*
@@ -100,3 +104,43 @@ _Avoid_: Fire risk score, anomaly percent
 **Burning Activity Calendar**:
 The two-dimensional phenological matrix ($\text{Year} \times \text{Pentad}$) and polar seasonal clock displaying Harmonized Fire Density, Harmonized Radiative Flux, and Standardized Fire Anomaly Index for an Area of Interest.
 _Avoid_: Fire heatmap, hotspot timeline
+
+**Anomaly Tier**:
+The operational severity band of a Standardized Fire Anomaly Index value, assigned in five ordered bands — QUIET ($< -0.5$), BASELINE ($-0.5 \le \text{SFAI} < 1.0$), ELEVATED ($1.0 \le \text{SFAI} < 1.75$), SEVERE ($1.75 \le \text{SFAI} < 2.5$), and CRISIS ($\ge 2.5$). SEVERE mobilises patrols; CRISIS raises an out-of-season crisis alarm.
+_Avoid_: Risk level, alert level, severity score, crisis threshold
+
+**Measured Epoch**:
+A year for which the archive holds a real NASA FIRMS slice set — the harmonized count for that year is computed from observed detections. Eleven of the twenty-six Mekong years and nine of the twenty-six Amazon years are Measured Epochs.
+_Avoid_: Real year, hard data, ground truth, anchor year
+
+**Interpolated Year**:
+A year with no archived slice set, whose annual scale is modelled from the observed MODIS-only count and the region's empirical seasonal envelope. The interpolation is deterministic but it is a model, not an observation, and published documents mark these years as such.
+_Avoid_: Estimated year, synthetic year, filled year, projection
+
+**Severe Anomaly Outline**:
+The cyan frame drawn on a Burning Activity Calendar cell whose Standardized Fire Anomaly Index reaches the display threshold of $+2.2\sigma$. It is a rendering convention for a *display* threshold, deliberately below the CRISIS Anomaly Tier so the calendar highlights severe anomalies before a crisis alarm is raised.
+_Avoid_: Crisis anomaly, crisis outline, alarm outline, threshold
+
+### Visual Communication Artifacts
+
+**Scientific Figure**:
+A publication-grade chart rendered directly from the empirical results by `benchmark_cli.figure_renderer`, carrying measured values, units and axis labels. It is a build artifact — regenerated from code, never hand-edited, never re-labelled for narrative effect.
+_Avoid_: Chart, plot, graph, illustration
+
+**Narrative Asset**:
+A hand-authored visual — motion graphic, 3D scene, title card or map animation — produced for the pitch video to explain the science. It may depict a concept truthfully but it never substitutes for a Scientific Figure, and it is never labelled as a measurement.
+_Avoid_: Figure, chart, data viz, screenshot, mock-up
+
+**Workbench**:
+The Flare-Chronos interactive analysis surface — the Deck.gl / MapLibre application specified in `docs/04_UI_UX_Burning_Calendar_Wireframe.md` that renders the harmonization engine's output on demand rather than pre-rendering it. Specified but not yet implemented.
+_Avoid_: Dashboard, UI, app, interactive demo, live visualization
+
+**Main Submission Video**:
+The 120-second primary pitch deliverable for NASA Space Apps, cut to the shot script in `docs/05_Pitch_Deck_and_Video_Script.md` §3.1.
+_Avoid_: Demo, promo, trailer, explainer
+
+**Pitch Deck**:
+The 7-slide presentation mirroring the `docs/05_Pitch_Deck_and_Video_Script.md` §2 blueprint — the still counterpart of the Main Submission Video, carrying the same argument in slide form.
+_Avoid_: Slide deck, slides, presentation, deck
+
+Rendered deliverables, their release tags, and the naming convention they share are indexed in [`docs/media/SOURCES.md`](docs/media/SOURCES.md).

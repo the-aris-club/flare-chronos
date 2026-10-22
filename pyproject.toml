@@ -10,6 +10,10 @@ dependencies = [
     "pandas>=2.2.0",
     "requests>=2.31.0",
     "pillow>=10.0.0",
+    "langgraph>=1.0.0",
+    "langchain-core>=0.3.0",
+    "pydantic>=2.7.0",
+    "pyyaml>=6.0.0",
 ]
 
 [tool.uv.workspace]
@@ -17,16 +21,36 @@ members = [
     "packages/harmonization-core",
     "packages/firms-ingestion",
     "apps/benchmark-cli",
+    "apps/ai-service",
 ]
 
 [dependency-groups]
-dev = ["pytest>=8.0", "ruff>=0.17.0", "pyright>=1.1.0"]
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.17.0",
+    "pyright>=1.1.0",
+    "langgraph-checkpoint-sqlite>=3.1.2",
+]
 
 [tool.pytest.ini_options]
 pythonpath = [
     "packages/harmonization-core/src",
     "packages/firms-ingestion/src",
     "apps/benchmark-cli/src",
+    "apps/ai-service/src",
     "src",
 ]
 testpaths = ["tests"]
+addopts = ["-m", "not live"]
+markers = [
+    "live: calls a real hosted language model and spends provider credit; excluded from the default suite",
+]
+
+[tool.pyright]
+extraPaths = [
+    "packages/harmonization-core/src",
+    "packages/firms-ingestion/src",
+    "apps/benchmark-cli/src",
+    "apps/ai-service/src",
+    "src",
+]

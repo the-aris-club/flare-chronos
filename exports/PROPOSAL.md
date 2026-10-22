@@ -1,14 +1,18 @@
+<div align="center" class="brand-logo-container">
+  <img class="brand-logo-img" src="../docs/figures/flare-chronos-logo.png" alt="Flare-Chronos Official Logo — 26-Year Harmonized Burning Activity Calendar" width="210" />
+</div>
+
 # ĐỀ XUẤT GIẢI PHÁP KHOA HỌC & THUYẾT MINH DỰ ÁN: FLARE-CHRONOS
 
 > **Tên dự án:** **FLARE-CHRONOS** — *Hệ Thống Đồng Bộ Hóa Vật Lý Liên Cảm Biến MODIS–VIIRS & Lịch Hoạt Động Cháy Thông Minh 26 Năm (2000–2026+)*
->
+
 > **Tên viết tắt (Acronym):** *Fire Long-term Archive Resolution & Cross-sensor Harmonization for Operational Near-real-time Observation System*
->
+
 > **Thử thách (Challenge):** [Harmonization of MODIS and VIIRS Hot Spots](https://www.spaceappschallenge.org/2026/challenges/harmonization-of-modis-and-viirs-hot-spots/) — *2026 NASA Space Apps Challenge*
->
+
 > **Tác giả / Bản quyền:** **Lê Thành Trung** (`lethanhtrung.trungle@gmail.com`)
 >
-> **Cơ sở dữ liệu kiểm chứng:** **$1.609.194$ bản ghi điểm nóng vệ tinh thực tế** (`138` lát cắt phủ trọn **26 năm liên tục `2001–2026`** và **12 tháng chu kỳ mùa vụ trong năm**) từ hệ thống **NASA Earthdata LANCE FIRMS** (`MODIS Collection 6.1` và `VIIRS 375m Collection 2` trên 5 vệ tinh `Terra`, `Aqua`, `Suomi-NPP`, `NOAA-20`, `NOAA-21`).
+> **Cơ sở dữ liệu kiểm chứng:** **$1.609.182$ bản ghi điểm nóng vệ tinh thực tế** (`134` lát cắt phủ trọn **26 năm liên tục `2001–2026`** và **12 tháng chu kỳ mùa vụ trong năm**) từ hệ thống **NASA Earthdata LANCE FIRMS** (`MODIS Collection 6.1` và `VIIRS 375m Collection 2` trên 5 vệ tinh `Terra`, `Aqua`, `Suomi-NPP`, `NOAA-20`, `NOAA-21`).
 
 ---
 
@@ -29,7 +33,7 @@
 
 ### 1.1. Tuyên ngôn giá trị (Value Proposition)
 
-> **Flare-Chronos** là nền tảng khoa học và hệ thống phân tích không-thời gian giải quyết sự đứt gãy lịch sử dài 26 năm giữa thế hệ cảm biến vệ tinh **MODIS** (`Terra/Aqua`, độ phân giải tâm quét $1\text{ km}$, hoạt động `2000–2026`) đang dần kết thúc sứ mệnh và thế hệ cảm biến kế nhiệm **VIIRS** (`Suomi-NPP/NOAA-20/NOAA-21`, độ phân giải tâm quét $375\text{ m}$, hoạt động `2012–2026+`). Thay vì cộng gộp số điểm nóng thô hoặc nội suy tuyến tính đơn giản, hệ thống thiết lập **khung đồng bộ hóa vật lý – thống kê 5 giai đoạn**: (1) chuẩn hóa góc thiên đỉnh Mặt Trời $\text{SZA} < 85^\circ$, (2) ánh xạ xác suất Bayes $P_{\text{fire}} \in [0, 1]$ kết hợp lọc nhiễu hạt Nam Đại Tây Dương (SAA) và nguồn nhiệt tĩnh, (3) khôi phục hình học elip dải quét $\Delta S(\theta)\times\Delta T(\theta)$ và phân bổ diện tích lên lưới lục giác đẳng diện tích **Uber H3**, (4) hiệu chuẩn bức xạ $4\,\mu\text{m}$ hai giai đoạn trên cặp quỹ đạo đồng thời, và (5) gom cụm sự kiện cháy đa vệ tinh chuẩn hóa theo nỗ lực quan sát $\Omega(y, \phi)$. Được kiểm chứng trên **$1.609.194$ điểm nóng thực tế từ NASA LANCE FIRMS** phủ trọn 26 năm liên tục (`2001–2026`) và 12 tháng chu kỳ mùa vụ, giải pháp giảm **$79,7\%$** sai số phân phối Kolmogorov-Smirnov ($D_{\text{KS}}$ từ $0.1166$ xuống $0.0237$ trên $N=11.553$ cặp ô lưới đồng thời Aqua–SNPP) và kiến tạo **Lịch Hoạt Động Cháy Thống Nhất 26 Năm (*Harmonized Burning Activity Calendar*)** cấu trúc `26 Năm × 73 Pentads` cùng chỉ số cảnh báo sớm **$\text{SFAI Z-Score}$**, giúp lực lượng cứu hỏa, nhà quản lý lâm nghiệp và nhà khoa học khí hậu tách bạch chính xác mùa đốt phụ phẩm nông nghiệp định kỳ với khủng hoảng cháy rừng ngoài mùa vụ mà không bị đánh lừa bởi bước nhảy giả tạo $+1.351\%$ do gia tăng số lượng vệ tinh.
+> **Flare-Chronos** là nền tảng khoa học và hệ thống phân tích không-thời gian giải quyết sự đứt gãy lịch sử dài 26 năm giữa thế hệ cảm biến vệ tinh **MODIS** (`Terra/Aqua`, độ phân giải tâm quét $1\text{ km}$, hoạt động `2000–2026`) đang dần kết thúc sứ mệnh và thế hệ cảm biến kế nhiệm **VIIRS** (`Suomi-NPP/NOAA-20/NOAA-21`, độ phân giải tâm quét $375\text{ m}$, hoạt động `2012–2026+`). Thay vì cộng gộp số điểm nóng thô hoặc nội suy tuyến tính đơn giản, hệ thống thiết lập **khung đồng bộ hóa vật lý – thống kê 5 giai đoạn**: (1) chuẩn hóa góc thiên đỉnh Mặt Trời $\text{SZA} < 85^\circ$, (2) ánh xạ xác suất Bayes $P_{\text{fire}} \in [0, 1]$ kết hợp lọc nhiễu hạt Nam Đại Tây Dương (SAA) và nguồn nhiệt tĩnh, (3) khôi phục hình học elip dải quét $\Delta S(\theta)\times\Delta T(\theta)$ và phân bổ diện tích lên lưới lục giác đẳng diện tích **Uber H3**, (4) hiệu chuẩn bức xạ $4\,\mu\text{m}$ hai giai đoạn trên cặp quỹ đạo đồng thời, và (5) gom cụm sự kiện cháy đa vệ tinh chuẩn hóa theo nỗ lực quan sát $\Omega(y, \phi)$. Được kiểm chứng trên **$1.609.182$ điểm nóng thực tế từ NASA LANCE FIRMS** phủ trọn 26 năm liên tục (`2001–2026`) và 12 tháng chu kỳ mùa vụ, giải pháp giảm **$79,7\%$** sai số phân phối Kolmogorov-Smirnov ($D_{\text{KS}}$ từ $0.1166$ xuống $0.0237$ trên $N=11.553$ cặp ô lưới đồng thời Aqua–SNPP) và kiến tạo **Lịch Hoạt Động Cháy Thống Nhất 26 Năm (*Harmonized Burning Activity Calendar*)** cấu trúc `26 Năm × 73 Pentads` cùng chỉ số cảnh báo sớm **$\text{SFAI Z-Score}$**, giúp lực lượng cứu hỏa, nhà quản lý lâm nghiệp và nhà khoa học khí hậu tách bạch chính xác mùa đốt phụ phẩm nông nghiệp định kỳ với khủng hoảng cháy rừng ngoài mùa vụ mà không bị đánh lừa bởi bước nhảy giả tạo $+1.351,8\%$ do gia tăng số lượng vệ tinh.
 
 ### 1.2. Nguyên tắc thiết kế cốt lõi
 
@@ -54,7 +58,7 @@ Khi ghép nối trực tiếp chuỗi dữ liệu **MODIS Collection 6.1** (*Gig
 | **1. Hình học điểm ảnh & Hiệu ứng rìa dải quét (*Bow-Tie Distortion*)** | Độ cao $h = 705\text{ km}$, dải quét $2.330\text{ km}$ ($\theta_{\max} = \pm 55^\circ$). Điểm ảnh không gom cụm: từ **$1.00 \times 1.00\text{ km}$ ($1.00\text{ km}^2$)** ở tâm quét phình ra tới **$4.83 \times 2.01\text{ km}$ ($9.69\text{ km}^2$)** ở rìa quét (*Ichoku & Kaufman, 2005*). | Độ cao $h \approx 829\text{ km}$, dải quét $3.040\text{ km}$ ($\theta_{\max} = \pm 56.28^\circ$). Áp dụng gom cụm phần cứng 3 phân vùng (*Wolfe et al., 2013*): Zone 1 ($0^\circ\text{–}31.72^\circ$, gom $3:1$), Zone 2 ($31.72^\circ\text{–}44.86^\circ$, gom $2:1$), Zone 3 ($44.86^\circ\text{–}56.28^\circ$, giữ $1:1$). Diện tích chỉ từ **$0.131\text{ km}^2$** đến tối đa **$0.615\text{ km}^2$**. | Diện tích 1 pixel MODIS ở rìa quét lớn gấp **$74,23\text{ lần}$** 1 pixel VIIRS ở tâm quét! Coi điểm nóng là tọa độ điểm $(lat, lon)$ gây sai số định vị diện tích cháy lên tới $\pm 5\text{ km}$. |
 | **2. Độ nhạy phát hiện & Công suất bức xạ lửa ($\text{FRP}$)** | Dùng kênh 21/22 ($\lambda \approx 3.96\,\mu\text{m}$) và kênh 31 ($11\,\mu\text{m}$). Ngưỡng phát hiện tối thiểu $\text{FRP}_{\text{lim}}$ ở nadir là $3.7\text{ MW}$ (đêm) / $8.2\text{ MW}$ (ngày), nhưng tăng vọt lên **$38.6\text{–}41.2\text{ MW}$** ở góc quét $55^\circ$ (*Sofiev & Kouznetsov, 2026*). | Phát hiện vị trí trên kênh I-4 ($375\text{ m}$, $3.55\text{–}3.93\,\mu\text{m}$); nhưng do I-4 bão hòa ở $367\text{ K}$ (ngày) / $320\text{ K}$ (đêm), $\text{FRP}$ được tính lai từ kênh M13 ($750\text{ m}$, dual-gain). Ngưỡng phát hiện $\text{FRP}_{\text{lim}} \approx 0.50\text{ MW}$ (đêm) và $\le 3.4\text{ MW}$ ở rìa quét ngày. | MODIS bỏ sót $65\text{–}85\%$ đám cháy nhỏ (đốt rơm rạ, cháy thực bì dưới tán rừng). Trên $11.553$ cặp ô lưới đồng thời Aqua–SNPP, VIIRS ghi nhận số điểm cháy gấp **$3,560\times$** và tổng $\text{FRP}$ gấp **$1,371\times$** MODIS. |
 | **3. Thang đo độ tin cậy (`Confidence`) & Nhiễu SAA / Nguồn tĩnh** | Trường `confidence` là số nguyên liên tục từ **$0\%$ đến $100\%$** (dựa trên hàm thành viên ngữ cảnh của *Giglio et al., 2003*). Có trường phân loại nguồn nhiệt trong bản chuẩn khoa học. | Trường `confidence` là biến phân loại 3 mức: **`low`** (lóa nắng hoặc $\Delta T_4 < 15\text{ K}$), **`nominal`** ($\Delta T_4 > 15\text{ K}$), và **`high`** (pixel bão hòa). Chịu nhiễu hạt proton ban đêm tại **Dị thường Nam Đại Tây Dương (SAA)**. | Không thể đặt ngưỡng lọc chung giữa số nguyên $0\text{–}100$ và nhãn phân loại `l/n/h`. Tại Nam Mỹ, **$3,55\%\text{–}4,63\%$** điểm nóng VIIRS là xung nhiễu SAA ban đêm hoặc nguồn nhiệt công nghiệp tĩnh. |
-| **4. Trùng lặp quỹ đạo đa vệ tinh (*Overpass Multiplicity*)** | Terra bay qua lúc `10:30 / 22:30 MLT`; Aqua bay qua lúc `13:30 / 01:30 MLT`. | Cả 3 vệ tinh Suomi-NPP (`13:30 MLT`), NOAA-20 (`~12:40 MLT`, lệch 50 phút) và NOAA-21 (`~13:05 MLT`, lệch 25 phút) cùng quét chồng lên một đám cháy trong vòng $\sim 55\text{ phút}$ đầu giờ chiều! | Số lượng vệ tinh tăng từ $1$ (năm 2000) lên $5$ (năm 2024–2026) tạo ra **bước nhảy giả tạo $+1.351\%$** tại Tiểu vùng Mekong (`3.580` $\to$ `51.974` điểm/5 ngày năm 2019 và `50.988` điểm năm 2024) và **$+795\%$** tại Amazon! |
+| **4. Trùng lặp quỹ đạo đa vệ tinh (*Overpass Multiplicity*)** | Terra bay qua lúc `10:30 / 22:30 MLT`; Aqua bay qua lúc `13:30 / 01:30 MLT`. | Cả 3 vệ tinh Suomi-NPP (`13:30 MLT`), NOAA-20 (`~12:40 MLT`, lệch 50 phút) và NOAA-21 (`~13:05 MLT`, lệch 25 phút) cùng quét chồng lên một đám cháy trong vòng $\sim 55\text{ phút}$ đầu giờ chiều! | Số lượng vệ tinh tăng từ $1$ (năm 2000) lên $5$ (năm 2024–2026) tạo ra **bước nhảy giả tạo $+1.351,8\%$** tại Tiểu vùng Mekong (`3.580` $\to$ `51.974` điểm/5 ngày năm 2019 và `50.988` điểm năm 2024) và **$+795\%$** tại Amazon! |
 | **5. Chế độ xử lý `URT/RT/NRT` vs. `Standard Science Quality`** | Bản NRT của Aqua có thể lệch vị trí vài km trong vòng 12 giờ sau khi tàu hiệu chỉnh quỹ đạo. | Bản NRT (`1.0NRT`/`2.0NRT`) gán cờ `DayNight` theo pha quỹ đạo lên/xuống (Ascending/Descending node) thay vì góc thiên đỉnh Mặt Trời $\text{SZA} < 85^\circ$ như bản Standard. | Gây lệch phân loại Ngày/Đêm ở vùng vĩ độ trung bình – cao và vùng hoàng hôn/bình minh khi ghép nối lịch sử (`SP`) với cảnh báo sớm (`NRT`). |
 
 ---
@@ -87,7 +91,9 @@ flowchart TB
         SCHEMA["Chuẩn Hóa Thực Thể Dị Thường Nhiệt (Unified Thermal Detection Schema)"]
     end
 
-    subgraph TIER3["3. Lõi Đồng Bộ Hóa Vật Lý & Thống Kê 5 Giai Đoạn (Physics-Guided Harmonization Engine)"]
+subgraph TIER3["3.
+
+Lõi Đồng Bộ Hóa Vật Lý & Thống Kê 5 Giai Đoạn (Physics-Guided Harmonization Engine)"]
         S1["Giai Đoạn 1: Chuẩn Hóa Thiên Văn SZA(φ, λ, UTC) < 85°"]
         S2["Giai Đoạn 2: Xác Suất Bayes P(fire) & Lọc Nhiễu SAA / Nguồn Tĩnh"]
         S3["Giai Đoạn 3: Khôi Phục Elip ΔS×ΔT & Cầu Phương Lưới Kép Uber H3"]
@@ -100,7 +106,7 @@ flowchart TB
         CAL["Động Cơ Lịch Hoạt Động Cháy (26 Năm × 73 Pentads: Chỉ số HFD, HRF, SFAI Z-Score)"]
     end
 
-    subgraph TIER5["5. Không Gian Phân Tích Tương Tác & Cảnh Báo Sớm (Analytical Workbench)"]
+    subgraph TIER5["5. Không Gian Phân Tích Tương Tác & Cảnh Báo Sớm (Workbench)"]
         MAP["Bản Đồ WebGL Đa Độ Phân Giải (Elip Footprint Thực & Lưới Lục Giác H3)"]
         CLOCK["Ma Trận Lịch Cháy 26×73, Đồng Hồ Mùa Vụ Cực & Hệ Thống Báo Động SFAI"]
     end
@@ -139,7 +145,7 @@ sequenceDiagram
 Để đảm bảo khả năng truy vấn tức thời (độ trễ `< 50 ms`) trên chuỗi lịch sử 26 năm cho bất kỳ vùng địa lý nào mà không bị nghẽn bởi phép toán giao cắt đa giác hình học phức tạp, hệ thống sử dụng ba trụ cột công nghệ:
 - **Hệ thống lưới rời rạc toàn cầu đẳng diện tích Uber H3 (*Hierarchical Hexagonal Discrete Global Grid System*):** Quy chiếu toàn bộ bề mặt Trái Đất về chỉ mục số nguyên 64-bit (`UINT64`) ở hai cấp độ phân giải đồng thời: **Resolution 7** (diện tích trung bình $\bar{A}_7 = 5.161\text{ km}^2$, phục vụ phân tích khí hậu vùng và hiệu chuẩn liên cảm biến) và **Resolution 8** ($\bar{A}_8 = 0.737\text{ km}^2$, phục vụ định vị đám cháy cấp độ hiện trường và lọc nguồn nhiệt công nghiệp tĩnh).
 - **Khối dữ liệu cột hiệu năng cao (*Columnar Spatio-Temporal Cube*):** Lưu trữ ba tầng dữ liệu chuẩn hóa gồm: (1) *Điểm nóng đã hiệu chuẩn mức cảm biến*, (2) *Danh mục sự kiện cháy độc lập sau khử trùng lặp đa vệ tinh*, và (3) *Khối lập phương Lịch Hoạt Động Cháy (`H3 Cell × Year × Pentad`)* hỗ trợ xuất trực tiếp sang chuẩn mở `GeoParquet` và `GeoJSON`.
-- **Không gian trực quan hóa địa không gian tăng tốc phần cứng (*WebGL Analytical Dashboard*):** Kết xuất đồng thời hàng trăm nghìn đa giác elip dải quét $\Delta S \times \Delta T$ xoay theo góc phương vị quỹ đạo cùng lưới lục giác H3 và biểu đồ ma trận mùa vụ.
+- **Không gian trực quan hóa địa không gian tăng tốc phần cứng (*WebGL Workbench*):** Kết xuất đồng thời hàng trăm nghìn đa giác elip dải quét $\Delta S \times \Delta T$ xoay theo góc phương vị quỹ đạo cùng lưới lục giác H3 và biểu đồ ma trận mùa vụ.
 
 ---
 
@@ -181,7 +187,7 @@ Từ kích thước $(\Delta S, \Delta T)$, hệ thống giải phương trình 
 
 $$w_{p, h} = \sum_{k \in \{1..13\}: \text{H3}(\phi_k, \lambda_k) = h} \omega_k, \quad \text{với } \sum_{h \in \mathcal{H}} w_{p, h} \equiv 1.0000$$
 
-![Figure 1 - Scan Angle Footprint Physics](file:///Users/xirothedev/workspace/flare-chronos/docs/figures/fig1_scan_angle_footprint_physics.png)
+![Figure 1 - Scan Angle Footprint Physics](../docs/figures/fig1_scan_angle_footprint_physics.png)
 
 ### 4.3. Giai đoạn 2: Toán tử quan sát bức xạ $4\,\mu\text{m}$ & Hiệu chuẩn chéo hai giai đoạn (Two-Stage FRP Calibration)
 
@@ -253,9 +259,9 @@ $$\text{FRP}_{\text{lim, VIIRS}}(A_p, \text{SZA}) = \left( 0.50 + 0.65 \cdot \ma
 | **Sai số toàn phương trung bình ($\text{RMSE}$, $\text{MW/cell}$)** | $149.104\text{ MW}$ | **$145.155\text{ MW}$** | Giảm sai số bậc hai trên toàn dải |
 | **Khoảng cách phân phối Kolmogorov-Smirnov ($D_{\text{KS}}$)** | $0.1166$ | **$0.0237$** | **Giảm $79,7\%$ sai lệch phân phối xác suất!** |
 
-![Figure 3 - Cross-Sensor FRP Calibration](file:///Users/xirothedev/workspace/flare-chronos/docs/figures/fig3_cross_sensor_frp_quantile_mapping.png)
+![Figure 3 - Cross-Sensor FRP Calibration](../docs/figures/fig3_cross_sensor_frp_quantile_mapping.png)
 
-![Figure 2 - Overpass Deduplication and Effort Factor](file:///Users/xirothedev/workspace/flare-chronos/docs/figures/fig2_overpass_deduplication_sza.png)
+![Figure 2 - Overpass Deduplication and Effort Factor](../docs/figures/fig2_overpass_deduplication_sza.png)
 
 ### 5.2. Nghiên cứu điển hình 1: Tiểu vùng sông Mekong & Việt Nam (`100.0°E–109.5°E, 11.0°N–23.5°N`)
 
@@ -263,7 +269,9 @@ Khu vực Đông Nam Á lục địa (bao gồm Tây Nguyên, Tây Bắc Việt 
 
 #### Bảng đối chứng số liệu thực tế NASA FIRMS xuyên suốt 26 năm (Cửa sổ 5 ngày cao điểm giữa tháng 3: `15/03 – 19/03`)
 
-| Năm (Epoch) | Tổ Hợp Cảm Biến Hoạt Động | Điểm Nóng Thô Theo Từng Nguồn | Tổng Điểm Nóng Thô (`Raw Sum`) | Sự Kiện Cháy Độc Lập (`Fire Episodes`) | Hệ Số Nén Trùng Lặp | Nỗ Lực Quan Sát $\Omega(y, \phi)$ | Sự Kiện Chuẩn Hóa `Flare-Chronos` | Chỉ Số Thô (`2005=100`) | Chỉ Số Chuẩn Hóa (`2005=100`) |
+> **Ghi chú về năm đo và năm nội suy:** Lịch 26 năm bao gồm **11 năm có lát cắt thực tế (Measured Epoch)** — nơi số điểm được chuẩn hóa trực tiếp từ dữ liệu NASA FIRMS quan sát được — và **15 năm nội suy (Interpolated Year)**, với thang năm được mô hình hóa từ số điểm MODIS quan sát được và đường bao mùa thực nghiệm của vùng. Nội suy là **mô hình, không phải quan sát**; các bảng dưới đây chỉ liệt kê năm có lát cắt thực tế.
+
+| Năm (Epoch) | Tổ Hợp Cảm Biến Hoạt Động | Điểm Nóng Thô Theo Từng Nguồn | Tổng Điểm Nóng Thô (`Raw Sum`) | Sự Kiện Cháy Vật Lý (`Fire Episode`) | Hệ Số Nén Trùng Lặp | Nỗ Lực Quan Sát $\Omega(y, \phi)$ | Sự Kiện Chuẩn Hóa `Flare-Chronos` | Chỉ Số Thô (`2005=100`) | Chỉ Số Chuẩn Hóa (`2005=100`) |
 | :---: | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | **2005** | `MODIS` (Terra+Aqua) | MODIS: `3.580` | **3.580** | 2.132 | $1.68\times$ | $1.0084$ | **7.717,0** | `100,0` | **`100,0`** |
 | **2007** *(Hạn khô)* | `MODIS` (Terra+Aqua) | MODIS: `11.296` | **11.296** | 6.350 | $1.78\times$ | $1.0084$ | **22.984,4** | `315,5` | **`297,8`** *(Đỉnh hạn kỷ lục)* |
@@ -273,21 +281,25 @@ Khu vực Đông Nam Á lục địa (bao gồm Tây Nguyên, Tây Bắc Việt 
 | **2019** *(+NOAA-20)* | `MODIS` + `S-NPP` + `NOAA-20` | MODIS: `5.054`<br/>SNPP: `23.677`<br/>NOAA20: `23.243` | **51.974** | 25.293 | $2.06\times$ | $1.7950$ | **11.363,6** | `1.451,8` *(+1.352% ảo)* | **`147,3`** |
 | **2020** | `MODIS` + `S-NPP` + `NOAA-20` | MODIS: `4.827`<br/>SNPP: `23.050`<br/>NOAA20: `20.275` | **48.152** | 22.315 | $2.16\times$ | $1.7950$ | **10.025,6** | `1.345,0` | **`129,9`** |
 | **2023** | `MODIS` + `S-NPP` + `NOAA-20` | MODIS: `4.086`<br/>SNPP: `19.824`<br/>NOAA20: `18.959` | **42.869** | 22.280 | $1.92\times$ | $1.9362$ | **9.279,9** | `1.197,5` | **`120,3`** |
-| **2024** *(+NOAA-21)* | `MODIS` + `S-NPP` + `NOAA-20` + `NOAA-21` | MODIS: `3.446`<br/>SNPP: `16.020`<br/>NOAA20: `15.651`<br/>NOAA21: `15.871` | **50.988** | 22.557 | $2.26\times$ | $2.0975$ | **7.266,4** | **`1.424,2`** *(+1.324% ảo!)* | **`94,2`** *(Thực tế giảm 5,8%!)* |
+| **2024** *(+NOAA-21)* | `MODIS` + `S-NPP` + `NOAA-20` + `NOAA-21` | MODIS: `3.446`<br/>SNPP: `16.020`<br/>NOAA20: `15.651`<br/>NOAA21: `15.871` | **50.988** | 22.557 | $2.26\times$ | $2.0975$ | **7.266,4** | **`1.424,2`** *(+1.324,2% ảo!)* | **`94,2`** *(Thực tế giảm 5,8%!)* |
 | **2025** | `MODIS` + `S-NPP` + `NOAA-20` + `NOAA-21` | MODIS: `2.282`<br/>SNPP: `10.148`<br/>NOAA20: `9.754`<br/>NOAA21: `9.264` | **31.448** | 14.264 | $2.21\times$ | $2.0975$ | **4.594,9** | `878,4` | **`59,5`** |
 | **2026** | `MODIS` + `S-NPP` + `NOAA-20` + `NOAA-21` | MODIS: `2.016`<br/>SNPP: `11.148`<br/>NOAA20: `11.173`<br/>NOAA21: `10.315` | **34.652** | 15.746 | $2.20\times$ | $2.0975$ | **5.072,3** | `967,9` | **`56,3`** |
 
 > [!IMPORTANT]
 > **Phát hiện chấn động từ chuỗi dữ liệu thực tế 26 năm (`2001–2026`) tại Tiểu vùng sông Mekong & Việt Nam:**  
-> Vào kỳ 5 ngày giữa tháng 3/2024, cảm biến chuẩn `MODIS` ghi nhận `3.446` điểm cháy — **thấp hơn $3,7\%$** so với cùng kỳ năm 2005 (`3.580` điểm), và tiếp tục giảm xuống `2.282` điểm năm 2025 và `2.016` điểm năm 2026. Thế nhưng, do sự tham gia đồng thời của 3 vệ tinh VIIRS (`Suomi-NPP`, `NOAA-20`, `NOAA-21`), tổng số điểm nóng thô cộng gộp vọt lên tới **$51.974$ điểm năm 2019 (`+1.351,8%`) và $50.988$ điểm năm 2024 (`+1.324,2%` so với năm 2005)!** Sau khi đi qua **Flare-Chronos**, chỉ số hoạt động cháy chuẩn hóa trả về đúng giá trị thực chất là **$94,2$** năm 2024, **$59,5$** năm 2025 và **$56,3$** năm 2026, đồng thời giữ lại nguyên vẹn tín hiệu vật lý của các đợt hạn hán lịch sử **năm 2007 (`297,8`)**, **El Niño 2010 (`208,3`)** và **El Niño 2015–2016 (`270,2` – `196,0`)**.
+> Vào kỳ 5 ngày giữa tháng 3/2024, cảm biến chuẩn `MODIS` ghi nhận `3.446` điểm cháy — **thấp hơn $3,7\%$** so với cùng kỳ năm 2005 (`3.580` điểm), và tiếp tục giảm xuống `2.282` điểm năm 2025 và `2.016` điểm năm 2026.
 
-### 5.3. Nghiên cứu điển hình 2: Vành đai cháy rừng nhiệt đới Amazon, Brazil (`62.0°W–50.0°W, 14.0°S–4.0°S`)
+> Thế nhưng, do sự tham gia đồng thời của 3 vệ tinh VIIRS (`Suomi-NPP`, `NOAA-20`, `NOAA-21`), tổng số điểm nóng thô cộng gộp vọt lên tới **$51.974$ điểm năm 2019 (`+1.351,8%`) và $50.988$ điểm năm 2024 (`+1.324,2%` so với năm 2005)!** Sau khi đi qua **Flare-Chronos**, chỉ số hoạt động cháy chuẩn hóa trả về đúng giá trị thực chất là **$94,2$** năm 2024, **$59,5$** năm 2025 và **$56,3$** năm 2026, đồng thời giữ lại nguyên vẹn tín hiệu vật lý của các đợt hạn hán lịch sử **năm 2007 (`297,8`)**, **El Niño 2010 (`208,3`)** và **El Niño 2015–2016 (`270,2` – `196,0`)**.
+
+### 5.3. Nghiên cứu điển hình 2: Vành đai Rừng Nhiệt đới Amazon, Brazil (`62.0°W–50.0°W, 14.0°S–4.0°S`)
 
 Khu vực phía Nam lưu vực Amazon (bang Mato Grosso và Pará, Brazil) đại diện cho chế độ cháy rừng nhiệt đới quy mô lớn trong mùa khô Nam bán cầu (tháng 7 – tháng 10), đồng thời nằm ngay trong tâm điểm của **Dị thường Từ trường Nam Đại Tây Dương (SAA)**.
 
 #### Bảng đối chứng số liệu thực tế NASA FIRMS xuyên suốt 26 năm (Cửa sổ 5 ngày cao điểm cuối tháng 8: `20/08 – 24/08`)
 
-| Năm (Epoch) | Tổ Hợp Cảm Biến Hoạt Động | Điểm Nóng Thô Theo Từng Nguồn | Tổng Điểm Nóng Thô (`Raw Sum`) | Sự Kiện Cháy Độc Lập (`Fire Episodes`) | Hệ Số Nén Trùng Lặp | Xung Nhiễu SAA Đêm Đã Lọc | Sự Kiện Chuẩn Hóa `Flare-Chronos` | Chỉ Số Thô (`2005=100`) | Chỉ Số Chuẩn Hóa (`2005=100`) |
+> **Ghi chú về năm đo và năm nội suy:** Lịch 26 năm bao gồm **9 năm có lát cắt thực tế (Measured Epoch)** — nơi số điểm được chuẩn hóa trực tiếp từ dữ liệu NASA FIRMS quan sát được — và **17 năm nội suy (Interpolated Year)**, với thang năm được mô hình hóa từ số điểm MODIS quan sát được và đường bao mùa thực nghiệm của vùng. Nội suy là **mô hình, không phải quan sát**; các bảng dưới đây chỉ liệt kê năm có lát cắt thực tế.
+
+| Năm (Epoch) | Tổ Hợp Cảm Biến Hoạt Động | Điểm Nóng Thô Theo Từng Nguồn | Tổng Điểm Nóng Thô (`Raw Sum`) | Sự Kiện Cháy Vật Lý (`Fire Episode`) | Hệ Số Nén Trùng Lặp | Xung Nhiễu SAA Đêm Đã Lọc | Sự Kiện Chuẩn Hóa `Flare-Chronos` | Chỉ Số Thô (`2005=100`) | Chỉ Số Chuẩn Hóa (`2005=100`) |
 | :---: | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | **2005** *(Hạn lớn)* | `MODIS` (Terra+Aqua) | MODIS: `13.804` | **13.804** | 6.303 | $2.19\times$ | 626 | **16.037,4** | `100,0` | **`100,0`** |
 | **2007** *(Hạn lớn)* | `MODIS` (Terra+Aqua) | MODIS: `13.033` | **13.033** | 5.995 | $2.17\times$ | 494 | **15.253,7** | `94,4` | **`95,1`** |
@@ -295,7 +307,7 @@ Khu vực phía Nam lưu vực Amazon (bang Mato Grosso và Pará, Brazil) đạ
 | **2012** *(+S-NPP)* | `MODIS` + `S-NPP` | MODIS: `6.677`<br/>SNPP: `26.807` | **33.484** | 10.793 | $3.10\times$ | 4.145 | **7.276,3** | `242,6` *(Tăng ảo)* | **`45,4`** *(Giảm phá rừng thực tế)* |
 | **2019** *(+NOAA-20)* | `MODIS` + `S-NPP` + `NOAA-20` | MODIS: `4.770`<br/>SNPP: `16.882`<br/>NOAA20: `17.099` | **38.751** | 9.748 | $3.98\times$ | 5.024 | **4.406,6** | `280,7` | **`27,5`** |
 | **2020** | `MODIS` + `S-NPP` + `NOAA-20` | MODIS: `3.506`<br/>SNPP: `22.031`<br/>NOAA20: `20.575` | **46.112** | 11.156 | $4.13\times$ | 7.347 | **5.043,0** | `334,0` | **`31,4`** |
-| **2024** *(Hạn 2024 + 4 luồng)* | `MODIS` + `S-NPP` + `NOAA-20` + `NOAA-21` | MODIS: `8.151`<br/>SNPP: `35.647`<br/>NOAA20: `35.765`<br/>NOAA21: `32.842` | **112.405** | 22.579 | **$4.98\times$** | **18.097** | **11.343,1** | **`814,3`** *(+714% ảo!)* | **`70,7`** *(Đỉnh hạn thập kỷ 2020s)* |
+| **2024** *(Hạn 2024 + 4 luồng)* | `MODIS` + `S-NPP` + `NOAA-20` + `NOAA-21` | MODIS: `8.151`<br/>SNPP: `35.647`<br/>NOAA20: `35.765`<br/>NOAA21: `32.842` | **112.405** | 22.579 | **$4.98\times$** | **18.097** | **7.318,1** | **`814,3`** *(+714,3% ảo!)* | **`45,6`** *(đo được, không phải đỉnh 2020s)* |
 | **2025** | `MODIS` + `S-NPP` + `NOAA-20` + `NOAA-21` | MODIS: `1.420`<br/>SNPP: `6.517`<br/>NOAA20: `5.859`<br/>NOAA21: `6.233` | **20.029** | 3.179 | $6.30\times$ | 2.262 | **1.030,4** | `145,1` | **`6,4`** |
 | **2026** | `MODIS_NRT` + `S-NPP` + `NOAA-20` + `NOAA-21` | MODIS: `3.555`<br/>SNPP: `14.534`<br/>NOAA20: `13.894`<br/>NOAA21: `13.406` | **45.389** | 7.009 | $6.48\times$ | 6.174 | **2.271,7** | `328,8` | **`25,8`** |
 
@@ -303,7 +315,7 @@ Khu vực phía Nam lưu vực Amazon (bang Mato Grosso và Pará, Brazil) đạ
 
 Để chứng minh khả năng tách bạch chính xác chu kỳ mùa cháy đặc thù của từng vùng sinh thái trên ma trận `26 Năm × 73 Pentads`, hệ thống đã thu thập đầy đủ **12 tháng trong năm 2024** từ cảm biến chuẩn `VIIRS_SNPP_SP` (cửa sổ 5 ngày mỗi tháng) trên cả hai bán cầu:
 
-| Tháng Trong Năm (2024) | Pentad Đại Diện | Tiểu Vùng Sông Mekong & Việt Nam (`VIIRS_SNPP_SP`, 5 ngày) | Vành Đai Rừng Nhiệt Đới Amazon (`VIIRS_SNPP_SP`, 5 ngày) | Trạng Thái Sinh Thái Đối Nghịch Giữa Hai Bán Cầu |
+| Tháng Trong Năm (2024) | Pentad Đại Diện | Tiểu Vùng Sông Mekong & Việt Nam (`VIIRS_SNPP_SP`, 5 ngày) | Vành đai Rừng Nhiệt đới Amazon (`VIIRS_SNPP_SP`, 5 ngày) | Trạng Thái Sinh Thái Đối Nghịch Giữa Hai Bán Cầu |
 | :---: | :---: | :---: | :---: | :--- |
 | **Tháng 01 (`15/01`)** | `P03` | `11.952` điểm nóng | `856` điểm nóng | Khởi đầu mùa khô Đông Dương / Mùa mưa Amazon |
 | **Tháng 02 (`05/02 – 20/02`)** | `P08 – P11` | `10.471` $\to$ `14.941` điểm nóng | `290` điểm nóng | Tăng tốc đốt thực bì & rơm rạ tại Mekong |
@@ -318,15 +330,15 @@ Khu vực phía Nam lưu vực Amazon (bang Mato Grosso và Pará, Brazil) đạ
 | **Tháng 11 (`15/11`)** | `P64` | `1.212` điểm nóng | `456` điểm nóng | Kết thúc mùa mưa tại Đông Nam Á lục địa |
 | **Tháng 12 (`15/12`)** | `P70` | `2.505` điểm nóng | `112` điểm nóng | Chuẩn bị bước vào chu kỳ đốt sinh khối năm mới |
 
-![Figure 4 - Regime Shift Elimination](file:///Users/xirothedev/workspace/flare-chronos/docs/figures/fig4_regime_shift_elimination.png)
+![Figure 4 - Regime Shift Elimination](../docs/figures/fig4_regime_shift_elimination.png)
 
-![Figure 5 - Harmonized Burning Activity Calendar](file:///Users/xirothedev/workspace/flare-chronos/docs/figures/fig5_harmonized_burning_calendar.png)
+![Figure 5 - Harmonized Burning Activity Calendar](../docs/figures/fig5_harmonized_burning_calendar.png)
 
 ---
 
 ## 6. Thiết kế giao diện Lịch Hoạt Động Cháy & Quy trình vận hành (UI/UX & Operational Workflow)
 
-### 6.1. Bố cục không gian phân tích đồng bộ 4 khung nhìn (Four-Pane Analytical Workbench)
+### 6.1. Bố cục không gian phân tích đồng bộ 4 khung nhìn (Four-Pane Workbench)
 
 ```text
 +----------------------------------------------------------------------------------------------------------------------+
@@ -336,8 +348,8 @@ Khu vực phía Nam lưu vực Amazon (bang Mato Grosso và Pará, Brazil) đạ
 |                                                       |  [BẢNG ĐIỀU KHIỂN ĐỐI CHỨNG TRƯỚC / SAU ĐỒNG BỘ HÓA]         |
 |   [KHUNG BẢN ĐỒ KHÔNG GIAN ĐA TẦNG - WEBGL FOOTPRINT] |  +----------------+----------------+----------------+        |
 |                                                       |  | Raw Detections | Fire Episodes  | SFAI Z-Score   |        |
-|      _.-""""-._      (Elip MODIS Rìa Quét: 4.8x2.0km) |  |  50,988 (Thô)  |  18,412 (Chuẩn)|  +2.84 sigma   |        |
-|    .'          '.     o o (Cụm VIIRS 375m bên trong)  |  |  (+1,324% ảo)  |  (Khử trùng lặp|  [SEVERE RISK] |        |
+|      _.-""""-._      (Elip MODIS Rìa Quét: 4.8x2.0km) |  |  43,342 (Thô)  |  22,573 (Chuẩn)|  +2.64 sigma   |        |
+|    .'          '.     o o (Cụm VIIRS 375m bên trong)  |  | (+1.110,7% ảo) |  (Khử trùng lặp|  [SEVERE RISK] |        |
 |   /   o  o  o    \                                    |  +----------------+----------------+----------------+        |
 |  |       o        |   / \ / \ / \ (Lưới Lục Giác     |                                                              |
 |   \              /   | H3| H3| H3|  Đẳng Diện Tích)   |  [ĐỒNG HỒ MÙA VỤ CHÁY - POLAR PHENOLOGY CLOCK (365 NGÀY)]    |
@@ -347,12 +359,12 @@ Khu vực phía Nam lưu vực Amazon (bang Mato Grosso và Pará, Brazil) đạ
 |   Chú giải Lớp Bản Đồ:                                |           /      .'     '.      \   Pentad 11 - 22           |
 |   [x] Elip Footprint Thực (Scan x Track, góc alpha)   |          |      |  2016   |      |  (20/02 - 20/04)          |
 |   [x] Lưới H3 Res 7/8 (Màu theo HRF MW/km^2)          |           \      '. ___ .'      / * Cảnh báo sớm ngoài mùa:  |
-|   [x] Tâm Sự Kiện Cháy Độc Lập (Fire Episode)         |             .     ' - - '     .     Pentad 8 (Giữa tháng 2)  |
+|   [x] Tâm Sự Kiện Cháy Vật Lý (Fire Episode)         |             .     ' - - '     .     Pentad 8 (Giữa tháng 2)  |
 |   [x] Nguồn Nhiệt Tĩnh Đã Tách (Nhà máy/Khí đồng hành)|               ' - . _ _ . - '                                |
 |                                                       |              Pentad 37 (02/07)                               |
 +-------------------------------------------------------+--------------------------------------------------------------+
 | [MA TRẬN LỊCH HOẠT ĐỘNG CHÁY THỐNG NHẤT 26 NĂM - HARMONIZED BURNING ACTIVITY CALENDAR (26 YEARS x 73 PENTADS)]       |
-| Chỉ số hiển thị: (•) HFD (Sự kiện/100km2/ngày)   ( ) HRF (MW/km2)   ( ) SFAI Anomaly Z-Score   [x] Viền xanh Crisis  |
+| Chỉ số hiển thị: (•) HFD (Sự kiện/100km2/ngày)   ( ) HRF (MW/km2)   ( ) SFAI Anomaly Z-Score   [x] Viền xanh Severe Anomaly  |
 |                                                                                                                      |
 | Năm   | Jan (P01-06) | Feb (P07-12) | Mar (P13-18) | Apr (P19-24) | May-Jul (P25-42) | Aug-Oct (P43-60) | Nov-Dec    |
 | ------+--------------+--------------+--------------+--------------+------------------+------------------+----------- |
@@ -376,6 +388,17 @@ Khu vực phía Nam lưu vực Amazon (bang Mato Grosso và Pará, Brazil) đạ
    - Khi chỉ số $\text{SFAI}_{y,p} \in [+1.75, +2.50)$: Kích hoạt **Cảnh báo Mùa cháy Nghiêm trọng (*Severe Fire Period*)** — tăng cường tuần tra kiểm lâm.
    - Khi chỉ số $\text{SFAI}_{y,p} \ge +2.50\sigma$ (đặc biệt khi xuất hiện sớm vào Pentad 7–10 như năm El Niño 2010 và 2016): Kích hoạt **Báo động Đỏ Khủng hoảng Cháy Ngoài Mùa Vụ (*Out-of-Season Crisis Anomaly*)**.
 
+### 6.3. Tầng hỗ trợ ra quyết định nhận thức kép có kiểm chứng số học (Verified Dual-System Cognitive Decision-Support)
+
+Để chuyển hóa ma trận **Lịch Hoạt Động Cháy 26 Năm × 73 Pentads** thành các bản tin điều hành và phân tích khoa học tức thời mà **tuyệt đối không phát sinh sai số tính nhẩm**, **Flare-Chronos** tích hợp kiến trúc hỗ trợ ra quyết định **Nhận thức Kép (*Dual-Process Cognitive Architecture*: System 1 $\leftrightarrow$ System 2)**:
+
+1. **Tầng Phản xạ Nhanh (*System 1 Reflexive Layer — Structured Decision Engine*):** Sử dụng động cơ quyết định có cấu trúc theo ba kiểu câu hỏi nguyên thủy (`noul` cho mệnh đề nhị phân, `choice` cho phân loại miền không-thời gian, và `score` cho thang đo mức độ khẩn cấp) để phân loại ý định truy vấn, trích xuất tham số không-thời gian (vùng sinh thái, giai đoạn năm, chỉ số Pentad, độ phân giải lưới lục giác), phát cảnh báo khẩn cấp thời gian thực khi $\text{SFAI}_{y,p} \ge +2.50\sigma$, và biên dịch kết quả theo đúng ngôn ngữ chuyên môn của ba nhóm đối tượng thụ hưởng (*Lực lượng Kiểm lâm Thực địa*, *Lãnh đạo Quản lý Lâm nghiệp*, và *Nhà Khoa học Khí hậu*). Động cơ quyết định trả **xác suất hiệu chuẩn**, và **ngưỡng định tuyến được hiệu chỉnh bằng phép đo** trên chính các yêu cầu của dự án chứ không phải bằng giá trị mặc định. Tầng này chạy theo **chuỗi dự phòng** (mô hình quyết định → mô hình chat → trích xuất tất định theo văn bản) nên một lần chạy không phụ thuộc vào việc bất kỳ dịch vụ nào còn sống, và mỗi lần lùi bậc đều được ghi lại để không báo cáo nào tự nhận đã có phân loại khi thực tế không có. Tầng phản xạ còn **gán phân tích** mà yêu cầu cần — một trong hai mươi phân tích của hệ thống — và câu trả lời đó quyết định tầng nhận thức, bề mặt công cụ, khoá cache và tiêu đề báo cáo.
+2. **Tầng Suy luận Sâu (*System 2 Deliberative Layer — Multi-Step Causal Attribution*):** Thực thi 15 kịch bản phân tích nhân quả đa bước — bao gồm phân rã bước nhảy dị thường giữa hiệu ứng tăng vệ tinh và biến đổi cháy thực chất, giám định bất đồng chéo giữa MODIS và VIIRS ở rìa dải quét, mô phỏng phản thực tế kịch bản ngừng hoạt động của vệ tinh `Terra`, `Aqua` và `Suomi-NPP` sau năm 2026, kiểm toán đường cơ sở phát thải carbon **REDD+ MRV**, và đánh giá hiệu quả chính sách cấm đốt phụ phẩm nông nghiệp.
+3. **Cổng Công cụ Vật lý Tất định, Cơ chế Leo thang Cộng sinh & Sổ cái Số liệu Đã Xác thực (*Deterministic Physics Gate, Dynamic Escalation & Verified Facts Ledger*):** Mô hình ngôn ngữ hoàn toàn không được phép tự tính nhẩm các phương trình hình học cầu hay thống kê khí hậu. Mọi phép tính đều được ủy thác cho 24 toán tử vật lý tất định và ghi nhận vào sổ cái số liệu theo từng phiên. Khi Tầng Phản xạ Nhanh phát hiện độ lệch giữa chỉ số thô và chỉ số chuẩn hóa $\ge 200\%$ (như mức chênh lệch $+1.330,0\%$ tại Mekong năm 2024) hoặc xuất hiện nhiễu hạt ban đêm vùng SAA, hệ thống tự động leo thang sang Tầng Suy luận Sâu; đồng thời bộ kiểm chứng độc lập đối chiếu từng con số trong dự thảo báo cáo với sổ cái trước khi xuất bản, tự động yêu cầu tổng hợp lại nếu phát hiện bất kỳ con số suy diễn nào chưa qua kiểm chứng.
+4. **Cổng Phê Duyệt Của Con Người & Luồng Sự Kiện Mở (*Human Sign-off Gate & Open Event Stream*):** Bất kỳ báo cáo nào **authorize hành động hiện trường** (cảnh báo khẩn cho lực lượng kiểm lâm, điều phối chiến thuật) đều **dừng run** tại cổng phê duyệt và chờ quyết định của con người. Quyết định **từ chối** thì **không có báo cáo nào được phát hành**, còn quyết định **duyệt** thì báo cáo mới được phát hành kèm dấu vết người quyết định. Toàn bộ quá trình được phát ra thành **luồng sự kiện có kiểu** (Server-Sent Events: phân loại → gọi tool → suy luận → kiểm chứng → phê duyệt → báo cáo) để giao diện hiển thị **ngay khi báo cáo đang được kiểm chứng** chứ không phải một bản văn bịa sẵn.
+5. **Bằng Chứng Kiểm Chứng Trên Mô Hình Thật (*Live Empirical Evidence*):** Toàn bộ `20` Use Case được chạy trên **mô hình thật** và **mọi Use Case đều vượt qua cổng kiểm chứng định lượng** — `20/20` đạt, `0` số liệu thiếu nguồn, mỗi Use Case chỉ dùng **đúng một vòng gọi công cụ**, `0` lần tự sửa lỗi, `0` yêu cầu làm rõ, và `0` lần phải lùi bậc phân loại. Bộ kiểm thử gồm `67` bài **ngoại tuyến** (không gọi mô hình) và `6` bài **trên mô hình thật**; CI **không bao giờ** tiêu tốn credit mô hình, và bộ kiểm thử trên mô hình thật chỉ chạy từ workflow thủ công.
+6. **Sản Phẩm Chạy Được Để Xem Một Run Diễn Ra (*Runnable Demo*):** Một máy chủ nhỏ chỉ dùng thư viện chuẩn phục vụ đúng hai endpoint đã công bố ở §5.2 của tài liệu kiến trúc — `GET /api/v1/analysis/stream` (chạy một Use Case và phát sự kiện theo thời gian thực) và `POST /api/v1/analysis/resume` (trả lời một run đang dừng chờ con người) — kèm một trang demo hiện từng bước: **phân loại → gọi tool → suy luận → kiểm chứng định lượng → phê duyệt của con người → báo cáo**. Chế độ mặc định dùng harness tất định nên demo **chạy được ở bất kỳ đâu, không cần khoá API**, và `--mode live` dùng mô hình thật. Một người đánh giá có thể **xem một run diễn ra** thay vì chỉ đọc mô tả.
+
 ---
 
 ## 7. Đánh giá tác động, Giới hạn vật lý & Lộ trình mở rộng 2027+ (Impact, Limitations & Roadmap)
@@ -384,10 +407,10 @@ Khu vực phía Nam lưu vực Amazon (bang Mato Grosso và Pará, Brazil) đạ
 
 | Tiêu Chí Đánh Giá | Trọng Tâm Của Hội Đồng Giám Khảo | Giá Trị Đóng Góp Cốt Lõi Của **Flare-Chronos** |
 | :--- | :--- | :--- |
-| **1. Validity (Tính Xác Thực Khoa Học)** | Giải pháp có dựa trên định luật vật lý cảm biến và toán học vững chắc không? Có số liệu kiểm chứng thực tế không? | Kiểm chứng trực tiếp trên **$1.609.194$ điểm nóng thực tế từ NASA LANCE FIRMS** phủ trọn 26 năm liên tục (`2001–2026`); giải phương trình cầu dải quét $\Delta S(\theta)\times\Delta T(\theta)$, toán tử quan sát bức xạ $4\,\mu\text{m}$ và hiệu chuẩn trên **$11.553$ cặp ô lưới đồng thời Aqua–SNPP**, giảm **$79,7\%$** sai số phân phối Kolmogorov-Smirnov ($D_{\text{KS}}$ từ $0.1166 \to 0.0237$, $R^2$ đạt $0.7470$). |
+| **1. Validity (Tính Xác Thực Khoa Học)** | Giải pháp có dựa trên định luật vật lý cảm biến và toán học vững chắc không? Có số liệu kiểm chứng thực tế không? | Kiểm chứng trực tiếp trên **$1.609.182$ điểm nóng thực tế từ NASA LANCE FIRMS** phủ trọn 26 năm liên tục (`2001–2026`); giải phương trình cầu dải quét $\Delta S(\theta)\times\Delta T(\theta)$, toán tử quan sát bức xạ $4\,\mu\text{m}$ và hiệu chuẩn trên **$11.553$ cặp ô lưới đồng thời Aqua–SNPP**, giảm **$79,7\%$** sai số phân phối Kolmogorov-Smirnov ($D_{\text{KS}}$ từ $0.1166 \to 0.0237$, $R^2$ đạt $0.7470$). | **Bằng chứng bổ sung từ tầng nhận thức kép:** chạy toàn bộ `20` Use Case trên mô hình thật → **20/20 vượt qua cổng kiểm chứng định lượng**, `0` số liệu thiếu nguồn, `0` lần tự sửa lỗi; `67` bài kiểm thử ngoại tuyến + `6` bài trên mô hình thật, trong đó có **11 lỗi của chính bộ kiểm chứng** được phát hiện và sửa nhờ vòng lặp chạy trên mô hình thật.
 | **2. Relevance (Tính Bám Sát Đề Bài)** | Có giải quyết trọn vẹn bài toán bất đồng nhất giữa MODIS và VIIRS để dựng ra *Burning Activity Calendar* không? | Giải quyết toàn diện cả **5 rào cản liên cảm biến** (Footprint Bow-tie, Độ nhạy FRP, Thang Confidence & nhiễu SAA, Trùng lặp quỹ đạo 5 vệ tinh, Cờ NRT/Standard SZA) để xuất ra ma trận **26 Năm × 73 Pentads** cùng chỉ số dị thường **$\text{SFAI Z-Score}$**. |
 | **3. Creativity (Tính Sáng Tạo Đột Phá)** | Phương pháp tiếp cận có mới mẻ, vượt qua cách gom ô lưới kinh-vĩ độ hay nhân hệ số tuyến tính đơn giản không? | Thay thế điểm tròn vô hướng bằng **Phép phân bổ trọng số diện tích elip định hướng lên lưới lục giác kép Uber H3 (Res 7 & Res 8)** kết hợp **Khử trùng lặp sự kiện cháy không-thời gian ($\tau = 95\text{ phút}$)** và chuẩn hóa theo **Nỗ lực quan sát hiệu dụng $\Omega(y, \phi)$**. |
-| **4. Impact (Tác Động Thực Tiễn)** | Giải pháp giúp ích gì cho lực lượng cứu hỏa, quản lý rừng và nghiên cứu biến đổi khí hậu khi MODIS và Suomi-NPP ngừng hoạt động? | Ngăn chặn sai lầm chính sách do "bẫy nhảy bậc giả tạo $+1.324\%$" khi gộp thô đa cảm biến; tách bạch chính xác mùa đốt phụ phẩm nông nghiệp định kỳ với khủng hoảng cháy rừng El Niño ngoài mùa vụ tại **Việt Nam / Tiểu vùng Mekong** và **Rừng Amazon**. |
+| **4. Impact (Tác Động Thực Tiễn)** | Giải pháp giúp ích gì cho lực lượng cứu hỏa, quản lý rừng và nghiên cứu biến đổi khí hậu khi MODIS và Suomi-NPP ngừng hoạt động? | Ngăn chặn sai lầm chính sách do "bẫy nhảy bậc giả tạo $+1.324,2\%$" khi gộp thô đa cảm biến; tách bạch chính xác mùa đốt phụ phẩm nông nghiệp định kỳ với khủng hoảng cháy rừng El Niño ngoài mùa vụ tại **Việt Nam / Tiểu vùng Mekong** và **Rừng Amazon**. | **Bổ sung từ tầng nhận thức kép:** báo cáo chỉ được **phát hành sau khi con người phê duyệt** đối với mọi hành động hiện trường (quyết định từ chối ⇒ không phát hành gì); tầng báo cáo trả thẻ dữ kiện và cảnh báo khẩn trong **vài mili giây, không gọi mô hình** ⇒ vẫn dùng được khi nhà cung cấp mô hình không sẵn sàng.
 | **5. Presentation (Trình Bày & Trực Quan Hóa)** | Câu chuyện có súc tích, dễ hiểu và có sản phẩm thực thi rõ ràng không? | Bộ 5 biểu đồ khoa học chuẩn xuất bản cùng giao diện đồng bộ 4 khung nhìn (Elip Footprint + Lưới H3 + Ma trận 26×73 Pentad + Đồng hồ mùa vụ cực). |
 
 ### 7.2. Giới hạn vật lý và biện pháp quản trị rủi ro (Limitations & Risk Mitigation)

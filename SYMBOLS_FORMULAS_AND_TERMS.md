@@ -357,6 +357,10 @@ Trích từ `GLOSSARY.md` (root). Mỗi thuật ngữ kèm định nghĩa và t�
 - **HRF**: Mật độ thông lượng bức xạ (MW/km²). Tránh: Calibrated FRP, total heat flux.
 - **SFAI**: Z-score robust theo pentad. Tránh: Fire risk score, anomaly percent.
 - **Burning Activity Calendar**: Ma trận Year × Pentad. Tránh: Fire heatmap, hotspot timeline.
+- **Anomaly Tier**: Dải mức nguy hiểm vận hành của SFAI, gồm 5 bậc có thứ tự — QUIET ($< -0.5$), BASELINE ($-0.5 \le \text{SFAI} < 1.0$), ELEVATED ($1.0 \le \text{SFAI} < 1.75$), SEVERE ($1.75 \le \text{SFAI} < 2.5$), CRISIS ($\ge 2.5$). SEVERE huy động tuần tra; CRISIS kích hoạt báo động khủng hoảng ngoài mùa vụ. Tránh: Risk level, alert level, severity score, crisis threshold.
+- **Measured Epoch**: Năm có bộ lát cắt FIRMS thực tế trong kho lưu trữ — số điểm chuẩn hóa của năm đó được tính từ các phát hiện quan sát được. 11/26 năm của Mekong và 9/26 năm của Amazon là Measured Epoch. Tránh: Real year, hard data, ground truth, anchor year.
+- **Interpolated Year**: Năm không có bộ lát cắt, thang năm được mô hình hóa từ số điểm MODIS quan sát được và đường bao mùa thực nghiệm của vùng. Nội suy mang tính tất định nhưng là mô hình, không phải quan sát, và tài liệu công bố đánh dấu các năm này. Tránh: Estimated year, synthetic year, filled year, projection.
+- **Severe Anomaly Outline**: Khung viền xanh lơ vẽ trên ô Lịch Hoạt Động Cháy khi SFAI đạt ngưỡng hiển thị $+2.2\sigma$. Đây là quy ước *hiển thị*, cố ý thấp hơn Anomaly Tier CRISIS, để lịch làm nổi bật dị thường nghiêm trọng *trước khi* báo động khủng hoảng được kích hoạt. Tránh: Crisis anomaly, crisis outline, alarm outline, threshold.
 
 ### 5.4. Chế độ xử lý & vệ tinh
 
@@ -372,6 +376,14 @@ Trích từ `GLOSSARY.md` (root). Mỗi thuật ngữ kèm định nghĩa và t�
 - **Facade**: `FIRMSHarmonizer` compat layer.
 - **Bounded in-memory map**: Map có MAX_ENTRIES + TTL + FIFO.
 - **Encapsulated resource component**: Component React quản lý object URL.
+
+### 5.6. Nghệ thuật & sản phẩm truyền thông
+
+- **Scientific Figure**: Biểu đồ cấp xuất bản dựng trực tiếp từ kết quả thực nghiệm bởi `benchmark_cli.figure_renderer`, mang giá trị đo, đơn vị và nhãn trục. Là sản phẩm build — tái tạo từ code, không bao giờ sửa tay, không bao giờ dán nhãn lại để phục vụ kể chuyện. Tránh: Chart, plot, graph, illustration.
+- **Narrative Asset**: Hình ảnh dựng tay — motion graphic, cảnh 3D, title card hoặc animation bản đồ — làm cho video pitch dễ hiểu. Có thể mô tả khái niệm một cách trung thực nhưng không bao giờ thay thế Scientific Figure, và không bao giờ được dán nhãn là một phép đo. Tránh: Figure, chart, data viz, screenshot, mock-up.
+- **Workbench**: Bề mặt phân tích tương tác Flare-Chronos — ứng dụng Deck.gl / MapLibre được đặc tả trong `docs/04_UI_UX_Burning_Calendar_Wireframe.md`, kết xuất output của engine đồng bộ hóa theo yêu cầu thay vì dựng sẵn. Đã đặc tả, chưa hiện thực. Tránh: Dashboard, UI, app, interactive demo, live visualization.
+- **Main Submission Video**: Sản phẩm pitch chính 120 giây cho NASA Space Apps, cắt theo kịch bản từng giây tại `docs/05_Pitch_Deck_and_Video_Script.md` §3.1. Tránh: Demo, promo, trailer, explainer.
+- **Pitch Deck**: Bộ 7 slide đối chiếu với blueprint §2 của `docs/05_Pitch_Deck_and_Video_Script.md` — phần tĩnh đối ứng của Main Submission Video, truyền tải cùng một lập luận dưới dạng slide. Tránh: Slide deck, slides, presentation, deck.
 
 ---
 
@@ -430,14 +442,18 @@ Trích từ `GLOSSARY.md` (root). Mỗi thuật ngữ kèm định nghĩa và t�
 ## 8. Ghi Chú Về Tính Nhất Quán Dữ Liệu (Data Consistency Notes)
 
 Sau audit, các số liệu sau đã được hiệu chỉnh cho khớp với `data/processed/empirical_results.json`:
-- Tổng detections: **1,609,194** (không phải 1,609,182).
-- Số lát cắt CSV: **138** (không phải 134).
+- Tổng detections: **1,609,182** (không phải 1,609,194).
+- Số lát cắt CSV: **134** (không phải 138).
 - Thời gian test: **0.004s** (không phải 0.003s).
 - `n_pairs`: **11,553**; R²: **0.7330 → 0.7470**; KS: **0.1166 → 0.0237**; count ratio: **3.56×**; FRP ratio: **1.371×**.
 - MODIS nadir area: **1.000 km²**; edge (55°): **9.688 km²**.
 - VIIRS nadir area: **0.1305 km²**; edge (56.28°): **0.615 km²**.
 
-Các claim trong `PROPOSAL.md`/`REPORT.md` đã được cập nhật tương ứng. Các giá trị tổng hợp (synthetic) trong calendar 26 năm (noise rng, multiplier 1.55/1.85, điền VIIRS thiếu bằng ratio) **chưa** được hiệu chỉnh — xem Q4 trong handoff.
+Các claim trong `PROPOSAL.md`/`REPORT.md` đã được cập nhật tương ứng. Lịch 26 năm gồm **11/26 năm đo được (Measured Epoch)** cho Mekong và **9/26 năm** cho Amazon; các năm còn lại là **năm nội suy (Interpolated Year)** — thang năm được mô hình hóa từ số điểm MODIS quan sát được và đường bao mùa thực nghiệm của vùng (nhiễu rng có seed cố định, hệ số đỉnh El Niño `1.85`, nền khí hậu Amazon `0.58`, hiệu chỉnh single-Terra `1.92/1.32`). Nội suy là **mô hình, không phải quan sát**, và tài liệu đánh dấu rõ. Xem `docs/adr/0009-measured-epochs-and-interpolated-years.md`.
+
+Hệ số `1.55` từng nhân vào chỉ số chuẩn hóa của Amazon 2024 *sau* khi chuẩn hóa mà không có giải thích nào được ghi lại; nó là lý do duy nhất khiến năm đó hiện ra là một năm dữ dội. Đã loại bỏ — chỉ số công bố là **45,6**, và bộ kiểm thử chặn việc nhân hệ số lên một năm đo được.
+
+Đồng thời, `docs/01_NASA_SpaceApps_Proposal.md` và `docs/05_Pitch_Deck_and_Video_Script.md` đã được đồng bộ lại với `data/processed/empirical_results.json` (chúng vẫn công bố số liệu của lần kéo FIRMS cũ: `775.531` bản ghi / `5.769` cặp ô lưới / `$D_{KS}$ 0.1180 → 0.0205`). `tests/test_documented_claims_consistency.py` tự động kiểm tra các claim này, nên lần tái tạo `empirical_results.json` sau này sẽ làm CI đỏ nếu tài liệu chưa được cập nhật theo.
 
 ---
 

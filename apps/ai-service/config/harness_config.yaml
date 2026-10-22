@@ -1,0 +1,172 @@
+# ==============================================================================
+# FLARE-CHRONOS DUAL-SYSTEM (SYSTEM 1 <-> SYSTEM 2) LANGGRAPH HARNESS CONFIG
+# ==============================================================================
+# Governed by ADR-0005 (Deterministic Tool Gate) and ADR-0006 (Explicit
+# Endpoint Profile). Every value below is resolved with the precedence
+#   process environment -> workspace .env file -> this file
+# No credential, endpoint, or model is ever read from the host's agent tooling
+# configuration. Secrets live in environment variables only.
+#
+# Protocol values:
+#   typed_questions  - posts {model, state, questions}, returns {answers} with
+#                      calibrated probabilities. Used by System 1.
+#   native_chat      - posts {model, messages, ...}, returns
+#                      {message: {content, thinking, tool_calls}}. Used by System 2.
+
+harness:
+  name: "flare-chronos-dual-cognitive-harness"
+  version: "2.0.0"
+  framework: "langgraph"
+  state_checkpointer: "memory_saver"
+
+models:
+  system1_reflexive:
+    role: "System 1 Reflexive Layer (Analysis Assignment, Intent & Entity Classification, 1-Hop Lookup, Flash NRT Alert, Stakeholder Fact Card)"
+    # The decision model answers typed questions with calibrated probabilities.
+    # It runs on the local inference node and answers the region, the urgency,
+    # the deliberative flag and the analysis the request needs.
+    protocol: "typed_questions"
+    endpoint: "http://127.0.0.1:11434/v1/systemone"
+    endpoint_env: "SYSTEM1_ENDPOINT"
+    model_id: "clef-flash"
+    model_env: "SYSTEM1_MODEL"
+    api_key_env: "SYSTEM1_API_KEY"
+    request:
+      timeout_ms: 120000
+      user_agent: "flare-chronos/2.0.0"
+    # The fallback answers through the native chat protocol when the decision
+    # model cannot be reached. The chain ends at the deterministic extraction.
+    fallback:
+      protocol: "native_chat"
+      endpoint: "https://ollama.com/api/chat"
+      endpoint_env: "SYSTEM1_FALLBACK_ENDPOINT"
+      model_id: "gemma4:31b"
+      model_env: "SYSTEM1_FALLBACK_MODEL"
+      api_key_env: "SYSTEM1_API_KEY"
+      request:
+        timeout_ms: 60000
+        thinking_level: false
+        user_agent: "flare-chronos/2.0.0"
+    assigned_use_cases:
+      - "UC-S1.1"  # Reflexive Intent & Urgency Triage (<150ms routing)
+      - "UC-S1.2"  # Spatio-Temporal Entity & Schema Extraction (Pydantic v2)
+      - "UC-S1.3"  # Single-Hop Deterministic Metric Lookup
+      - "UC-S1.4"  # Flash NRT Anomaly Alerting (SFAI >= +2.5 sigma)
+      - "UC-S1.5"  # Ubiquitous Language & Multi-Stakeholder Briefing Synthesis
+
+  system2_deliberative:
+    role: "System 2 Deliberative Layer (Multi-Step Causal Attribution, Sensor Forensics, Counterfactual Simulation, Policy & QA/QC Auditing)"
+    protocol: "native_chat"
+    endpoint: "https://ollama.com/api/chat"
+    endpoint_env: "SYSTEM2_ENDPOINT"
+    # Chosen by measurement: the model that needed no repair and no
+    # clarification across the whole live benchmark, one tool round each.
+    model_id: "beam"
+    model_env: "SYSTEM2_MODEL"
+    api_key_env: "SYSTEM2_API_KEY"
+    request:
+      timeout_ms: 300000
+      temperature: 0.0
+      max_output_tokens: 65536
+      # The deliberation level belongs to one model family. Another model may
+      # refuse it; the adapter then asks without deliberation and the telemetry
+      # records that the tier ran without it.
+      thinking_level: "xhigh"
+      seed: 20240315
+      user_agent: "flare-chronos/2.0.0"
+      headers: {}
+      extra_body: {}
+    assigned_use_cases:
+      - "UC-1.1"  # Regime-Shift Attribution (Sensor Artifact vs Real Fire)
+      - "UC-1.2"  # Cross-Sensor Discrepancy Forensics (MODIS vs VIIRS)
+      - "UC-1.3"  # Multi-Evidence Thermal Source Origin Classification
+      - "UC-2.1"  # Phenological Phase-Shift & Early-Onset El Nino Detection
+      - "UC-2.2"  # Uncertainty-Aware Tactical Dispatch (Elliptical Footprint)
+      - "UC-2.3"  # Self-Verifying Multi-Stakeholder Situation Briefing
+      - "UC-3.1"  # Counterfactual Constellation Retirement Simulation (2026+)
+      - "UC-3.2"  # Multi-Hop Spatio-Temporal Cube Analytics
+      - "UC-3.3"  # Autonomous Biome-Specific Operator Recalibration
+      - "UC-4.1"  # End-of-Life Orbital Drift & Solar Zenith Angle Audit
+      - "UC-4.2"  # Near-Real-Time (URT/RT/NRT) vs Standard (SP) Fidelity Audit
+      - "UC-4.3"  # Adaptive NASA FIRMS Rate-Limit & Transaction Budgeting
+      - "UC-5.1"  # Sensor-Invariant REDD+ Carbon MRV Baseline Audit
+      - "UC-5.2"  # Agricultural Burn-Ban Policy Counterfactual Evaluation
+      - "UC-5.3"  # Transboundary Smoke & Fire Propagation Forensics (H3 Rings)
+
+symbiosis_protocol:
+  context_pruning_enabled: true
+  max_tools_per_system2_turn: 6
+  dynamic_escalation:
+    escalate_on_raw_vs_harmonized_pct_diff: 200.0
+    escalate_on_saa_nighttime_anomaly: true
+    escalate_on_sfai_crisis_sigma: 2.2
+    escalate_on_multi_hop_causal_why: true
+  pattern_distillation:
+    enable_verified_pattern_cache: true
+    cache_ttl_seconds: 86400
+
+cognition:
+  # System 2 tool surface. "all" exposes every registered deterministic tool to
+  # the model; "use_case" narrows it to the use case's primary tools.
+  deliberative_tool_surface: "all"
+  # System 1 tool surface. "atomic" exposes the Atomic Tools only, so the fast
+  # tier can never reach a Domain Diagnostic Tool.
+  fast_tier_tool_surface: "atomic"
+  # Probability of "is_deliberative" above which an unrequested query is routed
+  # to the deliberative tier. This is the last-resort rule: when the classifier
+  # names the analysis, the analysis decides the tier. Measured on the twenty
+  # free-form requests, the decision model's probabilities overlap between the
+  # two tiers, so no threshold on this number reaches twenty of twenty.
+  deliberative_threshold: 0.29
+  # Probability of "is_urgent" above which the request is a flash crisis.
+  # Measured on the same twenty requests: the urgent ones start at 0.467 and
+  # the others end at 0.099, so the threshold sits in the middle of that gap.
+  urgency_threshold: 0.25
+  # Maximum clarification questions the model may ask in one run.
+  max_clarifications: 2
+  # Use cases whose briefing must be authorized by a human before it is released.
+  requires_sign_off:
+    - "UC-S1.4"
+    - "UC-2.2"
+  # LangGraph recursion limit for one run.
+  recursion_limit: 24
+
+deterministic_tool_gate:
+  strict_tool_only_numerics: true
+  forbid_freeform_llm_arithmetic: true
+  require_verified_facts_ledger: true
+  numeric_tolerance_rel: 0.005
+  max_reasoning_steps: 8
+  max_self_correction_retries: 2
+  allow_exempt_structural_numbers:
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 7
+    - 8
+    - 12
+    - 13
+    - 15
+    - 20
+    - 26
+    - 73
+    - 85
+    - 95
+    - 100
+    - 375
+    - 2000
+    - 2001
+    - 2005
+    - 2007
+    - 2010
+    - 2012
+    - 2016
+    - 2018
+    - 2019
+    - 2020
+    - 2023
+    - 2024
+    - 2025
+    - 2026
