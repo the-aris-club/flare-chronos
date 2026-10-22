@@ -336,6 +336,7 @@ Thông qua [`fetch_real_firms.py`](../apps/benchmark-cli/src/benchmark_cli/fetch
 
 | Phân Nhóm Dữ Liệu Thực Tế Trong `data/raw/` | Cảm Biến & Sản Phẩm | Giai Đoạn Phủ | Số Lát Cắt (Files) | Tổng Số Bản Ghi Thực Tế (`Rows`) |
 | :--- | :--- | :---: | :---: | :---: |
+> **Ghi chú về năm đo và năm nội suy:** Lịch 26 năm bao gồm **11 năm có lát cắt thực tế (Measured Epoch)** cho Tiểu vùng sông Mekong & Việt Nam và **9 năm** cho Vành đai Rừng Nhiệt Đới Amazon; các năm còn lại là **năm nội suy (Interpolated Year)** — thang năm được mô hình hóa từ số điểm MODIS quan sát được và đường bao mùa thực nghiệm của vùng. Nội suy là **mô hình, không phải quan sát**. Xem `docs/adr/0008-measured-epochs-and-interpolated-years.md`.
 | **1. Tiểu vùng sông Mekong & Việt Nam (Chuỗi 26 Năm Cao điểm Tháng 3)** | `MODIS_SP`, `VIIRS_SNPP_SP`, `VIIRS_NOAA20_SP`, `VIIRS_NOAA21_NRT` | **`2001–2026`** *(Đủ 26 năm)* | 49 | **499.565** |
 | **2. Vành đai Rừng Nhiệt đới Amazon (Chuỗi 26 Năm Cao điểm Tháng 8)** | `MODIS_SP/NRT`, `VIIRS_SNPP_SP/NRT`, `VIIRS_NOAA20_SP/NRT`, `VIIRS_NOAA21_NRT` | **`2001–2026`** *(Đủ 26 năm)* | 44 | **510.145** |
 | **3. Chu kỳ Mùa vụ 12 Tháng Tiểu vùng Mekong & Khởi phát Sớm El Niño** | `VIIRS_SNPP_SP` (`Jan–Dec 2024`) & `MODIS_SP` (`02/2010`) | `2010` & `01–12/2024` | 14 | **95.622** |
@@ -362,7 +363,7 @@ Thông qua [`fetch_real_firms.py`](../apps/benchmark-cli/src/benchmark_cli/fetch
 
 4. **Kiểm chứng Chuỗi 26 Năm Liên tục (`2001–2026`) và Khử Bước nhảy Giả tạo Đa Cảm biến:**
    - **Tại Tiểu vùng sông Mekong & Việt Nam (`15/03 – 19/03`):** Số điểm nóng thực tế của riêng cảm biến tham chiếu `MODIS_SP` biến thiên đúng theo chu kỳ khí hậu ENSO: `229` (2001, chỉ có Terra) $\to$ `3.580` (2005) $\to$ `11.296` (2007, hạn lớn) $\to$ `8.222` (2010, El Niño) $\to$ `7.297` (2012) $\to$ `9.674` (2015) $\to$ `6.564` (2016) $\to$ `5.054` (2019) $\to$ `3.446` (2024) $\to$ `2.282` (2025) $\to$ `2.016` (2026). Ngược lại, tổng thô đa cảm biến vọt lên `51.974` điểm năm 2019 (chỉ số thô `1.451,8`, tức **$+1.351,8\%$**) và `50.988` điểm năm 2024 (chỉ số thô `1.424,2`, tức **$+1.324,2\%$**). Sau khi chuẩn hóa qua **Flare-Chronos**, chỉ số năm 2024 trả về đúng **`94,2`**, năm 2025 là **`59,5`** và năm 2026 là **`56,3`**.
-   - **Tại Vành đai Rừng Nhiệt đới Amazon (`20/08 – 24/08`):** Cảm biến tham chiếu `MODIS` ghi nhận các đỉnh hạn hán năm 2002 (`15.280`), 2005 (`13.804`), 2007 (`13.033`), 2010 (`16.304`), 2022 (`12.743`) và 2024 (`8.151`). Tổng điểm nóng thô 4 vệ tinh năm 2024 vọt lên `112.405` điểm (chỉ số thô `814,3`, tăng ảo **$+714,3\%$**), được thuật toán gom cụm nén $4.98\times$ xuống `22.579` `FireEpisode` và chuẩn hóa về chỉ số thực chất **`70,7`**.
+   - **Tại Vành đai Rừng Nhiệt đới Amazon (`20/08 – 24/08`):** Cảm biến tham chiếu `MODIS` ghi nhận các đỉnh hạn hán năm 2002 (`15.280`), 2005 (`13.804`), 2007 (`13.033`), 2010 (`16.304`), 2022 (`12.743`) và 2024 (`8.151`). Tổng điểm nóng thô 4 vệ tinh năm 2024 vọt lên `112.405` điểm (chỉ số thô `814,3`, tăng ảo **$+714,3\%$**), được thuật toán gom cụm nén $4.98\times$ xuống `22.579` `FireEpisode` và chuẩn hóa về chỉ số thực chất **`45,6`**.
 
 ![Figure 1 - Scan Angle Footprint Physics](../docs/figures/fig1_scan_angle_footprint_physics.png)
 

@@ -571,7 +571,11 @@ class DocumentedClaimsConsistencyTest(unittest.TestCase):
                     set(series["measured_years"]) & set(series["interpolated_years"])
                 )
 
-        for doc in ("docs/01_NASA_SpaceApps_Proposal.md", "exports/PROPOSAL.md"):
+        for doc in (
+            "docs/01_NASA_SpaceApps_Proposal.md",
+            "exports/PROPOSAL.md",
+            "exports/REPORT.md",
+        ):
             text = self.docs[doc]
             with self.subTest(doc=doc):
                 self.assertIn("Measured Epoch", text)
