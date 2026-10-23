@@ -30,6 +30,9 @@ sys.path.insert(0, str(ROOT / "apps" / "benchmark-cli" / "src"))
 sys.path.insert(0, str(ROOT / "src"))
 
 from flare_chronos_core import (
+    CELL_INTERPOLATED,
+    CELL_MODELLED_IN_MEASURED_YEAR,
+    CELL_OBSERVED,
     FIRE_EPISODE_WINDOW_MINUTES,
     InstantaneousFootprint,
     SensorType,
@@ -44,6 +47,7 @@ from flare_chronos_core import (
     invert_modis_scan_angle,
     invert_viirs_scan_angle,
     latlon_to_h3,
+    measured_only_sfai,
     modis_dimensions_from_scan_angle,
     parse_firms_dataframe,
     viirs_dimensions_from_scan_angle,
@@ -66,32 +70,8 @@ RAW_DIR = ROOT / "data" / "raw"
 PROC_DIR = ROOT / "data" / "processed"
 FIG_DIR = ROOT / "docs" / "figures"
 
-# Per-cell provenance codes in the calendar's provenance matrix.
-CELL_OBSERVED = 0
-CELL_MODELLED_IN_MEASURED_YEAR = 1
-CELL_INTERPOLATED = 2
-
-# A pentad earns an SFAI only with at least this many observed years behind it.
-MIN_MEASURED_YEARS = 8
-
-
-def measured_only_sfai(hfd: np.ndarray, provenance: np.ndarray) -> np.ndarray:
-    """Robust seasonal Z-score per pentad, from observed cells only (NaN elsewhere).
-
-    A pentad's baseline uses only its observed cells, and a pentad with fewer than
-    ``MIN_MEASURED_YEARS`` of them reports no SFAI at all. See ADR-0010.
-    """
-    sfai = np.full(hfd.shape, np.nan)
-    for c in range(hfd.shape[1]):
-        seen = provenance[:, c] == CELL_OBSERVED
-        if seen.sum() < MIN_MEASURED_YEARS:
-            continue
-        col = hfd[seen, c]
-        med = float(np.median(col))
-        mad = float(np.median(np.abs(col - med)))
-        sigma = max(0.05, 0.65 * 1.4826 * mad + 0.35 * float(np.std(col)))
-        sfai[seen, c] = np.round((col - med) / sigma, 3)
-    return sfai
+# Calendar HFD is O(1); a 0.05 floor keeps a flat pentad from dividing by ~0.
+SFAI_SIGMA_FLOOR = 0.05
 
 
 # --- Modelling constants for the 26-year calendar -------------------------
@@ -292,6 +272,7 @@ def run_coincident_overpass_calibration() -> tuple[Any, dict[str, Any]]:
     modis_cell_counts: list[int] = []
     viirs_cell_counts: list[int] = []
     pair_years: list[int] = []
+    pair_groups: list[str] = []
 
     # Group by (acq_date, daynight, H3_Res6_coarse_neighborhood) for simultaneous Aqua + S-NPP passes
     for m_file, v_file, pair_year in pair_files:
@@ -349,6 +330,7 @@ def run_coincident_overpass_calibration() -> tuple[Any, dict[str, Any]]:
             modis_cell_counts.append(int(row["m_cnt"]))
             viirs_cell_counts.append(int(row["v_cnt"]))
             pair_years.append(pair_year)
+            pair_groups.append(f"{pair_year}-{m_file.split('__')[0]}-{row['acq_date']}")
 
     m_arr = np.array(modis_cell_frps, dtype=float)
     v_arr = np.array(viirs_cell_frps, dtype=float)
@@ -356,7 +338,11 @@ def run_coincident_overpass_calibration() -> tuple[Any, dict[str, Any]]:
 
     model = fit_coincident_aqua_snpp_model(m_arr, v_arr, a_arr)
     holdout = holdout_validation(
-        m_arr, v_arr, a_arr, np.array(pair_years) <= HOLDOUT_TRAIN_LAST_YEAR
+        m_arr,
+        v_arr,
+        a_arr,
+        np.array(pair_years) <= HOLDOUT_TRAIN_LAST_YEAR,
+        groups=np.array(pair_groups),
     )
 
     # Apply fitted model to compute harmonized predictions for plotting
@@ -422,15 +408,21 @@ def run_coincident_overpass_calibration() -> tuple[Any, dict[str, Any]]:
 
 
 def load_static_source_registry(region: str) -> frozenset[str]:
-    """Derive the region's Static Source Registry from its year-round slices.
+    """Derive the region's Static Source Registry from one year of SNPP slices.
 
-    Built from the ``<region>_season__*`` slices (one 5-day slice per month of a
-    single year, plus a 2010 MODIS slice for Mekong). Needs slices spanning the
-    calendar year; a region without them would get an empty registry rather than
-    one guessed from a single peak-season window.
+    Uses the region's 2024 Suomi-NPP slices: the ``<region>_season__*`` monthly
+    slices plus the peak-window slice, which fills the month the seasonal set
+    lacks. The result is empty on this archive for Amazon and one cell for
+    Mekong; a Resolution-8 cell (~0.46 km edge) is compared against 375 m
+    pixels, so a persistent emitter only registers if its detections land in
+    one cell in 10 of 12 months.
     """
+    paths = [
+        *RAW_DIR.glob(f"{region}_season__VIIRS_SNPP_SP__2024-*__5d.csv"),
+        *RAW_DIR.glob(f"{region}__VIIRS_SNPP_SP__2024-*__5d.csv"),
+    ]
     observations: list[tuple[str, int]] = []
-    for path in sorted(RAW_DIR.glob(f"{region}_season__*.csv")):
+    for path in sorted(paths):
         df = pd.read_csv(path, usecols=["latitude", "longitude", "acq_date"])
         months = pd.to_datetime(df["acq_date"]).dt.month
         observations += [
@@ -457,7 +449,7 @@ def evaluate_epoch_slice(
     date_str: str,
     sources: list[str],
     cal_model: Any,
-    max_sample_per_source: int = 8000,
+    max_sample_per_source: int | None = None,
     static_cells: frozenset[str] = frozenset(),
     cloud_clear: tuple[float, float] | None = None,
 ) -> dict[str, Any]:
@@ -475,8 +467,8 @@ def evaluate_epoch_slice(
         if not df.empty:
             total_raw_frp_mw += float(df["frp"].sum())
             df["source_code"] = src
-            if len(df) > max_sample_per_source:
-                # Head slice (first N rows) for kernel clustering benchmark
+            if max_sample_per_source is not None and len(df) > max_sample_per_source:
+                # Optional cap, for quick runs only: the head slice is not a random sample.
                 df_sub = df.iloc[:max_sample_per_source].copy()
             else:
                 df_sub = df.copy()
@@ -521,7 +513,7 @@ def evaluate_epoch_slice(
     n_viirs_streams = sum(1 for s in sources if "VIIRS" in s)
     if all("MODIS" in s for s in sources):
         harm_frp_total = (
-            sum(d.calibrated_viirs_eq_frp_mw for d in harm_dets) * sample_scale / omega
+            sum(ep.harmonized_frp_mw for ep in episodes) * sample_scale / omega
         )
     else:
         stream_overlap_norm = 1.0 + STREAM_OVERLAP_GAIN * max(0, n_viirs_streams - 1)
@@ -533,7 +525,7 @@ def evaluate_epoch_slice(
 
     dedup_ratio = total_raw_unsampled / max(1, est_episodes)
 
-    invariance: dict[str, float] = {}
+    invariance: dict[str, float | None] = {}
     if n_viirs and any("MODIS" in s for s in sources):
         modis_view = evaluate_epoch_slice(
             region,
@@ -544,8 +536,10 @@ def evaluate_epoch_slice(
             static_cells,
             cloud_clear,
         )
-        invariance["sensor_invariance_ratio"] = round(
-            harm_equiv_episodes / modis_view["harmonized_viirs_eq_episodes"], 3
+        modis_count = modis_view.get("harmonized_viirs_eq_episodes")
+        # None, not a crash, when the MODIS view is empty (file missing or no episodes).
+        invariance["sensor_invariance_ratio"] = (
+            round(harm_equiv_episodes / modis_count, 3) if modis_count else None
         )
 
     return {
@@ -833,7 +827,7 @@ def build_26yr_calendars_and_series(
 
         mat_np = np.array(hfd_matrix, dtype=float)
         prov_np = np.array(provenance, dtype=int)
-        sfai_np = measured_only_sfai(mat_np, prov_np)
+        sfai_np = measured_only_sfai(mat_np, prov_np, sigma_floor=SFAI_SIGMA_FLOOR)
 
         # The summary caption names the years that actually reach a severe
         # anomaly, and the peak SFAI actually observed. Both are derived from

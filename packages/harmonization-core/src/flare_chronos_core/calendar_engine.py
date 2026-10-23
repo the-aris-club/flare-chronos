@@ -16,6 +16,40 @@ import numpy as np
 from .deduplication import compute_effective_observation_effort
 from .domain import AnomalyTier, BurningCalendarCell, FireEpisode
 
+# Per-cell provenance codes in a calendar's provenance matrix (ADR-0010).
+CELL_OBSERVED = 0
+CELL_MODELLED_IN_MEASURED_YEAR = 1
+CELL_INTERPOLATED = 2
+
+# A pentad earns an SFAI only with at least this many observed years behind it.
+MIN_MEASURED_YEARS = 8
+
+
+def measured_only_sfai(
+    hfd: np.ndarray,
+    provenance: np.ndarray,
+    *,
+    min_years: int = MIN_MEASURED_YEARS,
+    sigma_floor: float = 1e-4,
+) -> np.ndarray:
+    """Robust seasonal Z-score per pentad from observed cells only (NaN elsewhere).
+
+    A pentad's baseline uses only its observed cells, and a pentad with fewer than
+    ``min_years`` of them reports no SFAI at all. The robust sigma matches
+    ``build_burning_activity_calendar``: 0.65 x 1.4826 MAD + 0.35 x std. See ADR-0010.
+    """
+    sfai = np.full(hfd.shape, np.nan)
+    for c in range(hfd.shape[1]):
+        seen = provenance[:, c] == CELL_OBSERVED
+        if seen.sum() < min_years:
+            continue
+        col = hfd[seen, c]
+        med = float(np.median(col))
+        mad = float(np.median(np.abs(col - med)))
+        sigma = max(sigma_floor, 0.65 * 1.4826 * mad + 0.35 * float(np.std(col)))
+        sfai[seen, c] = np.round((col - med) / sigma, 3)
+    return sfai
+
 
 def day_of_year_to_pentad(doy: int) -> int:
     """Map day-of-year (1..366) to standard 5-day climatological Pentad (1..73)."""

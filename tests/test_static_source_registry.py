@@ -51,8 +51,16 @@ class TestStaticSourceRegistry(unittest.TestCase):
 
     def test_repeat_detections_in_one_month_do_not_make_a_cell_static(self) -> None:
         cell = latlon_to_h3(*FLARE, 8)
-        registry = build_static_source_registry([(cell, 3)] * 500)
+        other = latlon_to_h3(14.0, 106.0, 8)
+        year_round = [(other, m) for m in range(1, 13)]
+        registry = build_static_source_registry([(cell, 3)] * 500 + year_round)
         self.assertNotIn(cell, registry)
+        self.assertIn(other, registry)
+
+    def test_a_partial_year_is_refused_rather_than_misread(self) -> None:
+        cell = latlon_to_h3(*FLARE, 8)
+        with self.assertRaises(ValueError):
+            build_static_source_registry([(cell, m) for m in range(3, 9)])
 
     def test_harmonization_rejects_a_detection_in_a_registered_cell(self) -> None:
         cell = latlon_to_h3(*FLARE, 8)

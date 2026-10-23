@@ -8,11 +8,16 @@ from datetime import UTC, datetime
 import pandas as pd
 
 from .calendar_engine import (
+    CELL_INTERPOLATED,
+    CELL_MODELLED_IN_MEASURED_YEAR,
+    CELL_OBSERVED,
+    MIN_MEASURED_YEARS,
     SFAI_CRISIS_THRESHOLD_Z,
     SFAI_SEVERE_THRESHOLD_Z,
     build_burning_activity_calendar,
     classify_sfai_tier,
     day_of_year_to_pentad,
+    measured_only_sfai,
     pentad_to_doy_range,
 )
 from .confidence_filter import (
@@ -241,10 +246,14 @@ def harmonize_detections(
 
 
 __all__ = [
+    "CELL_INTERPOLATED",
+    "CELL_MODELLED_IN_MEASURED_YEAR",
+    "CELL_OBSERVED",
     "DAYNIGHT_SZA_THRESHOLD_DEG",
     "FIRE_EPISODE_WINDOW_MINUTES",
     "H3_RES7_AREA_KM2",
     "H3_RES8_AREA_KM2",
+    "MIN_MEASURED_YEARS",
     "SFAI_CRISIS_THRESHOLD_Z",
     "SFAI_SEVERE_THRESHOLD_Z",
     "AnomalyTier",
@@ -282,6 +291,7 @@ __all__ = [
     "is_in_south_atlantic_anomaly",
     "is_static_or_non_veg_source",
     "latlon_to_h3",
+    "measured_only_sfai",
     "modis_dimensions_from_scan_angle",
     "parse_firms_dataframe",
     "pentad_to_doy_range",

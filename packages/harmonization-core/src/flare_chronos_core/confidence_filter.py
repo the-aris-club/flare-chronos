@@ -108,10 +108,16 @@ def build_static_source_registry(
     """Return the Resolution-8 cells detected in at least ``min_months`` distinct calendar months.
 
     ``observations`` are ``(h3_res8_cell, calendar_month)`` pairs. The archive must
-    cover the whole year for the result to mean anything: a peak-season-only slice
-    makes every burning cell look persistent, or none, so callers without
-    year-round coverage should pass no registry rather than a misleading one.
+    cover all 12 calendar months, or this raises: a peak-season-only slice makes
+    every burning cell look persistent, or none.
     """
+    observations = list(observations)
+    covered = {month for _, month in observations}
+    if len(covered) < 12:
+        raise ValueError(
+            f"the slices cover only {len(covered)} of 12 calendar months; "
+            "a registry from a partial year would be meaningless"
+        )
     months_by_cell: dict[str, set[int]] = {}
     for cell, month in observations:
         months_by_cell.setdefault(cell, set()).add(month)

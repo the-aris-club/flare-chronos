@@ -52,6 +52,28 @@ if __name__ == "__main__":
     unittest.main()
 
 
+class TestHoldoutHonesty(unittest.TestCase):
+    def test_a_split_with_no_test_pairs_is_refused(self) -> None:
+        modis, viirs, areas = synthetic_pairs(100, seed=3)
+        with self.assertRaises(ValueError):
+            holdout_validation(modis, viirs, areas, np.ones(100, dtype=bool))
+
+    def test_resampling_whole_groups_widens_the_interval_for_correlated_pairs(
+        self,
+    ) -> None:
+        modis, viirs, areas = synthetic_pairs(600, seed=7)
+        groups = np.repeat(np.arange(60), 10)  # ten pairs share each date
+        viirs = viirs + np.repeat(np.random.default_rng(1).normal(0, 25, 60), 10)
+        train = np.arange(600) < 400
+        iid = holdout_validation(modis, viirs, areas, train)
+        grouped = holdout_validation(modis, viirs, areas, train, groups=groups)
+        iid_width = iid["rmse_gain_ci95_mw"][1] - iid["rmse_gain_ci95_mw"][0]
+        grouped_width = (
+            grouped["rmse_gain_ci95_mw"][1] - grouped["rmse_gain_ci95_mw"][0]
+        )
+        self.assertGreater(grouped_width, iid_width)
+
+
 class TestPublishedHoldout(unittest.TestCase):
     def test_the_published_calibration_gain_is_positive_on_held_out_years(self) -> None:
         import json

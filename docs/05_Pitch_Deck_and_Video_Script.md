@@ -60,7 +60,7 @@
 ### Slide 5 — Eliminating the 2012/2020/2024 Step-Jump Mirage (Đối Chứng Thực Thực Nghiệm 26 Năm)
 * **So sánh trực diện Trước và Sau khi qua Flare-Chronos:**
   - **Tiểu vùng sông Mekong & Việt Nam (`2001–2026`)**: Dữ liệu thô báo cáo mức tăng ảo gấp $14,2\times$ vào năm 2024; đường chuẩn hóa của **Flare-Chronos** giữ vững đường cơ sở vật lý ổn định (các năm **đo được** của thập niên 2020 nằm trong $\text{Index} \approx 94\text{–}120$ và làm nổi bật chính xác 2 đỉnh hạn hán **El Niño 2010 ($\text{Index} = 208,3$)** và **El Niño 2016 ($\text{Index} = 196,0$)**.
-  - **Vành đai Cháy Rừng Amazon (`2001–2026`)**: Tỷ lệ nén trùng lặp đạt **$4,98\times$** vào năm 2024 (từ $112.405$ phát hiện thô xuống $26.271$ sự kiện cháy độc lập), phản ánh trung thực chu kỳ hạn hán 2005, 2010 và 2024.
+  - **Vành đai Cháy Rừng Amazon (`2001–2026`)**: Tỷ lệ nén trùng lặp đạt **$4,98\times$** vào năm 2024 (từ $112.405$ phát hiện thô xuống $19.542$ sự kiện cháy độc lập), phản ánh trung thực chu kỳ hạn hán 2005, 2010 và 2024.
 * **Hình ảnh trực quan:** Nhúng [fig4_regime_shift_elimination.png](figures/fig4_regime_shift_elimination.png).
 
 ### Slide 6 — The Harmonized Burning Activity Calendar & Early Warning (Sản Phẩm Ứng Dụng Thực Tế)

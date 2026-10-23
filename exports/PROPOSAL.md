@@ -246,7 +246,8 @@ $$\text{FRP}_{\text{lim, VIIRS}}(A_p, \text{SZA}) = \left( 0.50 + 0.65 \cdot \ma
    - **Mật độ Thông lượng Bức xạ Lửa Chuẩn hóa ($\text{HRF}_{y,p}$, $\text{MW} / \text{km}^2$):**
      $$\text{HRF}_{y,p} = \frac{1}{A_{\text{AOI}}} \sum_{E_k \in \mathcal{E}_{y,p}} \frac{\widehat{\text{FRP}}_{\text{VIIRS-eq}}(E_k)}{\Omega(y, \phi_k)}$$
    - **Chỉ số Dị thường Cháy Chuẩn hóa ($\text{SFAI}_{y,p}$, Z-Score bền vững theo Pentad):**
-     $$\text{SFAI}_{y,p} = \frac{\text{HRF}_{y,p} - \text{Median}_{y'\in[2001,2026]}\!\left(\text{HRF}_{y',p}\right)}{0.65 \cdot \left(1.4826 \cdot \text{MAD}_{y'}\!\left(\text{HRF}_{y',p}\right)\right) + 0.35 \cdot \text{Std}_{y'}\!\left(\text{HRF}_{y',p}\right)}$$
+     $$\text{SFAI}_{y,p} = \frac{\text{HRF}_{y,p} - \text{Median}_{y'\in\mathcal{Y}_{\text{obs}}(p)}\!\left(\text{HRF}_{y',p}\right)}{0.65 \cdot \left(1.4826 \cdot \text{MAD}_{y'}\!\left(\text{HRF}_{y',p}\right)\right) + 0.35 \cdot \text{Std}_{y'}\!\left(\text{HRF}_{y',p}\right)}$$
+     *(Theo ADR-0010: $\mathcal{Y}_{\text{obs}}(p)$ là tập các năm có **ô đã quan sát** ở Pentad $p$ — chỉ Pentad chứa cửa sổ 5 ngày của một Mốc đo thực. Cần tối thiểu $8$ năm, nếu không SFAI không được tính; các ô mô hình không mang SFAI.)*
 
 ---
 
@@ -265,6 +266,8 @@ $$\text{FRP}_{\text{lim, VIIRS}}(A_p, \text{SZA}) = \left( 0.50 + 0.65 \cdot \ma
 | **Sai số toàn phương trung bình ($\text{RMSE}$, $\text{MW/cell}$)** | $149.104\text{ MW}$ | **$140.154\text{ MW}$** | Giảm sai số bậc hai trên toàn dải |
 | **Khoảng cách phân phối Kolmogorov-Smirnov ($D_{\text{KS}}$)** | $0.1166$ | **$0.0348$** | **Giảm $70,2\%$ sai lệch phân phối xác suất!** |
 
+**Kiểm định trên các năm giữ lại.** Các chỉ số trong bảng trên được tính trong mẫu nên lạc quan. Khi khớp trên các cặp đến năm $2019$ ($5.331$ cặp) và chấm điểm trên các cặp từ $2020$ ($6.222$ cặp): $\text{RMSE}$ giảm từ $154{,}2$ xuống $145{,}4\text{ MW}$; khoảng tin cậy $95\%$ của mức giảm (bootstrap theo nhóm ngày–vùng) là $6{,}6$–$11{,}8\text{ MW}$; trọng số blend khớp được là $0{,}897$ (thay cho $0{,}65$ cố định). Hiệu chuẩn có ích nhưng khiêm tốn: phần lớn sai số còn lại không giảm được bằng hiệu chuẩn công suất.
+
 ![Figure 3 - Cross-Sensor FRP Calibration](../docs/figures/fig3_cross_sensor_frp_quantile_mapping.png)
 
 ![Figure 2 - Overpass Deduplication and Effort Factor](../docs/figures/fig2_overpass_deduplication_sza.png)
@@ -280,16 +283,16 @@ Khu vực Đông Nam Á lục địa (bao gồm Tây Nguyên, Tây Bắc Việt 
 | Năm (Epoch) | Tổ Hợp Cảm Biến Hoạt Động | Điểm Nóng Thô Theo Từng Nguồn | Tổng Điểm Nóng Thô (`Raw Sum`) | Sự Kiện Cháy Vật Lý (`Fire Episode`) | Hệ Số Nén Trùng Lặp | Nỗ Lực Quan Sát $\Omega(y, \phi)$ | Sự Kiện Chuẩn Hóa `Flare-Chronos` | Chỉ Số Thô (`2005=100`) | Chỉ Số Chuẩn Hóa (`2005=100`) |
 | :---: | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | **2005** | `MODIS` (Terra+Aqua) | MODIS: `3.580` | **3.580** | 2.179 | $1.68\times$ | $0.8662$ | **9.181,9** | `100,0` | **`100,0`** |
-| **2007** *(Hạn khô)* | `MODIS` (Terra+Aqua) | MODIS: `11.296` | **11.296** | 6.696 | $1.78\times$ | $0.8662$ | **25.533,2** | `315,5` | **`297,8`** *(Đỉnh hạn kỷ lục)* |
-| **2010** *(El Niño)* | `MODIS` (Terra+Aqua) | MODIS: `8.222` | **8.222** | 4.661 | $1.85\times$ | $0.8662$ | **17.730,7** | `229,7` | **`208,3`** *(Đỉnh hạn)* |
-| **2012** *(+S-NPP)* | `MODIS` + `S-NPP` | MODIS: `7.297`<br/>SNPP: `25.720` | **33.017** | 17.669 | $1.95\times$ | $1.3809$ | **12.795,3** | `922,3` *(+822% ảo)* | **`147,2`** |
-| **2016** *(Siêu El Niño)* | `MODIS` + `S-NPP` | MODIS: `6.564`<br/>SNPP: `36.778` | **43.342** | 23.239 | $1.92\times$ | $1.3809$ | **11.606,2** | `1.210,7` | **`196,0`** *(Đỉnh hạn)* |
-| **2019** *(+NOAA-20)* | `MODIS` + `S-NPP` + `NOAA-20` | MODIS: `5.054`<br/>SNPP: `23.677`<br/>NOAA20: `23.243` | **51.974** | 26.061 | $2.06\times$ | $2.0709$ | **10.148,7** | `1.451,8` *(+1.352% ảo)* | **`147,3`** |
-| **2020** | `MODIS` + `S-NPP` + `NOAA-20` | MODIS: `4.827`<br/>SNPP: `23.050`<br/>NOAA20: `20.275` | **48.152** | 23.090 | $2.16\times$ | $2.0709$ | **12.245,0** | `1.345,0` | **`129,9`** |
-| **2023** | `MODIS` + `S-NPP` + `NOAA-20` | MODIS: `4.086`<br/>SNPP: `19.824`<br/>NOAA20: `18.959` | **42.869** | 22.850 | $1.92\times$ | $2.0709$ | **12.325,2** | `1.197,5` | **`120,3`** |
-| **2024** *(+NOAA-21)* | `MODIS` + `S-NPP` + `NOAA-20` + `NOAA-21` | MODIS: `3.446`<br/>SNPP: `16.020`<br/>NOAA20: `15.651`<br/>NOAA21: `15.871` | **50.988** | 23.750 | $2.26\times$ | $2.0850$ | **7.696,5** | **`1.424,2`** *(+1.324,2% ảo!)* | **`94,2`** *(Thực tế giảm 5,8%!)* |
-| **2025** | `MODIS` + `S-NPP` + `NOAA-20` + `NOAA-21` | MODIS: `2.282`<br/>SNPP: `10.148`<br/>NOAA20: `9.754`<br/>NOAA21: `9.264` | **31.448** | 15.046 | $2.21\times$ | $2.0850$ | **6.885,3** | `878,4` | **`59,5`** |
-| **2026** | `MODIS` + `S-NPP` + `NOAA-20` + `NOAA-21` | MODIS: `2.016`<br/>SNPP: `11.148`<br/>NOAA20: `11.173`<br/>NOAA21: `10.315` | **34.652** | 17.114 | $2.20\times$ | $2.0850$ | **3.824,4** | `967,9` | **`56,3`** |
+| **2007** *(Hạn khô)* | `MODIS` (Terra+Aqua) | MODIS: `11.296` | **11.296** | 6.587 | $1.78\times$ | $0.8662$ | **25.117,6** | `315,5` | **`297,8`** *(Đỉnh hạn kỷ lục)* |
+| **2010** *(El Niño)* | `MODIS` (Terra+Aqua) | MODIS: `8.222` | **8.222** | 4.644 | $1.85\times$ | $0.8662$ | **17.666,1** | `229,7` | **`208,3`** *(Đỉnh hạn)* |
+| **2012** *(+S-NPP)* | `MODIS` + `S-NPP` | MODIS: `7.297`<br/>SNPP: `25.720` | **33.017** | 16.304 | $1.95\times$ | $1.3809$ | **11.806,8** | `922,3` *(+822% ảo)* | **`147,2`** |
+| **2016** *(Siêu El Niño)* | `MODIS` + `S-NPP` | MODIS: `6.564`<br/>SNPP: `36.778` | **43.342** | 22.847 | $1.92\times$ | $1.3809$ | **11.410,4** | `1.210,7` | **`196,0`** *(Đỉnh hạn)* |
+| **2019** *(+NOAA-20)* | `MODIS` + `S-NPP` + `NOAA-20` | MODIS: `5.054`<br/>SNPP: `23.677`<br/>NOAA20: `23.243` | **51.974** | 23.434 | $2.06\times$ | $2.0709$ | **9.125,7** | `1.451,8` *(+1.352% ảo)* | **`147,3`** |
+| **2020** | `MODIS` + `S-NPP` + `NOAA-20` | MODIS: `4.827`<br/>SNPP: `23.050`<br/>NOAA20: `20.275` | **48.152** | 21.323 | $2.16\times$ | $2.0709$ | **11.307,9** | `1.345,0` | **`129,9`** |
+| **2023** | `MODIS` + `S-NPP` + `NOAA-20` | MODIS: `4.086`<br/>SNPP: `19.824`<br/>NOAA20: `18.959` | **42.869** | 21.065 | $1.92\times$ | $2.0709$ | **11.362,4** | `1.197,5` | **`120,3`** |
+| **2024** *(+NOAA-21)* | `MODIS` + `S-NPP` + `NOAA-20` + `NOAA-21` | MODIS: `3.446`<br/>SNPP: `16.020`<br/>NOAA20: `15.651`<br/>NOAA21: `15.871` | **50.988** | 22.950 | $2.26\times$ | $2.0850$ | **7.437,3** | **`1.424,2`** *(+1.324,2% ảo!)* | **`94,2`** *(Thực tế giảm 5,8%!)* |
+| **2025** | `MODIS` + `S-NPP` + `NOAA-20` + `NOAA-21` | MODIS: `2.282`<br/>SNPP: `10.148`<br/>NOAA20: `9.754`<br/>NOAA21: `9.264` | **31.448** | 14.532 | $2.21\times$ | $2.0850$ | **6.650,1** | `878,4` | **`59,5`** |
+| **2026** | `MODIS` + `S-NPP` + `NOAA-20` + `NOAA-21` | MODIS: `2.016`<br/>SNPP: `11.148`<br/>NOAA20: `11.173`<br/>NOAA21: `10.315` | **34.652** | 16.869 | $2.20\times$ | $2.0850$ | **3.769,7** | `967,9` | **`56,3`** |
 
 > [!IMPORTANT]
 > **Phát hiện chấn động từ chuỗi dữ liệu thực tế 26 năm (`2001–2026`) tại Tiểu vùng sông Mekong & Việt Nam:**  
@@ -307,15 +310,15 @@ Khu vực phía Nam lưu vực Amazon (bang Mato Grosso và Pará, Brazil) đạ
 
 | Năm (Epoch) | Tổ Hợp Cảm Biến Hoạt Động | Điểm Nóng Thô Theo Từng Nguồn | Tổng Điểm Nóng Thô (`Raw Sum`) | Sự Kiện Cháy Vật Lý (`Fire Episode`) | Hệ Số Nén Trùng Lặp | Xung Nhiễu SAA Đêm Đã Lọc | Sự Kiện Chuẩn Hóa `Flare-Chronos` | Chỉ Số Thô (`2005=100`) | Chỉ Số Chuẩn Hóa (`2005=100`) |
 | :---: | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **2005** *(Hạn lớn)* | `MODIS` (Terra+Aqua) | MODIS: `13.804` | **13.804** | 6.748 | $2.19\times$ | 626 | **20.339,7** | `100,0` | **`100,0`** |
-| **2007** *(Hạn lớn)* | `MODIS` (Terra+Aqua) | MODIS: `13.033` | **13.033** | 6.425 | $2.17\times$ | 494 | **15.076,6** | `94,4` | **`95,1`** |
-| **2010** *(Siêu hạn)* | `MODIS` (Terra+Aqua) | MODIS: `16.304` | **16.304** | 7.390 | $2.45\times$ | 929 | **17.358,6** | `118,1` | **`105,6`** |
-| **2012** *(+S-NPP)* | `MODIS` + `S-NPP` | MODIS: `6.677`<br/>SNPP: `26.807` | **33.484** | 11.601 | $3.10\times$ | 4.145 | **7.598,2** | `242,6` *(Tăng ảo)* | **`45,4`** *(Giảm phá rừng thực tế)* |
-| **2019** *(+NOAA-20)* | `MODIS` + `S-NPP` + `NOAA-20` | MODIS: `4.770`<br/>SNPP: `16.882`<br/>NOAA20: `17.099` | **38.751** | 10.515 | $3.98\times$ | 5.024 | **5.981,8** | `280,7` | **`27,5`** |
-| **2020** | `MODIS` + `S-NPP` + `NOAA-20` | MODIS: `3.506`<br/>SNPP: `22.031`<br/>NOAA20: `20.575` | **46.112** | 12.068 | $4.13\times$ | 7.347 | **5.286,1** | `334,0` | **`31,4`** |
-| **2024** *(Hạn 2024 + 4 luồng)* | `MODIS` + `S-NPP` + `NOAA-20` + `NOAA-21` | MODIS: `8.151`<br/>SNPP: `35.647`<br/>NOAA20: `35.765`<br/>NOAA21: `32.842` | **112.405** | 26.271 | **$4.98\times$** | **18.097** | **7.705,0** | **`814,3`** *(+714,3% ảo!)* | **`45,6`** *(đo được, không phải đỉnh 2020s)* |
+| **2005** *(Hạn lớn)* | `MODIS` (Terra+Aqua) | MODIS: `13.804` | **13.804** | 6.955 | $2.19\times$ | 518 | **20.963,7** | `100,0` | **`100,0`** |
+| **2007** *(Hạn lớn)* | `MODIS` (Terra+Aqua) | MODIS: `13.033` | **13.033** | 6.369 | $2.17\times$ | 447 | **14.945,2** | `94,4` | **`95,1`** |
+| **2010** *(Siêu hạn)* | `MODIS` (Terra+Aqua) | MODIS: `16.304` | **16.304** | 7.635 | $2.45\times$ | 626 | **17.934,1** | `118,1` | **`105,6`** |
+| **2012** *(+S-NPP)* | `MODIS` + `S-NPP` | MODIS: `6.677`<br/>SNPP: `26.807` | **33.484** | 9.351 | $3.10\times$ | 3.848 | **6.124,6** | `242,6` *(Tăng ảo)* | **`45,4`** *(Giảm phá rừng thực tế)* |
+| **2019** *(+NOAA-20)* | `MODIS` + `S-NPP` + `NOAA-20` | MODIS: `4.770`<br/>SNPP: `16.882`<br/>NOAA20: `17.099` | **38.751** | 8.764 | $3.98\times$ | 5.144 | **4.985,7** | `280,7` | **`27,5`** |
+| **2020** | `MODIS` + `S-NPP` + `NOAA-20` | MODIS: `3.506`<br/>SNPP: `22.031`<br/>NOAA20: `20.575` | **46.112** | 10.446 | $4.13\times$ | 7.418 | **4.575,6** | `334,0` | **`31,4`** |
+| **2024** *(Hạn 2024 + 4 luồng)* | `MODIS` + `S-NPP` + `NOAA-20` + `NOAA-21` | MODIS: `8.151`<br/>SNPP: `35.647`<br/>NOAA20: `35.765`<br/>NOAA21: `32.842` | **112.405** | 19.542 | **$4.98\times$** | **15.434** | **5.731,4** | **`814,3`** *(+714,3% ảo!)* | **`45,6`** *(đo được, không phải đỉnh 2020s)* |
 | **2025** | `MODIS` + `S-NPP` + `NOAA-20` + `NOAA-21` | MODIS: `1.420`<br/>SNPP: `6.517`<br/>NOAA20: `5.859`<br/>NOAA21: `6.233` | **20.029** | 3.780 | $6.30\times$ | 2.262 | **1.303,6** | `145,1` | **`6,4`** |
-| **2026** | `MODIS_NRT` + `S-NPP` + `NOAA-20` + `NOAA-21` | MODIS: `3.555`<br/>SNPP: `14.534`<br/>NOAA20: `13.894`<br/>NOAA21: `13.406` | **45.389** | 8.979 | $6.48\times$ | 6.174 | **2.676,3** | `328,8` | **`25,8`** |
+| **2026** | `MODIS_NRT` + `S-NPP` + `NOAA-20` + `NOAA-21` | MODIS: `3.555`<br/>SNPP: `14.534`<br/>NOAA20: `13.894`<br/>NOAA21: `13.406` | **45.389** | 8.310 | $6.48\times$ | 5.130 | **2.476,9** | `328,8` | **`25,8`** |
 
 ### 5.4. Kiểm chứng đối xứng pha mùa vụ 12 tháng trong năm (Intra-Annual Phenology Envelope)
 
@@ -354,7 +357,7 @@ Khu vực phía Nam lưu vực Amazon (bang Mato Grosso và Pará, Brazil) đạ
 |                                                       |  [BẢNG ĐIỀU KHIỂN ĐỐI CHỨNG TRƯỚC / SAU ĐỒNG BỘ HÓA]         |
 |   [KHUNG BẢN ĐỒ KHÔNG GIAN ĐA TẦNG - WEBGL FOOTPRINT] |  +----------------+----------------+----------------+        |
 |                                                       |  | Raw Detections | Fire Episodes  | SFAI Z-Score   |        |
-|      _.-""""-._      (Elip MODIS Rìa Quét: 4.8x2.0km) |  |  43,342 (Thô)  |  23,239 (Chuẩn)|  +2.64 sigma   |        |
+|      _.-""""-._      (Elip MODIS Rìa Quét: 4.8x2.0km) |  |  43,342 (Thô)  |  22,847 (Chuẩn)|  +2.64 sigma   |        |
 |    .'          '.     o o (Cụm VIIRS 375m bên trong)  |  | (+1.110,7% ảo) |  (Khử trùng lặp|  [SEVERE RISK] |        |
 |   /   o  o  o    \                                    |  +----------------+----------------+----------------+        |
 |  |       o        |   / \ / \ / \ (Lưới Lục Giác     |                                                              |

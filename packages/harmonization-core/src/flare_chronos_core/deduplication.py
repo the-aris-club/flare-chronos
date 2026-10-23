@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import math
 
-from .domain import FireEpisode, HarmonizedDetection
+from .domain import FireEpisode, HarmonizedDetection, SensorType
 from .geometry_h3 import R_EARTH_KM
 
 
@@ -64,6 +64,8 @@ def compute_effective_observation_effort(
     else:
         base_omega = 2.08
     if n_viirs_streams is not None:
+        if n_viirs_streams < 0:
+            raise ValueError("n_viirs_streams cannot be negative")
         ladder = _EFFORT_BY_VIIRS_STREAMS[min(n_viirs_streams, 3)]
         base_omega = min(base_omega, ladder)
 
@@ -171,6 +173,12 @@ def cluster_fire_episodes(
             clusters.append(new_cl)
             spatial_buckets.setdefault((b_lat, b_lon), []).append(new_cl)
 
+    # The effort is that of the sensors actually present in this batch, so a
+    # MODIS-only slice of a 2024 epoch is not credited with the full constellation.
+    n_viirs_streams = len(
+        {d.raw.platform for d in valid if d.raw.sensor is SensorType.VIIRS}
+    )
+
     episodes: list[FireEpisode] = []
     for idx, cl in enumerate(clusters, start=1):
         # Weight centroid toward finest-resolution (smallest footprint area) detections
@@ -202,7 +210,7 @@ def cluster_fire_episodes(
         harmonized_frp = sum(by_platform_frp.values()) / max(1, len(by_platform_frp))
 
         year = cl[0].raw.acq_datetime_utc.year
-        omega = compute_effective_observation_effort(year, c_lat)
+        omega = compute_effective_observation_effort(year, c_lat, n_viirs_streams)
         effort_norm_count = combined_prob / omega
 
         # Pick representative finest-resolution H3 cells

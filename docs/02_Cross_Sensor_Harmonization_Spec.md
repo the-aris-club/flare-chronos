@@ -106,6 +106,8 @@ Vệ tinh **Aqua (MODIS)** và **Suomi-NPP (VIIRS)** có cùng giờ địa phư
 | **Sai số toàn phương trung bình ($\text{RMSE}$, $\text{MW/cell}$)** | $149.104\text{ MW}$ | **$140.154\text{ MW}$** | Giảm sai số bậc hai trên toàn dải |
 | **Khoảng cách phân phối Kolmogorov-Smirnov ($D_{\text{KS}}$)** | $0.1166$ | **$0.0348$** | **Giảm $70.2\%$ sai lệch phân phối xác suất!** |
 
+**Kiểm định trên các năm giữ lại.** Các chỉ số trong bảng trên được tính trong mẫu nên lạc quan. Khi khớp trên các cặp đến năm $2019$ ($5.331$ cặp) và chấm điểm trên các cặp từ $2020$ ($6.222$ cặp): $\text{RMSE}$ giảm từ $154{,}2$ xuống $145{,}4\text{ MW}$; khoảng tin cậy $95\%$ của mức giảm (bootstrap theo nhóm ngày–vùng) là $6{,}6$–$11{,}8\text{ MW}$; trọng số blend khớp được là $0{,}897$ (thay cho $0{,}65$ cố định). Hiệu chuẩn có ích nhưng khiêm tốn: phần lớn sai số còn lại không giảm được bằng hiệu chuẩn công suất.
+
 ![Cross Sensor FRP Calibration](figures/fig3_cross_sensor_frp_quantile_mapping.png)
 
 ---
@@ -185,7 +187,8 @@ Trên mỗi vùng quan tâm có diện tích $A_{\text{AOI}}$ ($\text{km}^2$), t
 2. **Mật độ Thông lượng Bức xạ Lửa Chuẩn hóa ($\text{HRF}_{y,p}$, $\text{MW} / \text{km}^2$)**:
    $$\text{HRF}_{y,p} = \frac{1}{A_{\text{AOI}}} \sum_{E_k \in \mathcal{E}_{y,p}} \frac{\widehat{\text{FRP}}_{\text{VIIRS-eq}}(E_k)}{\Omega(y, \phi_k)}$$
 3. **Chỉ số Dị thường Cháy Chuẩn hóa ($\text{SFAI}_{y,p}$, Z-Score bền vững theo Pentad)**:
-   $$\text{SFAI}_{y,p} = \frac{\text{HRF}_{y,p} - \text{Median}_{y'\in[2001,2026]}\!\left(\text{HRF}_{y',p}\right)}{0.65 \cdot \left(1.4826 \cdot \text{MAD}_{y'}\!\left(\text{HRF}_{y',p}\right)\right) + 0.35 \cdot \text{Std}_{y'}\!\left(\text{HRF}_{y',p}\right)}$$
+   $$\text{SFAI}_{y,p} = \frac{\text{HRF}_{y,p} - \text{Median}_{y'\in\mathcal{Y}_{\text{obs}}(p)}\!\left(\text{HRF}_{y',p}\right)}{0.65 \cdot \left(1.4826 \cdot \text{MAD}_{y'}\!\left(\text{HRF}_{y',p}\right)\right) + 0.35 \cdot \text{Std}_{y'}\!\left(\text{HRF}_{y',p}\right)}$$
+   *(Theo ADR-0010: $\mathcal{Y}_{\text{obs}}(p)$ là tập các năm có **ô đã quan sát** ở Pentad $p$ — chỉ Pentad chứa cửa sổ 5 ngày của một Mốc đo thực. Cần tối thiểu $8$ năm, nếu không SFAI không được tính; các ô mô hình không mang SFAI.)*
 
 ---
 

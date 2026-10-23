@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
+from typing import Any
 
 import numpy as np
 
@@ -264,9 +265,10 @@ def holdout_validation(
     modis_scan_areas: np.ndarray,
     train_mask: np.ndarray,
     *,
+    groups: np.ndarray | None = None,
     n_boot: int = 500,
     seed: int = 2026,
-) -> dict[str, float | int | tuple[float, float]]:
+) -> dict[str, Any]:
     """Fit on the training pairs, score on the rest.
 
     The parametric/quantile blend weight is fitted here on the training pairs
@@ -276,6 +278,8 @@ def holdout_validation(
 
     Scores the fitted power-law/quantile blend only; the detection-limit offset that
     ``apply_two_stage_frp_calibration`` adds per detection is not part of the fit.
+    The caller's pair selection is applied before the split, so the gain describes the
+    pairs that survive that selection, not every co-incident pair.
     """
     train = train_mask.astype(bool)
     model = fit_coincident_aqua_snpp_model(
@@ -293,6 +297,8 @@ def holdout_validation(
     weight = fit_blend_weight(p_tr, e_tr, v_tr)
 
     test = ~train
+    if not test.any() or not train.any():
+        raise ValueError("the split needs both training and held-out pairs")
     p_te, e_te = components(modis_cell_frp[test], modis_scan_areas[test])
     v_te = viirs_cell_frp[test]
     raw_te = modis_cell_frp[test]
@@ -304,8 +310,15 @@ def holdout_validation(
 
     rng = np.random.default_rng(seed)
     gains = []
+    if groups is None:
+        members = [np.array([i]) for i in range(len(v_te))]
+    else:
+        # Pairs from one date and region are correlated, so resample whole groups.
+        g_te = groups[test]
+        members = [np.flatnonzero(g_te == g) for g in np.unique(g_te)]
     for _ in range(n_boot):
-        idx = rng.integers(0, len(v_te), len(v_te))
+        picks = rng.integers(0, len(members), len(members))
+        idx = np.concatenate([members[k] for k in picks])
         gains.append(rmse(v_te[idx], raw_te[idx]) - rmse(v_te[idx], pred_te[idx]))
     low, high = (float(x) for x in np.percentile(gains, [2.5, 97.5]))
 

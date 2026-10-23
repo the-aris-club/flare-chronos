@@ -10,7 +10,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "apps" / "benchmark-cli" / "src"))
 
-from benchmark_cli.run_experiments import (
+from flare_chronos_core import (
     CELL_INTERPOLATED,
     CELL_MODELLED_IN_MEASURED_YEAR,
     CELL_OBSERVED,

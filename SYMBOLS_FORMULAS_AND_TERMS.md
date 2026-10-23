@@ -137,8 +137,8 @@
 | $\alpha$ (day/night) | Power-law intercept | — | `day_power_alpha`, `night_power_alpha` |
 | $\beta$ (day/night) | Power-law exponent | — | `day_power_beta`, `night_power_beta` |
 | $\kappa$ | Scan-tail compensation | — | `scan_tail_kappa` |
-| $\gamma$ | Blend weight parametric | 0.65 | Trọng số parametric trong blend |
-| $1-\gamma$ | Blend weight EQM | 0.35 | Trọng số EQM trong blend |
+| $\gamma$ | Blend weight parametric | 0.8969 | Trọng số parametric trong blend, khớp bình phương tối thiểu trên cặp huấn luyện (≤2019); mặc định 0.65 trước khi khớp |
+| $1-\gamma$ | Blend weight EQM | 0.1031 | Trọng số EQM trong blend |
 | $\text{base\_count\_mult}$ | Count multiplier nadir | 2.85 (day), 3.40 (night) | Nhân số điểm hotspot tương đương |
 | $\kappa_{\text{grid}}$ | Grid search kappa | [0.10, 0.55] | Tìm $\kappa$ tối ưu |
 | $\alpha_{\text{track}}$ | Track azimuth | deg | Góc phương vị vệt quỹ đạo |
@@ -240,7 +240,7 @@ $$\widetilde{\text{FRP}}_{\text{MODIS}} = \text{FRP}_{\text{raw}} \cdot [1 + \ka
 Vị trí: `radiometric_calibrator.py::apply_two_stage_frp_calibration`.
 
 ### F11. Stage 2 parametric + EQM blend
-$$\widehat{\text{FRP}}_{\text{VIIRS-eq}} = 0.65\cdot(\alpha\cdot \widetilde{\text{FRP}}^\beta + 0.35(\text{FRP}_{\text{lim}}-1.15)) + 0.35\cdot \text{EQM}(\widetilde{\text{FRP}})$$
+$$\widehat{\text{FRP}}_{\text{VIIRS-eq}} = \gamma\cdot(\alpha\cdot \widetilde{\text{FRP}}^\beta + 0.35(\text{FRP}_{\text{lim}}-1.15)) + (1-\gamma)\cdot \text{EQM}(\widetilde{\text{FRP}})$$
 Vị trí: `radiometric_calibrator.py::apply_two_stage_frp_calibration`.
 
 ### F12. VIIRS equivalent count
@@ -302,7 +302,7 @@ $$\text{HRF}_{y,p} = \frac{1}{A_{\text{AOI}}}\sum_{E_k\in\mathcal{E}_{y,p}} \fra
 Vị trí: `calendar_engine.py::build_burning_activity_calendar`.
 
 ### F25. SFAI
-$$\text{SFAI}_{y,p} = \frac{\text{HRF}_{y,p}-\text{Median}_{y'}(\text{HRF}_{y',p})}{0.65(1.4826\cdot\text{MAD})+0.35\cdot\text{Std}}$$
+$$\text{SFAI}_{y,p} = \frac{\text{HRF}_{y,p}-\text{Median}_{y'\in\mathcal{Y}_{\text{obs}}(p)}(\text{HRF}_{y',p})}{0.65(1.4826\cdot\text{MAD})+0.35\cdot\text{Std}}$$
 Vị trí: `calendar_engine.py::build_burning_activity_calendar`.
 
 ### F26. Pentad mapping
