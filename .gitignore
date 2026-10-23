@@ -51,7 +51,3 @@ data/runtime/
 *.aiff
 *.srt
 *.vtt
-
-# Raw NASA FIRMS pulls: pinned by data/raw/SHA256SUMS, not committed any further.
-# Files already tracked stay tracked; only new pulls are ignored.
-data/raw/*.csv

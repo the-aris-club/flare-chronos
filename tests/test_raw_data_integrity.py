@@ -3,10 +3,16 @@
 from __future__ import annotations
 
 import hashlib
+import sys
 import unittest
 from pathlib import Path
 
-RAW = Path(__file__).resolve().parents[1] / "data" / "raw"
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "apps" / "benchmark-cli" / "src"))
+
+from benchmark_cli.pin_raw_data import checksums
+
+RAW = ROOT / "data" / "raw"
 
 
 class TestRawDataIntegrity(unittest.TestCase):
@@ -28,6 +34,9 @@ class TestRawDataIntegrity(unittest.TestCase):
             for line in (RAW / "SHA256SUMS").read_text().splitlines()
         }
         self.assertEqual({p.name for p in RAW.glob("*.csv")} - pinned, set())
+
+    def test_the_pin_script_reproduces_the_committed_checksums(self) -> None:
+        self.assertEqual(checksums(RAW), (RAW / "SHA256SUMS").read_text())
 
 
 if __name__ == "__main__":
