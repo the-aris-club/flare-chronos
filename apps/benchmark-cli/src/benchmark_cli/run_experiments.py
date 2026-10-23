@@ -485,6 +485,9 @@ def evaluate_epoch_slice(
             100.0 * reclassified_dn / max(1, len(harm_dets)), 2
         ),
         "saa_rejected_count": round(saa_rejected * sample_scale),
+        "saa_rejected_share_pct": round(
+            100.0 * saa_rejected / max(1, len(harm_dets)), 2
+        ),
     }
 
 
