@@ -67,6 +67,10 @@ _Avoid_: Atlantic noise zone
 A persistent non-biomass heat emitter—such as a gas flare, steel mill, cement kiln, refinery, or active volcano—that repeatedly triggers Thermal Detections within the same spatial cell across seasons.
 _Avoid_: False fire, stationary hotspot
 
+**Static Source Registry**:
+The versioned set of Iso-Area Cells (Resolution 8) that the archive shows to be persistently hot across years and seasons, derived from the detections themselves and passed into harmonization so that a Static Thermal Source is rejected rather than counted as a Fire Episode.
+_Avoid_: Blocklist, exclusion mask, static cell list
+
 **Fire Episode**:
 A unique, physical burning event reconstructed by clustering spatially overlapping and temporally proximate Thermal Detections acquired across multiple satellite overpasses within a single diurnal window.
 _Avoid_: Deduplicated point, merged hotspot, fire cluster
