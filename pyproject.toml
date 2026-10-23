@@ -1,6 +1,6 @@
 [project]
 name = "flare-chronos-workspace"
-version = "0.1.0"
+version = "1.0.0"
 description = "Cross-Sensor Harmonization of MODIS (C6.1) and VIIRS (375m C1/C2) Active Fire Hot Spots & 26-Year Harmonized Burning Activity Calendar"
 readme = "docs/01_NASA_SpaceApps_Proposal.md"
 authors = [{name = "Xiro The Dev", email = "lethanhtrung.trungle@gmail.com"}]

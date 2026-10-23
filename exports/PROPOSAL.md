@@ -5,7 +5,7 @@
 # ĐỀ XUẤT GIẢI PHÁP KHOA HỌC & THUYẾT MINH DỰ ÁN: FLARE-CHRONOS
 
 > **Tên dự án:** **FLARE-CHRONOS** — *Hệ Thống Đồng Bộ Hóa Vật Lý Liên Cảm Biến MODIS–VIIRS & Lịch Hoạt Động Cháy Thông Minh 26 Năm (2000–2026+)*
-> **Phiên bản:** `v0.1.0` — cập nhật 23/10/2026
+> **Phiên bản:** `v1.0.0` — cập nhật 23/10/2026
 
 > **Tên viết tắt (Acronym):** *Fire Long-term Archive Resolution & Cross-sensor Harmonization for Operational Near-real-time Observation System*
 
