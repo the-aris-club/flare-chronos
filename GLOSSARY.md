@@ -121,6 +121,10 @@ _Avoid_: Real year, hard data, ground truth, anchor year
 A year with no archived slice set, whose annual scale is modelled from the observed MODIS-only count and the region's empirical seasonal envelope. The interpolation is deterministic but it is a model, not an observation, and published documents mark these years as such.
 _Avoid_: Estimated year, synthetic year, filled year, projection
 
+**Observed Cell**:
+A cell of the Burning Activity Calendar whose value comes from a Measured Epoch's own FIRMS window — the pentad that holds the 5-day slice, in a measured year. Every other cell is modelled, either inside a measured year or in an Interpolated Year. Only Observed Cells carry a Standardized Fire Anomaly Index, an Anomaly Tier or a Severe Anomaly Outline.
+_Avoid_: Real cell, measured pentad, hard cell
+
 **Severe Anomaly Outline**:
 The cyan frame drawn on a Burning Activity Calendar cell whose Standardized Fire Anomaly Index reaches the display threshold of $+2.2\sigma$. It is a rendering convention for a *display* threshold, deliberately below the CRISIS Anomaly Tier so the calendar highlights severe anomalies before a crisis alarm is raised.
 _Avoid_: Crisis anomaly, crisis outline, alarm outline, threshold
