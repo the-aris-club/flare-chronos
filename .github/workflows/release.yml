@@ -58,8 +58,10 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          # The release package lives at the repo root, so `changeset publish`
+          # tags it v<version> (not <name>@<version> like nested packages).
           echo '${{ steps.changesets.outputs.published-packages }}' \
-            | jq -r '.[] | "\(.name)@\(.version)"' \
+            | jq -r '.[] | "v\(.version)"' \
             | while read -r tag; do
                 gh release upload "$tag" exports/PROPOSAL.pdf exports/PROPOSAL.md exports/REPORT.pdf exports/REPORT.md exports/MODEL_FLOW.pdf exports/MODEL_FLOW.md --clobber
               done
