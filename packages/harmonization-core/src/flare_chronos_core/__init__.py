@@ -16,6 +16,7 @@ from .calendar_engine import (
     pentad_to_doy_range,
 )
 from .confidence_filter import (
+    build_static_source_registry,
     compute_unified_detection_probability,
     has_aqua_nrt_geolocation_risk,
     is_in_south_atlantic_anomaly,
@@ -255,6 +256,7 @@ __all__ = [
     "allocate_footprint_to_h3",
     "apply_two_stage_frp_calibration",
     "build_burning_activity_calendar",
+    "build_static_source_registry",
     "classify_sfai_tier",
     "cluster_fire_episodes",
     "compute_effective_observation_effort",

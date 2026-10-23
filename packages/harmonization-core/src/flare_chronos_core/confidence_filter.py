@@ -11,6 +11,7 @@ Solves Problem 3 & Problem 5 (partial) of the NASA MODIS-VIIRS Harmonization Cha
 from __future__ import annotations
 
 import math
+from collections.abc import Iterable
 
 from .domain import ProcessingMode, SatellitePlatform, SensorType, ThermalDetection
 
@@ -93,6 +94,28 @@ def is_static_or_non_veg_source(
     if det.fire_type is not None and det.fire_type in (1, 2, 3):
         return True
     return h3_res8_cell in persistent_static_cells
+
+
+# A persistent heat emitter (gas flare, kiln, volcano) is detected in nearly every
+# month of the year; seasonal agricultural burning is detected in a few.
+STATIC_SOURCE_MIN_MONTHS = 10
+
+
+def build_static_source_registry(
+    observations: Iterable[tuple[str, int]],
+    min_months: int = STATIC_SOURCE_MIN_MONTHS,
+) -> frozenset[str]:
+    """Return the Resolution-8 cells detected in at least ``min_months`` distinct calendar months.
+
+    ``observations`` are ``(h3_res8_cell, calendar_month)`` pairs. The archive must
+    cover the whole year for the result to mean anything: a peak-season-only slice
+    makes every burning cell look persistent, or none, so callers without
+    year-round coverage should pass no registry rather than a misleading one.
+    """
+    months_by_cell: dict[str, set[int]] = {}
+    for cell, month in observations:
+        months_by_cell.setdefault(cell, set()).add(month)
+    return frozenset(c for c, m in months_by_cell.items() if len(m) >= min_months)
 
 
 def has_aqua_nrt_geolocation_risk(det: ThermalDetection, scan_angle_deg: float) -> bool:

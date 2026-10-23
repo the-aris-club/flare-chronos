@@ -32,6 +32,7 @@ sys.path.insert(0, str(ROOT / "src"))
 from flare_chronos_core import (
     InstantaneousFootprint,
     SensorType,
+    build_static_source_registry,
     cluster_fire_episodes,
     compute_effective_observation_effort,
     compute_frp_detection_limit,
@@ -39,6 +40,7 @@ from flare_chronos_core import (
     harmonize_detections,
     invert_modis_scan_angle,
     invert_viirs_scan_angle,
+    latlon_to_h3,
     modis_dimensions_from_scan_angle,
     parse_firms_dataframe,
     viirs_dimensions_from_scan_angle,
@@ -371,12 +373,31 @@ def run_coincident_overpass_calibration() -> tuple[Any, dict[str, Any]]:
     return model, cal_plot_data
 
 
+def load_static_source_registry(region: str) -> frozenset[str]:
+    """Derive the region's Static Source Registry from its year-round slices.
+
+    Needs ``<region>_season__*`` slices spanning the calendar year. A region
+    without them (Mekong) gets an empty registry rather than one guessed from a
+    single peak-season window, so its Static Thermal Source filter stays off.
+    """
+    observations: list[tuple[str, int]] = []
+    for path in sorted(RAW_DIR.glob(f"{region}_season__*.csv")):
+        df = pd.read_csv(path, usecols=["latitude", "longitude", "acq_date"])
+        months = pd.to_datetime(df["acq_date"]).dt.month
+        observations += [
+            (latlon_to_h3(float(lat), float(lon), 8), int(m))
+            for lat, lon, m in zip(df["latitude"], df["longitude"], months)
+        ]
+    return build_static_source_registry(observations)
+
+
 def evaluate_epoch_slice(
     region: str,
     date_str: str,
     sources: list[str],
     cal_model: Any,
     max_sample_per_source: int = 8000,
+    static_cells: frozenset[str] = frozenset(),
 ) -> dict[str, Any]:
     """Run full harmonization and spatio-temporal deduplication on a multi-sensor epoch slice."""
     dfs: list[pd.DataFrame] = []
@@ -406,7 +427,11 @@ def evaluate_epoch_slice(
     sample_scale = total_raw_unsampled / max(1, len(combined_df))
 
     raw_dets = parse_firms_dataframe(combined_df)
-    harm_dets = harmonize_detections(raw_dets, calibration_model=cal_model)
+    harm_dets = harmonize_detections(
+        raw_dets,
+        calibration_model=cal_model,
+        persistent_static_h3_res8=set(static_cells),
+    )
     episodes = cluster_fire_episodes(harm_dets, temporal_window_minutes=95.0)
 
     reclassified_dn = sum(1 for d in harm_dets if d.daynight_reclassified)
@@ -825,11 +850,20 @@ def main() -> None:
         ),
     ]
 
+    mekong_static = load_static_source_registry("mekong")
+    amazon_static = load_static_source_registry("amazon")
+    print(
+        f"           Static Source Registry: mekong={len(mekong_static)} cells, "
+        f"amazon={len(amazon_static)} cells"
+    )
+
     mekong_epochs = [
-        evaluate_epoch_slice("mekong", d, s, cal_model) for d, s in mekong_plan
+        evaluate_epoch_slice("mekong", d, s, cal_model, static_cells=mekong_static)
+        for d, s in mekong_plan
     ]
     amazon_epochs = [
-        evaluate_epoch_slice("amazon", d, s, cal_model) for d, s in amazon_plan
+        evaluate_epoch_slice("amazon", d, s, cal_model, static_cells=amazon_static)
+        for d, s in amazon_plan
     ]
 
     omega_by_yr = {
