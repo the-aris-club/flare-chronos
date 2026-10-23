@@ -413,7 +413,7 @@ def render_fig2_overpass_deduplication(
     p2 = c.draw_panel_box(
         (1140, 132, 2164, 1275),
         "B. Empirical Multi-Sensor Deduplication on Real NASA FIRMS Data (2012-2025)",
-        "Comparison of Raw Thermal Detections vs. Deduplicated Physical Fire Episodes (tau = 95 min, Elliptical Overlap)",
+        "Comparison of Raw Thermal Detections vs. Deduplicated Physical Fire Episodes (tau = 60 min, Elliptical Overlap)",
     )
     epochs = dedup_stats["empirical_epochs"]
     n_ep = len(epochs)

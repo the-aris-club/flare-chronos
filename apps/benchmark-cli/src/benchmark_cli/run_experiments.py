@@ -30,6 +30,7 @@ sys.path.insert(0, str(ROOT / "apps" / "benchmark-cli" / "src"))
 sys.path.insert(0, str(ROOT / "src"))
 
 from flare_chronos_core import (
+    FIRE_EPISODE_WINDOW_MINUTES,
     InstantaneousFootprint,
     SensorType,
     build_static_source_registry,
@@ -479,7 +480,9 @@ def evaluate_epoch_slice(
         calibration_model=cal_model,
         persistent_static_h3_res8=set(static_cells),
     )
-    episodes = cluster_fire_episodes(harm_dets, temporal_window_minutes=95.0)
+    episodes = cluster_fire_episodes(
+        harm_dets, temporal_window_minutes=FIRE_EPISODE_WINDOW_MINUTES
+    )
 
     reclassified_dn = sum(1 for d in harm_dets if d.daynight_reclassified)
     saa_rejected = sum(1 for d in harm_dets if d.is_saa_anomaly)

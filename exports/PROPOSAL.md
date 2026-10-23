@@ -71,7 +71,7 @@ Khi ghép nối trực tiếp chuỗi dữ liệu **MODIS Collection 6.1** (*Gig
 | :--- | :--- | :--- | :--- | :--- |
 | **1. Quy chiếu không gian & Chuẩn hóa Footprint** | **Gán tâm điểm vào lưới Kinh–Vĩ độ $0.05^\circ$ (CMG Point Binning)**: Gán $(lat, lon)$ vào ô vuông $0.05^\circ \times 0.05^\circ$. | **Gán tâm điểm vào lưới lục giác Uber H3 (Centroid H3 Assignment)**: Chỉ gán tâm điểm vào 1 ô H3 duy nhất. | **Khôi phục Elip Định hướng $\Delta S(\theta)\times\Delta T(\theta)$ + Phân bổ Trọng số Cầu phương 13 điểm lên Lưới Kép Uber H3 Res 7 ($5.16\text{ km}^2$) & Res 8 ($0.74\text{ km}^2$)**. | Ô vuông kinh-vĩ độ bị co diện tích theo $\cos\phi$; gán tâm điểm bỏ qua việc 1 pixel MODIS rìa quét ($9.69\text{ km}^2$) phủ lên tới **13 ô H3 Res 8**. Phép cầu phương 13 điểm bảo toàn tuyệt đối tổng năng lượng ($\sum_h w_{p,h} = 1.0$). |
 | **2. Hiệu chuẩn chéo Độ nhạy & $\text{FRP}$** | **Nhân hệ số hằng số toàn cầu (Global Constant Scaling)**: $\text{FRP}_{\text{harm}} = k \cdot \text{FRP}_{\text{MODIS}}$. | **Mạng Nơ-ron Hộp đen (Black-Box MLP Regressor)**: Huấn luyện MLP không ràng buộc vật lý. | **Toán tử 2 Giai đoạn (Two-Stage Operator)**: Bước 1 bù đuôi phân phối theo góc quét $\text{FRP}_{\text{lim}}(\theta, \text{SZA})$; Bước 2 khớp **Power-Law + Empirical Quantile Mapping (EQM)** trên cặp đồng thời Aqua–SNPP. | Tỷ số VIIRS/MODIS biến thiên mạnh theo góc quét $\theta$ (từ $1.3\times$ ở nadir lên $>6\times$ ở rìa quét). Toán tử 2 giai đoạn giảm $70,2\%$ khoảng cách KS ($D_{\text{KS}} = 0.0348$ trên $N=11.553$ cặp ô lưới) và bảo toàn tính giải thích vật lý 100%. |
-| **3. Khử trùng lặp đa vệ tinh & Chuẩn hóa dài hạn** | **Cộng gộp trực tiếp hoặc lấy Max theo ngày (Daily Grid Max)**: Bỏ qua cấu trúc giờ bay qua. | **Lọc khoảng cách cố định $1\text{ km}$**: Không xét diện tích elip theo góc quét và tần suất quét qua các thập kỷ. | **Gom cụm Không-Thời gian theo Bán kính Elip ($\tau = 95\text{ phút}$) thành Sự kiện cháy độc lập (`Fire Episode`) + Chia Hệ số Nỗ lực Quan sát Hiệu dụng $\Omega(y, \phi)$**. | Gom chính xác đoàn tàu vệ tinh chiều (`NOAA-20` `12:40`, `NOAA-21` `13:05`, `S-NPP` `13:30`, `Aqua` `13:30 MLT`) thành 1 sự kiện cháy duy nhất với độ phức tạp tuyến tính $O(N)$ qua băm không gian. |
+| **3. Khử trùng lặp đa vệ tinh & Chuẩn hóa dài hạn** | **Cộng gộp trực tiếp hoặc lấy Max theo ngày (Daily Grid Max)**: Bỏ qua cấu trúc giờ bay qua. | **Lọc khoảng cách cố định $1\text{ km}$**: Không xét diện tích elip theo góc quét và tần suất quét qua các thập kỷ. | **Gom cụm Không-Thời gian theo Bán kính Elip ($\tau = 60	ext{ phút}$) thành Sự kiện cháy độc lập (`Fire Episode`) + Chia Hệ số Nỗ lực Quan sát Hiệu dụng $\Omega(y, \phi)$**. | Gom chính xác đoàn tàu vệ tinh chiều (`NOAA-20` `12:40`, `NOAA-21` `13:05`, `S-NPP` `13:30`, `Aqua` `13:30 MLT`) thành 1 sự kiện cháy duy nhất với độ phức tạp tuyến tính $O(N)$ qua băm không gian. |
 | **4. Thống nhất `Confidence` & `DayNight`** | **Giữ nguyên cờ `DayNight` gốc & cắt ngưỡng cứng `confidence >= 50`**. | **Quy đổi bậc thang cố định (Step Mapping): `low=30, nom=60, high=90`**. | **Tính lại góc thiên đỉnh Mặt Trời tuyệt đối $\text{SZA}(\phi, \lambda, t_{\text{UTC}}) < 85^\circ$ + Hàm Logistic Nhiệt $\Delta T_{45}$ + Bộ lọc Vật lý SAA & Nguồn nhiệt tĩnh**. | Khử hoàn toàn sai lệch cờ `DayNight` của luồng `1.0NRT/2.0NRT` và tự động lọc hàng nghìn xung nhiễu proton ban đêm của S-NPP và NOAA-20 trong vùng SAA Nam Mỹ. |
 
 ### 3.2. Sơ đồ kiến trúc tổng thể 5 tầng (5-Tier Conceptual Architecture)
@@ -98,7 +98,7 @@ Lõi Đồng Bộ Hóa Vật Lý & Thống Kê 5 Giai Đoạn (Physics-Guided Ha
         S2["Giai Đoạn 2: Xác Suất Bayes P(fire) & Lọc Nhiễu SAA / Nguồn Tĩnh"]
         S3["Giai Đoạn 3: Khôi Phục Elip ΔS×ΔT & Cầu Phương Lưới Kép Uber H3"]
         S4["Giai Đoạn 4: Toán Tử Bức Xạ 4 μm & Hiệu Chuẩn Phân Vị Aqua–SNPP"]
-        S5["Giai Đoạn 5: Gom Cụm Sự Kiện Cháy (τ = 95m) & Nỗ Lực Quan Sát Ω(y, φ)"]
+        S5["Giai Đoạn 5: Gom Cụm Sự Kiện Cháy (τ = 60m) & Nỗ Lực Quan Sát Ω(y, φ)"]
     end
 
     subgraph TIER4["4. Khối Dữ Liệu Không-Thời Gian & Động Cơ Lịch Hoạt Động Cháy 26 Năm"]
@@ -135,7 +135,7 @@ sequenceDiagram
     Engine->>Engine: 2. Lọc xung nhiễu proton đêm vùng SAA & Tách nguồn nhiệt công nghiệp tĩnh
     Engine->>Engine: 3. Giải ngược góc quét θ -> Dựng elip ΔS×ΔT -> Phân bổ trọng số H3 Res 7 & 8
     Engine->>Engine: 4. Áp dụng toán tử giới hạn góc quét FRP_lim(θ) & Ánh xạ phân vị EQM
-    Engine->>Engine: 5. Gom cụm sự kiện cháy không-thời gian (τ = 95 phút) & Chia nỗ lực Ω(y, φ)
+    Engine->>Engine: 5. Gom cụm sự kiện cháy không-thời gian (τ = 60 phút) & Chia nỗ lực Ω(y, φ)
     Engine-->>Cube: Cập nhật thực thể Sự kiện cháy & Tổng hợp ma trận 26 Năm × 73 Pentads
     Cube-->>User: Trả về Lịch Hoạt Động Cháy (HFD, HRF, SFAI Z-Score) & Đa giác GeoJSON
 ```
@@ -167,7 +167,9 @@ sequenceDiagram
 
 Trên vệ tinh **Terra** và **Aqua** (độ cao quỹ đạo danh định $h_{\text{MODIS}} = 705\text{ km}$, bán kính quỹ đạo $r = R_e + h_{\text{MODIS}} = 7083.137\text{ km}$, bước góc lấy mẫu $s = 0.0014184397\text{ rad}$), kích thước thực tế của điểm ảnh tại góc quét $\theta \in [0, 55^\circ]$ được xác định bởi hệ phương trình hình học cầu (*Ichoku & Kaufman, 2005; Giglio et al., 2016*):
 
-$$\Delta S_{\text{MODIS}}(\theta) = R_e \cdot s \left( \frac{\cos\theta}{\sqrt{(R_e / r)^2 - \sin^2\theta}} - 1 \right)$$
+$$\Delta S_{\text{MODIS}}(\theta) = r \cdot s \left( \cos\theta - \sqrt{(R_e / r)^2 - \sin^2\theta} \right) \cdot \frac{R_e}{r} \cdot \frac{1}{\sqrt{(R_e / r)^2 - \sin^2\theta}}$$
+
+Tức $\Delta S = \frac{R_e}{r} \cdot \frac{\Delta T}{\sqrt{(R_e / r)^2 - \sin^2\theta}}$: kích thước theo phương quét là kích thước dọc quỹ đạo $\Delta T$ nhân hệ số cong Trái Đất $\frac{R_e}{r}$ và hệ số giãn góc nhìn xiên $1/\sqrt{(R_e / r)^2 - \sin^2\theta}$. Dạng này tương đương đại số với $R_e \cdot s \left( \frac{\cos\theta}{\sqrt{(R_e / r)^2 - \sin^2\theta}} - 1 \right)$ (kiểm chứng số: cùng giá trị $1.000$, $1.159$, $1.943$, $4.830\text{ km}$ tại $0^\circ, 20^\circ, 40^\circ, 55^\circ$) và cho $\Delta S(0^\circ) = s\,h = 1.000\text{ km}$.
 
 $$\Delta T_{\text{MODIS}}(\theta) = r \cdot s \left( \cos\theta - \sqrt{(R_e / r)^2 - \sin^2\theta} \right)$$
 
@@ -224,8 +226,8 @@ $$\text{FRP}_{\text{lim, VIIRS}}(A_p, \text{SZA}) = \left( 0.50 + 0.65 \cdot \ma
 
 ### 4.5. Giai đoạn 4 & 5: Khử trùng lặp quỹ đạo đa vệ tinh, Nỗ lực quan sát $\Omega(y, \phi)$ & Chỉ số Lịch Hoạt Động Cháy
 
-1. **Gom cụm Không-Thời gian đa vệ tinh ($\tau_{\text{cluster}} = 95\text{ phút}$):**
-   Hai phát hiện $d_i, d_j$ từ các vệ tinh khác nhau (ví dụ đoàn tàu chiều `NOAA-20` lúc `12:40 MLT`, `NOAA-21` lúc `13:05 MLT`, `Suomi-NPP` lúc `13:30 MLT` và `Aqua` lúc `13:30 MLT`) được gom vào cùng một **Sự kiện cháy vật lý (`Fire Episode`) $E_k$** nếu chênh lệch thời gian $\Delta t \le 95\text{ phút}$ và thỏa mãn điều kiện giao cắt bán kính footprint hiệu dụng:
+1. **Gom cụm Không-Thời gian đa vệ tinh ($\tau_{\text{cluster}} = 60	ext{ phút}$):**
+   Hai phát hiện $d_i, d_j$ từ các vệ tinh khác nhau (ví dụ đoàn tàu chiều `NOAA-20` lúc `12:40 MLT`, `NOAA-21` lúc `13:05 MLT`, `Suomi-NPP` lúc `13:30 MLT` và `Aqua` lúc `13:30 MLT`) được gom vào cùng một **Sự kiện cháy vật lý (`Fire Episode`) $E_k$** nếu chênh lệch thời gian $\Delta t \le 60\text{ phút}$ và thỏa mãn điều kiện giao cắt bán kính footprint hiệu dụng:
    $$d_{\text{Haversine}}(x_i, x_j) \le \max\!\left( 1.35\text{ km}, \, \sqrt{\frac{A_{p_i}}{\pi}} + \sqrt{\frac{A_{p_j}}{\pi}} + 0.65\text{ km} \right) \quad \text{hoặc} \quad \text{H3}_8(x_i) = \text{H3}_8(x_j)$$
    Xác suất của sự kiện cháy $E_k$ từ $m$ lần phát hiện độc lập được tổng hợp theo quy tắc Bayes:
    $$P_{\text{episode}}(E_k) = 1 - \prod_{i=1}^{m} \left( 1 - 0.85 \cdot P_{\text{fire}}(d_i) \right)$$
@@ -273,17 +275,17 @@ Khu vực Đông Nam Á lục địa (bao gồm Tây Nguyên, Tây Bắc Việt 
 
 | Năm (Epoch) | Tổ Hợp Cảm Biến Hoạt Động | Điểm Nóng Thô Theo Từng Nguồn | Tổng Điểm Nóng Thô (`Raw Sum`) | Sự Kiện Cháy Vật Lý (`Fire Episode`) | Hệ Số Nén Trùng Lặp | Nỗ Lực Quan Sát $\Omega(y, \phi)$ | Sự Kiện Chuẩn Hóa `Flare-Chronos` | Chỉ Số Thô (`2005=100`) | Chỉ Số Chuẩn Hóa (`2005=100`) |
 | :---: | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **2005** | `MODIS` (Terra+Aqua) | MODIS: `3.580` | **3.580** | 2.178 | $1.68\times$ | $1.0084$ | **7.883,5** | `100,0` | **`100,0`** |
-| **2007** *(Hạn khô)* | `MODIS` (Terra+Aqua) | MODIS: `11.296` | **11.296** | 6.693 | $1.78\times$ | $1.0084$ | **24.226,0** | `315,5` | **`297,8`** *(Đỉnh hạn kỷ lục)* |
-| **2010** *(El Niño)* | `MODIS` (Terra+Aqua) | MODIS: `8.222` | **8.222** | 4.659 | $1.85\times$ | $1.0084$ | **16.863,7** | `229,7` | **`208,3`** *(Đỉnh hạn)* |
-| **2012** *(+S-NPP)* | `MODIS` + `S-NPP` | MODIS: `7.297`<br/>SNPP: `25.720` | **33.017** | 17.634 | $1.95\times$ | $1.4925$ | **11.815,1** | `922,3` *(+822% ảo)* | **`147,2`** |
-| **2016** *(Siêu El Niño)* | `MODIS` + `S-NPP` | MODIS: `6.564`<br/>SNPP: `36.778` | **43.342** | 23.129 | $1.92\times$ | $1.4925$ | **15.496,8** | `1.210,7` | **`196,0`** *(Đỉnh hạn)* |
-| **2019** *(+NOAA-20)* | `MODIS` + `S-NPP` + `NOAA-20` | MODIS: `5.054`<br/>SNPP: `23.677`<br/>NOAA20: `23.243` | **51.974** | 25.952 | $2.06\times$ | $1.7950$ | **11.659,6** | `1.451,8` *(+1.352% ảo)* | **`147,3`** |
-| **2020** | `MODIS` + `S-NPP` + `NOAA-20` | MODIS: `4.827`<br/>SNPP: `23.050`<br/>NOAA20: `20.275` | **48.152** | 22.958 | $2.16\times$ | $1.7950$ | **10.314,5** | `1.345,0` | **`129,9`** |
-| **2023** | `MODIS` + `S-NPP` + `NOAA-20` | MODIS: `4.086`<br/>SNPP: `19.824`<br/>NOAA20: `18.959` | **42.869** | 22.675 | $1.92\times$ | $1.7950$ | **10.187,3** | `1.197,5` | **`120,3`** |
-| **2024** *(+NOAA-21)* | `MODIS` + `S-NPP` + `NOAA-20` + `NOAA-21` | MODIS: `3.446`<br/>SNPP: `16.020`<br/>NOAA20: `15.651`<br/>NOAA21: `15.871` | **50.988** | 22.893 | $2.26\times$ | $2.0975$ | **7.374,6** | **`1.424,2`** *(+1.324,2% ảo!)* | **`94,2`** *(Thực tế giảm 5,8%!)* |
-| **2025** | `MODIS` + `S-NPP` + `NOAA-20` + `NOAA-21` | MODIS: `2.282`<br/>SNPP: `10.148`<br/>NOAA20: `9.754`<br/>NOAA21: `9.264` | **31.448** | 14.396 | $2.21\times$ | $2.0975$ | **4.637,4** | `878,4` | **`59,5`** |
-| **2026** | `MODIS` + `S-NPP` + `NOAA-20` + `NOAA-21` | MODIS: `2.016`<br/>SNPP: `11.148`<br/>NOAA20: `11.173`<br/>NOAA21: `10.315` | **34.652** | 16.134 | $2.20\times$ | $2.0975$ | **5.197,3** | `967,9` | **`56,3`** |
+| **2005** | `MODIS` (Terra+Aqua) | MODIS: `3.580` | **3.580** | 2.179 | $1.68\times$ | $1.0084$ | **7.887,1** | `100,0` | **`100,0`** |
+| **2007** *(Hạn khô)* | `MODIS` (Terra+Aqua) | MODIS: `11.296` | **11.296** | 6.696 | $1.78\times$ | $1.0084$ | **24.236,8** | `315,5` | **`297,8`** *(Đỉnh hạn kỷ lục)* |
+| **2010** *(El Niño)* | `MODIS` (Terra+Aqua) | MODIS: `8.222` | **8.222** | 4.661 | $1.85\times$ | $1.0084$ | **16.870,9** | `229,7` | **`208,3`** *(Đỉnh hạn)* |
+| **2012** *(+S-NPP)* | `MODIS` + `S-NPP` | MODIS: `7.297`<br/>SNPP: `25.720` | **33.017** | 17.669 | $1.95\times$ | $1.4925$ | **11.838,5** | `922,3` *(+822% ảo)* | **`147,2`** |
+| **2016** *(Siêu El Niño)* | `MODIS` + `S-NPP` | MODIS: `6.564`<br/>SNPP: `36.778` | **43.342** | 23.239 | $1.92\times$ | $1.4925$ | **15.570,5** | `1.210,7` | **`196,0`** *(Đỉnh hạn)* |
+| **2019** *(+NOAA-20)* | `MODIS` + `S-NPP` + `NOAA-20` | MODIS: `5.054`<br/>SNPP: `23.677`<br/>NOAA20: `23.243` | **51.974** | 26.061 | $2.06\times$ | $1.7950$ | **11.708,6** | `1.451,8` *(+1.352% ảo)* | **`147,3`** |
+| **2020** | `MODIS` + `S-NPP` + `NOAA-20` | MODIS: `4.827`<br/>SNPP: `23.050`<br/>NOAA20: `20.275` | **48.152** | 23.090 | $2.16\times$ | $1.7950$ | **10.373,8** | `1.345,0` | **`129,9`** |
+| **2023** | `MODIS` + `S-NPP` + `NOAA-20` | MODIS: `4.086`<br/>SNPP: `19.824`<br/>NOAA20: `18.959` | **42.869** | 22.850 | $1.92\times$ | $1.7950$ | **10.266,0** | `1.197,5` | **`120,3`** |
+| **2024** *(+NOAA-21)* | `MODIS` + `S-NPP` + `NOAA-20` + `NOAA-21` | MODIS: `3.446`<br/>SNPP: `16.020`<br/>NOAA20: `15.651`<br/>NOAA21: `15.871` | **50.988** | 23.750 | $2.26\times$ | $2.0975$ | **7.650,7** | **`1.424,2`** *(+1.324,2% ảo!)* | **`94,2`** *(Thực tế giảm 5,8%!)* |
+| **2025** | `MODIS` + `S-NPP` + `NOAA-20` + `NOAA-21` | MODIS: `2.282`<br/>SNPP: `10.148`<br/>NOAA20: `9.754`<br/>NOAA21: `9.264` | **31.448** | 15.046 | $2.21\times$ | $2.0975$ | **4.846,8** | `878,4` | **`59,5`** |
+| **2026** | `MODIS` + `S-NPP` + `NOAA-20` + `NOAA-21` | MODIS: `2.016`<br/>SNPP: `11.148`<br/>NOAA20: `11.173`<br/>NOAA21: `10.315` | **34.652** | 17.114 | $2.20\times$ | $2.0975$ | **5.513,0** | `967,9` | **`56,3`** |
 
 > [!IMPORTANT]
 > **Phát hiện chấn động từ chuỗi dữ liệu thực tế 26 năm (`2001–2026`) tại Tiểu vùng sông Mekong & Việt Nam:**  
@@ -304,12 +306,12 @@ Khu vực phía Nam lưu vực Amazon (bang Mato Grosso và Pará, Brazil) đạ
 | **2005** *(Hạn lớn)* | `MODIS` (Terra+Aqua) | MODIS: `13.804` | **13.804** | 6.748 | $2.19\times$ | 626 | **17.169,6** | `100,0` | **`100,0`** |
 | **2007** *(Hạn lớn)* | `MODIS` (Terra+Aqua) | MODIS: `13.033` | **13.033** | 6.425 | $2.17\times$ | 494 | **16.347,8** | `94,4` | **`95,1`** |
 | **2010** *(Siêu hạn)* | `MODIS` (Terra+Aqua) | MODIS: `16.304` | **16.304** | 7.390 | $2.45\times$ | 929 | **18.803,1** | `118,1` | **`105,6`** |
-| **2012** *(+S-NPP)* | `MODIS` + `S-NPP` | MODIS: `6.677`<br/>SNPP: `26.807` | **33.484** | 11.589 | $3.10\times$ | 4.145 | **7.813,0** | `242,6` *(Tăng ảo)* | **`45,4`** *(Giảm phá rừng thực tế)* |
-| **2019** *(+NOAA-20)* | `MODIS` + `S-NPP` + `NOAA-20` | MODIS: `4.770`<br/>SNPP: `16.882`<br/>NOAA20: `17.099` | **38.751** | 10.263 | $3.98\times$ | 5.024 | **4.639,4** | `280,7` | **`27,5`** |
-| **2020** | `MODIS` + `S-NPP` + `NOAA-20` | MODIS: `3.506`<br/>SNPP: `22.031`<br/>NOAA20: `20.575` | **46.112** | 12.045 | $4.13\times$ | 7.347 | **5.444,9** | `334,0` | **`31,4`** |
-| **2024** *(Hạn 2024 + 4 luồng)* | `MODIS` + `S-NPP` + `NOAA-20` + `NOAA-21` | MODIS: `8.151`<br/>SNPP: `35.647`<br/>NOAA20: `35.765`<br/>NOAA21: `32.842` | **112.405** | 24.501 | **$4.98\times$** | **18.097** | **7.941,1** | **`814,3`** *(+714,3% ảo!)* | **`45,6`** *(đo được, không phải đỉnh 2020s)* |
-| **2025** | `MODIS` + `S-NPP` + `NOAA-20` + `NOAA-21` | MODIS: `1.420`<br/>SNPP: `6.517`<br/>NOAA20: `5.859`<br/>NOAA21: `6.233` | **20.029** | 3.379 | $6.30\times$ | 2.262 | **1.095,2** | `145,1` | **`6,4`** |
-| **2026** | `MODIS_NRT` + `S-NPP` + `NOAA-20` + `NOAA-21` | MODIS: `3.555`<br/>SNPP: `14.534`<br/>NOAA20: `13.894`<br/>NOAA21: `13.406` | **45.389** | 7.974 | $6.48\times$ | 6.174 | **2.584,5** | `328,8` | **`25,8`** |
+| **2012** *(+S-NPP)* | `MODIS` + `S-NPP` | MODIS: `6.677`<br/>SNPP: `26.807` | **33.484** | 11.601 | $3.10\times$ | 4.145 | **7.821,1** | `242,6` *(Tăng ảo)* | **`45,4`** *(Giảm phá rừng thực tế)* |
+| **2019** *(+NOAA-20)* | `MODIS` + `S-NPP` + `NOAA-20` | MODIS: `4.770`<br/>SNPP: `16.882`<br/>NOAA20: `17.099` | **38.751** | 10.515 | $3.98\times$ | 5.024 | **4.753,3** | `280,7` | **`27,5`** |
+| **2020** | `MODIS` + `S-NPP` + `NOAA-20` | MODIS: `3.506`<br/>SNPP: `22.031`<br/>NOAA20: `20.575` | **46.112** | 12.068 | $4.13\times$ | 7.347 | **5.455,3** | `334,0` | **`31,4`** |
+| **2024** *(Hạn 2024 + 4 luồng)* | `MODIS` + `S-NPP` + `NOAA-20` + `NOAA-21` | MODIS: `8.151`<br/>SNPP: `35.647`<br/>NOAA20: `35.765`<br/>NOAA21: `32.842` | **112.405** | 26.271 | **$4.98\times$** | **18.097** | **8.514,7** | **`814,3`** *(+714,3% ảo!)* | **`45,6`** *(đo được, không phải đỉnh 2020s)* |
+| **2025** | `MODIS` + `S-NPP` + `NOAA-20` + `NOAA-21` | MODIS: `1.420`<br/>SNPP: `6.517`<br/>NOAA20: `5.859`<br/>NOAA21: `6.233` | **20.029** | 3.780 | $6.30\times$ | 2.262 | **1.225,1** | `145,1` | **`6,4`** |
+| **2026** | `MODIS_NRT` + `S-NPP` + `NOAA-20` + `NOAA-21` | MODIS: `3.555`<br/>SNPP: `14.534`<br/>NOAA20: `13.894`<br/>NOAA21: `13.406` | **45.389** | 8.979 | $6.48\times$ | 6.174 | **2.910,2** | `328,8` | **`25,8`** |
 
 ### 5.4. Kiểm chứng đối xứng pha mùa vụ 12 tháng trong năm (Intra-Annual Phenology Envelope)
 
@@ -343,12 +345,12 @@ Khu vực phía Nam lưu vực Amazon (bang Mato Grosso và Pará, Brazil) đạ
 ```text
 +----------------------------------------------------------------------------------------------------------------------+
 | [🔥 FLARE-CHRONOS]  AOI: [ Tiểu vùng sông Mekong & Việt Nam v ]   Giai đoạn: [2000 - 2026]   Lưới: [H3 Res 7 (5km)] |
-| Bộ lọc Vật lý: [x] Chuẩn hóa SZA < 85°  [x] Lọc nhiễu SAA Đêm  [x] Tách Nguồn Nhiệt Tĩnh  [x] Khử Trùng Lặp (95m)   |
+| Bộ lọc Vật lý: [x] Chuẩn hóa SZA < 85°  [x] Lọc nhiễu SAA Đêm  [x] Tách Nguồn Nhiệt Tĩnh  [x] Khử Trùng Lặp (60m)   |
 +-------------------------------------------------------+--------------------------------------------------------------+
 |                                                       |  [BẢNG ĐIỀU KHIỂN ĐỐI CHỨNG TRƯỚC / SAU ĐỒNG BỘ HÓA]         |
 |   [KHUNG BẢN ĐỒ KHÔNG GIAN ĐA TẦNG - WEBGL FOOTPRINT] |  +----------------+----------------+----------------+        |
 |                                                       |  | Raw Detections | Fire Episodes  | SFAI Z-Score   |        |
-|      _.-""""-._      (Elip MODIS Rìa Quét: 4.8x2.0km) |  |  43,342 (Thô)  |  23,129 (Chuẩn)|  +2.64 sigma   |        |
+|      _.-""""-._      (Elip MODIS Rìa Quét: 4.8x2.0km) |  |  43,342 (Thô)  |  23,239 (Chuẩn)|  +2.64 sigma   |        |
 |    .'          '.     o o (Cụm VIIRS 375m bên trong)  |  | (+1.110,7% ảo) |  (Khử trùng lặp|  [SEVERE RISK] |        |
 |   /   o  o  o    \                                    |  +----------------+----------------+----------------+        |
 |  |       o        |   / \ / \ / \ (Lưới Lục Giác     |                                                              |
@@ -409,7 +411,7 @@ Khu vực phía Nam lưu vực Amazon (bang Mato Grosso và Pará, Brazil) đạ
 | :--- | :--- | :--- |
 | **1. Validity (Tính Xác Thực Khoa Học)** | Giải pháp có dựa trên định luật vật lý cảm biến và toán học vững chắc không? Có số liệu kiểm chứng thực tế không? | Kiểm chứng trực tiếp trên **$1.609.182$ điểm nóng thực tế từ NASA LANCE FIRMS** phủ trọn 26 năm liên tục (`2001–2026`); giải phương trình cầu dải quét $\Delta S(\theta)\times\Delta T(\theta)$, toán tử quan sát bức xạ $4\,\mu\text{m}$ và hiệu chuẩn trên **$11.553$ cặp ô lưới đồng thời Aqua–SNPP**, giảm **$70,2\%$** sai số phân phối Kolmogorov-Smirnov ($D_{\text{KS}}$ từ $0.1166 \to 0.0348$, $R^2$ đạt $0.7641$). | **Bằng chứng bổ sung từ tầng nhận thức kép:** chạy toàn bộ `20` Use Case trên mô hình thật → **20/20 vượt qua cổng kiểm chứng định lượng**, `0` số liệu thiếu nguồn, `0` lần tự sửa lỗi; `67` bài kiểm thử ngoại tuyến + `6` bài trên mô hình thật, trong đó có **11 lỗi của chính bộ kiểm chứng** được phát hiện và sửa nhờ vòng lặp chạy trên mô hình thật.
 | **2. Relevance (Tính Bám Sát Đề Bài)** | Có giải quyết trọn vẹn bài toán bất đồng nhất giữa MODIS và VIIRS để dựng ra *Burning Activity Calendar* không? | Giải quyết toàn diện cả **5 rào cản liên cảm biến** (Footprint Bow-tie, Độ nhạy FRP, Thang Confidence & nhiễu SAA, Trùng lặp quỹ đạo 5 vệ tinh, Cờ NRT/Standard SZA) để xuất ra ma trận **26 Năm × 73 Pentads** cùng chỉ số dị thường **$\text{SFAI Z-Score}$**. |
-| **3. Creativity (Tính Sáng Tạo Đột Phá)** | Phương pháp tiếp cận có mới mẻ, vượt qua cách gom ô lưới kinh-vĩ độ hay nhân hệ số tuyến tính đơn giản không? | Thay thế điểm tròn vô hướng bằng **Phép phân bổ trọng số diện tích elip định hướng lên lưới lục giác kép Uber H3 (Res 7 & Res 8)** kết hợp **Khử trùng lặp sự kiện cháy không-thời gian ($\tau = 95\text{ phút}$)** và chuẩn hóa theo **Nỗ lực quan sát hiệu dụng $\Omega(y, \phi)$**. |
+| **3. Creativity (Tính Sáng Tạo Đột Phá)** | Phương pháp tiếp cận có mới mẻ, vượt qua cách gom ô lưới kinh-vĩ độ hay nhân hệ số tuyến tính đơn giản không? | Thay thế điểm tròn vô hướng bằng **Phép phân bổ trọng số diện tích elip định hướng lên lưới lục giác kép Uber H3 (Res 7 & Res 8)** kết hợp **Khử trùng lặp sự kiện cháy không-thời gian ($\tau = 60	ext{ phút}$)** và chuẩn hóa theo **Nỗ lực quan sát hiệu dụng $\Omega(y, \phi)$**. |
 | **4. Impact (Tác Động Thực Tiễn)** | Giải pháp giúp ích gì cho lực lượng cứu hỏa, quản lý rừng và nghiên cứu biến đổi khí hậu khi MODIS và Suomi-NPP ngừng hoạt động? | Ngăn chặn sai lầm chính sách do "bẫy nhảy bậc giả tạo $+1.324,2\%$" khi gộp thô đa cảm biến; tách bạch chính xác mùa đốt phụ phẩm nông nghiệp định kỳ với khủng hoảng cháy rừng El Niño ngoài mùa vụ tại **Việt Nam / Tiểu vùng Mekong** và **Rừng Amazon**. | **Bổ sung từ tầng nhận thức kép:** báo cáo chỉ được **phát hành sau khi con người phê duyệt** đối với mọi hành động hiện trường (quyết định từ chối ⇒ không phát hành gì); tầng báo cáo trả thẻ dữ kiện và cảnh báo khẩn trong **vài mili giây, không gọi mô hình** ⇒ vẫn dùng được khi nhà cung cấp mô hình không sẵn sàng.
 | **5. Presentation (Trình Bày & Trực Quan Hóa)** | Câu chuyện có súc tích, dễ hiểu và có sản phẩm thực thi rõ ràng không? | Bộ 5 biểu đồ khoa học chuẩn xuất bản cùng giao diện đồng bộ 4 khung nhìn (Elip Footprint + Lưới H3 + Ma trận 26×73 Pentad + Đồng hồ mùa vụ cực). |
 

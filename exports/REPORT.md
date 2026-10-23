@@ -59,7 +59,7 @@ Song hành cùng bản thuyết minh dự án [`exports/PROPOSAL.md`](PROPOSAL.m
 | **`ThermalDetection`** | Bản ghi phát hiện dị thường nhiệt thô từ 1 lượt bay qua của 1 cảm biến (`MODIS` hoặc `VIIRS`) trước khi hiệu chuẩn liên cảm biến. | Giữ nguyên trạng thái thô (`scan_km`, `track_km`, `bright_t4_k`, `bright_t5_k`, `frp_mw`, `raw_confidence`, `raw_daynight`). |
 | **`InstantaneousFootprint`** | Hình elip mặt đất thực tế của điểm ảnh cảm biến tại góc quét $\theta$, có bán trục $(\frac{\Delta S}{2}, \frac{\Delta T}{2})$ và xoay theo góc phương vị vệt quỹ đạo $\alpha_{\text{track}}$. | $\text{Area} = \Delta S(\theta) \times \Delta T(\theta)$; phân bổ trọng số diện tích lên lưới H3 luôn thỏa mãn $\sum_{h \in \mathcal{H}} w_{p,h} \equiv 1.0000$. |
 | **`HarmonizedDetection`** | Điểm nóng đã được chuẩn hóa sang không gian tương đương VIIRS (`VIIRS-Equivalent Space`), kèm nhãn `harmonized_daynight` theo $\text{SZA} < 85^\circ$ và xác suất $P_{\text{fire}} \in [0, 1]$. | Đã gắn cờ tách biệt `is_saa_anomaly` (nhiễu hạt Nam Đại Tây Dương) và `is_static_source` (nguồn nhiệt công nghiệp tĩnh). |
-| **`FireEpisode`** | Một sự kiện cháy vật lý độc lập trên mặt đất được hợp nhất từ $m \ge 1$ lần phát hiện trùng lặp của nhiều vệ tinh trong cửa sổ $\tau = 95\text{ phút}$. | Không bao giờ cộng dồn $\text{FRP}$ của các lượt quét trùng lặp; sử dụng cực đại có trọng số tin cậy và chuẩn hóa theo nỗ lực quan sát $\Omega(y, \phi)$. |
+| **`FireEpisode`** | Một sự kiện cháy vật lý độc lập trên mặt đất được hợp nhất từ $m \ge 1$ lần phát hiện trùng lặp của nhiều vệ tinh trong cửa sổ $\tau = 60	ext{ phút}$. | Không bao giờ cộng dồn $\text{FRP}$ của các lượt quét trùng lặp; sử dụng cực đại có trọng số tin cậy và chuẩn hóa theo nỗ lực quan sát $\Omega(y, \phi)$. |
 | **`BurningCalendarCell`** | Đơn vị phân tích chuẩn hóa của Lịch Hoạt Động Cháy tại năm $y \in [2000, 2026]$ và kỳ 5 ngày (**Pentad**) $p \in [1, 73]$. | Chứa bộ ba chỉ số bất biến theo số lượng vệ tinh: `hfd_per_100km2_day` ($\text{HFD}$), `hrf_mw_per_km2` ($\text{HRF}$), và `sfai_zscore` ($\text{SFAI}$). |
 
 ### 2.2. Các Quyết định Kiến trúc Cốt lõi (`docs/adr/0001..0005`)
@@ -68,7 +68,7 @@ Song hành cùng bản thuyết minh dự án [`exports/PROPOSAL.md`](PROPOSAL.m
 | :--- | :--- | :--- |
 | [**ADR-0001**](../docs/adr/0001-dual-resolution-h3-fractional-allocation.md) | Quy chiếu Elip Dải quét lên Lưới Lục giác Kép **Uber H3 Resolution 7 & 8** qua Cầu phương 13 điểm | Loại bỏ biến dạng diện tích theo $\cos\phi$ của lưới kinh-vĩ độ `0.05°` và khắc phục sai số gán tâm điểm khi 1 pixel MODIS rìa quét ($9.69\text{ km}^2$) phủ tới 13 ô H3 Res 8. |
 | [**ADR-0002**](../docs/adr/0002-two-stage-physics-guided-frp-harmonization.md) | Hiệu chuẩn Bức xạ Lửa ($\text{FRP}$) Hai Giai đoạn: Toán tử Góc quét + Ánh xạ Phân vị Thực nghiệm (EQM) | Khắc phục ngưỡng mù đám cháy nhỏ ở rìa quét MODIS ($\text{FRP}_{\text{lim}} = 41.2\text{ MW}$); giảm $70,2\%$ khoảng cách KS ($D_{\text{KS}} = 0.0348$, $R^2 = 0.7641$) trên $N = 11.553$ cặp ô lưới đồng thời Aqua–SNPP. |
-| [**ADR-0003**](../docs/adr/0003-spatio-temporal-episode-deduplication-and-effort-normalization.md) | Gom cụm Sự kiện Cháy Không-Thời gian ($\tau = 95\text{ phút}$) & Chuẩn hóa Nỗ lực Quan sát $\Omega(y, \phi)$ | Gom chính xác đoàn tàu vệ tinh chiều (`NOAA-20`, `NOAA-21`, `S-NPP`, `Aqua`) thành 1 `FireEpisode` duy nhất; khử hoàn toàn bước nhảy giả tạo $+1.351,8\%$ (năm 2019) và $+1.324,2\%$ (năm 2024) tại Tiểu vùng Mekong. |
+| [**ADR-0003**](../docs/adr/0003-spatio-temporal-episode-deduplication-and-effort-normalization.md) | Gom cụm Sự kiện Cháy Không-Thời gian ($\tau = 60	ext{ phút}$) & Chuẩn hóa Nỗ lực Quan sát $\Omega(y, \phi)$ | Gom chính xác đoàn tàu vệ tinh chiều (`NOAA-20`, `NOAA-21`, `S-NPP`, `Aqua`) thành 1 `FireEpisode` duy nhất; khử hoàn toàn bước nhảy giả tạo $+1.351,8\%$ (năm 2019) và $+1.324,2\%$ (năm 2024) tại Tiểu vùng Mekong. |
 | [**ADR-0004**](../docs/adr/0004-monorepo-deep-module-architecture.md) | Kiến trúc **Monorepo Deep-Module** tách biệt Lõi Vật lý Thuần túy (`Zero-I/O`) và Tầng Kết nối (`Seam`) | Cho phép kiểm thử toàn bộ 5 phương trình vật lý – thống kê trong `0.010 giây` không cần kết nối mạng, đồng thời hỗ trợ cả CLI thực nghiệm và Facade chấm điểm tự động. |
 | [**ADR-0005**](../docs/adr/0005-dual-system-langgraph-harness-and-deterministic-tool-gate.md) | Điều phối Nhận thức Kép **`LangGraph`** (System 1 $\leftrightarrow$ System 2) & Cổng Kiểm chứng Số học **`VerifiedFactsLedger`** | Cấm tuyệt đối LLM tự tính toán nhẩm; bắt buộc $100\%$ phép tính đi qua 23 `@tool` tất định và kiểm chứng từng con số trong phản hồi thông qua cạnh lặp tự sửa lỗi (`NumericGroundingVerifier`). |
 | [**ADR-0006**](../docs/adr/0006-explicit-endpoint-profiles-and-grounded-narrative-assembly.md) | Gắn mô hình bằng **Endpoint Profile** tường minh & **Grounded Narrative Assembly** | Cấm đọc cấu hình/credential agent trên máy người dùng; mọi tầng chỉ nhận `protocol` + `endpoint` + `model_id` + `api_key` + tham số. Mô hình viết diễn giải, **harness chèn mọi định lượng** từ `VerifiedFactsLedger`; thiếu key → lỗi ngay, không bao giờ bịa kết quả. |
@@ -102,7 +102,7 @@ Lõi Đồng Bộ Hóa Vật Lý Liên Cảm Biến (packages/harmonization-core
         STEP2["Bước 2: confidence_filter.py<br/>Logistic/Thermal Mapping + Lọc vùng SAA (11°E–110°W, 7°N–55°S) + Nguồn tĩnh"]
         STEP3["Bước 3: geometry_h3.py<br/>Giải ngược góc quét θ -> Elip ΔS×ΔT -> Phân bổ trọng số H3 Res 7 & Res 8"]
         STEP4["Bước 4: radiometric_calibrator.py<br/>Scan-Angle Observation Operator + Empirical Quantile Mapping (Aqua–SNPP)"]
-        STEP5["Bước 5: deduplication.py<br/>Spatio-Temporal Clustering (τ = 95 phút) -> FireEpisode / Ω(y, φ)"]
+        STEP5["Bước 5: deduplication.py<br/>Spatio-Temporal Clustering (τ = 60 phút) -> FireEpisode / Ω(y, φ)"]
     end
 
     subgraph CALENDAR_STORAGE["4. Tầng Lưu Trữ Phân Tích & Động Cơ Lịch Cháy (calendar_engine.py)"]
@@ -143,7 +143,7 @@ sequenceDiagram
     Core->>Core: 2. compute_unified_detection_probability() & filter_static_thermal_sources()
     Core->>Core: 3. reconstruct_instantaneous_footprint() & allocate_footprint_to_h3(Res 7, Res 8)
     Core->>Core: 4. apply_two_stage_frp_calibration() -> viirs_eq_frp_mw
-    Core->>Core: 5. cluster_fire_episodes(time_window_minutes=95.0) & compute_effective_observation_effort()
+    Core->>Core: 5. cluster_fire_episodes(time_window_minutes=60.0) & compute_effective_observation_effort()
     Core->>Core: 6. build_burning_activity_calendar() -> Ma trận 26 Năm × 73 Pentads (HFD, HRF, SFAI)
     Core-->>CLI: Trả về List[FireEpisode] & List[BurningCalendarCell]
     CLI->>Store: Lưu empirical_results.json & Gọi figure_renderer.py xuất 5 biểu đồ PNG
@@ -250,7 +250,7 @@ flare-chronos/
    - `fit_coincident_aqua_snpp_model(modis_aqua_Cell_frp, viirs_snpp_cell_frp, modis_mean_areas)`: Khớp tham số lũy thừa $(\alpha, \beta)$ bằng bình phương tối thiểu trong không gian logarit kết hợp bảng tra phân vị thực nghiệm 101 nút ($q \in [0, 1]$) và tính khoảng cách kiểm định **Kolmogorov-Smirnov ($D_{\text{KS}}$)** trước/sau hiệu chuẩn.
 
 6. **[`deduplication.py`](../packages/harmonization-core/src/flare_chronos_core/deduplication.py) — Gom cụm Sự kiện Cháy $O(N)$ & Chuẩn hóa Nỗ lực Quan sát $\Omega(y, \phi)$:**
-   - `cluster_fire_episodes(detections, time_window_minutes=95.0)`: Sử dụng cấu trúc **Băm Không gian (`Spatial Hash Buckets`, kích thước ô $0.05^\circ \approx 5.5\text{ km}$)** kết hợp duyệt cửa sổ trượt thời gian để gom cụm hàng trăm nghìn điểm nóng trong thời gian tuyến tính $O(N)$ thay vì $O(N^2)$!
+   - `cluster_fire_episodes(detections, time_window_minutes=60.0)`: Sử dụng cấu trúc **Băm Không gian (`Spatial Hash Buckets`, kích thước ô $0.05^\circ \approx 5.5\text{ km}$)** kết hợp duyệt cửa sổ trượt thời gian để gom cụm hàng trăm nghìn điểm nóng trong thời gian tuyến tính $O(N)$ thay vì $O(N^2)$!
    - `compute_effective_observation_effort(year, lat_deg)`: Tính hệ số nỗ lực quan sát hiệu dụng $\Omega(y, \phi)$ theo cấu hình chùm vệ tinh từng năm và hệ số hội tụ quỹ đạo cực theo vĩ độ $\frac{1}{\cos\phi}$.
 
 7. **[`calendar_engine.py`](../packages/harmonization-core/src/flare_chronos_core/calendar_engine.py) — Động cơ Lịch Hoạt Động Cháy `26 Năm × 73 Pentads`:**
@@ -366,7 +366,7 @@ Thông qua [`fetch_real_firms.py`](../apps/benchmark-cli/src/benchmark_cli/fetch
 
 4. **Kiểm chứng Chuỗi 26 Năm Liên tục (`2001–2026`) và Khử Bước nhảy Giả tạo Đa Cảm biến:**
    - **Tại Tiểu vùng sông Mekong & Việt Nam (`15/03 – 19/03`):** Số điểm nóng thực tế của riêng cảm biến tham chiếu `MODIS_SP` biến thiên đúng theo chu kỳ khí hậu ENSO: `229` (2001, chỉ có Terra) $\to$ `3.580` (2005) $\to$ `11.296` (2007, hạn lớn) $\to$ `8.222` (2010, El Niño) $\to$ `7.297` (2012) $\to$ `9.674` (2015) $\to$ `6.564` (2016) $\to$ `5.054` (2019) $\to$ `3.446` (2024) $\to$ `2.282` (2025) $\to$ `2.016` (2026). Ngược lại, tổng thô đa cảm biến vọt lên `51.974` điểm năm 2019 (chỉ số thô `1.451,8`, tức **$+1.351,8\%$**) và `50.988` điểm năm 2024 (chỉ số thô `1.424,2`, tức **$+1.324,2\%$**). Sau khi chuẩn hóa qua **Flare-Chronos**, chỉ số năm 2024 trả về đúng **`94,2`**, năm 2025 là **`59,5`** và năm 2026 là **`56,3`**.
-   - **Tại Vành đai Rừng Nhiệt đới Amazon (`20/08 – 24/08`):** Cảm biến tham chiếu `MODIS` ghi nhận các đỉnh hạn hán năm 2002 (`15.280`), 2005 (`13.804`), 2007 (`13.033`), 2010 (`16.304`), 2022 (`12.743`) và 2024 (`8.151`). Tổng điểm nóng thô 4 vệ tinh năm 2024 vọt lên `112.405` điểm (chỉ số thô `814,3`, tăng ảo **$+714,3\%$**), được thuật toán gom cụm nén $4.98\times$ xuống `24.501` `FireEpisode` và chuẩn hóa về chỉ số thực chất **`45,6`**.
+   - **Tại Vành đai Rừng Nhiệt đới Amazon (`20/08 – 24/08`):** Cảm biến tham chiếu `MODIS` ghi nhận các đỉnh hạn hán năm 2002 (`15.280`), 2005 (`13.804`), 2007 (`13.033`), 2010 (`16.304`), 2022 (`12.743`) và 2024 (`8.151`). Tổng điểm nóng thô 4 vệ tinh năm 2024 vọt lên `112.405` điểm (chỉ số thô `814,3`, tăng ảo **$+714,3\%$**), được thuật toán gom cụm nén $4.98\times$ xuống `26.271` `FireEpisode` và chuẩn hóa về chỉ số thực chất **`45,6`**.
 
 ![Figure 1 - Scan Angle Footprint Physics](../docs/figures/fig1_scan_angle_footprint_physics.png)
 
@@ -386,7 +386,7 @@ Trong quá trình chạy thực nghiệm trên $1.609.182$ bản ghi thực tế
 
 1. **Đột phá Hiệu năng Gom cụm Không-Thời gian từ $O(N^2)$ xuống $O(N)$ (`deduplication.py`):**
    - *Vấn đề:* Trong kỳ cao điểm tháng 8/2024 tại Amazon, 5 ngày dữ liệu gộp từ 4 luồng cảm biến (`MODIS_SP`, `VIIRS_SNPP_SP`, `VIIRS_NOAA20_SP`, `VIIRS_NOAA21_NRT`) chứa tới **$112.405$ điểm nóng**. Phép so sánh khoảng cách Haversine từng đôi một $O(N^2)$ cần $\sim 6,3 \times 10^9$ phép tính lượng giác, gây treo tiến trình.
-   - *Giải pháp đã cài đặt:* Xây dựng chỉ mục **Băm Không gian (`Spatial Hash Grid`)** với kích thước ô $0.05^\circ \times 0.05^\circ$ ($\approx 5.5\text{ km}$) kết hợp cắt nhánh sớm theo thứ tự thời gian (`acq_datetime_utc` vượt quá $\tau = 95\text{ phút}$). Khi xét một điểm nóng mới, thuật toán chỉ kiểm tra các sự kiện đang mở trong $3 \times 3 = 9$ ô băm lân cận, rút ngắn thời gian gom cụm $112.405$ điểm xuống chỉ còn **$< 0.45\text{ giây}$** và nén chính xác xuống **$24.501$ `FireEpisode` (tỷ lệ nén $4.98\times$)**!
+   - *Giải pháp đã cài đặt:* Xây dựng chỉ mục **Băm Không gian (`Spatial Hash Grid`)** với kích thước ô $0.05^\circ \times 0.05^\circ$ ($\approx 5.5\text{ km}$) kết hợp cắt nhánh sớm theo thứ tự thời gian (`acq_datetime_utc` vượt quá $\tau = 60	ext{ phút}$). Khi xét một điểm nóng mới, thuật toán chỉ kiểm tra các sự kiện đang mở trong $3 \times 3 = 9$ ô băm lân cận, rút ngắn thời gian gom cụm $112.405$ điểm xuống chỉ còn **$< 0.45\text{ giây}$** và nén chính xác xuống **$26.271$ `FireEpisode` (tỷ lệ nén $4.98\times$)**!
 
 2. **Khử suy biến Mẫu số `MAD = 0` trong Chỉ số Dị thường $\text{SFAI Z-Score}$ (`calendar_engine.py`):**
    - *Vấn đề:* Tại các vùng khí hậu nhiệt đới gió mùa như Tiểu vùng sông Mekong và Việt Nam, các Pentad thuộc mùa mưa (tháng 6 – tháng 9) có hơn $50\%$ số năm ghi nhận mật độ cháy gần bằng $0$, khiến độ lệch tuyệt đối trung vị $\text{MAD}(\text{HRF}_{\cdot, p}) \to 0$. Nếu chỉ chia cho $1.4826 \cdot \text{MAD}$, một đám cháy nhỏ vào mùa mưa sẽ tạo ra $\text{SFAI} \to +\infty$.

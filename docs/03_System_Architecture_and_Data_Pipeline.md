@@ -85,7 +85,7 @@ flowchart TB
         STEP2["Bước 2: Ánh Xạ Xác Suất P(fire) & Khử Nhiễu Vật Lý<br/>Logistic/Thermal Mapping + Lọc vùng SAA (11°E–110°W, 7°N–55°S) + Nguồn tĩnh"]
         STEP3["Bước 3: Khôi Phục Hình Học Dải Quét & Phân Bổ Uber H3<br/>Giải ngược góc quét θ -> Elip ΔS×ΔT -> Phân bổ trọng số H3 Res 7 & Res 8"]
         STEP4["Bước 4: Hiệu Chuẩn Bức Xạ 2 Giai Đoạn (Two-Stage FRP Operator)<br/>Scan-Angle Observation Operator + Stratified Quantile Mapping (Aqua–SNPP)"]
-        STEP5["Bước 5: Khử Trùng Lặp Quỹ Đạo & Chuẩn Hóa Nỗ Lực Quan Sát<br/>Spatio-Temporal Clustering (τ = 95 phút) -> Fire Episode / Ω(y, φ)"]
+        STEP5["Bước 5: Khử Trùng Lặp Quỹ Đạo & Chuẩn Hóa Nỗ Lực Quan Sát<br/>Spatio-Temporal Clustering (τ = 60 phút) -> Fire Episode / Ω(y, φ)"]
     end
 
     subgraph CALENDAR_STORAGE["4. Tầng Lưu Trữ Phân Tích & Lịch Hoạt Động Cháy"]
@@ -165,7 +165,7 @@ sequenceDiagram
     Core->>Core: 2. compute_unified_detection_probability() & Lọc nhiễu SAA / Nguồn tĩnh
     Core->>Core: 3. reconstruct_instantaneous_footprint() & allocate_footprint_to_h3(Res 7, Res 8)
     Core->>Core: 4. apply_two_stage_frp_calibration() (Observation Operator + EQM)
-    Core->>Core: 5. cluster_fire_episodes(τ=95 min) & Chia hệ số nỗ lực quan sát Ω(y, φ)
+    Core->>Core: 5. cluster_fire_episodes(τ = 60 min) & Chia hệ số nỗ lực quan sát Ω(y, φ)
     Core->>Core: 6. build_burning_activity_calendar() -> Ma trận 26 Năm × 73 Pentads
     Core-->>DB: Lưu trữ FireEpisode & BurningCalendarCell
     DB-->>User: Hiển thị Lịch Hoạt Động Cháy (HFD, HRF, SFAI) & Xuất GeoJSON/CSV

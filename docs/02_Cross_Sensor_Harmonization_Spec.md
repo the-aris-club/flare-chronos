@@ -33,7 +33,9 @@ Dữ liệu điểm nóng từ **NASA LANCE FIRMS** có sự phân mảnh cấu 
 
 Trên vệ tinh **Terra** và **Aqua** (độ cao quỹ đạo danh định $h_{\text{MODIS}} = 705\text{ km}$, bán kính quỹ đạo $r = R_e + h_{\text{MODIS}} = 6378.137 + 705 = 7083.137\text{ km}$, bước góc lấy mẫu $s = 0.0014184397\text{ rad/sample}$), kích thước thực tế của điểm ảnh tại góc quét $\theta \in [0, 55^\circ]$ được xác định bởi hệ phương trình hình học cầu (*Ichoku & Kaufman, 2005; Giglio et al., 2016*) cài đặt trong [`modis_dimensions_from_scan_angle`](../packages/harmonization-core/src/flare_chronos_core/geometry_h3.py):
 
-$$\Delta S_{\text{MODIS}}(\theta) = R_e \cdot s \left( \frac{\cos\theta}{\sqrt{(R_e / r)^2 - \sin^2\theta}} - 1 \right)$$
+$$\Delta S_{\text{MODIS}}(\theta) = r \cdot s \left( \cos\theta - \sqrt{(R_e / r)^2 - \sin^2\theta} \right) \cdot \frac{R_e}{r} \cdot \frac{1}{\sqrt{(R_e / r)^2 - \sin^2\theta}}$$
+
+Tức $\Delta S = \frac{R_e}{r} \cdot \frac{\Delta T}{\sqrt{(R_e / r)^2 - \sin^2\theta}}$: kích thước theo phương quét là kích thước dọc quỹ đạo $\Delta T$ nhân hệ số cong Trái Đất $\frac{R_e}{r}$ và hệ số giãn góc nhìn xiên $1/\sqrt{(R_e / r)^2 - \sin^2\theta}$. Dạng này tương đương đại số với $R_e \cdot s \left( \frac{\cos\theta}{\sqrt{(R_e / r)^2 - \sin^2\theta}} - 1 \right)$ (kiểm chứng số: cùng giá trị $1.000$, $1.159$, $1.943$, $4.830\text{ km}$ tại $0^\circ, 20^\circ, 40^\circ, 55^\circ$) và cho $\Delta S(0^\circ) = s\,h = 1.000\text{ km}$.
 
 $$\Delta T_{\text{MODIS}}(\theta) = r \cdot s \left( \cos\theta - \sqrt{(R_e / r)^2 - \sin^2\theta} \right)$$
 
@@ -151,7 +153,7 @@ Trong kỷ nguyên 5 vệ tinh (`2024–2026`), một đám cháy diễn ra vào
 - **Aqua MODIS** ($\sim 13\text{:}30\text{ MLT}$),
 cùng sự chồng lấn rìa dải quét ($\sim 15\%$ tại xích đạo) giữa các vòng quỹ đạo liền kề.
 
-Trong [`cluster_fire_episodes`](../packages/harmonization-core/src/flare_chronos_core/deduplication.py), hai phát hiện $d_i, d_j$ được gom vào cùng một **Sự kiện cháy vật lý ([`FireEpisode`](../packages/harmonization-core/src/flare_chronos_core/domain.py)) $E_k$** nếu thỏa mãn đồng thời điều kiện khoảng cách thời gian $\Delta t \le \tau_{\text{cluster}} = 95\text{ phút}$ và điều kiện giao cắt bán kính footprint hiệu dụng:
+Trong [`cluster_fire_episodes`](../packages/harmonization-core/src/flare_chronos_core/deduplication.py), hai phát hiện $d_i, d_j$ được gom vào cùng một **Sự kiện cháy vật lý ([`FireEpisode`](../packages/harmonization-core/src/flare_chronos_core/domain.py)) $E_k$** nếu thỏa mãn đồng thời điều kiện khoảng cách thời gian $\Delta t \le \tau_{\text{cluster}} = 60	ext{ phút}$ và điều kiện giao cắt bán kính footprint hiệu dụng:
 
 $$d_{\text{Haversine}}(x_i, x_j) \le \max\!\left( 1.35\text{ km}, \, \sqrt{\frac{A_{p_i}}{\pi}} + \sqrt{\frac{A_{p_j}}{\pi}} + 0.65\text{ km} \right) \quad \text{hoặc} \quad \text{H3}_8(x_i) = \text{H3}_8(x_j)$$
 

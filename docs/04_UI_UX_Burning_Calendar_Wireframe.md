@@ -25,12 +25,12 @@ Giao diện **Flare-Chronos Workbench** giải quyết triệt để hai ảo gi
 ```text
 +----------------------------------------------------------------------------------------------------------------------+
 | [🔥 FLARE-CHRONOS]  AOI: [ Tiểu vùng sông Mekong & Việt Nam v ]   Giai đoạn: [2000 - 2026]   Lưới: [H3 Res 7 (5km)] |
-| Bộ lọc Vật lý: [x] Chuẩn hóa SZA < 85°  [x] Lọc nhiễu SAA Đêm  [x] Tách Nguồn Nhiệt Tĩnh  [x] Khử Trùng Lặp (95m)   |
+| Bộ lọc Vật lý: [x] Chuẩn hóa SZA < 85°  [x] Lọc nhiễu SAA Đêm  [x] Tách Nguồn Nhiệt Tĩnh  [x] Khử Trùng Lặp (60m)   |
 +-------------------------------------------------------+--------------------------------------------------------------+
 |                                                       |  [BẢNG ĐIỀU KHIỂN ĐỐI CHỨNG TRƯỚC / SAU ĐỒNG BỘ HÓA]         |
 |   [KHUNG BẢN ĐỒ KHÔNG GIAN ĐA TẦNG - DECK.GL/MAPLIBRE]|  +----------------+----------------+----------------+        |
 |                                                       |  | Raw Detections | Fire Episodes  | SFAI Z-Score   |        |
-|      _.-""""-._      (Elip MODIS Rìa Quét: 4.8x2.0km) |  |  43,342 (Thô)  |  23,129 (Chuẩn)|  +2.64 sigma   |        |
+|      _.-""""-._      (Elip MODIS Rìa Quét: 4.8x2.0km) |  |  43,342 (Thô)  |  23,239 (Chuẩn)|  +2.64 sigma   |        |
 |    .'          '.     o o (Cụm VIIRS 375m bên trong)  |  | (+1.110,7% ảo) |  (Khử trùng lặp|  [SEVERE RISK] |        |
 |   /   o  o  o    \                                    |  +----------------+----------------+----------------+        |
 |  |       o        |   / \ / \ / \ (Lưới Lục Giác     |                                                              |

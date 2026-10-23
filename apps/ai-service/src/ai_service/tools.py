@@ -24,6 +24,7 @@ if str(ROOT / "packages" / "harmonization-core" / "src") not in sys.path:
     sys.path.insert(0, str(ROOT / "packages" / "harmonization-core" / "src"))
 
 from flare_chronos_core import (
+    FIRE_EPISODE_WINDOW_MINUTES,
     InstantaneousFootprint,
     ProcessingMode,
     SatellitePlatform,
@@ -1021,7 +1022,9 @@ def tool_harmonize_real_firms_csv_slice(
     sub_df = df.head(int(sample_limit)) if sample_limit > 0 else df
     raw_detections = parse_firms_dataframe(sub_df, default_source=slice_filename)
     harmonized = harmonize_detections(raw_detections)
-    episodes = cluster_fire_episodes(harmonized, temporal_window_minutes=95.0)
+    episodes = cluster_fire_episodes(
+        harmonized, temporal_window_minutes=FIRE_EPISODE_WINDOW_MINUTES
+    )
 
     all_day_sza_ok = all(
         h.sza_deg < 85.0 for h in harmonized if h.harmonized_daynight == "D"

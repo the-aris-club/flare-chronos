@@ -59,7 +59,7 @@
 | $\bar{A}_8$ (H3 Res 8) | $0.73732760$ | km² | Diện tích ô lục giác H3 Resolution 8 | `geometry_h3.py::H3_RES8_AREA_KM2` |
 | $A_{\text{VIIRS,nadir,nominal}}$ | $0.140625$ | km² | $0.375\times0.375$ km² nominal VIIRS | `radiometric_calibrator.py` |
 | $P_{\text{thresh}}$ | $85.0$ | deg | Ngưỡng SZA phân biệt ngày/đêm | `solar_sza.py::DAYNIGHT_SZA_THRESHOLD_DEG` |
-| $\tau_{\text{cluster}}$ | $95.0$ | phút | Cửa sổ thời gian gom cụm đa vệ tinh | `deduplication.py::cluster_fire_episodes` |
+| $\tau_{\text{cluster}}$ | $60.0$ | phút | Cửa sổ thời gian gom cụm đa vệ tinh | `deduplication.py::cluster_fire_episodes` |
 | $P_{\text{min}}$ | $0.20$ | — | Xác suất phát hiện tối thiểu để vào cụm | `deduplication.py::cluster_fire_episodes` |
 | $\text{SAA}$ bounds | $\phi\in[-55,7]$, $\lambda\in[-110,11]$ | deg | Hộp giới hạn Dị thường Nam Đại Tây Dương | `confidence_filter.py` |
 | $\Omega_0$ baseline | $1.00$ | — | Kỷ nguyên chuẩn Terra+Aqua xích đạo 2003–2011 | `deduplication.py::compute_effective_observation_effort` |
@@ -150,7 +150,7 @@
 | $\Omega(y, \phi)$ | Effective observation effort | — | Chuẩn hóa = 1.00 tại Terra+Aqua xích đạo 2003–2011 |
 | $\Omega_0(y)$ | Baseline effort theo năm | — | 0.52, 0.76, 1.00, 1.48, 1.78, 1.92, 2.08 |
 | $\text{lat\_convergence}$ | Hội tụ vĩ độ | — | $1 + 0.18(1/\cos\phi - 1)$, bounded [1.0, 1.65] |
-| $\tau_{\text{cluster}}$ | Cửa sổ gom cụm | phút | 95 |
+| $\tau_{\text{cluster}}$ | Cửa sổ gom cụm | phút | 60 |
 | $d_{\text{Haversine}}$ | Khoảng cách great-circle | km | Haversine distance |
 | $r_{\text{eff}}$ | Bán kính footprint hiệu dụng | km | $\sqrt{A_p/\pi}$ |
 | $m$ | Số phát hiện trong cụm | — | raw_detection_count |
@@ -196,7 +196,9 @@
 Mỗi công thức kèm tên, biểu thức, biến, và vị trí cài đặt.
 
 ### F1. MODIS across-track $\Delta S(\theta)$
-$$\Delta S_{\text{MODIS}}(\theta) = R_e \cdot s \left( \frac{\cos\theta}{\sqrt{(R_e/r)^2 - \sin^2\theta}} - 1 \right)$$
+$$\Delta S_{\text{MODIS}}(\theta) = r \cdot s \left( \cos\theta - \sqrt{(R_e / r)^2 - \sin^2\theta} \right) \cdot \frac{R_e}{r} \cdot \frac{1}{\sqrt{(R_e / r)^2 - \sin^2\theta}}$$
+
+Tức $\Delta S = \frac{R_e}{r} \cdot \frac{\Delta T}{\sqrt{(R_e / r)^2 - \sin^2\theta}}$: kích thước theo phương quét là kích thước dọc quỹ đạo $\Delta T$ nhân hệ số cong Trái Đất $\frac{R_e}{r}$ và hệ số giãn góc nhìn xiên $1/\sqrt{(R_e / r)^2 - \sin^2\theta}$. Dạng này tương đương đại số với $R_e \cdot s \left( \frac{\cos\theta}{\sqrt{(R_e / r)^2 - \sin^2\theta}} - 1 \right)$ (kiểm chứng số: cùng giá trị $1.000$, $1.159$, $1.943$, $4.830\text{ km}$ tại $0^\circ, 20^\circ, 40^\circ, 55^\circ$) và cho $\Delta S(0^\circ) = s\,h = 1.000\text{ km}$.
 Biến: $R_e=6378.137$, $r=7083.137$, $s=0.0014184397$, $\theta$ rad.
 Vị trí: `geometry_h3.py::modis_dimensions_from_scan_angle`.
 

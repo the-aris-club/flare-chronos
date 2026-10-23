@@ -5,7 +5,11 @@ from __future__ import annotations
 import unittest
 from datetime import UTC, datetime, timedelta
 
-from flare_chronos_core import cluster_fire_episodes, harmonize_detections
+from flare_chronos_core import (
+    FIRE_EPISODE_WINDOW_MINUTES,
+    cluster_fire_episodes,
+    harmonize_detections,
+)
 from flare_chronos_core.domain import (
     ProcessingMode,
     SatellitePlatform,
@@ -13,7 +17,7 @@ from flare_chronos_core.domain import (
     ThermalDetection,
 )
 
-WINDOW_MIN = 95.0
+WINDOW_MIN = FIRE_EPISODE_WINDOW_MINUTES
 
 
 def viirs_detection(det_id: str, minutes_after_start: float) -> ThermalDetection:

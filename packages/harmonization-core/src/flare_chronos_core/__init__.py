@@ -23,6 +23,7 @@ from .confidence_filter import (
     is_static_or_non_veg_source,
 )
 from .deduplication import (
+    FIRE_EPISODE_WINDOW_MINUTES,
     cluster_fire_episodes,
     compute_effective_observation_effort,
     haversine_km,
@@ -240,6 +241,7 @@ def harmonize_detections(
 
 __all__ = [
     "DAYNIGHT_SZA_THRESHOLD_DEG",
+    "FIRE_EPISODE_WINDOW_MINUTES",
     "H3_RES7_AREA_KM2",
     "H3_RES8_AREA_KM2",
     "SFAI_CRISIS_THRESHOLD_Z",

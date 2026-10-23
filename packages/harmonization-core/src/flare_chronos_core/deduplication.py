@@ -73,16 +73,22 @@ def compute_effective_observation_effort(
     return round(base_omega * lat_convergence, 4)
 
 
+# The afternoon overpass train (NOAA-20 12:40, NOAA-21 13:05, Suomi-NPP and Aqua 13:30
+# MLT) spans 50 minutes. Windowing from the cluster's first detection, 60 minutes
+# holds that train and stops short of the next orbit of any one satellite.
+FIRE_EPISODE_WINDOW_MINUTES = 60.0
+
+
 def cluster_fire_episodes(
     detections: list[HarmonizedDetection],
-    temporal_window_minutes: float = 95.0,
+    temporal_window_minutes: float = FIRE_EPISODE_WINDOW_MINUTES,
     min_probability: float = 0.20,
 ) -> list[FireEpisode]:
     """Deduplicate multi-satellite Thermal Detections into physical Fire Episodes.
 
     Two detections d_i, d_j belong to the same Fire Episode if:
       1. neither is an SAA cosmic-ray anomaly or Static Thermal Source,
-      2. |t_i - t_j| <= temporal_window_minutes (default 95 min covers the entire
+      2. |t_i - t_j| <= temporal_window_minutes (default 60 min covers the 50-minute
          NOAA-20 / NOAA-21 / Suomi-NPP / Aqua afternoon or midnight overpass train), and
       3. great-circle distance(d_i, d_j) <= r_eff(d_i) + r_eff(d_j) + 0.65 km
          (or they map to the same H3 Resolution 7 cell within the overpass window).

@@ -28,7 +28,7 @@ class FIRMSHarmonizer:
         self,
         calibration_model: CrossSensorCalibrationModel | None = None,
         persistent_static_h3_res8: set[str] | None = None,
-        overpass_window_minutes: float = 95.0,
+        overpass_window_minutes: float = FIRE_EPISODE_WINDOW_MINUTES,
     ) -> None:
         self.calibration_model = calibration_model or default_calibration_model()
         self.persistent_static_h3_res8 = persistent_static_h3_res8 or set()
