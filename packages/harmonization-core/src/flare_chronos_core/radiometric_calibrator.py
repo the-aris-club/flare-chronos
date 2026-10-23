@@ -273,6 +273,9 @@ def holdout_validation(
     (least squares, clipped to [0, 1]) instead of being fixed at 0.65. Error is
     reported on the held-out pairs, with a bootstrap 95% interval on how much
     RMSE the calibration removes relative to the uncalibrated MODIS FRP.
+
+    Scores the fitted power-law/quantile blend only; the detection-limit offset that
+    ``apply_two_stage_frp_calibration`` adds per detection is not part of the fit.
     """
     train = train_mask.astype(bool)
     model = fit_coincident_aqua_snpp_model(

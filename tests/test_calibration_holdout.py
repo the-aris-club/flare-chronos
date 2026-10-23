@@ -50,3 +50,20 @@ class TestHoldoutValidation(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestPublishedHoldout(unittest.TestCase):
+    def test_the_published_calibration_gain_is_positive_on_held_out_years(self) -> None:
+        import json
+        from pathlib import Path
+
+        results = json.loads(
+            (
+                Path(__file__).resolve().parents[1]
+                / "data/processed/empirical_results.json"
+            ).read_text()
+        )
+        holdout = results["coincident_calibration"]["holdout"]
+        self.assertGreater(holdout["n_test"], 1000)
+        self.assertGreater(holdout["rmse_gain_ci95_mw"][0], 0.0)
+        self.assertLess(holdout["harmonized_rmse_mw"], holdout["raw_rmse_mw"])

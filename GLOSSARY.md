@@ -68,7 +68,7 @@ A persistent non-biomass heat emitter—such as a gas flare, steel mill, cement 
 _Avoid_: False fire, stationary hotspot
 
 **Static Source Registry**:
-The versioned set of Iso-Area Cells (Resolution 8) that the archive shows to be persistently hot across years and seasons, derived from the detections themselves and passed into harmonization so that a Static Thermal Source is rejected rather than counted as a Fire Episode.
+The versioned set of Iso-Area Cells (Resolution 8) that the archive shows to be hot in nearly every month of the year, derived from the detections themselves and passed into harmonization so that a Static Thermal Source is rejected rather than counted as a Fire Episode.
 _Avoid_: Blocklist, exclusion mask, static cell list
 
 **Fire Episode**:

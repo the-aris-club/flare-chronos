@@ -394,9 +394,10 @@ def run_coincident_overpass_calibration() -> tuple[Any, dict[str, Any]]:
 def load_static_source_registry(region: str) -> frozenset[str]:
     """Derive the region's Static Source Registry from its year-round slices.
 
-    Needs ``<region>_season__*`` slices spanning the calendar year. A region
-    without them (Mekong) gets an empty registry rather than one guessed from a
-    single peak-season window, so its Static Thermal Source filter stays off.
+    Built from the ``<region>_season__*`` slices (one 5-day slice per month of a
+    single year, plus a 2010 MODIS slice for Mekong). Needs slices spanning the
+    calendar year; a region without them would get an empty registry rather than
+    one guessed from a single peak-season window.
     """
     observations: list[tuple[str, int]] = []
     for path in sorted(RAW_DIR.glob(f"{region}_season__*.csv")):

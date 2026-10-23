@@ -12,6 +12,10 @@ from __future__ import annotations
 
 from typing import Any
 
+# ponytail: none of these three is fitted or sourced. They are tuned so the
+# MODIS-only and multi-sensor eras meet, which is why sensor_invariance_ratio in
+# the results artifact is the measurement that matters. Derive them from the
+# archive (overpass counts per sensor-year) before leaning on any conclusion.
 SUBPIXEL_OMISSION_FACTOR = {"mekong": 3.65, "amazon": 2.55}
 STREAM_OVERLAP_GAIN = 0.24
 

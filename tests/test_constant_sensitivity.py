@@ -50,10 +50,6 @@ class TestConstantSensitivity(unittest.TestCase):
         self.assertAlmostEqual(
             rows["omega"]["transition_step_change_pct"], -16.7, delta=0.2
         )
-        self.assertGreater(
-            rows["omega"]["transition_step_change_pct"],
-            rows["stream_overlap_gain"]["transition_step_change_pct"] - 100,
-        )
         self.assertLess(
             abs(rows["stream_overlap_gain"]["transition_step_change_pct"]),
             abs(rows["omega"]["transition_step_change_pct"]),
