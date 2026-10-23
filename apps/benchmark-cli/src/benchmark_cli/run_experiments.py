@@ -38,6 +38,7 @@ from flare_chronos_core import (
     compute_frp_detection_limit,
     fit_coincident_aqua_snpp_model,
     harmonize_detections,
+    holdout_validation,
     invert_modis_scan_angle,
     invert_viirs_scan_angle,
     latlon_to_h3,
@@ -55,6 +56,9 @@ from benchmark_cli.figure_renderer import (
     render_fig5_burning_activity_calendar,
 )
 from benchmark_cli.sensitivity import STREAM_OVERLAP_GAIN, harmonized_episode_count
+
+# Pairs up to this year train the calibration; later years score it.
+HOLDOUT_TRAIN_LAST_YEAR = 2019
 
 RAW_DIR = ROOT / "data" / "raw"
 PROC_DIR = ROOT / "data" / "processed"
@@ -234,12 +238,13 @@ def compute_scan_angle_verification() -> tuple[
 
 def run_coincident_overpass_calibration() -> tuple[Any, dict[str, Any]]:
     """Match real Aqua-MODIS and Suomi-NPP VIIRS co-incident H3 Res 7 cells (13:30 / 01:30 MLT) across all 2012-2026 windows."""
-    pair_files: list[tuple[str, str]] = []
+    pair_files: list[tuple[str, str, int]] = []
     for yr in range(2012, 2027):
         pair_files.append(
             (
                 f"mekong__MODIS_SP__{yr}-03-15__5d.csv",
                 f"mekong__VIIRS_SNPP_SP__{yr}-03-15__5d.csv",
+                yr,
             )
         )
         m_sfx = "NRT" if yr == 2026 else "SP"
@@ -247,6 +252,7 @@ def run_coincident_overpass_calibration() -> tuple[Any, dict[str, Any]]:
             (
                 f"amazon__MODIS_{m_sfx}__{yr}-08-20__5d.csv",
                 f"amazon__VIIRS_SNPP_{m_sfx}__{yr}-08-20__5d.csv",
+                yr,
             )
         )
 
@@ -255,9 +261,10 @@ def run_coincident_overpass_calibration() -> tuple[Any, dict[str, Any]]:
     modis_cell_areas: list[float] = []
     modis_cell_counts: list[int] = []
     viirs_cell_counts: list[int] = []
+    pair_years: list[int] = []
 
     # Group by (acq_date, daynight, H3_Res6_coarse_neighborhood) for simultaneous Aqua + S-NPP passes
-    for m_file, v_file in pair_files:
+    for m_file, v_file, pair_year in pair_files:
         df_m = _load_csv_safe(m_file)
         df_v = _load_csv_safe(v_file)
         if df_m.empty or df_v.empty:
@@ -311,12 +318,16 @@ def run_coincident_overpass_calibration() -> tuple[Any, dict[str, Any]]:
             modis_cell_areas.append(float(row["m_area"]))
             modis_cell_counts.append(int(row["m_cnt"]))
             viirs_cell_counts.append(int(row["v_cnt"]))
+            pair_years.append(pair_year)
 
     m_arr = np.array(modis_cell_frps, dtype=float)
     v_arr = np.array(viirs_cell_frps, dtype=float)
     a_arr = np.array(modis_cell_areas, dtype=float)
 
     model = fit_coincident_aqua_snpp_model(m_arr, v_arr, a_arr)
+    holdout = holdout_validation(
+        m_arr, v_arr, a_arr, np.array(pair_years) <= HOLDOUT_TRAIN_LAST_YEAR
+    )
 
     # Apply fitted model to compute harmonized predictions for plotting
     m_scan_corr = m_arr * (1.0 + model.scan_tail_kappa * np.log(np.maximum(1.0, a_arr)))
@@ -324,7 +335,8 @@ def run_coincident_overpass_calibration() -> tuple[Any, dict[str, Any]]:
     eqm_pred = np.interp(
         m_scan_corr, model.modis_quantiles_mw, model.viirs_quantiles_mw
     )
-    m_harm = 0.65 * param_pred + 0.35 * eqm_pred
+    w = model.blend_parametric_weight
+    m_harm = w * param_pred + (1.0 - w) * eqm_pred
 
     max_axis = float(np.percentile(v_arr, 96))
     in_bounds = (v_arr <= max_axis) & (m_arr <= max_axis)
@@ -363,6 +375,11 @@ def run_coincident_overpass_calibration() -> tuple[Any, dict[str, Any]]:
         "mean_coincident_viirs_to_modis_count_ratio": round(mean_count_ratio, 3),
         "mean_coincident_viirs_to_modis_frp_ratio": round(mean_frp_ratio, 3),
         "max_axis_mw": round(max_axis, 1),
+        "holdout": {
+            **holdout,
+            "train_last_year": HOLDOUT_TRAIN_LAST_YEAR,
+            "rmse_gain_ci95_mw": list(holdout["rmse_gain_ci95_mw"]),
+        },
         "viirs_sample": [round(float(v_arr[i]), 2) for i in idx_sub],
         "modis_raw_sample": [round(float(m_arr[i]), 2) for i in idx_sub],
         "modis_harm_sample": [round(float(m_harm[i]), 2) for i in idx_sub],

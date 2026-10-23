@@ -57,6 +57,7 @@ from .radiometric_calibrator import (
     compute_frp_detection_limit,
     default_calibration_model,
     fit_coincident_aqua_snpp_model,
+    holdout_validation,
 )
 from .solar_sza import (
     DAYNIGHT_SZA_THRESHOLD_DEG,
@@ -271,6 +272,7 @@ __all__ = [
     "harmonize_detections",
     "has_aqua_nrt_geolocation_risk",
     "haversine_km",
+    "holdout_validation",
     "invert_modis_scan_angle",
     "invert_viirs_scan_angle",
     "is_in_south_atlantic_anomaly",
