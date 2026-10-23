@@ -26,7 +26,13 @@ def haversine_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     return 2.0 * R_EARTH_KM * math.asin(min(1.0, math.sqrt(a)))
 
 
-def compute_effective_observation_effort(year: int, latitude_deg: float) -> float:
+# Effort of a constellation with this many VIIRS streams alongside Terra + Aqua.
+_EFFORT_BY_VIIRS_STREAMS = (1.00, 1.48, 1.78, 2.08)
+
+
+def compute_effective_observation_effort(
+    year: int, latitude_deg: float, n_viirs_streams: int | None = None
+) -> float:
     """Compute Effective Observation Effort factor Omega(year, latitude).
 
     Anchored to 1.00 at the dual-MODIS (Terra + Aqua, 2003-2011) equatorial baseline:
@@ -39,6 +45,9 @@ def compute_effective_observation_effort(year: int, latitude_deg: float) -> floa
     - 2024-2026 (+ NOAA-21 full operational 3-VIIRS + 2-MODIS constellation): Omega_0 = 2.08
 
     Modulated by latitude-dependent swath overlap sec(lat) bounded to [1.0, 1.65].
+
+    ``n_viirs_streams`` limits the effort to the sensors actually scored: a MODIS-only
+    view of a 2024 epoch has the dual-MODIS effort, not the full constellation's.
     """
     if year <= 2001:
         base_omega = 0.52
@@ -54,6 +63,9 @@ def compute_effective_observation_effort(year: int, latitude_deg: float) -> floa
         base_omega = 1.92
     else:
         base_omega = 2.08
+    if n_viirs_streams is not None:
+        ladder = _EFFORT_BY_VIIRS_STREAMS[min(n_viirs_streams, 3)]
+        base_omega = min(base_omega, ladder)
 
     # Polar-orbiting swath convergence increases revisit frequency with |latitude|
     cos_lat = max(0.55, math.cos(math.radians(latitude_deg)))

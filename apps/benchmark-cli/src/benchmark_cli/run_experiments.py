@@ -459,7 +459,8 @@ def evaluate_epoch_slice(
     est_episodes = round(len(episodes) * sample_scale)
     year = int(date_str[:4]) if date_str != "latest" else 2026
     mean_lat = 17.2 if region == "mekong" else -9.0
-    omega = compute_effective_observation_effort(year, mean_lat)
+    n_viirs = sum(1 for s in sources if "VIIRS" in s)
+    omega = compute_effective_observation_effort(year, mean_lat, n_viirs)
 
     # Harmonize across sensor regimes onto a consistent VIIRS-equivalent single-constellation baseline:
     # - In MODIS-only epochs (2005, 2010), each deduplicated MODIS episode is scaled by the
@@ -483,7 +484,22 @@ def evaluate_epoch_slice(
 
     dedup_ratio = total_raw_unsampled / max(1, est_episodes)
 
+    invariance: dict[str, float] = {}
+    if n_viirs and any("MODIS" in s for s in sources):
+        modis_view = evaluate_epoch_slice(
+            region,
+            date_str,
+            [s for s in sources if "MODIS" in s],
+            cal_model,
+            max_sample_per_source,
+            static_cells,
+        )
+        invariance["sensor_invariance_ratio"] = round(
+            harm_equiv_episodes / modis_view["harmonized_viirs_eq_episodes"], 3
+        )
+
     return {
+        **invariance,
         "region": region,
         "date_window": date_str,
         "year": year,
