@@ -150,7 +150,9 @@ def check_version_match(require_tools: bool) -> None:
             text=True,
             capture_output=True,
         ).stdout
-        pdf_match = PDF_VERSION_RE.search(pdf_text)
+        # pdftotext may break a line mid-word (e.g. "Phiên\nbản") depending on
+        # the poppler/weasyprint versions, so match on whitespace-normalized text.
+        pdf_match = PDF_VERSION_RE.search(re.sub(r"\s+", " ", pdf_text))
         if not pdf_match:
             failures.append(f"{pdf_name}: no 'Phiên bản' version found in the text")
             continue
