@@ -112,8 +112,18 @@ NASA FIRMS (MODIS / VIIRS / NRT) ──► firms-ingestion (rate-limited, cached
 The harness is the product; the demo puts a browser in front of it.
 
 ```bash
-uv run python -m ai_service.serve            # http://127.0.0.1:8765
+AI_SERVICE_AUTH=disabled uv run python -m ai_service.serve   # http://127.0.0.1:8765
 ```
+
+`AI_SERVICE_AUTH=disabled` is the local demo only: every caller becomes the
+`demo` principal with approver rights, so the server refuses to bind it to a
+non-loopback address. A real deployment sets `AI_SERVICE_JWT_KEY` (plus optional
+`AI_SERVICE_JWT_ISSUER`, `AI_SERVICE_JWT_AUDIENCE`, `AI_SERVICE_JWT_ALGORITHMS`)
+and sends `Authorization: Bearer <token>`; tokens need `sub` and `exp`, and the
+`approver` role in `roles` may decide other principals' runs. A browser
+`EventSource` cannot send that header, so a frontend reads the stream with
+`fetch`. The API contract is `docs/openapi/ai-service.json`
+(`python -m ai_service.api` regenerates it).
 
 The page shows one run as it happens: the classification, the tool calls, the
 reasoning, the numeric verification and the briefing, with the approval buttons

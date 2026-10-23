@@ -141,10 +141,10 @@ Xác suất `urgency` **tách được**:
 
 ## 4.1. Sản Phẩm Chạy Được: Xem Một Run Thật
 
-Luồng sự kiện không dừng ở mức đặc tả. Một máy chủ nhỏ — chỉ dùng thư viện chuẩn — phục vụ đúng hai endpoint mà tài liệu kiến trúc công bố, kèm một trang demo:
+Luồng sự kiện không dừng ở mức đặc tả. Một máy chủ FastAPI (xác thực bằng bearer token, xem ADR-0011) phục vụ đúng hai endpoint mà tài liệu kiến trúc công bố, kèm một trang demo:
 
 ```bash
-uv run python -m ai_service.serve            # http://127.0.0.1:8765
+AI_SERVICE_AUTH=disabled uv run python -m ai_service.serve   # http://127.0.0.1:8765 (chỉ để demo cục bộ)
 ```
 
 | Endpoint | Việc |

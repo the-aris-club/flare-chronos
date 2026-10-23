@@ -78,6 +78,12 @@
         "title": "ValidationError",
         "type": "object"
       }
+    },
+    "securitySchemes": {
+      "HTTPBearer": {
+        "scheme": "bearer",
+        "type": "http"
+      }
     }
   },
   "info": {
@@ -102,11 +108,21 @@
         "responses": {
           "200": {
             "content": {
-              "application/json": {
-                "schema": {}
-              }
+              "text/event-stream": {}
             },
-            "description": "Successful Response"
+            "description": "Server-Sent Events"
+          },
+          "401": {
+            "description": "missing or invalid bearer token"
+          },
+          "403": {
+            "description": "only the owner or an approver may decide"
+          },
+          "404": {
+            "description": "no such run"
+          },
+          "409": {
+            "description": "the run has no sign-off request waiting"
           },
           "422": {
             "content": {
@@ -119,6 +135,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Resume"
       }
     },
@@ -172,11 +193,18 @@
         "responses": {
           "200": {
             "content": {
-              "application/json": {
-                "schema": {}
-              }
+              "text/event-stream": {}
             },
-            "description": "Successful Response"
+            "description": "Server-Sent Events"
+          },
+          "400": {
+            "description": "query is required"
+          },
+          "401": {
+            "description": "missing or invalid bearer token"
+          },
+          "403": {
+            "description": "the thread belongs to another principal"
           },
           "422": {
             "content": {
@@ -189,6 +217,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Stream"
       }
     },
@@ -209,6 +242,11 @@
             "description": "Successful Response"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Use Cases"
       }
     }

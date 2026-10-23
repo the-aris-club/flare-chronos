@@ -4,6 +4,10 @@ FastAPI app with bearer-token identity, identity-bound sign-off, SSE with event
 ids, a per-run time budget and CORS. The Sign-off Principal comes from validated
 token claims and never from the request body.
 
+Known limit: the run time budget cancels the stream, but harness nodes are
+synchronous and keep running in a worker thread until they return, so a timed-out
+run can overlap the next one. Hard cancellation needs the nodes to be async.
+
 Scope note: events carry ids, but a dropped connection is not replayed; a client
 that reconnects with Last-Event-ID starts a fresh read of the checkpointed
 thread. Persisting per-thread events is a separate, larger change.
@@ -26,6 +30,7 @@ import jwt
 from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, StreamingResponse
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import BaseModel, Field
 
 from ai_service.events import HarnessEvent
@@ -81,14 +86,19 @@ def _unauthorized(detail: str) -> HTTPException:
     return HTTPException(401, detail, headers={"WWW-Authenticate": "Bearer"})
 
 
-def authenticate(request: Request) -> Principal:
+_bearer = HTTPBearer(auto_error=False)
+
+
+def authenticate(
+    request: Request,
+    credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(_bearer)],
+) -> Principal:
     cfg: AuthConfig = request.app.state.auth
     if cfg.disabled:
         return Principal("demo", frozenset({APPROVER_ROLE}))
-    header = request.headers.get("Authorization", "")
-    scheme, _, bearer = header.partition(" ")
-    if scheme.lower() != "bearer" or not bearer or not cfg.key:
+    if credentials is None or not credentials.credentials or not cfg.key:
         raise _unauthorized("a bearer token is required")
+    bearer = credentials.credentials
     try:
         claims = jwt.decode(
             bearer,
@@ -96,7 +106,7 @@ def authenticate(request: Request) -> Principal:
             algorithms=list(cfg.algorithms),
             issuer=cfg.issuer,
             audience=cfg.audience,
-            options={"require": ["sub"]},
+            options={"require": ["sub", "exp"]},
         )
     except jwt.PyJWTError as exc:
         raise _unauthorized(f"invalid token: {exc}") from exc
@@ -130,6 +140,7 @@ def create_app(
     auth: AuthConfig | None = None,
     run_timeout_s: float | None = None,
     mode: str = "deterministic",
+    checkpoint_path: Path | None = None,
 ) -> FastAPI:
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
@@ -196,7 +207,19 @@ def create_app(
     def use_cases(_: Annotated[Principal, Depends(authenticate)]) -> dict[str, Any]:
         return {"use_cases": [{"id": u.value, "label": u.value} for u in UseCaseId]}
 
-    @app.get("/api/v1/analysis/stream")
+    @app.get(
+        "/api/v1/analysis/stream",
+        response_class=StreamingResponse,
+        responses={
+            200: {
+                "description": "Server-Sent Events",
+                "content": {"text/event-stream": {}},
+            },
+            400: {"description": "query is required"},
+            401: {"description": "missing or invalid bearer token"},
+            403: {"description": "the thread belongs to another principal"},
+        },
+    )
     def stream(
         request: Request,
         principal: Annotated[Principal, Depends(authenticate)],
@@ -217,8 +240,21 @@ def create_app(
             ),
         )
 
-    @app.post("/api/v1/analysis/resume")
-    def resume(
+    @app.post(
+        "/api/v1/analysis/resume",
+        response_class=StreamingResponse,
+        responses={
+            200: {
+                "description": "Server-Sent Events",
+                "content": {"text/event-stream": {}},
+            },
+            401: {"description": "missing or invalid bearer token"},
+            403: {"description": "only the owner or an approver may decide"},
+            404: {"description": "no such run"},
+            409: {"description": "the run has no sign-off request waiting"},
+        },
+    )
+    async def resume(
         request: Request,
         body: ResumeRequest,
         principal: Annotated[Principal, Depends(authenticate)],
@@ -229,6 +265,9 @@ def create_app(
             raise HTTPException(404, "no such run")
         if principal.sub != owner and APPROVER_ROLE not in principal.roles:
             raise HTTPException(403, "only the run's owner or an approver may decide")
+        pending = await request.app.state.harness.apending_requests(body.thread_id)
+        if not any(p.get("kind") == "sign_off" for p in pending):
+            raise HTTPException(409, "this run has no sign-off request waiting")
         store.record_decision(body.thread_id, principal.sub, body.approved, body.reason)
         answer = {
             "approved": body.approved,
@@ -254,4 +293,11 @@ def export_openapi(path: Path) -> None:
         schema = app.openapi()
     path.write_text(
         json.dumps(schema, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
+
+
+if __name__ == "__main__":
+    # Regenerate the committed contract: python -m ai_service.api
+    export_openapi(
+        Path(__file__).resolve().parents[4] / "docs" / "openapi" / "ai-service.json"
     )

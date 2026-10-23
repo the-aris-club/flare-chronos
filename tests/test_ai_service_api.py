@@ -7,6 +7,7 @@ import json
 import sqlite3
 import sys
 import tempfile
+import time
 import unittest
 from pathlib import Path
 
@@ -30,7 +31,8 @@ SIGN_OFF_QUERY = "/api/v1/analysis/stream?use_case_id=UC-S1.4&query=UC-S1.4+flas
 
 
 def token(sub: str, roles: tuple[str, ...] = ()) -> dict[str, str]:
-    encoded = jwt.encode({"sub": sub, "roles": list(roles)}, SECRET, algorithm="HS256")
+    claims = {"sub": sub, "roles": list(roles), "exp": int(time.time()) + 3600}
+    encoded = jwt.encode(claims, SECRET, algorithm="HS256")
     return {"Authorization": f"Bearer {encoded}"}
 
 
@@ -79,8 +81,17 @@ class TestAuthentication(ApiCase):
         )
         self.assertEqual(response.status_code, 401)
 
+    def test_a_token_without_an_expiry_is_refused(self) -> None:
+        forever = jwt.encode({"sub": "ana"}, SECRET, algorithm="HS256")
+        response = self.client.get(
+            "/api/v1/analysis/use-cases", headers={"Authorization": f"Bearer {forever}"}
+        )
+        self.assertEqual(response.status_code, 401)
+
     def test_a_token_without_a_subject_is_refused(self) -> None:
-        bare = jwt.encode({"roles": []}, SECRET, algorithm="HS256")
+        bare = jwt.encode(
+            {"roles": [], "exp": int(time.time()) + 3600}, SECRET, algorithm="HS256"
+        )
         response = self.client.get(
             "/api/v1/analysis/use-cases", headers={"Authorization": f"Bearer {bare}"}
         )
@@ -181,6 +192,21 @@ class TestSignOff(ApiCase):
             with self.assertRaises(sqlite3.DatabaseError):
                 raw.execute("DELETE FROM audit")
 
+    def test_a_run_that_asked_for_no_sign_off_cannot_be_decided(self) -> None:
+        done = self.client.get(
+            "/api/v1/analysis/stream?use_case_id=UC-S1.3&query=UC-S1.3+lookup+2024+mekong&thread_id=plain",
+            headers=token("ana"),
+        )
+        self.assertIn("event: run_completed", done.text)
+        self.assertEqual(self.resume("ana", "plain").status_code, 409)
+        self.assertEqual(self.store.decisions("plain"), [])
+
+    def test_a_sign_off_request_can_be_decided_only_once(self) -> None:
+        thread = self.start_signoff_run("ana")
+        self.assertEqual(self.resume("ana", thread).status_code, 200)
+        self.assertEqual(self.resume("ana", thread, approved=False).status_code, 409)
+        self.assertEqual(len(self.store.decisions(thread)), 1)
+
     def test_an_unknown_thread_is_not_found(self) -> None:
         self.assertEqual(self.resume("ana", "no-such-thread").status_code, 404)
 
@@ -189,6 +215,40 @@ class TestSignOff(ApiCase):
             "/api/v1/analysis/resume", json={"approved": True}, headers=token("ana")
         )
         self.assertEqual(response.status_code, 422)
+
+
+class TestProductionLifespan(unittest.TestCase):
+    """The deployed app builds its own harness on a durable async checkpointer."""
+
+    def test_a_paused_run_streams_fully_and_resumes_on_the_async_saver(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            app = create_app(
+                store=RunStore(Path(tmp) / "service.sqlite"),
+                auth=AuthConfig(key=SECRET, algorithms=("HS256",)),
+                checkpoint_path=Path(tmp) / "checkpoints.sqlite",
+            )
+            with TestClient(app) as client:
+                paused = client.get(
+                    SIGN_OFF_QUERY + "&thread_id=prod", headers=token("ana")
+                )
+                self.assertIn("event: run_paused", paused.text)
+                self.assertNotIn("run_failed", paused.text)
+                done = client.post(
+                    "/api/v1/analysis/resume",
+                    json={"thread_id": "prod", "approved": True},
+                    headers=token("ana"),
+                )
+                self.assertIn("event: run_completed", done.text)
+
+
+class TestDemoBinding(unittest.TestCase):
+    def test_the_unauthenticated_demo_refuses_a_public_address(self) -> None:
+        from ai_service.serve import check_bind
+
+        with self.assertRaises(SystemExit):
+            check_bind("0.0.0.0", AuthConfig(disabled=True))  # noqa: S104
+        check_bind("127.0.0.1", AuthConfig(disabled=True))
+        check_bind("0.0.0.0", AuthConfig(key=SECRET))  # noqa: S104
 
 
 class TestRestartSafety(unittest.TestCase):
@@ -204,6 +264,18 @@ class TestRestartSafety(unittest.TestCase):
 
 
 class TestOpenApiContract(ApiCase):
+    def test_the_contract_declares_bearer_auth_and_the_event_stream(self) -> None:
+        schema = self.app.openapi()
+        self.assertIn("HTTPBearer", schema["components"]["securitySchemes"])
+        stream = schema["paths"]["/api/v1/analysis/stream"]["get"]
+        self.assertIn("text/event-stream", stream["responses"]["200"]["content"])
+        self.assertTrue(stream.get("security"))
+        for status in ("400", "401", "403"):
+            self.assertIn(status, stream["responses"])
+        resume = schema["paths"]["/api/v1/analysis/resume"]["post"]
+        for status in ("401", "403", "404", "409"):
+            self.assertIn(status, resume["responses"])
+
     def test_the_published_schema_matches_the_app(self) -> None:
         snapshot = REPO_ROOT / "docs" / "openapi" / "ai-service.json"
         self.assertEqual(json.loads(snapshot.read_text()), self.app.openapi())

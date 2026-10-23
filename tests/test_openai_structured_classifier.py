@@ -28,10 +28,10 @@ from ai_service.models import (
 from ai_service.schemas import SpatioTemporalQueryEntity
 
 CLASSIFICATION_ARGS = {
-    "use_case_id": "UC-S1.3",
     "region": "mekong",
-    "urgency": "routine",
-    "needs_deliberation": False,
+    "is_deliberative": False,
+    "urgency": False,
+    "use_case": "UC-S1.3",
     "confidence": 0.9,
 }
 
@@ -128,8 +128,19 @@ class TestOpenAIStructuredClassifier(unittest.TestCase):
     def test_arguments_arrive_as_a_json_string_and_are_parsed(self) -> None:
         StubHandler.reply = openai_reply(json.dumps(CLASSIFICATION_ARGS))
         answers = self.model().classify("lookup 2024 mekong", {}, self.entity())
-        self.assertIsInstance(answers, dict)
-        self.assertTrue(answers)
+        self.assertEqual(answers["answers"]["use_case"]["choice"], "UC-S1.3")
+        self.assertEqual(answers["answers"]["region"]["choice"], "mekong")
+        self.assertEqual(answers["confidence_source"], "self_reported")
+
+    def test_an_endpoint_without_an_http_scheme_is_a_fallback_eligible_error(
+        self,
+    ) -> None:
+        from ai_service.models import EndpointCallError, _post_json
+
+        for url in ("file:///etc/passwd", "localhost:11434/v1/chat/completions"):
+            with self.subTest(url=url), self.assertRaises(EndpointCallError) as ctx:
+                _post_json(url, {}, {}, 1.0)
+            self.assertFalse(ctx.exception.retryable)
 
     def test_a_reply_without_a_classification_call_is_an_error(self) -> None:
         StubHandler.reply = {

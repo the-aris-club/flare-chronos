@@ -14,6 +14,17 @@ import uvicorn
 
 from ai_service.api import AuthConfig, create_app
 
+LOOPBACK_HOSTS = {"127.0.0.1", "localhost", "::1"}
+
+
+def check_bind(host: str, auth: AuthConfig) -> None:
+    """Refuse to expose the unauthenticated demo principal beyond this machine."""
+    if auth.disabled and host not in LOOPBACK_HOSTS:
+        raise SystemExit(
+            "AI_SERVICE_AUTH=disabled makes every caller an approver; "
+            f"bind it to a loopback address, not {host!r}"
+        )
+
 
 def main() -> None:
     parser = argparse.ArgumentParser(
@@ -29,6 +40,7 @@ def main() -> None:
     )
     args = parser.parse_args()
     auth = AuthConfig.from_env()
+    check_bind(args.host, auth)
     if auth.disabled:
         print("WARNING: AI_SERVICE_AUTH=disabled; every caller is the demo principal.")
     elif not auth.key:

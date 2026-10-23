@@ -223,7 +223,7 @@ def _post_json(
     """POST a JSON body and decode a JSON object response."""
     # Endpoints come from the environment, so refuse file: and custom schemes.
     if urllib.parse.urlparse(url).scheme not in ("http", "https"):
-        raise ValueError(f"endpoint must be http or https: {url!r}")
+        raise EndpointCallError(f"endpoint must be http or https: {url!r}", 400)
     request = urllib.request.Request(  # noqa: S310 - scheme checked above
         url,
         data=json.dumps(payload).encode("utf-8"),
