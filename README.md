@@ -74,7 +74,7 @@ See [`docs/00_Project_Name_and_Acronym.md`](docs/00_Project_Name_and_Acronym.md)
 - **Astronomical day/night unification**: SZA < 85° reclassification.
 - **Noise rejection**: SAA cosmic-ray spike filter, static thermal source filter, unified P(fire).
 - **Two-stage FRP calibration**: scan-angle observation operator + stratified quantile mapping (Aqua→SNPP).
-- **Spatio-temporal deduplication**: multi-satellite overpass clustering into Fire Episodes (τ = 95 min).
+- **Spatio-temporal deduplication**: multi-satellite overpass clustering into Fire Episodes (τ = 60 min).
 - **Effort normalization**: Ω(year, latitude) prevents constellation-expansion artificial trends.
 - **Burning Activity Calendar**: 26 Years × 73 Pentads matrix of HFD / HRF / SFAI with robust seasonal Z-scores.
 - **Dual-System Cognitive AI Harness (`apps/ai-service`)**: LangGraph orchestration pairing a **System 1 decision model** (assigns the analysis, the region and the urgency with calibrated probabilities) with a **System 2 native chat endpoint** (deliberative reasoning) across **20 Use Cases** and **23 deterministic `@tool` functions**. The Reflexive Layer runs a chain — decision model, then chat model, then deterministic extraction — so a run never depends on one service being up ([MODEL_FLOW](exports/MODEL_FLOW.md)). The model chooses its own tool calls; the harness only decides which tools each tier may reach. Every briefing is a **Grounded Narrative**: the model authors the interpretation while the harness injects every quantity from the `VerifiedFactsLedger`, checked by a `NumericGroundingVerifier`. Briefings that authorize a field action pause for a **human sign-off** before they are released. Each layer is bound through an **Endpoint Profile** (protocol, endpoint, model, API key, request options) resolved from explicit configuration only — never from the host's agent tooling configuration ([ADR-0006](docs/adr/0006-explicit-endpoint-profiles-and-grounded-narrative-assembly.md), [ADR-0008](docs/adr/0008-model-driven-tool-selection-sign-off-and-event-stream.md)).
@@ -112,8 +112,18 @@ NASA FIRMS (MODIS / VIIRS / NRT) ──► firms-ingestion (rate-limited, cached
 The harness is the product; the demo puts a browser in front of it.
 
 ```bash
-uv run python -m ai_service.serve            # http://127.0.0.1:8765
+AI_SERVICE_AUTH=disabled uv run python -m ai_service.serve   # http://127.0.0.1:8765
 ```
+
+`AI_SERVICE_AUTH=disabled` is the local demo only: every caller becomes the
+`demo` principal with approver rights, so the server refuses to bind it to a
+non-loopback address. A real deployment sets `AI_SERVICE_JWT_KEY` (plus optional
+`AI_SERVICE_JWT_ISSUER`, `AI_SERVICE_JWT_AUDIENCE`, `AI_SERVICE_JWT_ALGORITHMS`)
+and sends `Authorization: Bearer <token>`; tokens need `sub` and `exp`, and the
+`approver` role in `roles` may decide other principals' runs. A browser
+`EventSource` cannot send that header, so a frontend reads the stream with
+`fetch`. The API contract is `docs/openapi/ai-service.json`
+(`python -m ai_service.api` regenerates it).
 
 The page shows one run as it happens: the classification, the tool calls, the
 reasoning, the numeric verification and the briefing, with the approval buttons
@@ -223,6 +233,8 @@ Hooks run: `ruff check` → `ruff format` → `pyright` → `pytest`.
 ## Data
 
 Raw NASA FIRMS CSVs are cached under `data/raw/` (Amazon & Mekong AOIs, 2000–2026). Empirical results and publication figures live under `data/processed/` and `docs/figures/`. See `data/raw/fetch_manifest.json` for provenance.
+
+The raw CSVs are committed so anyone can analyze the archive after a plain `git clone`, with no FIRMS key and no download. `data/raw/SHA256SUMS` pins every file; after adding or replacing a slice run `uv run python -m benchmark_cli.pin_raw_data` and commit the CSVs with the refreshed checksums (`tests/test_raw_data_integrity.py` fails until you do). The ERA5 cloud table is under `data/cloud/`.
 
 ---
 

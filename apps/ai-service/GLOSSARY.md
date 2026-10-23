@@ -74,6 +74,10 @@ _Avoid_: Approval prompt, confirmation dialog, human review
 The recorded answer to a Sign-off Request, naming who decided, when, and on what grounds.
 _Avoid_: Approval log, audit trail, sign-off record
 
+**Sign-off Principal**:
+The authenticated identity that owns a run or is assigned to approve it, established from validated token claims and never from the request body. A Sign-off Decision names a Sign-off Principal.
+_Avoid_: User, approver name, decided-by string, operator
+
 **Clarification Request**:
 A request for a human to supply information the analysis cannot infer, raised without authorizing any action.
 _Avoid_: Question, prompt, clarification

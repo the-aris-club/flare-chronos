@@ -67,6 +67,10 @@ _Avoid_: Atlantic noise zone
 A persistent non-biomass heat emitter—such as a gas flare, steel mill, cement kiln, refinery, or active volcano—that repeatedly triggers Thermal Detections within the same spatial cell across seasons.
 _Avoid_: False fire, stationary hotspot
 
+**Static Source Registry**:
+The versioned set of Iso-Area Cells (Resolution 8) that the archive shows to be hot in nearly every month of the year, derived from the detections themselves and passed into harmonization so that a Static Thermal Source is rejected rather than counted as a Fire Episode.
+_Avoid_: Blocklist, exclusion mask, static cell list
+
 **Fire Episode**:
 A unique, physical burning event reconstructed by clustering spatially overlapping and temporally proximate Thermal Detections acquired across multiple satellite overpasses within a single diurnal window.
 _Avoid_: Deduplicated point, merged hotspot, fire cluster
@@ -74,6 +78,10 @@ _Avoid_: Deduplicated point, merged hotspot, fire cluster
 **Effective Observation Effort ($\Omega$)**:
 The normalized diurnal sensing capacity of the active satellite constellation at a given epoch and latitude, accounting for satellite count, swath overlap, and orbital revisit spacing.
 _Avoid_: Overpass count, satellite multiplier
+
+**Clear-Sky Weight**:
+The ratio of an epoch's clear-sky share (1 minus the ERA5 cloud fraction over its 5-day window) to the region's mean clear-sky share across Measured Epochs. It multiplies the Effective Observation Effort so that a cloudier-than-usual epoch is not credited with the sensing capacity of a clear one.
+_Avoid_: Cloud correction, cloud mask, cloud filter
 
 **Co-Incident Overpass Pair**:
 Simultaneous or near-simultaneous observations of the same Iso-Area Cell by Aqua-MODIS and Suomi-NPP VIIRS within their shared $\sim 13\text{:}30 / 01\text{:}30\text{ MLT}$ orbital plane during the 2012–2026 overlap era.
@@ -116,6 +124,10 @@ _Avoid_: Real year, hard data, ground truth, anchor year
 **Interpolated Year**:
 A year with no archived slice set, whose annual scale is modelled from the observed MODIS-only count and the region's empirical seasonal envelope. The interpolation is deterministic but it is a model, not an observation, and published documents mark these years as such.
 _Avoid_: Estimated year, synthetic year, filled year, projection
+
+**Observed Cell**:
+A cell of the Burning Activity Calendar whose value comes from a Measured Epoch's own FIRMS window — the pentad that holds the 5-day slice, in a measured year. Every other cell is modelled, either inside a measured year or in an Interpolated Year. Only Observed Cells carry a Standardized Fire Anomaly Index, an Anomaly Tier or a Severe Anomaly Outline.
+_Avoid_: Real cell, measured pentad, hard cell
 
 **Severe Anomaly Outline**:
 The cyan frame drawn on a Burning Activity Calendar cell whose Standardized Fire Anomaly Index reaches the display threshold of $+2.2\sigma$. It is a rendering convention for a *display* threshold, deliberately below the CRISIS Anomaly Tier so the calendar highlights severe anomalies before a crisis alarm is raised.

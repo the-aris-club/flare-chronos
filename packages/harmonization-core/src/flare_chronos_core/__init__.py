@@ -8,20 +8,28 @@ from datetime import UTC, datetime
 import pandas as pd
 
 from .calendar_engine import (
+    CELL_INTERPOLATED,
+    CELL_MODELLED_IN_MEASURED_YEAR,
+    CELL_OBSERVED,
+    MIN_MEASURED_YEARS,
     SFAI_CRISIS_THRESHOLD_Z,
     SFAI_SEVERE_THRESHOLD_Z,
     build_burning_activity_calendar,
     classify_sfai_tier,
     day_of_year_to_pentad,
+    measured_only_sfai,
     pentad_to_doy_range,
 )
 from .confidence_filter import (
+    build_static_source_registry,
     compute_unified_detection_probability,
     has_aqua_nrt_geolocation_risk,
     is_in_south_atlantic_anomaly,
     is_static_or_non_veg_source,
 )
 from .deduplication import (
+    FIRE_EPISODE_WINDOW_MINUTES,
+    cloud_weighted_effort,
     cluster_fire_episodes,
     compute_effective_observation_effort,
     haversine_km,
@@ -56,6 +64,7 @@ from .radiometric_calibrator import (
     compute_frp_detection_limit,
     default_calibration_model,
     fit_coincident_aqua_snpp_model,
+    holdout_validation,
 )
 from .solar_sza import (
     DAYNIGHT_SZA_THRESHOLD_DEG,
@@ -237,9 +246,14 @@ def harmonize_detections(
 
 
 __all__ = [
+    "CELL_INTERPOLATED",
+    "CELL_MODELLED_IN_MEASURED_YEAR",
+    "CELL_OBSERVED",
     "DAYNIGHT_SZA_THRESHOLD_DEG",
+    "FIRE_EPISODE_WINDOW_MINUTES",
     "H3_RES7_AREA_KM2",
     "H3_RES8_AREA_KM2",
+    "MIN_MEASURED_YEARS",
     "SFAI_CRISIS_THRESHOLD_Z",
     "SFAI_SEVERE_THRESHOLD_Z",
     "AnomalyTier",
@@ -255,7 +269,9 @@ __all__ = [
     "allocate_footprint_to_h3",
     "apply_two_stage_frp_calibration",
     "build_burning_activity_calendar",
+    "build_static_source_registry",
     "classify_sfai_tier",
+    "cloud_weighted_effort",
     "cluster_fire_episodes",
     "compute_effective_observation_effort",
     "compute_frp_detection_limit",
@@ -269,11 +285,13 @@ __all__ = [
     "harmonize_detections",
     "has_aqua_nrt_geolocation_risk",
     "haversine_km",
+    "holdout_validation",
     "invert_modis_scan_angle",
     "invert_viirs_scan_angle",
     "is_in_south_atlantic_anomaly",
     "is_static_or_non_veg_source",
     "latlon_to_h3",
+    "measured_only_sfai",
     "modis_dimensions_from_scan_angle",
     "parse_firms_dataframe",
     "pentad_to_doy_range",

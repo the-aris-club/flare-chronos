@@ -151,7 +151,7 @@ class TestFlareChronosPhysics(unittest.TestCase):
         self.assertLess(prob, 0.10)
 
     def test_multi_satellite_overpass_deduplication(self) -> None:
-        """Afternoon overpass train (NOAA-20, NOAA-21, SNPP, Aqua) within 55 min merges into 1 Fire Episode."""
+        """Afternoon overpass train (NOAA-20, NOAA-21, SNPP, Aqua) within 60 min merges into 1 Fire Episode."""
         base_lat, base_lon = 15.250, 107.120
         raw_pass_train = [
             ThermalDetection(
@@ -221,7 +221,7 @@ class TestFlareChronosPhysics(unittest.TestCase):
         ]
 
         harm = harmonize_detections(raw_pass_train)
-        episodes = cluster_fire_episodes(harm, temporal_window_minutes=95.0)
+        episodes = cluster_fire_episodes(harm, temporal_window_minutes=60.0)
         self.assertEqual(len(episodes), 1)
         ep = episodes[0]
         self.assertEqual(ep.raw_detection_count, 4)

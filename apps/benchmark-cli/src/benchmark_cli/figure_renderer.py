@@ -413,7 +413,7 @@ def render_fig2_overpass_deduplication(
     p2 = c.draw_panel_box(
         (1140, 132, 2164, 1275),
         "B. Empirical Multi-Sensor Deduplication on Real NASA FIRMS Data (2012-2025)",
-        "Comparison of Raw Thermal Detections vs. Deduplicated Physical Fire Episodes (tau = 95 min, Elliptical Overlap)",
+        "Comparison of Raw Thermal Detections vs. Deduplicated Physical Fire Episodes (tau = 60 min, Elliptical Overlap)",
     )
     epochs = dedup_stats["empirical_epochs"]
     n_ep = len(epochs)
@@ -779,11 +779,12 @@ def render_fig5_burning_activity_calendar(
         years = rdata["years"]  # 2001..2026 (26 rows)
         matrix = np.array(rdata["hfd_matrix"], dtype=float)  # shape (26, 73)
         sfai_mat = np.array(rdata["sfai_matrix"], dtype=float)
+        observed_mat = np.array(rdata["cell_provenance_matrix"]) == 0
 
         p = c.draw_panel_box(
             box,
             title_str,
-            f"Rows: Years (2001-2026) | Columns: 73 Climatological Pentads (Jan 1 - Dec 31) | Cyan Outline = Severe Anomaly (Z >= +{SFAI_HIGHLIGHT_Z})",
+            f"Rows: Years (2001-2026) | Columns: 73 Climatological Pentads (Jan 1 - Dec 31) | White dot = observed cell, all others modelled | Cyan Outline = observed cell with Z >= +{SFAI_HIGHLIGHT_Z}",
         )
         px0, py0, px1, py1 = p
         n_rows, n_cols = matrix.shape
@@ -806,6 +807,11 @@ def render_fig5_burning_activity_calendar(
                 val = matrix[r_idx, c_idx]
                 col = _heatmap_color(val / max(1e-6, vmax))
                 c.draw.rectangle([cx0, cy0, cx1, cy1], fill=col)
+                if observed_mat[r_idx, c_idx]:
+                    mx, my = (cx0 + cx1) // 2, (cy0 + cy1) // 2
+                    c.draw.ellipse(
+                        [mx - 2, my - 2, mx + 2, my + 2], fill=(255, 255, 255)
+                    )
                 if sfai_mat[r_idx, c_idx] >= SFAI_HIGHLIGHT_Z and val >= 0.35 * vmax:
                     c.draw.rectangle(
                         [cx0, cy0, cx1, cy1], outline=(0, 210, 255), width=2

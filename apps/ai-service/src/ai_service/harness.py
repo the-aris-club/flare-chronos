@@ -1068,6 +1068,11 @@ class FlareChronosDualSystemHarness:
         snapshot = self.graph.get_state(self._run_config(thread_id))
         return [dict(interrupt.value) for interrupt in snapshot.interrupts]
 
+    async def apending_requests(self, thread_id: str) -> list[dict[str, Any]]:
+        """Async twin of ``pending_requests`` for use on an async checkpointer."""
+        snapshot = await self.graph.aget_state(self._run_config(thread_id))
+        return [dict(interrupt.value) for interrupt in snapshot.interrupts]
+
     def invoke_to_completion(
         self,
         user_query: str,
@@ -1216,7 +1221,7 @@ class FlareChronosDualSystemHarness:
             )
             return
 
-        snapshot = self.graph.get_state(config)
+        snapshot = await self.graph.aget_state(config)
         if snapshot.interrupts:
             yield HarnessEvent(
                 "run_paused",

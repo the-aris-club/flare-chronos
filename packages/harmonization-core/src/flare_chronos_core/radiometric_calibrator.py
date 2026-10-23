@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
+from typing import Any
 
 import numpy as np
 
@@ -38,6 +39,8 @@ class CrossSensorCalibrationModel:
     harmonized_rmse_mw: float
     ks_stat_before: float
     ks_stat_after: float
+    # Share of the power-law term in the power-law/quantile blend. 0.65 until fitted.
+    blend_parametric_weight: float = 0.65
 
 
 def compute_frp_detection_limit(
@@ -141,7 +144,8 @@ def apply_two_stage_frp_calibration(
             right=parametric_frp,
         )
     )
-    viirs_eq_frp = 0.65 * parametric_frp + 0.35 * eqm_frp
+    w = cal.blend_parametric_weight
+    viirs_eq_frp = w * parametric_frp + (1.0 - w) * eqm_frp
 
     # Equivalent fire count expansion accounts for small fires missed inside large MODIS footprints
     viirs_eq_count = base_count_mult * (footprint.area_km2**0.38)
@@ -152,6 +156,15 @@ def apply_two_stage_frp_calibration(
         round(max(0.5, viirs_eq_frp), 3),
         round(viirs_eq_count, 4),
     )
+
+
+def fit_blend_weight(
+    parametric: np.ndarray, quantile_mapped: np.ndarray, reference: np.ndarray
+) -> float:
+    """Least-squares share of the power-law term in the blend, clipped to [0, 1]."""
+    spread = parametric - quantile_mapped
+    raw = np.sum((reference - quantile_mapped) * spread) / max(1e-9, np.sum(spread**2))
+    return float(np.clip(raw, 0.0, 1.0))
 
 
 def fit_coincident_aqua_snpp_model(
@@ -197,7 +210,8 @@ def fit_coincident_aqua_snpp_model(
 
     parametric_pred = alpha * (m_scan_corr**beta)
     eqm_pred = np.interp(m_scan_corr, m_quantiles, v_quantiles)
-    harmonized_pred = 0.65 * parametric_pred + 0.35 * eqm_pred
+    blend_weight = fit_blend_weight(parametric_pred, eqm_pred, v_ref)
+    harmonized_pred = blend_weight * parametric_pred + (1.0 - blend_weight) * eqm_pred
 
     # Compute validation statistics (Before vs After Harmonization)
     ss_tot = float(np.sum((v_ref - np.mean(v_ref)) ** 2))
@@ -241,4 +255,79 @@ def fit_coincident_aqua_snpp_model(
         harmonized_rmse_mw=round(harm_rmse, 3),
         ks_stat_before=round(ks_before, 4),
         ks_stat_after=round(ks_after, 4),
+        blend_parametric_weight=round(blend_weight, 4),
     )
+
+
+def holdout_validation(
+    modis_cell_frp: np.ndarray,
+    viirs_cell_frp: np.ndarray,
+    modis_scan_areas: np.ndarray,
+    train_mask: np.ndarray,
+    *,
+    groups: np.ndarray | None = None,
+    n_boot: int = 500,
+    seed: int = 2026,
+) -> dict[str, Any]:
+    """Fit on the training pairs, score on the rest.
+
+    The parametric/quantile blend weight is fitted here on the training pairs
+    (least squares, clipped to [0, 1]) instead of being fixed at 0.65. Error is
+    reported on the held-out pairs, with a bootstrap 95% interval on how much
+    RMSE the calibration removes relative to the uncalibrated MODIS FRP.
+
+    Scores the fitted power-law/quantile blend only; the detection-limit offset that
+    ``apply_two_stage_frp_calibration`` adds per detection is not part of the fit.
+    The caller's pair selection is applied before the split, so the gain describes the
+    pairs that survive that selection, not every co-incident pair.
+    """
+    train = train_mask.astype(bool)
+    model = fit_coincident_aqua_snpp_model(
+        modis_cell_frp[train], viirs_cell_frp[train], modis_scan_areas[train]
+    )
+
+    def components(m: np.ndarray, a: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+        scan = m * (1.0 + model.scan_tail_kappa * np.log(np.maximum(1.0, a)))
+        param = model.day_power_alpha * (scan**model.day_power_beta)
+        eqm = np.interp(scan, model.modis_quantiles_mw, model.viirs_quantiles_mw)
+        return param, eqm
+
+    p_tr, e_tr = components(modis_cell_frp[train], modis_scan_areas[train])
+    v_tr = viirs_cell_frp[train]
+    weight = fit_blend_weight(p_tr, e_tr, v_tr)
+
+    test = ~train
+    if not test.any() or not train.any():
+        raise ValueError("the split needs both training and held-out pairs")
+    p_te, e_te = components(modis_cell_frp[test], modis_scan_areas[test])
+    v_te = viirs_cell_frp[test]
+    raw_te = modis_cell_frp[test]
+    pred_te = weight * p_te + (1.0 - weight) * e_te
+    pred_tr = weight * p_tr + (1.0 - weight) * e_tr
+
+    def rmse(a: np.ndarray, b: np.ndarray) -> float:
+        return float(np.sqrt(np.mean((a - b) ** 2)))
+
+    rng = np.random.default_rng(seed)
+    gains = []
+    if groups is None:
+        members = [np.array([i]) for i in range(len(v_te))]
+    else:
+        # Pairs from one date and region are correlated, so resample whole groups.
+        g_te = groups[test]
+        members = [np.flatnonzero(g_te == g) for g in np.unique(g_te)]
+    for _ in range(n_boot):
+        picks = rng.integers(0, len(members), len(members))
+        idx = np.concatenate([members[k] for k in picks])
+        gains.append(rmse(v_te[idx], raw_te[idx]) - rmse(v_te[idx], pred_te[idx]))
+    low, high = (float(x) for x in np.percentile(gains, [2.5, 97.5]))
+
+    return {
+        "n_train": int(train.sum()),
+        "n_test": int(test.sum()),
+        "blend_parametric_weight": round(weight, 4),
+        "train_rmse_mw": round(rmse(v_tr, pred_tr), 3),
+        "raw_rmse_mw": round(rmse(v_te, raw_te), 3),
+        "harmonized_rmse_mw": round(rmse(v_te, pred_te), 3),
+        "rmse_gain_ci95_mw": (round(low, 3), round(high, 3)),
+    }

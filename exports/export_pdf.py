@@ -161,14 +161,14 @@ PROPOSAL_ARCH_SVG = """
   <text x="632" y="364" text-anchor="middle" font-size="8.5" font-weight="700" fill="#c2410c">FRP_lim(θ, SZA) + EQM</text>
   <text x="632" y="382" text-anchor="middle" font-size="8.5" fill="#475569">11.553 cặp đồng thời</text>
   <text x="632" y="396" text-anchor="middle" font-size="8.5" fill="#475569">Aqua–SNPP (13:30 MLT)</text>
-  <text x="632" y="410" text-anchor="middle" font-size="8.5" font-weight="700" fill="#15803d">Giảm 79.7% sai số KS!</text>
+  <text x="632" y="410" text-anchor="middle" font-size="8.5" font-weight="700" fill="#15803d">Giảm 70.2% sai số KS!</text>
 
   <rect x="724" y="296" width="160" height="142" rx="8" fill="#ffffff" stroke="#fb923c" stroke-width="1.4"/>
   <rect x="724" y="296" width="160" height="24" rx="8" fill="#ffedd5"/>
   <text x="804" y="312" text-anchor="middle" font-size="9.8" font-weight="700" fill="#9a3412">GIAI ĐOẠN 5: Sự Kiện</text>
   <text x="804" y="332" text-anchor="middle" font-size="9" font-weight="700" fill="#1e293b">Khử Trùng Lặp &amp; Nỗ Lực</text>
   <text x="804" y="350" text-anchor="middle" font-size="8.5" fill="#475569">Gom cụm không-thời gian</text>
-  <text x="804" y="364" text-anchor="middle" font-size="8.5" font-weight="700" fill="#c2410c">τ = 95 phút → Sự kiện cháy</text>
+  <text x="804" y="364" text-anchor="middle" font-size="8.5" font-weight="700" fill="#c2410c">τ = 60 phút → Sự kiện cháy</text>
   <text x="804" y="382" text-anchor="middle" font-size="8.5" fill="#475569">Chia hệ số nỗ lực quét</text>
   <text x="804" y="396" text-anchor="middle" font-size="8.5" font-weight="700" fill="#15803d">Ω(y, φ) ∈ [0.52, 2.10]</text>
   <text x="804" y="410" text-anchor="middle" font-size="8.5" fill="#475569">Khử bước nhảy +1.324,2%</text>
@@ -282,8 +282,8 @@ PROPOSAL_SEQ_SVG = """
   <text x="534" y="254" font-size="8.8" fill="#1e293b">• [5a] Tính góc thiên đỉnh Mặt Trời SZA(φ,λ,t) &lt; 85° (Day/Night)</text>
   <text x="534" y="272" font-size="8.8" fill="#1e293b">• [5b] Tính xác suất P(fire) ∈ [0,1] &amp; Lọc nhiễu SAA / Nguồn tĩnh</text>
   <text x="534" y="290" font-size="8.8" fill="#1e293b">• [5c] Giải góc quét θ → Elip ΔS×ΔT → Trọng số H3 Res 7 &amp; 8</text>
-  <text x="534" y="308" font-size="8.8" fill="#1e293b">• [5d] Hiệu chuẩn 2 giai đoạn FRP_lim(θ) + EQM (D_KS = 0.0237)</text>
-  <text x="534" y="326" font-size="8.8" fill="#1e293b">• [5e] Gom cụm sự kiện cháy (τ = 95 phút) &amp; Chia nỗ lực Ω(y, φ)</text>
+  <text x="534" y="308" font-size="8.8" fill="#1e293b">• [5d] Hiệu chuẩn 2 giai đoạn FRP_lim(θ) + EQM (D_KS = 0.0348)</text>
+  <text x="534" y="326" font-size="8.8" fill="#1e293b">• [5e] Gom cụm sự kiện cháy (τ = 60 phút) &amp; Chia nỗ lực Ω(y, φ)</text>
   <text x="534" y="344" font-size="8.8" font-weight="700" fill="#c2410c">• [5f] Tổng hợp Ma trận 26 Năm × 73 Pentads (HFD, HRF, SFAI)</text>
 
   <line x1="665" y1="392" x2="833" y2="392" stroke="#1e40af" stroke-width="1.8" marker-end="url(#seqArrow)"/>
@@ -416,14 +416,14 @@ REPORT_ARCH_SVG = """
   <text x="632" y="364" text-anchor="middle" font-size="8.5" font-weight="700" fill="#c2410c">FRP_lim(θ, SZA) + EQM</text>
   <text x="632" y="382" text-anchor="middle" font-size="8.5" fill="#475569">11.553 cặp đồng thời</text>
   <text x="632" y="396" text-anchor="middle" font-size="8.5" fill="#475569">Aqua–SNPP (13:30 MLT)</text>
-  <text x="632" y="410" text-anchor="middle" font-size="8.5" font-weight="700" fill="#15803d">Giảm 79.7% sai số KS!</text>
+  <text x="632" y="410" text-anchor="middle" font-size="8.5" font-weight="700" fill="#15803d">Giảm 70.2% sai số KS!</text>
 
   <rect x="724" y="296" width="160" height="142" rx="8" fill="#ffffff" stroke="#fb923c" stroke-width="1.4"/>
   <rect x="724" y="296" width="160" height="24" rx="8" fill="#ffedd5"/>
   <text x="804" y="312" text-anchor="middle" font-size="10" font-weight="700" fill="#9a3412">BƯỚC 5: Khử Trùng Lặp</text>
   <text x="804" y="332" text-anchor="middle" font-size="9" font-weight="600" fill="#1e293b">deduplication.py</text>
   <text x="804" y="350" text-anchor="middle" font-size="8.5" fill="#475569">Băm không gian O(N)</text>
-  <text x="804" y="364" text-anchor="middle" font-size="8.5" font-weight="700" fill="#c2410c">τ = 95 phút → FireEpisode</text>
+  <text x="804" y="364" text-anchor="middle" font-size="8.5" font-weight="700" fill="#c2410c">τ = 60 phút → FireEpisode</text>
   <text x="804" y="382" text-anchor="middle" font-size="8.5" fill="#475569">Chia hệ số nỗ lực quét</text>
   <text x="804" y="396" text-anchor="middle" font-size="8.5" font-weight="700" fill="#15803d">Ω(y, φ) ∈ [0.52, 2.10]</text>
   <text x="804" y="410" text-anchor="middle" font-size="8.5" fill="#475569">Khử bước nhảy +1.324,2%</text>
@@ -535,8 +535,8 @@ REPORT_SEQ_SVG = """
   <text x="534" y="254" font-size="8.8" fill="#1e293b">• [5a] harmonize_daynight_flag() → SZA(φ,λ,t) &lt; 85.0°</text>
   <text x="534" y="272" font-size="8.8" fill="#1e293b">• [5b] compute_unified_detection_probability() &amp; SAA Filter</text>
   <text x="534" y="290" font-size="8.8" fill="#1e293b">• [5c] reconstruct_instantaneous_footprint() &amp; allocate_h3()</text>
-  <text x="534" y="308" font-size="8.8" fill="#1e293b">• [5d] apply_two_stage_frp_calibration() (D_KS = 0.0237)</text>
-  <text x="534" y="326" font-size="8.8" fill="#1e293b">• [5e] cluster_fire_episodes(95m) &amp; effort Ω(y, φ)</text>
+  <text x="534" y="308" font-size="8.8" fill="#1e293b">• [5d] apply_two_stage_frp_calibration() (D_KS = 0.0348)</text>
+  <text x="534" y="326" font-size="8.8" fill="#1e293b">• [5e] cluster_fire_episodes(60m) &amp; effort Ω(y, φ)</text>
   <text x="534" y="344" font-size="8.8" font-weight="700" fill="#c2410c">• [5f] build_burning_activity_calendar() → 26×73 Matrix</text>
 
   <line x1="665" y1="392" x2="833" y2="392" stroke="#1e40af" stroke-width="1.8" marker-end="url(#seqArrow)"/>

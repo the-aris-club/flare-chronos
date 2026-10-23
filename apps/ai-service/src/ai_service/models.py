@@ -24,6 +24,7 @@ import json
 import os
 import re
 import urllib.error
+import urllib.parse
 import urllib.request
 from collections.abc import Sequence
 from pathlib import Path
@@ -58,7 +59,7 @@ AI_SERVICE_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_CONFIG_PATH = AI_SERVICE_ROOT / "config" / "harness_config.yaml"
 WORKSPACE_ENV_FILE = AI_SERVICE_ROOT.parents[1] / ".env"
 
-Protocol = Literal["typed_questions", "native_chat"]
+Protocol = Literal["typed_questions", "native_chat", "openai_structured"]
 
 DEFAULT_USER_AGENT = "flare-chronos/2.0.0"
 
@@ -220,14 +221,17 @@ def _post_json(
     url: str, payload: dict[str, Any], headers: dict[str, str], timeout_sec: float
 ) -> dict[str, Any]:
     """POST a JSON body and decode a JSON object response."""
-    request = urllib.request.Request(
+    # Endpoints come from the environment, so refuse file: and custom schemes.
+    if urllib.parse.urlparse(url).scheme not in ("http", "https"):
+        raise EndpointCallError(f"endpoint must be http or https: {url!r}", 400)
+    request = urllib.request.Request(  # noqa: S310 - scheme checked above
         url,
         data=json.dumps(payload).encode("utf-8"),
         headers=headers,
         method="POST",
     )
     try:
-        with urllib.request.urlopen(request, timeout=timeout_sec) as response:
+        with urllib.request.urlopen(request, timeout=timeout_sec) as response:  # noqa: S310
             body = response.read().decode("utf-8", errors="replace")
     except urllib.error.HTTPError as exc:
         detail = exc.read().decode("utf-8", errors="replace")[:400]
@@ -978,8 +982,89 @@ class NativeChatModel(HarnessChatModel):
         return ChatResult(generations=[ChatGeneration(message=message)])
 
 
+class OpenAIStructuredChatModel(NativeChatModel):
+    """System 1 classifier for any OpenAI-compatible chat-completions endpoint.
+
+    The model is forced to answer through the `classify_request` tool, and its
+    arguments (a JSON string in this protocol) become the classification. This
+    is the portable transport: it needs no bespoke protocol, only a standard
+    endpoint. It serves the Reflexive Layer's classification; the Deliberative
+    Layer keeps the native chat protocol.
+    """
+
+    @property
+    def _llm_type(self) -> str:
+        return "flare-chronos-system-one-structured"
+
+    def classify(
+        self,
+        state_text: str,
+        questions: dict[str, Any],
+        entity: SpatioTemporalQueryEntity,
+    ) -> dict[str, Any]:
+        request = self.profile.request
+        payload: dict[str, Any] = {
+            "model": self.profile.model_id,
+            "messages": self._to_native_messages(
+                [
+                    SystemMessage(system1_classification_prompt(entity)),
+                    HumanMessage(state_text),
+                ]
+            ),
+            "tools": [convert_to_openai_tool(classify_request)],
+            "tool_choice": {
+                "type": "function",
+                "function": {"name": "classify_request"},
+            },
+        }
+        if request.temperature is not None:
+            payload["temperature"] = request.temperature
+        if request.max_output_tokens is not None:
+            payload["max_tokens"] = request.max_output_tokens
+        payload.update(request.extra_body)
+        headers = {
+            **request.headers,
+            "Content-Type": "application/json",
+            "User-Agent": request.user_agent,
+            "Authorization": f"Bearer {resolve_api_key(self.profile)}",
+        }
+        response = _post_json(
+            self.profile.endpoint, payload, headers, request.timeout_ms / 1000.0
+        )
+        choices = response.get("choices") or [{}]
+        calls = self._to_langchain_tool_calls(
+            (choices[0].get("message") or {}).get("tool_calls") or []
+        )
+        if not calls:
+            raise EndpointCallError(
+                "The classifier returned no classification call.", 502
+            )
+        return classification_answers(
+            dict(calls[0].get("args") or {}), self.profile.model_id
+        )
+
+    def _generate(
+        self,
+        messages: list[BaseMessage],
+        stop: list[str] | None = None,
+        run_manager: CallbackManagerForLLMRun | None = None,
+        **kwargs: Any,
+    ) -> ChatResult:
+        raise NotImplementedError(
+            "The structured-output protocol serves classification only."
+        )
+
+
 def build_chat_model_for_profile(profile: EndpointProfile) -> HarnessChatModel:
     """Create the client that speaks a profile's protocol."""
+    if profile.protocol == "openai_structured":
+        return OpenAIStructuredChatModel(
+            role="system1_reflexive",
+            model_id=profile.model_id,
+            source_label=profile.endpoint,
+            reasoning_effort="low",
+            profile=profile,
+        )
     if profile.protocol == "typed_questions":
         return SystemOneChatModel(
             role="system1_reflexive",

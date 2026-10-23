@@ -33,7 +33,9 @@ Dữ liệu điểm nóng từ **NASA LANCE FIRMS** có sự phân mảnh cấu 
 
 Trên vệ tinh **Terra** và **Aqua** (độ cao quỹ đạo danh định $h_{\text{MODIS}} = 705\text{ km}$, bán kính quỹ đạo $r = R_e + h_{\text{MODIS}} = 6378.137 + 705 = 7083.137\text{ km}$, bước góc lấy mẫu $s = 0.0014184397\text{ rad/sample}$), kích thước thực tế của điểm ảnh tại góc quét $\theta \in [0, 55^\circ]$ được xác định bởi hệ phương trình hình học cầu (*Ichoku & Kaufman, 2005; Giglio et al., 2016*) cài đặt trong [`modis_dimensions_from_scan_angle`](../packages/harmonization-core/src/flare_chronos_core/geometry_h3.py):
 
-$$\Delta S_{\text{MODIS}}(\theta) = R_e \cdot s \left( \frac{\cos\theta}{\sqrt{(R_e / r)^2 - \sin^2\theta}} - 1 \right)$$
+$$\Delta S_{\text{MODIS}}(\theta) = r \cdot s \left( \cos\theta - \sqrt{(R_e / r)^2 - \sin^2\theta} \right) \cdot \frac{R_e}{r} \cdot \frac{1}{\sqrt{(R_e / r)^2 - \sin^2\theta}}$$
+
+Tức $\Delta S = \frac{R_e}{r} \cdot \frac{\Delta T}{\sqrt{(R_e / r)^2 - \sin^2\theta}}$: kích thước theo phương quét là kích thước dọc quỹ đạo $\Delta T$ nhân hệ số cong Trái Đất $\frac{R_e}{r}$ và hệ số giãn góc nhìn xiên $1/\sqrt{(R_e / r)^2 - \sin^2\theta}$. Dạng này tương đương đại số với $R_e \cdot s \left( \frac{\cos\theta}{\sqrt{(R_e / r)^2 - \sin^2\theta}} - 1 \right)$ (kiểm chứng số: cùng giá trị $1.000$, $1.159$, $1.943$, $4.830\text{ km}$ tại $0^\circ, 20^\circ, 40^\circ, 55^\circ$) và cho $\Delta S(0^\circ) = s\,h = 1.000\text{ km}$.
 
 $$\Delta T_{\text{MODIS}}(\theta) = r \cdot s \left( \cos\theta - \sqrt{(R_e / r)^2 - \sin^2\theta} \right)$$
 
@@ -100,9 +102,11 @@ Vệ tinh **Aqua (MODIS)** và **Suomi-NPP (VIIRS)** có cùng giờ địa phư
 | **Số cặp ô lưới đồng thời ($N_{\text{pairs}}$)** | $11.553\text{ ô lưới}$ | $11.553\text{ ô lưới}$ | Tập kiểm chứng thực tế NASA FIRMS |
 | **Tỷ số số điểm nóng trung bình ($\bar{N}_{\text{VIIRS}} / \bar{N}_{\text{MODIS}}$)** | $3.560\times$ | $1.000\times$ (Đã chuẩn hóa tương đương) | Khử sạch độ lệch mật độ $+256.0\%$ |
 | **Tỷ số tổng FRP trung bình ($\sum \text{FRP}_{\text{VIIRS}} / \sum \text{FRP}_{\text{MODIS}}$)** | $1.371\times$ | $1.004\times$ | Khử độ lệch thiếu hụt năng lượng $-27.1\%$ |
-| **Hệ số xác định ($R^2$)** | $0.7330$ | **$0.7470$** | Tăng độ tương quan giải thích phương sai |
-| **Sai số toàn phương trung bình ($\text{RMSE}$, $\text{MW/cell}$)** | $149.104\text{ MW}$ | **$145.155\text{ MW}$** | Giảm sai số bậc hai trên toàn dải |
-| **Khoảng cách phân phối Kolmogorov-Smirnov ($D_{\text{KS}}$)** | $0.1166$ | **$0.0237$** | **Giảm $79.7\%$ sai lệch phân phối xác suất!** |
+| **Hệ số xác định ($R^2$)** | $0.7330$ | **$0.7641$** | Tăng độ tương quan giải thích phương sai |
+| **Sai số toàn phương trung bình ($\text{RMSE}$, $\text{MW/cell}$)** | $149.104\text{ MW}$ | **$140.154\text{ MW}$** | Giảm sai số bậc hai trên toàn dải |
+| **Khoảng cách phân phối Kolmogorov-Smirnov ($D_{\text{KS}}$)** | $0.1166$ | **$0.0348$** | **Giảm $70.2\%$ sai lệch phân phối xác suất!** |
+
+**Kiểm định trên các năm giữ lại.** Các chỉ số trong bảng trên được tính trong mẫu nên lạc quan. Khi khớp trên các cặp đến năm $2019$ ($5.331$ cặp) và chấm điểm trên các cặp từ $2020$ ($6.222$ cặp): $\text{RMSE}$ giảm từ $154{,}2$ xuống $145{,}4\text{ MW}$; khoảng tin cậy $95\%$ của mức giảm (bootstrap theo nhóm ngày–vùng) là $6{,}6$–$11{,}8\text{ MW}$; trọng số blend khớp được là $0{,}897$ (thay cho $0{,}65$ cố định). Hiệu chuẩn có ích nhưng khiêm tốn: phần lớn sai số còn lại không giảm được bằng hiệu chuẩn công suất.
 
 ![Cross Sensor FRP Calibration](figures/fig3_cross_sensor_frp_quantile_mapping.png)
 
@@ -151,7 +155,7 @@ Trong kỷ nguyên 5 vệ tinh (`2024–2026`), một đám cháy diễn ra vào
 - **Aqua MODIS** ($\sim 13\text{:}30\text{ MLT}$),
 cùng sự chồng lấn rìa dải quét ($\sim 15\%$ tại xích đạo) giữa các vòng quỹ đạo liền kề.
 
-Trong [`cluster_fire_episodes`](../packages/harmonization-core/src/flare_chronos_core/deduplication.py), hai phát hiện $d_i, d_j$ được gom vào cùng một **Sự kiện cháy vật lý ([`FireEpisode`](../packages/harmonization-core/src/flare_chronos_core/domain.py)) $E_k$** nếu thỏa mãn đồng thời điều kiện khoảng cách thời gian $\Delta t \le \tau_{\text{cluster}} = 95\text{ phút}$ và điều kiện giao cắt bán kính footprint hiệu dụng:
+Trong [`cluster_fire_episodes`](../packages/harmonization-core/src/flare_chronos_core/deduplication.py), hai phát hiện $d_i, d_j$ được gom vào cùng một **Sự kiện cháy vật lý ([`FireEpisode`](../packages/harmonization-core/src/flare_chronos_core/domain.py)) $E_k$** nếu thỏa mãn đồng thời điều kiện khoảng cách thời gian $\Delta t \le \tau_{\text{cluster}} = 60	ext{ phút}$ và điều kiện giao cắt bán kính footprint hiệu dụng:
 
 $$d_{\text{Haversine}}(x_i, x_j) \le \max\!\left( 1.35\text{ km}, \, \sqrt{\frac{A_{p_i}}{\pi}} + \sqrt{\frac{A_{p_j}}{\pi}} + 0.65\text{ km} \right) \quad \text{hoặc} \quad \text{H3}_8(x_i) = \text{H3}_8(x_j)$$
 
@@ -169,6 +173,11 @@ $$\Omega(y, \phi) = \Omega_0(y) \cdot \left[ 1 + 0.18 \left( \frac{1}{\max(0.55,
 
 với $\Omega_0(2000\text{–}2001) = 0.52$, $\Omega_0(2002) = 0.76$, $\Omega_0(2003\text{–}2011) = 1.00$, $\Omega_0(2012\text{–}2017) = 1.48$, $\Omega_0(2018\text{–}2022) = 1.78$, $\Omega_0(2023) = 1.92$, và $\Omega_0(2024\text{–}2026) = 2.08$.
 
+
+**Trọng số che phủ mây (ERA5):** nỗ lực quan sát của mỗi Mốc đo thực được nhân thêm tỷ lệ trời quang tương đối:
+$$\Omega_{\text{eff}}(y, \phi) = \Omega(y, \phi) \cdot \frac{c_y}{\bar{c}}, \qquad c_y = 1 - f_{\text{mây}, y}$$
+với $f_{\text{mây}, y}$ là độ che phủ mây tổng của ERA5 trung bình trên lưới $3 \times 3$ điểm phủ vùng nghiên cứu, trên các giờ nằm trong $\pm 2$ giờ quanh $13{:}30$ và $01{:}30$ giờ mặt trời địa phương của cửa sổ 5 ngày, và $\bar{c}$ là giá trị trung bình của vùng trên các Mốc đo thực (nên một epoch điển hình giữ nguyên $\Omega$). Epoch nhiều mây hơn thường lệ nhận nỗ lực thấp hơn, nên số sự kiện cháy của nó được chia cho một số nhỏ hơn. **Hạn chế đã biết:** ERA5 là trường tái phân tích, không phải quan sát tại thời điểm vệ tinh bay qua; mây ti mỏng không che được lửa; và quan hệ tỷ lệ tuyến tính là một giả định. Trọng số này làm dịch chuyển chỉ số điều hòa của từng epoch tới khoảng $\pm 35\%$ (Mekong 2025: $+42\%$, 2026: $-31\%$), vì vậy các kết luận về dị thường phải đọc cùng với độ nhạy này.
+
 ### 5.3. Công Thức Tính Bộ Ba Chỉ Số Của Lịch Hoạt Động Cháy (`HFD`, `HRF`, `SFAI`)
 
 Trên mỗi vùng quan tâm có diện tích $A_{\text{AOI}}$ ($\text{km}^2$), tại năm $y \in [2000, 2026]$ và kỳ 5 ngày (**Pentad**) $p \in [1, 73]$:
@@ -178,7 +187,8 @@ Trên mỗi vùng quan tâm có diện tích $A_{\text{AOI}}$ ($\text{km}^2$), t
 2. **Mật độ Thông lượng Bức xạ Lửa Chuẩn hóa ($\text{HRF}_{y,p}$, $\text{MW} / \text{km}^2$)**:
    $$\text{HRF}_{y,p} = \frac{1}{A_{\text{AOI}}} \sum_{E_k \in \mathcal{E}_{y,p}} \frac{\widehat{\text{FRP}}_{\text{VIIRS-eq}}(E_k)}{\Omega(y, \phi_k)}$$
 3. **Chỉ số Dị thường Cháy Chuẩn hóa ($\text{SFAI}_{y,p}$, Z-Score bền vững theo Pentad)**:
-   $$\text{SFAI}_{y,p} = \frac{\text{HRF}_{y,p} - \text{Median}_{y'\in[2001,2026]}\!\left(\text{HRF}_{y',p}\right)}{0.65 \cdot \left(1.4826 \cdot \text{MAD}_{y'}\!\left(\text{HRF}_{y',p}\right)\right) + 0.35 \cdot \text{Std}_{y'}\!\left(\text{HRF}_{y',p}\right)}$$
+   $$\text{SFAI}_{y,p} = \frac{\text{HRF}_{y,p} - \text{Median}_{y'\in\mathcal{Y}_{\text{obs}}(p)}\!\left(\text{HRF}_{y',p}\right)}{0.65 \cdot \left(1.4826 \cdot \text{MAD}_{y'}\!\left(\text{HRF}_{y',p}\right)\right) + 0.35 \cdot \text{Std}_{y'}\!\left(\text{HRF}_{y',p}\right)}$$
+   *(Theo ADR-0010: $\mathcal{Y}_{\text{obs}}(p)$ là tập các năm có **ô đã quan sát** ở Pentad $p$ — chỉ Pentad chứa cửa sổ 5 ngày của một Mốc đo thực. Cần tối thiểu $8$ năm, nếu không SFAI không được tính; các ô mô hình không mang SFAI.)*
 
 ---
 

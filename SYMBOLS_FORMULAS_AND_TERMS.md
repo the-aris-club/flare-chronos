@@ -59,7 +59,7 @@
 | $\bar{A}_8$ (H3 Res 8) | $0.73732760$ | km² | Diện tích ô lục giác H3 Resolution 8 | `geometry_h3.py::H3_RES8_AREA_KM2` |
 | $A_{\text{VIIRS,nadir,nominal}}$ | $0.140625$ | km² | $0.375\times0.375$ km² nominal VIIRS | `radiometric_calibrator.py` |
 | $P_{\text{thresh}}$ | $85.0$ | deg | Ngưỡng SZA phân biệt ngày/đêm | `solar_sza.py::DAYNIGHT_SZA_THRESHOLD_DEG` |
-| $\tau_{\text{cluster}}$ | $95.0$ | phút | Cửa sổ thời gian gom cụm đa vệ tinh | `deduplication.py::cluster_fire_episodes` |
+| $\tau_{\text{cluster}}$ | $60.0$ | phút | Cửa sổ thời gian gom cụm đa vệ tinh | `deduplication.py::cluster_fire_episodes` |
 | $P_{\text{min}}$ | $0.20$ | — | Xác suất phát hiện tối thiểu để vào cụm | `deduplication.py::cluster_fire_episodes` |
 | $\text{SAA}$ bounds | $\phi\in[-55,7]$, $\lambda\in[-110,11]$ | deg | Hộp giới hạn Dị thường Nam Đại Tây Dương | `confidence_filter.py` |
 | $\Omega_0$ baseline | $1.00$ | — | Kỷ nguyên chuẩn Terra+Aqua xích đạo 2003–2011 | `deduplication.py::compute_effective_observation_effort` |
@@ -137,8 +137,8 @@
 | $\alpha$ (day/night) | Power-law intercept | — | `day_power_alpha`, `night_power_alpha` |
 | $\beta$ (day/night) | Power-law exponent | — | `day_power_beta`, `night_power_beta` |
 | $\kappa$ | Scan-tail compensation | — | `scan_tail_kappa` |
-| $\gamma$ | Blend weight parametric | 0.65 | Trọng số parametric trong blend |
-| $1-\gamma$ | Blend weight EQM | 0.35 | Trọng số EQM trong blend |
+| $\gamma$ | Blend weight parametric | 0.8969 | Trọng số parametric trong blend, khớp bình phương tối thiểu trên cặp huấn luyện (≤2019); mặc định 0.65 trước khi khớp |
+| $1-\gamma$ | Blend weight EQM | 0.1031 | Trọng số EQM trong blend |
 | $\text{base\_count\_mult}$ | Count multiplier nadir | 2.85 (day), 3.40 (night) | Nhân số điểm hotspot tương đương |
 | $\kappa_{\text{grid}}$ | Grid search kappa | [0.10, 0.55] | Tìm $\kappa$ tối ưu |
 | $\alpha_{\text{track}}$ | Track azimuth | deg | Góc phương vị vệt quỹ đạo |
@@ -150,7 +150,7 @@
 | $\Omega(y, \phi)$ | Effective observation effort | — | Chuẩn hóa = 1.00 tại Terra+Aqua xích đạo 2003–2011 |
 | $\Omega_0(y)$ | Baseline effort theo năm | — | 0.52, 0.76, 1.00, 1.48, 1.78, 1.92, 2.08 |
 | $\text{lat\_convergence}$ | Hội tụ vĩ độ | — | $1 + 0.18(1/\cos\phi - 1)$, bounded [1.0, 1.65] |
-| $\tau_{\text{cluster}}$ | Cửa sổ gom cụm | phút | 95 |
+| $\tau_{\text{cluster}}$ | Cửa sổ gom cụm | phút | 60 |
 | $d_{\text{Haversine}}$ | Khoảng cách great-circle | km | Haversine distance |
 | $r_{\text{eff}}$ | Bán kính footprint hiệu dụng | km | $\sqrt{A_p/\pi}$ |
 | $m$ | Số phát hiện trong cụm | — | raw_detection_count |
@@ -196,7 +196,9 @@
 Mỗi công thức kèm tên, biểu thức, biến, và vị trí cài đặt.
 
 ### F1. MODIS across-track $\Delta S(\theta)$
-$$\Delta S_{\text{MODIS}}(\theta) = R_e \cdot s \left( \frac{\cos\theta}{\sqrt{(R_e/r)^2 - \sin^2\theta}} - 1 \right)$$
+$$\Delta S_{\text{MODIS}}(\theta) = r \cdot s \left( \cos\theta - \sqrt{(R_e / r)^2 - \sin^2\theta} \right) \cdot \frac{R_e}{r} \cdot \frac{1}{\sqrt{(R_e / r)^2 - \sin^2\theta}}$$
+
+Tức $\Delta S = \frac{R_e}{r} \cdot \frac{\Delta T}{\sqrt{(R_e / r)^2 - \sin^2\theta}}$: kích thước theo phương quét là kích thước dọc quỹ đạo $\Delta T$ nhân hệ số cong Trái Đất $\frac{R_e}{r}$ và hệ số giãn góc nhìn xiên $1/\sqrt{(R_e / r)^2 - \sin^2\theta}$. Dạng này tương đương đại số với $R_e \cdot s \left( \frac{\cos\theta}{\sqrt{(R_e / r)^2 - \sin^2\theta}} - 1 \right)$ (kiểm chứng số: cùng giá trị $1.000$, $1.159$, $1.943$, $4.830\text{ km}$ tại $0^\circ, 20^\circ, 40^\circ, 55^\circ$) và cho $\Delta S(0^\circ) = s\,h = 1.000\text{ km}$.
 Biến: $R_e=6378.137$, $r=7083.137$, $s=0.0014184397$, $\theta$ rad.
 Vị trí: `geometry_h3.py::modis_dimensions_from_scan_angle`.
 
@@ -238,7 +240,7 @@ $$\widetilde{\text{FRP}}_{\text{MODIS}} = \text{FRP}_{\text{raw}} \cdot [1 + \ka
 Vị trí: `radiometric_calibrator.py::apply_two_stage_frp_calibration`.
 
 ### F11. Stage 2 parametric + EQM blend
-$$\widehat{\text{FRP}}_{\text{VIIRS-eq}} = 0.65\cdot(\alpha\cdot \widetilde{\text{FRP}}^\beta + 0.35(\text{FRP}_{\text{lim}}-1.15)) + 0.35\cdot \text{EQM}(\widetilde{\text{FRP}})$$
+$$\widehat{\text{FRP}}_{\text{VIIRS-eq}} = \gamma\cdot(\alpha\cdot \widetilde{\text{FRP}}^\beta + 0.35(\text{FRP}_{\text{lim}}-1.15)) + (1-\gamma)\cdot \text{EQM}(\widetilde{\text{FRP}})$$
 Vị trí: `radiometric_calibrator.py::apply_two_stage_frp_calibration`.
 
 ### F12. VIIRS equivalent count
@@ -300,7 +302,7 @@ $$\text{HRF}_{y,p} = \frac{1}{A_{\text{AOI}}}\sum_{E_k\in\mathcal{E}_{y,p}} \fra
 Vị trí: `calendar_engine.py::build_burning_activity_calendar`.
 
 ### F25. SFAI
-$$\text{SFAI}_{y,p} = \frac{\text{HRF}_{y,p}-\text{Median}_{y'}(\text{HRF}_{y',p})}{0.65(1.4826\cdot\text{MAD})+0.35\cdot\text{Std}}$$
+$$\text{SFAI}_{y,p} = \frac{\text{HRF}_{y,p}-\text{Median}_{y'\in\mathcal{Y}_{\text{obs}}(p)}(\text{HRF}_{y',p})}{0.65(1.4826\cdot\text{MAD})+0.35\cdot\text{Std}}$$
 Vị trí: `calendar_engine.py::build_burning_activity_calendar`.
 
 ### F26. Pentad mapping

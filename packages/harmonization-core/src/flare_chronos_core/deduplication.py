@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import math
 
-from .domain import FireEpisode, HarmonizedDetection
+from .domain import FireEpisode, HarmonizedDetection, SensorType
 from .geometry_h3 import R_EARTH_KM
 
 
@@ -26,7 +26,13 @@ def haversine_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     return 2.0 * R_EARTH_KM * math.asin(min(1.0, math.sqrt(a)))
 
 
-def compute_effective_observation_effort(year: int, latitude_deg: float) -> float:
+# Effort of a constellation with this many VIIRS streams alongside Terra + Aqua.
+_EFFORT_BY_VIIRS_STREAMS = (1.00, 1.48, 1.78, 2.08)
+
+
+def compute_effective_observation_effort(
+    year: int, latitude_deg: float, n_viirs_streams: int | None = None
+) -> float:
     """Compute Effective Observation Effort factor Omega(year, latitude).
 
     Anchored to 1.00 at the dual-MODIS (Terra + Aqua, 2003-2011) equatorial baseline:
@@ -39,6 +45,9 @@ def compute_effective_observation_effort(year: int, latitude_deg: float) -> floa
     - 2024-2026 (+ NOAA-21 full operational 3-VIIRS + 2-MODIS constellation): Omega_0 = 2.08
 
     Modulated by latitude-dependent swath overlap sec(lat) bounded to [1.0, 1.65].
+
+    ``n_viirs_streams`` limits the effort to the sensors actually scored: a MODIS-only
+    view of a 2024 epoch has the dual-MODIS effort, not the full constellation's.
     """
     if year <= 2001:
         base_omega = 0.52
@@ -54,6 +63,11 @@ def compute_effective_observation_effort(year: int, latitude_deg: float) -> floa
         base_omega = 1.92
     else:
         base_omega = 2.08
+    if n_viirs_streams is not None:
+        if n_viirs_streams < 0:
+            raise ValueError("n_viirs_streams cannot be negative")
+        ladder = _EFFORT_BY_VIIRS_STREAMS[min(n_viirs_streams, 3)]
+        base_omega = min(base_omega, ladder)
 
     # Polar-orbiting swath convergence increases revisit frequency with |latitude|
     cos_lat = max(0.55, math.cos(math.radians(latitude_deg)))
@@ -61,16 +75,34 @@ def compute_effective_observation_effort(year: int, latitude_deg: float) -> floa
     return round(base_omega * lat_convergence, 4)
 
 
+def cloud_weighted_effort(omega: float, clear: float, reference_clear: float) -> float:
+    """Scale effort by an epoch's clear-sky share relative to the region's norm.
+
+    A cloudier-than-usual epoch lets the constellation see less fire, so it earns
+    less effort and its episode count is divided by less. Dividing by the
+    reference share keeps a typical epoch at its sensor-based effort.
+    """
+    if clear <= 0.0 or reference_clear <= 0.0:
+        raise ValueError("clear-sky fractions must be positive")
+    return round(omega * clear / reference_clear, 4)
+
+
+# The afternoon overpass train (NOAA-20 12:40, NOAA-21 13:05, Suomi-NPP and Aqua 13:30
+# MLT) spans 50 minutes. Windowing from the cluster's first detection, 60 minutes
+# holds that train and stops short of the next orbit of any one satellite.
+FIRE_EPISODE_WINDOW_MINUTES = 60.0
+
+
 def cluster_fire_episodes(
     detections: list[HarmonizedDetection],
-    temporal_window_minutes: float = 95.0,
+    temporal_window_minutes: float = FIRE_EPISODE_WINDOW_MINUTES,
     min_probability: float = 0.20,
 ) -> list[FireEpisode]:
     """Deduplicate multi-satellite Thermal Detections into physical Fire Episodes.
 
     Two detections d_i, d_j belong to the same Fire Episode if:
       1. neither is an SAA cosmic-ray anomaly or Static Thermal Source,
-      2. |t_i - t_j| <= temporal_window_minutes (default 95 min covers the entire
+      2. |t_i - t_j| <= temporal_window_minutes (default 60 min covers the 50-minute
          NOAA-20 / NOAA-21 / Suomi-NPP / Aqua afternoon or midnight overpass train), and
       3. great-circle distance(d_i, d_j) <= r_eff(d_i) + r_eff(d_j) + 0.65 km
          (or they map to the same H3 Resolution 7 cell within the overpass window).
@@ -110,7 +142,9 @@ def cluster_fire_episodes(
                     continue
                 still_active: list[list[HarmonizedDetection]] = []
                 for cl in bucket:
-                    anchor = cl[-1]
+                    # Seed-anchored: linking to the newest member would let a run of
+                    # detections each inside the window chain into one long episode.
+                    anchor = cl[0]
                     dt_min = (
                         t_cur - anchor.raw.acq_datetime_utc
                     ).total_seconds() / 60.0
@@ -138,6 +172,12 @@ def cluster_fire_episodes(
             new_cl = [det]
             clusters.append(new_cl)
             spatial_buckets.setdefault((b_lat, b_lon), []).append(new_cl)
+
+    # The effort is that of the sensors actually present in this batch, so a
+    # MODIS-only slice of a 2024 epoch is not credited with the full constellation.
+    n_viirs_streams = len(
+        {d.raw.platform for d in valid if d.raw.sensor is SensorType.VIIRS}
+    )
 
     episodes: list[FireEpisode] = []
     for idx, cl in enumerate(clusters, start=1):
@@ -170,7 +210,7 @@ def cluster_fire_episodes(
         harmonized_frp = sum(by_platform_frp.values()) / max(1, len(by_platform_frp))
 
         year = cl[0].raw.acq_datetime_utc.year
-        omega = compute_effective_observation_effort(year, c_lat)
+        omega = compute_effective_observation_effort(year, c_lat, n_viirs_streams)
         effort_norm_count = combined_prob / omega
 
         # Pick representative finest-resolution H3 cells

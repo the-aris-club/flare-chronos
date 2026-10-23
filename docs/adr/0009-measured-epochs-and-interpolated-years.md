@@ -4,6 +4,8 @@ status: accepted
 
 # The 26-Year Calendar Is Partly Measured and Partly Interpolated
 
+**Partially superseded by** [ADR-0010](./0010-sfai-baseline-from-measured-epochs-only.md): the SFAI baseline now uses Measured Epochs only. The vocabulary and the rules below still hold.
+
 The Burning Activity Calendar spans 2001–2026, but the archive does not hold a NASA FIRMS slice set for every one of those years. **Eleven of the twenty-six Mekong years and nine of the twenty-six Amazon years are Measured Epochs** — years whose harmonized count is computed from observed detections. The remaining years are **Interpolated Years**: their annual scale is modelled from the observed MODIS-only count, and their intra-year shape is taken from the region's empirical seasonal envelope.
 
 We publish that distinction rather than presenting the whole series as observation. The interpolation is deterministic, so the figures are reproducible, but it is a model, and a reader who cannot tell an observation from a model output will read the modelled years as measured evidence.
