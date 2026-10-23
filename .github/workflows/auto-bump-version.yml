@@ -1,0 +1,54 @@
+name: Auto Bump Version
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: auto-bump-version
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  bump:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Install tools (pandoc, weasyprint, poppler, fonts)
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq pandoc poppler-utils weasyprint fonts-liberation fonts-noto-core
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          python-version: "3.13"
+          enable-cache: true
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+      - name: Set up pnpm (version from the packageManager field)
+        uses: pnpm/setup@a0881977cd8ea73b1ed212236c99ca10dcc80cf4 # v3.1.1
+        with:
+          cache: true
+          cache-dependency-path: pnpm-lock.yaml
+          install: false
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Bump version (package.json + CHANGELOG.md + exports/*.md + PDFs)
+        run: pnpm run doc:version
+      - name: Refresh uv lockfile
+        run: uv lock
+      - name: Commit and push the version bump
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet; then
+            echo "No version changes to commit."
+            exit 0
+          fi
+          git add -A
+          git commit -m "chore(release): version packages"
+          git push

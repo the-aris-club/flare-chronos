@@ -303,7 +303,7 @@ requires-dist = [
 
 [[package]]
 name = "flare-chronos-ai-service"
-version = "1.0.0"
+version = "0.1.0"
 source = { editable = "apps/ai-service" }
 dependencies = [
     { name = "fastapi" },

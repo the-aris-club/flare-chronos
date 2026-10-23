@@ -4,8 +4,7 @@
 
 # BÁO CÁO KẾT QUẢ TRIỂN KHAI KIẾN TRÚC MÃ NGUỒN & THỰC NGHIỆM HỆ THỐNG: FLARE-CHRONOS
 
-> **Phiên bản:** `v1.0.0` — cập nhật 21/10/2026
-
+> **Phiên bản:** `v0.1.0` — cập nhật 23/10/2026
 > **Tác giả / Bản quyền:** **Lê Thành Trung** (`lethanhtrung.trungle@gmail.com`)
 
 > **Tài liệu song hành:** Hồ sơ thuyết minh độc lập [`PROPOSAL.md`](PROPOSAL.md) • Bản đồ từ điển miền [`GLOSSARY-MAP.md`](../GLOSSARY-MAP.md) • Từ điển miền [`GLOSSARY.md`](../GLOSSARY.md) & [`apps/ai-service/GLOSSARY.md`](../apps/ai-service/GLOSSARY.md) • Hồ sơ quyết định kiến trúc [`docs/adr/`](../docs/adr/0001-dual-resolution-h3-fractional-allocation.md)

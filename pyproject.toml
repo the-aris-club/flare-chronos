@@ -56,6 +56,7 @@ extend-select = ["S"]
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["S101", "S105", "S310"]
 "exports/export_pdf.py" = ["S603"]
+"scripts/check-docs.py" = ["S603", "S607"]
 
 [tool.pyright]
 extraPaths = [
