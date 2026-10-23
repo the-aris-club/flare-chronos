@@ -24,6 +24,7 @@ import json
 import os
 import re
 import urllib.error
+import urllib.parse
 import urllib.request
 from collections.abc import Sequence
 from pathlib import Path
@@ -220,14 +221,17 @@ def _post_json(
     url: str, payload: dict[str, Any], headers: dict[str, str], timeout_sec: float
 ) -> dict[str, Any]:
     """POST a JSON body and decode a JSON object response."""
-    request = urllib.request.Request(
+    # Endpoints come from the environment, so refuse file: and custom schemes.
+    if urllib.parse.urlparse(url).scheme not in ("http", "https"):
+        raise ValueError(f"endpoint must be http or https: {url!r}")
+    request = urllib.request.Request(  # noqa: S310 - scheme checked above
         url,
         data=json.dumps(payload).encode("utf-8"),
         headers=headers,
         method="POST",
     )
     try:
-        with urllib.request.urlopen(request, timeout=timeout_sec) as response:
+        with urllib.request.urlopen(request, timeout=timeout_sec) as response:  # noqa: S310
             body = response.read().decode("utf-8", errors="replace")
     except urllib.error.HTTPError as exc:
         detail = exc.read().decode("utf-8", errors="replace")[:400]

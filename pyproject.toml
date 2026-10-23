@@ -46,6 +46,13 @@ markers = [
     "live: calls a real hosted language model and spends provider credit; excluded from the default suite",
 ]
 
+[tool.ruff.lint]
+extend-select = ["S"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101", "S310"]
+"exports/export_pdf.py" = ["S603"]
+
 [tool.pyright]
 extraPaths = [
     "packages/harmonization-core/src",

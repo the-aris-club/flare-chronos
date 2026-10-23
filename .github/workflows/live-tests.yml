@@ -1,8 +1,10 @@
 name: Live Model Tests
 
-# Manual trigger only. The default CI workflow never calls a hosted language
-# model, so provider credit is spent only when a maintainer asks for it.
+# The default CI workflow never calls a hosted language model. This one does,
+# weekly and on demand, so provider credit is spent only here.
 on:
+  schedule:
+    - cron: "0 3 * * 1"
   workflow_dispatch:
     inputs:
       pytest_args:
