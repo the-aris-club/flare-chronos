@@ -100,9 +100,9 @@ Vệ tinh **Aqua (MODIS)** và **Suomi-NPP (VIIRS)** có cùng giờ địa phư
 | **Số cặp ô lưới đồng thời ($N_{\text{pairs}}$)** | $11.553\text{ ô lưới}$ | $11.553\text{ ô lưới}$ | Tập kiểm chứng thực tế NASA FIRMS |
 | **Tỷ số số điểm nóng trung bình ($\bar{N}_{\text{VIIRS}} / \bar{N}_{\text{MODIS}}$)** | $3.560\times$ | $1.000\times$ (Đã chuẩn hóa tương đương) | Khử sạch độ lệch mật độ $+256.0\%$ |
 | **Tỷ số tổng FRP trung bình ($\sum \text{FRP}_{\text{VIIRS}} / \sum \text{FRP}_{\text{MODIS}}$)** | $1.371\times$ | $1.004\times$ | Khử độ lệch thiếu hụt năng lượng $-27.1\%$ |
-| **Hệ số xác định ($R^2$)** | $0.7330$ | **$0.7470$** | Tăng độ tương quan giải thích phương sai |
-| **Sai số toàn phương trung bình ($\text{RMSE}$, $\text{MW/cell}$)** | $149.104\text{ MW}$ | **$145.155\text{ MW}$** | Giảm sai số bậc hai trên toàn dải |
-| **Khoảng cách phân phối Kolmogorov-Smirnov ($D_{\text{KS}}$)** | $0.1166$ | **$0.0237$** | **Giảm $79.7\%$ sai lệch phân phối xác suất!** |
+| **Hệ số xác định ($R^2$)** | $0.7330$ | **$0.7641$** | Tăng độ tương quan giải thích phương sai |
+| **Sai số toàn phương trung bình ($\text{RMSE}$, $\text{MW/cell}$)** | $149.104\text{ MW}$ | **$140.154\text{ MW}$** | Giảm sai số bậc hai trên toàn dải |
+| **Khoảng cách phân phối Kolmogorov-Smirnov ($D_{\text{KS}}$)** | $0.1166$ | **$0.0348$** | **Giảm $70.2\%$ sai lệch phân phối xác suất!** |
 
 ![Cross Sensor FRP Calibration](figures/fig3_cross_sensor_frp_quantile_mapping.png)
 

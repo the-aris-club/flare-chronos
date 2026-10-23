@@ -17,17 +17,30 @@
   "coincident_calibration": {
     "n_pairs": 11553,
     "raw_r2": 0.733,
-    "harm_r2": 0.747,
+    "harm_r2": 0.7641,
     "raw_rmse": 149.104,
-    "harm_rmse": 145.155,
+    "harm_rmse": 140.154,
     "ks_before": 0.1166,
-    "ks_after": 0.0237,
+    "ks_after": 0.0348,
     "alpha": 1.7121,
     "beta": 0.9271,
     "scan_tail_kappa": 0.1,
     "mean_coincident_viirs_to_modis_count_ratio": 3.56,
     "mean_coincident_viirs_to_modis_frp_ratio": 1.371,
-    "max_axis_mw": 630.7
+    "max_axis_mw": 630.7,
+    "holdout": {
+      "n_train": 5331,
+      "n_test": 6222,
+      "blend_parametric_weight": 0.8969,
+      "train_rmse_mw": 133.797,
+      "raw_rmse_mw": 154.209,
+      "harmonized_rmse_mw": 145.354,
+      "rmse_gain_ci95_mw": [
+        6.857,
+        10.936
+      ],
+      "train_last_year": 2019
+    }
   },
   "mekong_empirical_epochs": [
     {
@@ -41,14 +54,15 @@
         "MODIS_SP": 3580
       },
       "total_raw_detections": 3580,
-      "deduplicated_fire_episodes": 2132,
-      "deduplication_compression_ratio": 1.679,
+      "deduplicated_fire_episodes": 2178,
+      "deduplication_compression_ratio": 1.644,
       "effective_observation_effort_omega": 1.0084,
-      "harmonized_viirs_eq_episodes": 7717.0,
+      "harmonized_viirs_eq_episodes": 7883.5,
       "raw_total_frp_mw": 201861.4,
-      "harmonized_total_frp_mw": 285243.1,
+      "harmonized_total_frp_mw": 287885.4,
       "daynight_sza_reclassified_pct": 0.0,
-      "saa_rejected_count": 0
+      "saa_rejected_count": 0,
+      "saa_rejected_share_pct": 0.0
     },
     {
       "region": "mekong",
@@ -61,14 +75,15 @@
         "MODIS_SP": 11296
       },
       "total_raw_detections": 11296,
-      "deduplicated_fire_episodes": 6350,
-      "deduplication_compression_ratio": 1.779,
+      "deduplicated_fire_episodes": 6693,
+      "deduplication_compression_ratio": 1.688,
       "effective_observation_effort_omega": 1.0084,
-      "harmonized_viirs_eq_episodes": 22984.4,
+      "harmonized_viirs_eq_episodes": 24226.0,
       "raw_total_frp_mw": 593305.9,
-      "harmonized_total_frp_mw": 731555.1,
+      "harmonized_total_frp_mw": 737433.4,
       "daynight_sza_reclassified_pct": 0.0,
-      "saa_rejected_count": 0
+      "saa_rejected_count": 0,
+      "saa_rejected_share_pct": 0.0
     },
     {
       "region": "mekong",
@@ -81,14 +96,15 @@
         "MODIS_SP": 8222
       },
       "total_raw_detections": 8222,
-      "deduplicated_fire_episodes": 4440,
-      "deduplication_compression_ratio": 1.852,
+      "deduplicated_fire_episodes": 4659,
+      "deduplication_compression_ratio": 1.765,
       "effective_observation_effort_omega": 1.0084,
-      "harmonized_viirs_eq_episodes": 16071.0,
+      "harmonized_viirs_eq_episodes": 16863.7,
       "raw_total_frp_mw": 440036.2,
-      "harmonized_total_frp_mw": 599666.7,
+      "harmonized_total_frp_mw": 602580.6,
       "daynight_sza_reclassified_pct": 0.0,
-      "saa_rejected_count": 0
+      "saa_rejected_count": 0,
+      "saa_rejected_share_pct": 0.0
     },
     {
       "region": "mekong",
@@ -103,14 +119,15 @@
         "VIIRS_SNPP_SP": 25720
       },
       "total_raw_detections": 33017,
-      "deduplicated_fire_episodes": 16952,
-      "deduplication_compression_ratio": 1.948,
+      "deduplicated_fire_episodes": 17634,
+      "deduplication_compression_ratio": 1.872,
       "effective_observation_effort_omega": 1.4925,
-      "harmonized_viirs_eq_episodes": 11358.1,
+      "harmonized_viirs_eq_episodes": 11815.1,
       "raw_total_frp_mw": 971392.9,
-      "harmonized_total_frp_mw": 1039108.7,
+      "harmonized_total_frp_mw": 1029843.0,
       "daynight_sza_reclassified_pct": 0.0,
-      "saa_rejected_count": 0
+      "saa_rejected_count": 0,
+      "saa_rejected_share_pct": 0.0
     },
     {
       "region": "mekong",
@@ -125,14 +142,15 @@
         "VIIRS_SNPP_SP": 36778
       },
       "total_raw_detections": 43342,
-      "deduplicated_fire_episodes": 22573,
-      "deduplication_compression_ratio": 1.92,
+      "deduplicated_fire_episodes": 23129,
+      "deduplication_compression_ratio": 1.874,
       "effective_observation_effort_omega": 1.4925,
-      "harmonized_viirs_eq_episodes": 15124.3,
+      "harmonized_viirs_eq_episodes": 15496.8,
       "raw_total_frp_mw": 649658.9,
-      "harmonized_total_frp_mw": 880774.4,
+      "harmonized_total_frp_mw": 893274.0,
       "daynight_sza_reclassified_pct": 0.0,
-      "saa_rejected_count": 0
+      "saa_rejected_count": 0,
+      "saa_rejected_share_pct": 0.0
     },
     {
       "region": "mekong",
@@ -149,14 +167,15 @@
         "VIIRS_NOAA20_SP": 23243
       },
       "total_raw_detections": 51974,
-      "deduplicated_fire_episodes": 25293,
-      "deduplication_compression_ratio": 2.055,
+      "deduplicated_fire_episodes": 25952,
+      "deduplication_compression_ratio": 2.003,
       "effective_observation_effort_omega": 1.795,
-      "harmonized_viirs_eq_episodes": 11363.6,
+      "harmonized_viirs_eq_episodes": 11659.6,
       "raw_total_frp_mw": 935204.8,
-      "harmonized_total_frp_mw": 485644.1,
+      "harmonized_total_frp_mw": 496586.9,
       "daynight_sza_reclassified_pct": 0.0,
-      "saa_rejected_count": 0
+      "saa_rejected_count": 0,
+      "saa_rejected_share_pct": 0.0
     },
     {
       "region": "mekong",
@@ -173,14 +192,15 @@
         "VIIRS_NOAA20_SP": 20275
       },
       "total_raw_detections": 48152,
-      "deduplicated_fire_episodes": 22315,
-      "deduplication_compression_ratio": 2.158,
+      "deduplicated_fire_episodes": 22958,
+      "deduplication_compression_ratio": 2.097,
       "effective_observation_effort_omega": 1.795,
-      "harmonized_viirs_eq_episodes": 10025.6,
+      "harmonized_viirs_eq_episodes": 10314.5,
       "raw_total_frp_mw": 870741.7,
-      "harmonized_total_frp_mw": 455575.3,
+      "harmonized_total_frp_mw": 458696.5,
       "daynight_sza_reclassified_pct": 0.0,
-      "saa_rejected_count": 0
+      "saa_rejected_count": 0,
+      "saa_rejected_share_pct": 0.0
     },
     {
       "region": "mekong",
@@ -197,14 +217,15 @@
         "VIIRS_NOAA20_SP": 18959
       },
       "total_raw_detections": 42869,
-      "deduplicated_fire_episodes": 22280,
-      "deduplication_compression_ratio": 1.924,
+      "deduplicated_fire_episodes": 22675,
+      "deduplication_compression_ratio": 1.891,
       "effective_observation_effort_omega": 1.9362,
-      "harmonized_viirs_eq_episodes": 9279.9,
+      "harmonized_viirs_eq_episodes": 9444.4,
       "raw_total_frp_mw": 694987.6,
-      "harmonized_total_frp_mw": 336783.5,
+      "harmonized_total_frp_mw": 339658.2,
       "daynight_sza_reclassified_pct": 0.0,
-      "saa_rejected_count": 0
+      "saa_rejected_count": 0,
+      "saa_rejected_share_pct": 0.0
     },
     {
       "region": "mekong",
@@ -223,14 +244,15 @@
         "VIIRS_NOAA21_NRT": 15871
       },
       "total_raw_detections": 50988,
-      "deduplicated_fire_episodes": 22557,
-      "deduplication_compression_ratio": 2.26,
+      "deduplicated_fire_episodes": 22893,
+      "deduplication_compression_ratio": 2.227,
       "effective_observation_effort_omega": 2.0975,
-      "harmonized_viirs_eq_episodes": 7266.4,
+      "harmonized_viirs_eq_episodes": 7374.6,
       "raw_total_frp_mw": 704979.3,
-      "harmonized_total_frp_mw": 200033.3,
+      "harmonized_total_frp_mw": 199468.8,
       "daynight_sza_reclassified_pct": 0.0,
-      "saa_rejected_count": 0
+      "saa_rejected_count": 0,
+      "saa_rejected_share_pct": 0.0
     },
     {
       "region": "mekong",
@@ -249,14 +271,15 @@
         "VIIRS_NOAA21_NRT": 9264
       },
       "total_raw_detections": 31448,
-      "deduplicated_fire_episodes": 14264,
-      "deduplication_compression_ratio": 2.205,
+      "deduplicated_fire_episodes": 14396,
+      "deduplication_compression_ratio": 2.184,
       "effective_observation_effort_omega": 2.0975,
-      "harmonized_viirs_eq_episodes": 4594.9,
+      "harmonized_viirs_eq_episodes": 4637.4,
       "raw_total_frp_mw": 356347.0,
-      "harmonized_total_frp_mw": 84036.5,
+      "harmonized_total_frp_mw": 84614.9,
       "daynight_sza_reclassified_pct": 0.0,
-      "saa_rejected_count": 0
+      "saa_rejected_count": 0,
+      "saa_rejected_share_pct": 0.0
     },
     {
       "region": "mekong",
@@ -275,14 +298,15 @@
         "VIIRS_NOAA21_NRT": 10315
       },
       "total_raw_detections": 34652,
-      "deduplicated_fire_episodes": 15746,
-      "deduplication_compression_ratio": 2.201,
+      "deduplicated_fire_episodes": 16134,
+      "deduplication_compression_ratio": 2.148,
       "effective_observation_effort_omega": 2.0975,
-      "harmonized_viirs_eq_episodes": 5072.3,
+      "harmonized_viirs_eq_episodes": 5197.3,
       "raw_total_frp_mw": 405354.8,
-      "harmonized_total_frp_mw": 93962.9,
+      "harmonized_total_frp_mw": 97992.3,
       "daynight_sza_reclassified_pct": 0.0,
-      "saa_rejected_count": 0
+      "saa_rejected_count": 0,
+      "saa_rejected_share_pct": 0.0
     }
   ],
   "amazon_empirical_epochs": [
@@ -297,14 +321,15 @@
         "MODIS_SP": 13804
       },
       "total_raw_detections": 13804,
-      "deduplicated_fire_episodes": 6303,
-      "deduplication_compression_ratio": 2.19,
+      "deduplicated_fire_episodes": 6748,
+      "deduplication_compression_ratio": 2.046,
       "effective_observation_effort_omega": 1.0022,
-      "harmonized_viirs_eq_episodes": 16037.4,
+      "harmonized_viirs_eq_episodes": 17169.6,
       "raw_total_frp_mw": 917080.2,
-      "harmonized_total_frp_mw": 1130862.5,
+      "harmonized_total_frp_mw": 1139664.4,
       "daynight_sza_reclassified_pct": 0.0,
-      "saa_rejected_count": 626
+      "saa_rejected_count": 626,
+      "saa_rejected_share_pct": 4.54
     },
     {
       "region": "amazon",
@@ -317,14 +342,15 @@
         "MODIS_SP": 13033
       },
       "total_raw_detections": 13033,
-      "deduplicated_fire_episodes": 5995,
-      "deduplication_compression_ratio": 2.174,
+      "deduplicated_fire_episodes": 6425,
+      "deduplication_compression_ratio": 2.028,
       "effective_observation_effort_omega": 1.0022,
-      "harmonized_viirs_eq_episodes": 15253.7,
+      "harmonized_viirs_eq_episodes": 16347.8,
       "raw_total_frp_mw": 1009314.8,
-      "harmonized_total_frp_mw": 1432205.9,
+      "harmonized_total_frp_mw": 1439580.5,
       "daynight_sza_reclassified_pct": 0.0,
-      "saa_rejected_count": 494
+      "saa_rejected_count": 494,
+      "saa_rejected_share_pct": 3.79
     },
     {
       "region": "amazon",
@@ -337,14 +363,15 @@
         "MODIS_SP": 16304
       },
       "total_raw_detections": 16304,
-      "deduplicated_fire_episodes": 6654,
-      "deduplication_compression_ratio": 2.45,
+      "deduplicated_fire_episodes": 7390,
+      "deduplication_compression_ratio": 2.206,
       "effective_observation_effort_omega": 1.0022,
-      "harmonized_viirs_eq_episodes": 16930.5,
+      "harmonized_viirs_eq_episodes": 18803.1,
       "raw_total_frp_mw": 1068761.8,
-      "harmonized_total_frp_mw": 1449112.6,
+      "harmonized_total_frp_mw": 1454922.9,
       "daynight_sza_reclassified_pct": 0.0,
-      "saa_rejected_count": 929
+      "saa_rejected_count": 929,
+      "saa_rejected_share_pct": 5.7
     },
     {
       "region": "amazon",
@@ -359,14 +386,15 @@
         "VIIRS_SNPP_SP": 26807
       },
       "total_raw_detections": 33484,
-      "deduplicated_fire_episodes": 10793,
-      "deduplication_compression_ratio": 3.102,
+      "deduplicated_fire_episodes": 11589,
+      "deduplication_compression_ratio": 2.889,
       "effective_observation_effort_omega": 1.4833,
-      "harmonized_viirs_eq_episodes": 7276.3,
+      "harmonized_viirs_eq_episodes": 7813.0,
       "raw_total_frp_mw": 864588.6,
-      "harmonized_total_frp_mw": 973432.6,
+      "harmonized_total_frp_mw": 963845.3,
       "daynight_sza_reclassified_pct": 0.0,
-      "saa_rejected_count": 4145
+      "saa_rejected_count": 4145,
+      "saa_rejected_share_pct": 12.38
     },
     {
       "region": "amazon",
@@ -383,14 +411,15 @@
         "VIIRS_NOAA20_SP": 17099
       },
       "total_raw_detections": 38751,
-      "deduplicated_fire_episodes": 9748,
-      "deduplication_compression_ratio": 3.975,
+      "deduplicated_fire_episodes": 10263,
+      "deduplication_compression_ratio": 3.776,
       "effective_observation_effort_omega": 1.784,
-      "harmonized_viirs_eq_episodes": 4406.6,
+      "harmonized_viirs_eq_episodes": 4639.4,
       "raw_total_frp_mw": 673840.8,
-      "harmonized_total_frp_mw": 345448.8,
+      "harmonized_total_frp_mw": 341059.4,
       "daynight_sza_reclassified_pct": 0.0,
-      "saa_rejected_count": 5024
+      "saa_rejected_count": 5024,
+      "saa_rejected_share_pct": 12.97
     },
     {
       "region": "amazon",
@@ -407,14 +436,15 @@
         "VIIRS_NOAA20_SP": 20575
       },
       "total_raw_detections": 46112,
-      "deduplicated_fire_episodes": 11156,
-      "deduplication_compression_ratio": 4.133,
+      "deduplicated_fire_episodes": 12045,
+      "deduplication_compression_ratio": 3.828,
       "effective_observation_effort_omega": 1.784,
-      "harmonized_viirs_eq_episodes": 5043.0,
+      "harmonized_viirs_eq_episodes": 5444.9,
       "raw_total_frp_mw": 636756.0,
-      "harmonized_total_frp_mw": 325487.5,
+      "harmonized_total_frp_mw": 331286.0,
       "daynight_sza_reclassified_pct": 0.0,
-      "saa_rejected_count": 7347
+      "saa_rejected_count": 7347,
+      "saa_rejected_share_pct": 15.93
     },
     {
       "region": "amazon",
@@ -433,14 +463,15 @@
         "VIIRS_NOAA21_NRT": 32842
       },
       "total_raw_detections": 112405,
-      "deduplicated_fire_episodes": 22579,
-      "deduplication_compression_ratio": 4.978,
+      "deduplicated_fire_episodes": 24501,
+      "deduplication_compression_ratio": 4.588,
       "effective_observation_effort_omega": 2.0847,
-      "harmonized_viirs_eq_episodes": 7318.1,
+      "harmonized_viirs_eq_episodes": 7941.1,
       "raw_total_frp_mw": 1990752.4,
-      "harmonized_total_frp_mw": 814613.6,
+      "harmonized_total_frp_mw": 809406.3,
       "daynight_sza_reclassified_pct": 0.0,
-      "saa_rejected_count": 18097
+      "saa_rejected_count": 18097,
+      "saa_rejected_share_pct": 16.1
     },
     {
       "region": "amazon",
@@ -459,14 +490,15 @@
         "VIIRS_NOAA21_NRT": 6233
       },
       "total_raw_detections": 20029,
-      "deduplicated_fire_episodes": 3179,
-      "deduplication_compression_ratio": 6.3,
+      "deduplicated_fire_episodes": 3379,
+      "deduplication_compression_ratio": 5.927,
       "effective_observation_effort_omega": 2.0847,
-      "harmonized_viirs_eq_episodes": 1030.4,
+      "harmonized_viirs_eq_episodes": 1095.2,
       "raw_total_frp_mw": 401081.2,
-      "harmonized_total_frp_mw": 68321.5,
+      "harmonized_total_frp_mw": 72699.0,
       "daynight_sza_reclassified_pct": 0.0,
-      "saa_rejected_count": 2262
+      "saa_rejected_count": 2262,
+      "saa_rejected_share_pct": 11.29
     },
     {
       "region": "amazon",
@@ -485,14 +517,15 @@
         "VIIRS_NOAA21_NRT": 13406
       },
       "total_raw_detections": 45389,
-      "deduplicated_fire_episodes": 7009,
-      "deduplication_compression_ratio": 6.476,
+      "deduplicated_fire_episodes": 7974,
+      "deduplication_compression_ratio": 5.692,
       "effective_observation_effort_omega": 2.0847,
-      "harmonized_viirs_eq_episodes": 2271.7,
+      "harmonized_viirs_eq_episodes": 2584.5,
       "raw_total_frp_mw": 758598.7,
-      "harmonized_total_frp_mw": 157664.6,
+      "harmonized_total_frp_mw": 183880.2,
       "daynight_sza_reclassified_pct": 0.0,
-      "saa_rejected_count": 6174
+      "saa_rejected_count": 6174,
+      "saa_rejected_share_pct": 13.6
     }
   ],
   "saa_and_sza_nrt_audit": {
@@ -639,25 +672,25 @@
         156.1,
         100.0,
         159.4,
-        297.8,
+        307.3,
         135.8,
         103.1,
-        208.3,
+        213.9,
         50.8,
-        147.2,
+        149.9,
         188.1,
         222.8,
         270.2,
-        196.0,
+        196.6,
         54.6,
         55.7,
-        147.3,
-        129.9,
+        147.9,
+        130.8,
         162.0,
         46.6,
-        120.3,
-        94.2,
-        59.5,
+        119.8,
+        93.5,
+        58.8,
         56.3
       ],
       "measured_years": [
@@ -811,24 +844,24 @@
         66.0,
         100.0,
         43.0,
-        95.1,
+        95.2,
         65.6,
         13.8,
-        105.6,
+        109.5,
         14.0,
-        45.4,
+        45.5,
         12.1,
         49.3,
         33.8,
         32.0,
         22.0,
         11.7,
-        27.5,
-        31.4,
+        27.0,
+        31.7,
         54.4,
         92.3,
         32.1,
-        45.6,
+        46.3,
         6.4,
         25.8
       ],
