@@ -54,6 +54,7 @@ from benchmark_cli.figure_renderer import (
     render_fig4_regime_shift_elimination,
     render_fig5_burning_activity_calendar,
 )
+from benchmark_cli.sensitivity import STREAM_OVERLAP_GAIN, harmonized_episode_count
 
 RAW_DIR = ROOT / "data" / "raw"
 PROC_DIR = ROOT / "data" / "processed"
@@ -449,17 +450,14 @@ def evaluate_epoch_slice(
     #   2.55 in Amazon deforestation fronts) divided by Omega.
     # - In multi-sensor VIIRS+MODIS epochs (2012-2024), sub-pixel fires are directly resolved by
     #   VIIRS 375m; we normalize deduplicated episodes by Omega and active VIIRS stream multiplicity.
-    only_modis = all("MODIS" in s for s in sources)
+    harm_equiv_episodes = harmonized_episode_count(region, sources, est_episodes, omega)
     n_viirs_streams = sum(1 for s in sources if "VIIRS" in s)
-    if only_modis:
-        subpixel_omission_factor = 3.65 if region == "mekong" else 2.55
-        harm_equiv_episodes = (est_episodes * subpixel_omission_factor) / omega
+    if all("MODIS" in s for s in sources):
         harm_frp_total = (
             sum(d.calibrated_viirs_eq_frp_mw for d in harm_dets) * sample_scale / omega
         )
     else:
-        stream_overlap_norm = 1.0 + 0.24 * max(0, n_viirs_streams - 1)
-        harm_equiv_episodes = est_episodes / (omega * stream_overlap_norm)
+        stream_overlap_norm = 1.0 + STREAM_OVERLAP_GAIN * max(0, n_viirs_streams - 1)
         harm_frp_total = (
             sum(ep.harmonized_frp_mw for ep in episodes)
             * sample_scale
