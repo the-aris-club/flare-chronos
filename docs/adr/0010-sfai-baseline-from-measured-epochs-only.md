@@ -22,7 +22,7 @@ A Measured Epoch is one 5-day FIRMS window, so only **one pentad per measured ye
 
 ## Consequences
 
-- A cell has an Anomaly Tier only if it is observed. On the current archive that is one pentad (Mekong 15, Amazon 47) in each Measured Epoch, and the only observed cell at or above +2.2 sigma is Mekong 2007. The hand-set peak amplitude now shapes interpolated years only.
+- A cell has an Anomaly Tier only if it is observed. On the current archive that is one pentad (Mekong 15, Amazon 47) in each Measured Epoch, and the only observed cell at or above +2.2 sigma is Mekong 2007 (+2.9). The hand-set peak amplitude now shapes interpolated years only.
 - The SFAI baseline for a Pentad is computed from far fewer years than "25-year climatology" implies. Published documents state the number of measured years behind each baseline, and a Pentad with too few measured years reports no SFAI rather than a noisy one. The minimum is a named constant.
 - ADR-0009's Measured Epoch / Interpolated Year vocabulary, its prohibition on a post-harmonization multiplier, and the 2026 NRT limitation all still hold.
 - The ADR-0009 revisit trigger ("revisit if the archive cannot be extended to more years") is now an active work item: fetching more years is the first-choice fix, and this ADR is retired once every published year is a Measured Epoch.

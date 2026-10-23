@@ -61,7 +61,14 @@ from benchmark_cli.figure_renderer import (
     render_fig4_regime_shift_elimination,
     render_fig5_burning_activity_calendar,
 )
-from benchmark_cli.sensitivity import STREAM_OVERLAP_GAIN, harmonized_episode_count
+from benchmark_cli.sensitivity import (
+    FIT_TRAIN_LAST_YEAR,
+    HAND_SET_OMISSION_FACTOR,
+    STREAM_OVERLAP_GAIN,
+    SUBPIXEL_OMISSION_FACTOR,
+    fit_omission_factor,
+    harmonized_episode_count,
+)
 
 # Pairs up to this year train the calibration; later years score it.
 HOLDOUT_TRAIN_LAST_YEAR = 2019
@@ -1088,6 +1095,18 @@ def main() -> None:
         "mekong_empirical_epochs": mekong_epochs,
         "amazon_empirical_epochs": amazon_epochs,
         "saa_and_sza_nrt_audit": saa_sza_stats,
+        "omission_factor_fit": {
+            region: fit_omission_factor(
+                epochs,
+                SUBPIXEL_OMISSION_FACTOR[region],
+                FIT_TRAIN_LAST_YEAR,
+                HAND_SET_OMISSION_FACTOR[region],
+            )
+            for region, epochs in (
+                ("mekong", mekong_epochs),
+                ("amazon", amazon_epochs),
+            )
+        },
         "regime_shift_series": series_data,
     }
     out_json = PROC_DIR / "empirical_results.json"

@@ -10,13 +10,18 @@ transition, which is where an artificial step would show up.
 
 from __future__ import annotations
 
+from statistics import median
 from typing import Any
 
-# ponytail: none of these three is fitted or sourced. They are tuned so the
-# MODIS-only and multi-sensor eras meet, which is why sensor_invariance_ratio in
-# the results artifact is the measurement that matters. Derive them from the
-# archive (overpass counts per sensor-year) before leaning on any conclusion.
-SUBPIXEL_OMISSION_FACTOR = {"mekong": 3.65, "amazon": 2.55}
+# The omission factor is fitted (see ``fit_omission_factor``): the median over
+# epochs up to FIT_TRAIN_LAST_YEAR of the factor that would make each epoch's
+# sensor_invariance_ratio exactly 1. It was 3.65 (Mekong) and 2.55 (Amazon), hand-set.
+# The overlap gain and the era Omega ladder are still hand-set, not sourced; the
+# held-out invariance gap says how far that matters.
+FIT_TRAIN_LAST_YEAR = 2020
+SUBPIXEL_OMISSION_FACTOR = {"mekong": 3.35, "amazon": 1.82}
+# The hand-set values the fit replaced; kept so the artifact reports the real gain.
+HAND_SET_OMISSION_FACTOR = {"mekong": 3.65, "amazon": 2.55}
 STREAM_OVERLAP_GAIN = 0.24
 
 
@@ -88,3 +93,38 @@ def sensitivity_table(
         }
         for name, arg in knobs.items()
     ]
+
+
+def fit_omission_factor(
+    epochs: list[dict[str, Any]],
+    k_current: float,
+    train_last_year: int,
+    k_reference: float | None = None,
+) -> dict[str, Any]:
+    """Fit the MODIS-only omission factor on early epochs; rescale later ones.
+
+    The MODIS-only count is proportional to the factor, so the factor that makes an
+    epoch's ``sensor_invariance_ratio`` equal 1 is ``k_current * ratio``. The fit is
+    the median of that over the training epochs; epochs after ``train_last_year``
+    are never used to fit and only report their ratio before and after. The ratio
+    scales as 1/k, so "before" is the ratio under ``k_reference`` (default: the
+    current factor) and "after" is the ratio under the fitted factor.
+    """
+    reference = k_current if k_reference is None else k_reference
+    scored = [e for e in epochs if e.get("sensor_invariance_ratio") is not None]
+    train = [e for e in scored if e["year"] <= train_last_year]
+    held_out = [e for e in scored if e["year"] > train_last_year]
+    k_fit = float(median(k_current * e["sensor_invariance_ratio"] for e in train))
+    return {
+        "k_prior": reference,
+        "k_fit": round(k_fit, 4),
+        "train_years": [e["year"] for e in train],
+        "held_out_before": {
+            e["year"]: round(e["sensor_invariance_ratio"] * k_current / reference, 3)
+            for e in held_out
+        },
+        "held_out_after": {
+            e["year"]: round(e["sensor_invariance_ratio"] * k_current / k_fit, 3)
+            for e in held_out
+        },
+    }

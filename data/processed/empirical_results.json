@@ -60,7 +60,7 @@
       "omega_before_cloud": 1.0084,
       "cloud_clear_sky_fraction": 0.4083,
       "cloud_reference_clear_sky_fraction": 0.4753,
-      "harmonized_viirs_eq_episodes": 9181.9,
+      "harmonized_viirs_eq_episodes": 8427.2,
       "raw_total_frp_mw": 201861.4,
       "harmonized_total_frp_mw": 330210.5,
       "daynight_sza_reclassified_pct": 0.0,
@@ -84,7 +84,7 @@
       "omega_before_cloud": 1.0084,
       "cloud_clear_sky_fraction": 0.4512,
       "cloud_reference_clear_sky_fraction": 0.4753,
-      "harmonized_viirs_eq_episodes": 25117.6,
+      "harmonized_viirs_eq_episodes": 23053.1,
       "raw_total_frp_mw": 593305.9,
       "harmonized_total_frp_mw": 855399.5,
       "daynight_sza_reclassified_pct": 0.0,
@@ -108,7 +108,7 @@
       "omega_before_cloud": 1.0084,
       "cloud_clear_sky_fraction": 0.4523,
       "cloud_reference_clear_sky_fraction": 0.4753,
-      "harmonized_viirs_eq_episodes": 17666.1,
+      "harmonized_viirs_eq_episodes": 16214.1,
       "raw_total_frp_mw": 440036.2,
       "harmonized_total_frp_mw": 607891.5,
       "daynight_sza_reclassified_pct": 0.0,
@@ -116,7 +116,7 @@
       "saa_rejected_share_pct": 0.0
     },
     {
-      "sensor_invariance_ratio": 0.723,
+      "sensor_invariance_ratio": 0.788,
       "region": "mekong",
       "date_window": "2012-03-15",
       "year": 2012,
@@ -143,7 +143,7 @@
       "saa_rejected_share_pct": 0.0
     },
     {
-      "sensor_invariance_ratio": 1.055,
+      "sensor_invariance_ratio": 1.149,
       "region": "mekong",
       "date_window": "2016-03-15",
       "year": 2016,
@@ -170,7 +170,7 @@
       "saa_rejected_share_pct": 0.0
     },
     {
-      "sensor_invariance_ratio": 0.922,
+      "sensor_invariance_ratio": 1.005,
       "region": "mekong",
       "date_window": "2019-03-15",
       "year": 2019,
@@ -199,7 +199,7 @@
       "saa_rejected_share_pct": 0.0
     },
     {
-      "sensor_invariance_ratio": 0.913,
+      "sensor_invariance_ratio": 0.994,
       "region": "mekong",
       "date_window": "2020-03-15",
       "year": 2020,
@@ -228,7 +228,7 @@
       "saa_rejected_share_pct": 0.0
     },
     {
-      "sensor_invariance_ratio": 1.003,
+      "sensor_invariance_ratio": 1.093,
       "region": "mekong",
       "date_window": "2023-03-15",
       "year": 2023,
@@ -257,7 +257,7 @@
       "saa_rejected_share_pct": 0.0
     },
     {
-      "sensor_invariance_ratio": 0.915,
+      "sensor_invariance_ratio": 0.997,
       "region": "mekong",
       "date_window": "2024-03-15",
       "year": 2024,
@@ -288,7 +288,7 @@
       "saa_rejected_share_pct": 0.0
     },
     {
-      "sensor_invariance_ratio": 0.844,
+      "sensor_invariance_ratio": 0.92,
       "region": "mekong",
       "date_window": "2025-03-15",
       "year": 2025,
@@ -319,7 +319,7 @@
       "saa_rejected_share_pct": 0.0
     },
     {
-      "sensor_invariance_ratio": 1.048,
+      "sensor_invariance_ratio": 1.142,
       "region": "mekong",
       "date_window": "2026-03-15",
       "year": 2026,
@@ -368,7 +368,7 @@
       "omega_before_cloud": 1.0022,
       "cloud_clear_sky_fraction": 0.6293,
       "cloud_reference_clear_sky_fraction": 0.7455,
-      "harmonized_viirs_eq_episodes": 20963.7,
+      "harmonized_viirs_eq_episodes": 14962.3,
       "raw_total_frp_mw": 917080.2,
       "harmonized_total_frp_mw": 1448470.4,
       "daynight_sza_reclassified_pct": 0.0,
@@ -392,7 +392,7 @@
       "omega_before_cloud": 1.0022,
       "cloud_clear_sky_fraction": 0.8084,
       "cloud_reference_clear_sky_fraction": 0.7455,
-      "harmonized_viirs_eq_episodes": 14945.2,
+      "harmonized_viirs_eq_episodes": 10666.8,
       "raw_total_frp_mw": 1009314.8,
       "harmonized_total_frp_mw": 1246865.7,
       "daynight_sza_reclassified_pct": 0.0,
@@ -416,7 +416,7 @@
       "omega_before_cloud": 1.0022,
       "cloud_clear_sky_fraction": 0.8076,
       "cloud_reference_clear_sky_fraction": 0.7455,
-      "harmonized_viirs_eq_episodes": 17934.1,
+      "harmonized_viirs_eq_episodes": 12800.0,
       "raw_total_frp_mw": 1068761.8,
       "harmonized_total_frp_mw": 1331963.1,
       "daynight_sza_reclassified_pct": 0.0,
@@ -424,7 +424,7 @@
       "saa_rejected_share_pct": 3.84
     },
     {
-      "sensor_invariance_ratio": 0.714,
+      "sensor_invariance_ratio": 1.0,
       "region": "amazon",
       "date_window": "2012-08-20",
       "year": 2012,
@@ -451,7 +451,7 @@
       "saa_rejected_share_pct": 11.49
     },
     {
-      "sensor_invariance_ratio": 0.588,
+      "sensor_invariance_ratio": 0.824,
       "region": "amazon",
       "date_window": "2019-08-20",
       "year": 2019,
@@ -480,7 +480,7 @@
       "saa_rejected_share_pct": 13.27
     },
     {
-      "sensor_invariance_ratio": 0.977,
+      "sensor_invariance_ratio": 1.369,
       "region": "amazon",
       "date_window": "2020-08-20",
       "year": 2020,
@@ -509,7 +509,7 @@
       "saa_rejected_share_pct": 16.09
     },
     {
-      "sensor_invariance_ratio": 0.608,
+      "sensor_invariance_ratio": 0.852,
       "region": "amazon",
       "date_window": "2024-08-20",
       "year": 2024,
@@ -540,7 +540,7 @@
       "saa_rejected_share_pct": 13.73
     },
     {
-      "sensor_invariance_ratio": 0.647,
+      "sensor_invariance_ratio": 0.907,
       "region": "amazon",
       "date_window": "2025-08-20",
       "year": 2025,
@@ -571,7 +571,7 @@
       "saa_rejected_share_pct": 11.29
     },
     {
-      "sensor_invariance_ratio": 0.611,
+      "sensor_invariance_ratio": 0.856,
       "region": "amazon",
       "date_window": "2026-08-20",
       "year": 2026,
@@ -623,6 +623,49 @@
       "sza_reclassified_pct": 0.0,
       "saa_night_false_alarms_filtered": 0,
       "saa_night_false_alarm_pct": 0.0
+    }
+  },
+  "omission_factor_fit": {
+    "mekong": {
+      "k_prior": 3.65,
+      "k_fit": 3.3483,
+      "train_years": [
+        2012,
+        2016,
+        2019,
+        2020
+      ],
+      "held_out_before": {
+        "2023": 1.003,
+        "2024": 0.915,
+        "2025": 0.844,
+        "2026": 1.048
+      },
+      "held_out_after": {
+        "2023": 1.094,
+        "2024": 0.997,
+        "2025": 0.92,
+        "2026": 1.143
+      }
+    },
+    "amazon": {
+      "k_prior": 2.55,
+      "k_fit": 1.82,
+      "train_years": [
+        2012,
+        2019,
+        2020
+      ],
+      "held_out_before": {
+        "2024": 0.608,
+        "2025": 0.647,
+        "2026": 0.611
+      },
+      "held_out_after": {
+        "2024": 0.852,
+        "2025": 0.907,
+        "2026": 0.856
+      }
     }
   },
   "regime_shift_series": {
@@ -751,20 +794,20 @@
         103.1,
         192.4,
         50.8,
-        128.6,
+        140.1,
         188.1,
         222.8,
         270.2,
-        124.3,
+        135.4,
         54.6,
         55.7,
-        99.4,
-        123.2,
+        108.3,
+        134.2,
         162.0,
         46.6,
-        123.7,
-        81.0,
-        72.4,
+        134.8,
+        88.3,
+        78.9,
         56.3
       ],
       "measured_years": [
@@ -923,20 +966,20 @@
         13.8,
         85.5,
         14.0,
-        29.2,
+        40.9,
         12.1,
         49.3,
         33.8,
         32.0,
         22.0,
         11.7,
-        23.8,
-        21.8,
+        33.3,
+        30.6,
         54.4,
         92.3,
         32.1,
-        27.3,
-        6.2,
+        38.3,
+        8.7,
         25.8
       ],
       "measured_years": [

@@ -65,7 +65,7 @@
 
 ### Slide 6 — The Harmonized Burning Activity Calendar & Early Warning (Sản Phẩm Ứng Dụng Thực Tế)
 * **Trình diễn Ma trận Lịch Hoạt Động Cháy (`26 Năm × 73 Pentads`) & Chỉ số Dị thường $\text{SFAI}$:**
-  - **Tại Việt Nam & Tiểu vùng Mekong**: Xác định chính xác cửa sổ đốt phụ phẩm nông nghiệp và cháy rừng khộp theo mùa kéo dài từ **Pentad 11 đến Pentad 22 (20/02 – 20/04)**; chỉ chấm điểm SFAI trên các ô **đã quan sát** (Pentad 15 của các Mốc đo thực): năm 2007 vượt ngưỡng hiển thị viền xanh $+2{,}2\sigma$ (đo được $+2{,}6\sigma$), còn 2010 ($+1{,}15\sigma$) và 2016 ($+0{,}88\sigma$) không vượt. Các ô còn lại là mô hình và không mang cấp dị thường nào.
+  - **Tại Việt Nam & Tiểu vùng Mekong**: Xác định chính xác cửa sổ đốt phụ phẩm nông nghiệp và cháy rừng khộp theo mùa kéo dài từ **Pentad 11 đến Pentad 22 (20/02 – 20/04)**; chỉ chấm điểm SFAI trên các ô **đã quan sát** (Pentad 15 của các Mốc đo thực): năm 2007 vượt ngưỡng hiển thị viền xanh $+2{,}2\sigma$ (đo được $+2{,}9\sigma$), còn 2010 ($+1{,}2\sigma$) và 2016 ($+0{,}0\sigma$) không vượt. Các ô còn lại là mô hình và không mang cấp dị thường nào.
   - **Tại Lưu vực Amazon**: Định vị chính xác mùa cháy cao điểm từ **Pentad 40 đến Pentad 56 (15/07 – 07/10)**.
 * **Trên nền lịch đó, hệ thống phát ra báo cáo có căn cứ và chờ người quyết định:**
   - **Báo cáo Grounded Narrative**: mô hình viết diễn giải theo đúng ngôn ngữ từng đối tượng (lực lượng kiểm lâm / lãnh đạo lâm nghiệp / nhà khoa học khí hậu), còn **mọi định lượng do harness chèn từ sổ cái** — mô hình không được tự tính bất kỳ con số nào.

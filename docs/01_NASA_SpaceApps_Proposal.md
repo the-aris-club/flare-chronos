@@ -97,8 +97,8 @@ Khu vực Đông Nam Á lục địa (bao gồm Tây Nguyên, Tây Bắc Việt 
 
 | Năm (Epoch) | Tổ Hợp Cảm Biến Hoạt Động | Điểm Nóng Thô Theo Từng Nguồn (`Raw Counts`) | Tổng Điểm Nóng Thô (`Raw Sum`) | Sự Kiện Cháy Độc Lập (`Fire Episodes`) | Hệ Số Nén Trùng Lặp | Nỗ Lực Quan Sát $\Omega(y, \phi)$ | Sự Kiện Chuẩn Hóa `Flare-Chronos` (`VIIRS-eq`) | Chỉ Số Thô (`2005=100`) | Chỉ Số Chuẩn Hóa (`2005=100`) |
 | :---: | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **2005** | `MODIS_SP` (Terra+Aqua) | MODIS: `3.580` | **3.580** | 2.179 | $1.68\times$ | $0.8662$ | **9.181,9** | `100,0` | **`100,0`** |
-| **2010** *(El Niño)* | `MODIS_SP` (Terra+Aqua) | MODIS: `8.222` | **8.222** | 4.644 | $1.85\times$ | $0.8662$ | **17.666,1** | `229,7` | **`208,3`** *(Đỉnh hạn)* |
+| **2005** | `MODIS_SP` (Terra+Aqua) | MODIS: `3.580` | **3.580** | 2.179 | $1.68\times$ | $0.8662$ | **8.427,2** | `100,0` | **`100,0`** |
+| **2010** *(El Niño)* | `MODIS_SP` (Terra+Aqua) | MODIS: `8.222` | **8.222** | 4.644 | $1.85\times$ | $0.8662$ | **16.214,1** | `229,7` | **`208,3`** *(Đỉnh hạn)* |
 | **2012** *(+S-NPP)* | `MODIS_SP` + `SNPP_SP` | MODIS: `7.297`<br/>SNPP: `25.720` | **33.017** | 16.304 | $1.95\times$ | $1.3809$ | **11.806,8** | `922,3` *(+822% ảo)* | **`147,2`** |
 | **2016** *(Siêu El Niño)* | `MODIS_SP` + `SNPP_SP` | MODIS: `6.564`<br/>SNPP: `36.778` | **43.342** | 22.847 | $1.92\times$ | $1.3809$ | **11.410,4** | `1.210,7` | **`196,0`** *(Đỉnh hạn)* |
 | **2020** | `MODIS_SP` + `SNPP_SP` + `NOAA20_SP` | MODIS: `4.827`<br/>SNPP: `23.050`<br/>NOAA20: `20.275` | **48.152** | 21.323 | $2.16\times$ | $2.0709$ | **11.307,9** | `1.345,0` | **`129,9`** |
@@ -122,8 +122,8 @@ Khu vực phía Nam lưu vực Amazon (bang Mato Grosso và Pará, Brazil) đạ
 
 | Năm (Epoch) | Tổ Hợp Cảm Biến Hoạt Động | Điểm Nóng Thô Theo Từng Nguồn (`Raw Counts`) | Tổng Điểm Nóng Thô (`Raw Sum`) | Sự Kiện Cháy Độc Lập (`Fire Episodes`) | Hệ Số Nén Trùng Lặp | Xung Nhiễu SAA Đêm Đã Lọc | Sự Kiện Chuẩn Hóa `Flare-Chronos` (`VIIRS-eq`) | Chỉ Số Thô (`2005=100`) | Chỉ Số Chuẩn Hóa (`2005=100`) |
 | :---: | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **2005** *(Hạn lớn)* | `MODIS_SP` (Terra+Aqua) | MODIS: `13.804` | **13.804** | 6.955 | $2.19\times$ | 518 | **20.963,7** | `100,0` | **`100,0`** |
-| **2010** *(Siêu hạn)* | `MODIS_SP` (Terra+Aqua) | MODIS: `16.304` | **16.304** | 7.635 | $2.45\times$ | 626 | **17.934,1** | `118,1` | **`105,6`** |
+| **2005** *(Hạn lớn)* | `MODIS_SP` (Terra+Aqua) | MODIS: `13.804` | **13.804** | 6.955 | $2.19\times$ | 518 | **14.962,3** | `100,0` | **`100,0`** |
+| **2010** *(Siêu hạn)* | `MODIS_SP` (Terra+Aqua) | MODIS: `16.304` | **16.304** | 7.635 | $2.45\times$ | 626 | **12.800,0** | `118,1` | **`105,6`** |
 | **2012** *(+S-NPP)* | `MODIS_SP` + `SNPP_SP` | MODIS: `6.677`<br/>SNPP: `26.807` | **33.484** | 9.351 | $3.10\times$ | 3.848 | **6.124,6** | `242,6` *(Tăng ảo)* | **`45,4`** *(Giảm phá rừng thực tế)* |
 | **2019** | `MODIS_SP` + `SNPP_SP` + `NOAA20_SP` | MODIS: `4.770`<br/>SNPP: `16.882`<br/>NOAA20: `17.099` | **38.751** | 8.764 | $3.98\times$ | 5.144 | **4.985,7** | `280,7` | **`27,5`** |
 | **2020** | `MODIS_SP` + `SNPP_SP` + `NOAA20_SP` | MODIS: `3.506`<br/>SNPP: `22.031`<br/>NOAA20: `20.575` | **46.112** | 10.446 | $4.13\times$ | 7.418 | **4.575,6** | `334,0` | **`31,4`** |
