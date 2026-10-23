@@ -110,7 +110,9 @@ def cluster_fire_episodes(
                     continue
                 still_active: list[list[HarmonizedDetection]] = []
                 for cl in bucket:
-                    anchor = cl[-1]
+                    # Seed-anchored: linking to the newest member would let a run of
+                    # detections each inside the window chain into one long episode.
+                    anchor = cl[0]
                     dt_min = (
                         t_cur - anchor.raw.acq_datetime_utc
                     ).total_seconds() / 60.0
