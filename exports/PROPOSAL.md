@@ -386,7 +386,7 @@ Khu vực phía Nam lưu vực Amazon (bang Mato Grosso và Pará, Brazil) đạ
    - Tại **Tiểu vùng sông Mekong & Việt Nam**, ma trận lịch cháy xác lập rõ cửa sổ đốt sinh khối định kỳ hàng năm kéo dài từ **Pentad 11 đến Pentad 22 (`20/02 – 20/04`)**.
    - Khi chỉ số $\text{SFAI}_{y,p} \in [-0.5, +1.0)$: Hoạt động đốt nằm trong dải sinh thái mùa vụ bình thường (*Normal Seasonal Baseline*).
    - Khi chỉ số $\text{SFAI}_{y,p} \in [+1.75, +2.50)$: Kích hoạt **Cảnh báo Mùa cháy Nghiêm trọng (*Severe Fire Period*)** — tăng cường tuần tra kiểm lâm.
-   - Khi chỉ số $\text{SFAI}_{y,p} \ge +2.50\sigma$ (đặc biệt khi xuất hiện sớm vào Pentad 7–10 như năm El Niño 2010 và 2016): Kích hoạt **Báo động Đỏ Khủng hoảng Cháy Ngoài Mùa Vụ (*Out-of-Season Crisis Anomaly*)**.
+   - Khi chỉ số $\text{SFAI}_{y,p} \ge +2.50\sigma$: Kích hoạt **Báo động Đỏ Khủng hoảng Cháy Ngoài Mùa Vụ (*Out-of-Season Crisis Anomaly*)**.
 
 ### 6.3. Tầng hỗ trợ ra quyết định nhận thức kép có kiểm chứng số học (Verified Dual-System Cognitive Decision-Support)
 

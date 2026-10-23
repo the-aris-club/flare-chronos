@@ -459,17 +459,23 @@ class DocumentedClaimsConsistencyTest(unittest.TestCase):
         for region in ("mekong", "amazon"):
             caption = cal[region]["summary_caption"]
             with self.subTest(region=region):
-                self.assertIn("Severe", caption)
-                # every year named must really reach a severe anomaly
                 years = cal[region]["years"]
-                sfai = cal[region]["sfai_matrix"]
+                # SFAI exists only on observed cells; unscored cells are None.
+                sfai = [
+                    [v for v in row if v is not None]
+                    for row in cal[region]["sfai_matrix"]
+                ]
                 named = {
-                    int(m.group(0)) for m in re.finditer(r"\b(19|20)\d{2}\b", caption)
+                    int(m.group(0))
+                    for m in re.finditer(r"\b(19|20)\d{2}\b", caption)
+                    if int(m.group(0)) in years
                 }
-                self.assertTrue(named)
+                if not named:
+                    self.assertIn("none reach the display threshold", caption)
+                # every year named must really reach a severe anomaly on an observed cell
                 for year in named:
-                    self.assertIn(year, years)
                     row = sfai[years.index(year)]
+                    self.assertTrue(row, f"{region}: caption names unscored {year}.")
                     self.assertGreaterEqual(
                         max(row),
                         2.2,
@@ -482,7 +488,7 @@ class DocumentedClaimsConsistencyTest(unittest.TestCase):
                 peak = float(peaks[0])
                 self.assertAlmostEqual(
                     peak,
-                    round(max(max(row) for row in sfai), 1),
+                    round(max(max(row) for row in sfai if row), 1),
                     delta=0.05,
                     msg=f"{region}: caption peak {peak} != matrix peak.",
                 )

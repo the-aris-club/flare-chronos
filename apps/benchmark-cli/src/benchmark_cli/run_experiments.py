@@ -64,6 +64,34 @@ RAW_DIR = ROOT / "data" / "raw"
 PROC_DIR = ROOT / "data" / "processed"
 FIG_DIR = ROOT / "docs" / "figures"
 
+# Per-cell provenance codes in the calendar's provenance matrix.
+CELL_OBSERVED = 0
+CELL_MODELLED_IN_MEASURED_YEAR = 1
+CELL_INTERPOLATED = 2
+
+# A pentad earns an SFAI only with at least this many observed years behind it.
+MIN_MEASURED_YEARS = 8
+
+
+def measured_only_sfai(hfd: np.ndarray, provenance: np.ndarray) -> np.ndarray:
+    """Robust seasonal Z-score per pentad, from observed cells only (NaN elsewhere).
+
+    A pentad's baseline uses only its observed cells, and a pentad with fewer than
+    ``MIN_MEASURED_YEARS`` of them reports no SFAI at all. See ADR-0010.
+    """
+    sfai = np.full(hfd.shape, np.nan)
+    for c in range(hfd.shape[1]):
+        seen = provenance[:, c] == CELL_OBSERVED
+        if seen.sum() < MIN_MEASURED_YEARS:
+            continue
+        col = hfd[seen, c]
+        med = float(np.median(col))
+        mad = float(np.median(np.abs(col - med)))
+        sigma = max(0.05, 0.65 * 1.4826 * mad + 0.35 * float(np.std(col)))
+        sfai[seen, c] = np.round((col - med) / sigma, 3)
+    return sfai
+
+
 # --- Modelling constants for the 26-year calendar -------------------------
 #
 # The calendar spans 26 years, but only the years in the epoch list are
@@ -724,10 +752,15 @@ def build_26yr_calendars_and_series(
         raw_idx_list: list[float] = []
         harm_idx_list: list[float] = []
         hfd_matrix: list[list[float]] = []
+        provenance: list[list[int]] = []
+        # A cell is observed only for the pentad that holds the epoch's 5-day
+        # FIRMS window, in a Measured Epoch. Every other cell is modelled.
+        observed_pentad = peak_pentad
 
         for yr in years_full:
             r_cnt = float(raw_26.get(yr, raw_2005))
-            if yr in emp_map and yr != 2026:
+            is_measured = yr in emp_map and yr != 2026
+            if is_measured:
                 h_cnt = float(emp_map[yr]["harmonized_viirs_eq_episodes"])
             else:
                 # Directly anchor to the real observed MODIS_SP count for year `yr`,
@@ -740,6 +773,7 @@ def build_26yr_calendars_and_series(
             harm_idx_list.append(round(100.0 * h_cnt / harm_2005, 1))
 
             row_hfd: list[float] = []
+            row_prov: list[int] = []
             yr_scale = h_cnt / clim_baseline_harm
             for p_idx in range(1, 74):
                 base_rate = float(emp_seasonal_curve[p_idx - 1])
@@ -747,23 +781,33 @@ def build_26yr_calendars_and_series(
                     _CALENDAR_NOISE_FLOOR,
                     1.0 + float(rng.normal(0.0, _CALENDAR_NOISE_SD)),
                 )
-                val = base_rate * yr_scale * noise
-                if (
-                    yr in (2007, 2010, 2015, 2016, 2024)
-                    and abs(p_idx - (peak_pentad - 5)) <= 2
-                ):
-                    val *= _EL_NINO_PEAK_AMPLITUDE
+                observed = is_measured and p_idx == observed_pentad
+                if observed:
+                    # No noise and no multiplier: the cell is the measured value.
+                    val = base_rate * yr_scale
+                    row_prov.append(CELL_OBSERVED)
+                else:
+                    val = base_rate * yr_scale * noise
+                    # A hand-set peak amplitude is a modelling assumption and
+                    # only ever shapes interpolated years.
+                    if (
+                        not is_measured
+                        and yr in (2007, 2010, 2015, 2016, 2024)
+                        and abs(p_idx - (peak_pentad - 5)) <= 2
+                    ):
+                        val *= _EL_NINO_PEAK_AMPLITUDE
+                    row_prov.append(
+                        CELL_MODELLED_IN_MEASURED_YEAR
+                        if is_measured
+                        else CELL_INTERPOLATED
+                    )
                 row_hfd.append(round(val, 4))
             hfd_matrix.append(row_hfd)
+            provenance.append(row_prov)
 
         mat_np = np.array(hfd_matrix, dtype=float)
-        sfai_np = np.zeros_like(mat_np)
-        for c_i in range(73):
-            col = mat_np[:, c_i]
-            med = float(np.median(col))
-            mad = float(np.median(np.abs(col - med)))
-            sigma = max(0.05, 0.65 * 1.4826 * mad + 0.35 * float(np.std(col)))
-            sfai_np[:, c_i] = np.round((col - med) / sigma, 3)
+        prov_np = np.array(provenance, dtype=int)
+        sfai_np = measured_only_sfai(mat_np, prov_np)
 
         # The summary caption names the years that actually reach a severe
         # anomaly, and the peak SFAI actually observed. Both are derived from
@@ -772,12 +816,18 @@ def build_26yr_calendars_and_series(
         anomaly_years = [
             year
             for row, year in enumerate(years_full)
-            if float(sfai_np[row].max()) >= SFAI_HIGHLIGHT_Z
+            if np.nanmax(sfai_np[row], initial=-np.inf) >= SFAI_HIGHLIGHT_Z
         ]
-        peak_sfai = float(sfai_np.max())
+        peak_sfai = float(np.nanmax(sfai_np))
+        observed_years = [
+            y for y, row in zip(years_full, prov_np) if (row == CELL_OBSERVED).any()
+        ]
         caption = (
-            f"Peak Fire Window: {peak_window} | {anomaly_label}: "
-            f"{', '.join(str(y) for y in anomaly_years)} (SFAI +{peak_sfai:.1f} sigma)"
+            f"Peak Fire Window: {peak_window} | Scored on observed cells only "
+            f"({len(observed_years)} measured years, pentad {observed_pentad}) | "
+            f"{anomaly_label}: "
+            f"{', '.join(str(y) for y in anomaly_years) or 'none reach the display threshold'}"
+            f" (peak observed SFAI +{peak_sfai:.1f} sigma)"
         )
 
         # Which years are measured (anchored to a real epoch) and which are
@@ -798,7 +848,9 @@ def build_26yr_calendars_and_series(
         cal_out[region_key] = {
             "years": years_full,
             "hfd_matrix": hfd_matrix,
-            "sfai_matrix": sfai_np.tolist(),
+            "sfai_matrix": np.where(np.isnan(sfai_np), None, sfai_np).tolist(),
+            "cell_provenance_matrix": prov_np.tolist(),
+            "observed_pentad": observed_pentad,
             "summary_caption": caption,
             "measured_years": measured_years,
             "interpolated_years": interpolated_years,
@@ -971,6 +1023,11 @@ def main() -> None:
     )
     series_data, cal_matrix_data = build_26yr_calendars_and_series(
         mekong_epochs, amazon_epochs
+    )
+    # Static artifact for the web frontend (ADR-0011): the calendar with a
+    # per-cell provenance flag, so a viewer can tell an observation from a model.
+    (PROC_DIR / "burning_calendar.json").write_text(
+        json.dumps(cal_matrix_data, separators=(",", ":")), encoding="utf-8"
     )
     render_fig4_regime_shift_elimination(
         FIG_DIR / "fig4_regime_shift_elimination.png",
