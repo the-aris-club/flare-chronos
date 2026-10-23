@@ -1,0 +1,65 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: release-main
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release:
+    # Pinned: verify the pandoc/weasyprint/font toolchain before moving to
+    # ubuntu-26 (ubuntu-latest migrates 2026-10-19 per runner-images#14748).
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - name: Install tools (pandoc, weasyprint, poppler, fonts)
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq pandoc poppler-utils weasyprint fonts-liberation fonts-noto-core
+          weasyprint --version
+          pandoc --version | head -1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+      - name: Set up pnpm (version from the packageManager field)
+        uses: pnpm/setup@a0881977cd8ea73b1ed212236c99ca10dcc80cf4 # v3.1.1
+        with:
+          cache: true
+          cache-dependency-path: pnpm-lock.yaml
+          install: false
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          python-version: "3.13"
+          enable-cache: true
+      - name: Install dependencies
+        run: |
+          pnpm install --frozen-lockfile
+          uv sync --group dev
+      - name: Preflight checks (entry format + version match)
+        run: python3 scripts/check-docs.py --scan --require-tools
+      - name: Create release PR or tag the release
+        id: changesets
+        uses: changesets/action@ae32849d5ba541f9ae29e40e22a623bc13562f51 # v2.1.2
+        with:
+          version-script: pnpm run doc:version
+          publish-script: pnpm run release
+          commit-message: "chore(release): version packages"
+      - name: Attach the exported PDFs to the GitHub release
+        if: steps.changesets.outputs.published == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo '${{ steps.changesets.outputs.published-packages }}' \
+            | jq -r '.[] | "\(.name)@\(.version)"' \
+            | while read -r tag; do
+                gh release upload "$tag" exports/PROPOSAL.pdf exports/PROPOSAL.md exports/REPORT.pdf exports/REPORT.md exports/MODEL_FLOW.pdf exports/MODEL_FLOW.md --clobber
+              done

@@ -7,6 +7,21 @@ on:
     branches: [main]
 
 jobs:
+  check-docs:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install poppler
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq poppler-utils
+      - name: Check entry format, fragment presence, and PDF/MD version match
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: python3 scripts/check-docs.py --base "$BASE_SHA" --require-tools
+
   test:
     runs-on: ubuntu-latest
     strategy:

@@ -3,6 +3,7 @@
 **Tài liệu này** mô tả *mô hình luồng* đã thiết kế cho bộ điều phối nhận thức kép: hai thế hệ mô hình làm hai việc khác nhau, một chuỗi phân loại có dự phòng, và một cổng kiểm chứng định lượng đứng trước mọi báo cáo. Mọi con số trong tài liệu là **kết quả đo trên chính dữ liệu và yêu cầu của dự án**, không phải đặc tính được công bố của nhà cung cấp.
 
 > Báo cáo tổng thể của dự án: [`REPORT.md`](./REPORT.md). Quyết định kiến trúc: [`ADR-0005`](../docs/adr/0005-dual-system-langgraph-harness-and-deterministic-tool-gate.md), [`ADR-0006`](../docs/adr/0006-explicit-endpoint-profiles-and-grounded-narrative-assembly.md), [`ADR-0008`](../docs/adr/0008-model-driven-tool-selection-sign-off-and-event-stream.md), [`ADR-0009`](../docs/adr/0009-measured-epochs-and-interpolated-years.md).
+> **Phiên bản:** `v0.1.0` — cập nhật 23/10/2026
 
 ---
 

@@ -1,0 +1,19 @@
+{
+  "name": "flare-chronos",
+  "version": "0.1.0",
+  "private": true,
+  "author": "Xiro The Dev <lethanhtrung.trungle@gmail.com>",
+  "description": "Flare-Chronos — changelog and release automation for the exported proposal documents",
+  "packageManager": "pnpm@12.3.1",
+  "scripts": {
+    "doc:version": "changeset version && node scripts/apply-version.mjs && uv run python exports/export_pdf.py && uv run python exports/export_pdf.py -i exports/MODEL_FLOW.md -o exports/MODEL_FLOW.pdf",
+    "release": "changeset publish",
+    "check": "python3 scripts/check-docs.py --scan"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^3.0.3"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

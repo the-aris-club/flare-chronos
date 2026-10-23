@@ -27,6 +27,9 @@ build/
 # Runtime state (durable graph checkpoints for human sign-off)
 data/runtime/
 
+# Node (changesets release automation)
+node_modules/
+
 # Editorial / Media Build Artifacts
 # Rendered deliverables are published as GitHub Releases, not committed.
 # Source projects (After Effects, Blender, ...) live in external storage;
