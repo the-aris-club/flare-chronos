@@ -34,6 +34,7 @@ from flare_chronos_core import (
     InstantaneousFootprint,
     SensorType,
     build_static_source_registry,
+    cloud_weighted_effort,
     cluster_fire_episodes,
     compute_effective_observation_effort,
     compute_frp_detection_limit,
@@ -439,6 +440,18 @@ def load_static_source_registry(region: str) -> frozenset[str]:
     return build_static_source_registry(observations)
 
 
+def load_cloud_clear_sky(region: str) -> dict[str, tuple[float, float]]:
+    """Map each epoch window to (clear-sky share, the region's mean clear-sky share).
+
+    The share is 1 minus the ERA5 cloud fraction in ``data/cloud``. The regional
+    mean is the reference: a typical epoch keeps its sensor-based effort.
+    """
+    table = json.loads((ROOT / "data" / "cloud" / "era5_cloud_cover.json").read_text())
+    clear = {w: 1.0 - c for w, c in table["regions"][region].items()}
+    reference = sum(clear.values()) / len(clear)
+    return {w: (v, reference) for w, v in clear.items()}
+
+
 def evaluate_epoch_slice(
     region: str,
     date_str: str,
@@ -446,6 +459,7 @@ def evaluate_epoch_slice(
     cal_model: Any,
     max_sample_per_source: int = 8000,
     static_cells: frozenset[str] = frozenset(),
+    cloud_clear: tuple[float, float] | None = None,
 ) -> dict[str, Any]:
     """Run full harmonization and spatio-temporal deduplication on a multi-sensor epoch slice."""
     dfs: list[pd.DataFrame] = []
@@ -493,6 +507,9 @@ def evaluate_epoch_slice(
     mean_lat = 17.2 if region == "mekong" else -9.0
     n_viirs = sum(1 for s in sources if "VIIRS" in s)
     omega = compute_effective_observation_effort(year, mean_lat, n_viirs)
+    omega_before_cloud = omega
+    if cloud_clear is not None:
+        omega = cloud_weighted_effort(omega, *cloud_clear)
 
     # Harmonize across sensor regimes onto a consistent VIIRS-equivalent single-constellation baseline:
     # - In MODIS-only epochs (2005, 2010), each deduplicated MODIS episode is scaled by the
@@ -525,6 +542,7 @@ def evaluate_epoch_slice(
             cal_model,
             max_sample_per_source,
             static_cells,
+            cloud_clear,
         )
         invariance["sensor_invariance_ratio"] = round(
             harm_equiv_episodes / modis_view["harmonized_viirs_eq_episodes"], 3
@@ -541,6 +559,11 @@ def evaluate_epoch_slice(
         "deduplicated_fire_episodes": est_episodes,
         "deduplication_compression_ratio": round(dedup_ratio, 3),
         "effective_observation_effort_omega": omega,
+        "omega_before_cloud": omega_before_cloud,
+        "cloud_clear_sky_fraction": round(cloud_clear[0], 4) if cloud_clear else None,
+        "cloud_reference_clear_sky_fraction": round(cloud_clear[1], 4)
+        if cloud_clear
+        else None,
         "harmonized_viirs_eq_episodes": round(harm_equiv_episodes, 1),
         "raw_total_frp_mw": round(total_raw_frp_mw, 1),
         "harmonized_total_frp_mw": round(harm_frp_total, 1),
@@ -947,12 +970,29 @@ def main() -> None:
         f"amazon={len(amazon_static)} cells"
     )
 
+    mekong_cloud = load_cloud_clear_sky("mekong")
+    amazon_cloud = load_cloud_clear_sky("amazon")
+
     mekong_epochs = [
-        evaluate_epoch_slice("mekong", d, s, cal_model, static_cells=mekong_static)
+        evaluate_epoch_slice(
+            "mekong",
+            d,
+            s,
+            cal_model,
+            static_cells=mekong_static,
+            cloud_clear=mekong_cloud.get(d),
+        )
         for d, s in mekong_plan
     ]
     amazon_epochs = [
-        evaluate_epoch_slice("amazon", d, s, cal_model, static_cells=amazon_static)
+        evaluate_epoch_slice(
+            "amazon",
+            d,
+            s,
+            cal_model,
+            static_cells=amazon_static,
+            cloud_clear=amazon_cloud.get(d),
+        )
         for d, s in amazon_plan
     ]
 

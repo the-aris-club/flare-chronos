@@ -24,6 +24,7 @@ from .confidence_filter import (
 )
 from .deduplication import (
     FIRE_EPISODE_WINDOW_MINUTES,
+    cloud_weighted_effort,
     cluster_fire_episodes,
     compute_effective_observation_effort,
     haversine_km,
@@ -261,6 +262,7 @@ __all__ = [
     "build_burning_activity_calendar",
     "build_static_source_registry",
     "classify_sfai_tier",
+    "cloud_weighted_effort",
     "cluster_fire_episodes",
     "compute_effective_observation_effort",
     "compute_frp_detection_limit",

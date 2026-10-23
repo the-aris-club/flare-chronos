@@ -73,6 +73,18 @@ def compute_effective_observation_effort(
     return round(base_omega * lat_convergence, 4)
 
 
+def cloud_weighted_effort(omega: float, clear: float, reference_clear: float) -> float:
+    """Scale effort by an epoch's clear-sky share relative to the region's norm.
+
+    A cloudier-than-usual epoch lets the constellation see less fire, so it earns
+    less effort and its episode count is divided by less. Dividing by the
+    reference share keeps a typical epoch at its sensor-based effort.
+    """
+    if clear <= 0.0 or reference_clear <= 0.0:
+        raise ValueError("clear-sky fractions must be positive")
+    return round(omega * clear / reference_clear, 4)
+
+
 # The afternoon overpass train (NOAA-20 12:40, NOAA-21 13:05, Suomi-NPP and Aqua 13:30
 # MLT) spans 50 minutes. Windowing from the cluster's first detection, 60 minutes
 # holds that train and stops short of the next orbit of any one satellite.

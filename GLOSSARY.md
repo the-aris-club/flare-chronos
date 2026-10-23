@@ -79,6 +79,10 @@ _Avoid_: Deduplicated point, merged hotspot, fire cluster
 The normalized diurnal sensing capacity of the active satellite constellation at a given epoch and latitude, accounting for satellite count, swath overlap, and orbital revisit spacing.
 _Avoid_: Overpass count, satellite multiplier
 
+**Clear-Sky Weight**:
+The ratio of an epoch's clear-sky share (1 minus the ERA5 cloud fraction over its 5-day window) to the region's mean clear-sky share across Measured Epochs. It multiplies the Effective Observation Effort so that a cloudier-than-usual epoch is not credited with the sensing capacity of a clear one.
+_Avoid_: Cloud correction, cloud mask, cloud filter
+
 **Co-Incident Overpass Pair**:
 Simultaneous or near-simultaneous observations of the same Iso-Area Cell by Aqua-MODIS and Suomi-NPP VIIRS within their shared $\sim 13\text{:}30 / 01\text{:}30\text{ MLT}$ orbital plane during the 2012–2026 overlap era.
 _Avoid_: Matched points, overlapping passes

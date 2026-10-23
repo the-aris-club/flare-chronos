@@ -171,6 +171,11 @@ $$\Omega(y, \phi) = \Omega_0(y) \cdot \left[ 1 + 0.18 \left( \frac{1}{\max(0.55,
 
 với $\Omega_0(2000\text{–}2001) = 0.52$, $\Omega_0(2002) = 0.76$, $\Omega_0(2003\text{–}2011) = 1.00$, $\Omega_0(2012\text{–}2017) = 1.48$, $\Omega_0(2018\text{–}2022) = 1.78$, $\Omega_0(2023) = 1.92$, và $\Omega_0(2024\text{–}2026) = 2.08$.
 
+
+**Trọng số che phủ mây (ERA5):** nỗ lực quan sát của mỗi Mốc đo thực được nhân thêm tỷ lệ trời quang tương đối:
+$$\Omega_{\text{eff}}(y, \phi) = \Omega(y, \phi) \cdot \frac{c_y}{\bar{c}}, \qquad c_y = 1 - f_{\text{mây}, y}$$
+với $f_{\text{mây}, y}$ là độ che phủ mây tổng của ERA5 trung bình trên lưới $3 \times 3$ điểm phủ vùng nghiên cứu, trên các giờ nằm trong $\pm 2$ giờ quanh $13{:}30$ và $01{:}30$ giờ mặt trời địa phương của cửa sổ 5 ngày, và $\bar{c}$ là giá trị trung bình của vùng trên các Mốc đo thực (nên một epoch điển hình giữ nguyên $\Omega$). Epoch nhiều mây hơn thường lệ nhận nỗ lực thấp hơn, nên số sự kiện cháy của nó được chia cho một số nhỏ hơn. **Hạn chế đã biết:** ERA5 là trường tái phân tích, không phải quan sát tại thời điểm vệ tinh bay qua; mây ti mỏng không che được lửa; và quan hệ tỷ lệ tuyến tính là một giả định. Trọng số này làm dịch chuyển chỉ số điều hòa của từng epoch tới khoảng $\pm 35\%$ (Mekong 2025: $+42\%$, 2026: $-31\%$), vì vậy các kết luận về dị thường phải đọc cùng với độ nhạy này.
+
 ### 5.3. Công Thức Tính Bộ Ba Chỉ Số Của Lịch Hoạt Động Cháy (`HFD`, `HRF`, `SFAI`)
 
 Trên mỗi vùng quan tâm có diện tích $A_{\text{AOI}}$ ($\text{km}^2$), tại năm $y \in [2000, 2026]$ và kỳ 5 ngày (**Pentad**) $p \in [1, 73]$:
