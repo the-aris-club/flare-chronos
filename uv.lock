@@ -64,7 +64,7 @@ wheels = [
 
 [[package]]
 name = "benchmark-cli"
-version = "0.1.0"
+version = "1.0.0"
 source = { editable = "apps/benchmark-cli" }
 dependencies = [
     { name = "firms-ingestion" },
@@ -286,7 +286,7 @@ wheels = [
 
 [[package]]
 name = "firms-ingestion"
-version = "0.1.0"
+version = "1.0.0"
 source = { editable = "packages/firms-ingestion" }
 dependencies = [
     { name = "flare-chronos-core" },
@@ -303,7 +303,7 @@ requires-dist = [
 
 [[package]]
 name = "flare-chronos-ai-service"
-version = "0.1.0"
+version = "1.0.0"
 source = { editable = "apps/ai-service" }
 dependencies = [
     { name = "fastapi" },
@@ -335,7 +335,7 @@ requires-dist = [
 
 [[package]]
 name = "flare-chronos-core"
-version = "0.1.0"
+version = "1.0.0"
 source = { editable = "packages/harmonization-core" }
 dependencies = [
     { name = "h3" },
@@ -353,7 +353,7 @@ requires-dist = [
 
 [[package]]
 name = "flare-chronos-workspace"
-version = "0.1.0"
+version = "1.0.0"
 source = { virtual = "." }
 dependencies = [
     { name = "langchain-core" },

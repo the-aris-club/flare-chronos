@@ -1,6 +1,6 @@
 {
   "name": "flare-chronos",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "author": "Xiro The Dev <lethanhtrung.trungle@gmail.com>",
   "description": "Flare-Chronos — changelog and release automation for the exported proposal documents",
