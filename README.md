@@ -109,7 +109,7 @@ NASA FIRMS (MODIS / VIIRS / NRT) ──► firms-ingestion (rate-limited, cached
 
 ## Watch a Run
 
-The harness is the product; the demo puts a browser in front of it.
+The harness is the product; the API streams a run as it happens.
 
 ```bash
 AI_SERVICE_AUTH=disabled uv run python -m ai_service.serve   # http://127.0.0.1:8765
@@ -125,10 +125,11 @@ and sends `Authorization: Bearer <token>`; tokens need `sub` and `exp`, and the
 `fetch`. The API contract is `docs/openapi/ai-service.json`
 (`python -m ai_service.api` regenerates it).
 
-The page shows one run as it happens: the classification, the tool calls, the
-reasoning, the numeric verification and the briefing, with the approval buttons
-when the run asks for a human. The default mode is the deterministic harness,
-so the demo needs no credential; `--mode live` runs the real models.
+A client reads the Server-Sent Events stream and renders the classification, the
+tool calls, the reasoning, the numeric verification and the briefing, with the
+approval controls when the run asks for a human. The service does not ship an
+HTML page; `GET /` returns 404. The default mode is the deterministic harness, so
+a local run needs no model credential; `--mode live` runs the real models.
 
 The two endpoints the architecture document specifies are implemented here:
 `GET /api/v1/analysis/stream` and `POST /api/v1/analysis/resume`.

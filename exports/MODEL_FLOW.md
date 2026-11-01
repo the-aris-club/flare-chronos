@@ -142,7 +142,7 @@ Xác suất `urgency` **tách được**:
 
 ## 4.1. Sản Phẩm Chạy Được: Xem Một Run Thật
 
-Luồng sự kiện không dừng ở mức đặc tả. Một máy chủ FastAPI (xác thực bằng bearer token, xem ADR-0011) phục vụ đúng hai endpoint mà tài liệu kiến trúc công bố, kèm một trang demo:
+Luồng sự kiện không dừng ở mức đặc tả. Một máy chủ FastAPI (xác thực bằng bearer token, xem ADR-0011) phục vụ đúng hai endpoint mà tài liệu kiến trúc công bố:
 
 ```bash
 AI_SERVICE_AUTH=disabled uv run python -m ai_service.serve   # http://127.0.0.1:8765 (chỉ để demo cục bộ)
@@ -153,7 +153,7 @@ AI_SERVICE_AUTH=disabled uv run python -m ai_service.serve   # http://127.0.0.1:
 | `GET /api/v1/analysis/stream` | Chạy một Use Case và phát sự kiện của run theo thời gian thực |
 | `POST /api/v1/analysis/resume` | Trả lời một run đang dừng chờ — phê duyệt hoặc từ chối |
 
-Trang demo hiện từng sự kiện (phân loại → gọi tool → suy luận → kiểm chứng → phê duyệt → báo cáo), báo cáo cuối cùng, trạng thái kiểm chứng, và **nút phê duyệt** khi run cần người quyết định. Chế độ mặc định là harness tất định nên demo **chạy được ở bất kỳ đâu, không cần khoá API**; `--mode live` dùng mô hình thật.
+Workbench đọc luồng sự kiện và hiện từng bước (phân loại → gọi tool → suy luận → kiểm chứng → phê duyệt → báo cáo), báo cáo cuối cùng, trạng thái kiểm chứng, và **nút phê duyệt** khi run cần người quyết định. Dịch vụ không kèm trang HTML; `GET /` trả 404. Chế độ mặc định là harness tất định nên một run cục bộ **chạy được ở bất kỳ đâu, không cần khoá API**; `--mode live` dùng mô hình thật.
 
 ⇒ Điểm quan trọng: một người đánh giá có thể **xem một run diễn ra** thay vì chỉ đọc mô tả.
 

@@ -144,8 +144,16 @@ A hand-authored visual — motion graphic, 3D scene, title card or map animation
 _Avoid_: Figure, chart, data viz, screenshot, mock-up
 
 **Workbench**:
-The Flare-Chronos interactive analysis surface — the Deck.gl / MapLibre application specified in `docs/04_UI_UX_Burning_Calendar_Wireframe.md` that renders the harmonization engine's output on demand rather than pre-rendering it. Specified but not yet implemented.
-_Avoid_: Dashboard, UI, app, interactive demo, live visualization
+The Flare-Chronos interactive analysis surface — the Deck.gl / MapLibre application specified in `docs/04_UI_UX_Burning_Calendar_Wireframe.md` that renders the harmonization engine's output on demand rather than pre-rendering it. It has a single mode: it reads the exported harmonization data and the live analysis service, and never shows replayed or placeholder results. Specified but not yet implemented.
+_Avoid_: Dashboard, UI, app, interactive demo, live visualization, preview site
+
+**Demo Walkthrough**:
+The guided path through the Workbench that follows the Pitch Deck's argument, from the footprint asymmetry to a signed-off briefing. It drives the Workbench's own components with real data and a real analysis run, and it can be left at any step for free exploration.
+_Avoid_: Demo mode, tour, tutorial, replay
+
+**Region Globe**:
+The opening view of the Workbench: a rotating Earth that marks the regions with data and hands over to the flat map once a region is chosen. Anything on it that depicts satellite orbits is a Narrative Asset, not a measurement.
+_Avoid_: Globe map, 3D map, home map
 
 **Main Submission Video**:
 The 120-second primary pitch deliverable for NASA Space Apps, cut to the shot script in `docs/05_Pitch_Deck_and_Video_Script.md` §3.1.

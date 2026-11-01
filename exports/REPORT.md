@@ -208,7 +208,6 @@ flare-chronos/
 │           ├── human_input.py                    # Tool `ask_user_question` (interrupt) cho làm rõ yêu cầu
 │           ├── events.py                         # Event stream có kiểu + bộ mã hoá Server-Sent Events
 │           ├── serve.py                          # Máy chủ thư viện chuẩn: /api/v1/analysis/stream + /resume
-│           └── demo/index.html                   # Trang demo: xem một run diễn ra + nút phê duyệt
 │           └── run_all_usecases.py               # Thực thi toàn bộ 20 Use Cases & 3 bài đo kiểm cộng sinh -> ai_harness_results.json
 ├── src/
 │   └── harmonization/

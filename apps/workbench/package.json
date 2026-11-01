@@ -1,0 +1,42 @@
+{
+  "name": "workbench",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "test": "bun test src"
+  },
+  "dependencies": {
+    "lucide-react": "1.66.0",
+    "next": "16.4.3",
+    "next-intl": "4.14.9",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "recharts": "3.10.1",
+    "three": "0.184.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/turbopack": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@types/three": "0.184.0",
+    "babel-plugin-react-compiler": "1.0.0",
+    "d3-geo": "3.1.1",
+    "tailwindcss": "^4",
+    "topojson-client": "3.1.0",
+    "typescript": "^5"
+  },
+  "packageManager": "bun@1.4.4",
+  "ignoreScripts": [
+    "sharp",
+    "unrs-resolver"
+  ],
+  "trustedDependencies": [
+    "sharp",
+    "unrs-resolver"
+  ]
+}
