@@ -567,7 +567,7 @@ class DocumentedClaimsConsistencyTest(unittest.TestCase):
         the regional seasonal envelope. A reader cannot tell an observation
         from a model output unless the documents say so.
         """
-        expected = {"mekong": (11, 15), "amazon": (9, 17)}
+        expected = {"mekong": (25, 1), "amazon": (25, 1)}
         for region, (n_measured, n_interpolated) in expected.items():
             with self.subTest(region=region):
                 series = self.results["regime_shift_series"][region]
