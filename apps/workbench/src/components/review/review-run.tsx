@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
 import { useService } from '@/components/service/service-provider';
 import { AmIcon, ICON } from '@/components/ui/icon';
+import { Markdown } from '@/components/ui/markdown';
 import type { FailureReason } from '@/lib/service/client';
 import { parseAudit, parseRun, type AuditRow, type ReviewRun } from '@/lib/review/api';
 import { DecisionChip, StatusChip, utcTime } from './review-bits';
@@ -129,7 +130,7 @@ export function ReviewRunView({ runId }: { runId: string }) {
             </div>
           ) : (
             <>
-              <p className="text-body leading-relaxed whitespace-pre-line">{run.briefing}</p>
+              <Markdown>{run.briefing}</Markdown>
               {locale === 'vi' && (
                 <p className="text-meta text-ink-subtle border-line border-l-2 px-2 py-1">
                   {t('viBriefNote')}

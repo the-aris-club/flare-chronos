@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { AmIcon, ICON } from '@/components/ui/icon';
+import { Markdown } from '@/components/ui/markdown';
 import { useLabels } from '@/components/review/use-labels';
 import type { RunView } from '@/lib/service/run';
 import { PrincipalRow } from './service-panel';
@@ -99,9 +100,9 @@ export function BriefingRun({
           </ul>
 
           {briefing && (
-            <p className="text-body border-line border-t pt-2 leading-relaxed whitespace-pre-line">
-              {briefing}
-            </p>
+            <div className="border-line border-t pt-2">
+              <Markdown>{briefing}</Markdown>
+            </div>
           )}
 
           {run.phase === 'paused' && run.threadId && (
