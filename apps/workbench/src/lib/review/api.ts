@@ -1,5 +1,10 @@
 export type ReviewStatus = 'needs' | 'published' | 'withheld' | 'failed';
-export const REVIEW_STATUSES: readonly ReviewStatus[] = ['needs', 'published', 'withheld', 'failed'];
+export const REVIEW_STATUSES: readonly ReviewStatus[] = [
+  'needs',
+  'published',
+  'withheld',
+  'failed',
+];
 
 export type ReviewRow = {
   id: string;

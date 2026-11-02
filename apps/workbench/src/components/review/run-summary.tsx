@@ -58,7 +58,11 @@ export function EvidenceSummary({ run }: { run: ReviewRun }) {
       <Section label={t('evidence')}>
         <div className="border-line bg-panel flex flex-col gap-1.5 rounded-lg border p-3">
           {[
-            [t('verified'), `${run.verification.checked - unverified}/${run.verification.checked}`, unverified === 0],
+            [
+              t('verified'),
+              `${run.verification.checked - unverified}/${run.verification.checked}`,
+              unverified === 0,
+            ],
             [t('nosource'), String(unverified), unverified === 0],
             [t('citationIssues'), String(unresolved), unresolved === 0],
             [t('selfCorrections'), String(run.selfCorrections), true],

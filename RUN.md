@@ -106,8 +106,8 @@ Run in this order. All green.
 | Gate | Command / check | Result |
 |---|---|---|
 | Format | `bun run format` (Bun native, root `.oxfmtrc.json`) then `bun run format:check` | 103 files formatted; check clean |
-| Lint | `bun run lint` → `bun lint --no-script --max-warnings=0 --allow-unsupported apps/workbench` | 0 errors, 0 warnings |
-| Types | `bun run typecheck` → `tsc --noEmit` | clean |
+| Lint | `bun run lint-workbench` → `bun lint --max-warnings=0 --allow-unsupported apps/workbench` | 0 errors, 0 warnings |
+| Types | `bun run typecheck` → `bun check` | clean |
 | Build | `bun run build` (Turbopack) | compiled; `/` and `/workbench/[zone]` dynamic; `/icon.png` static |
 | Tokens | grep `style={{`, hex literals, `[Npx]` in `apps/workbench/src` | none |
 | Icons | `lucide-react` import only in `components/ui/icon.tsx`; every icon-only control has `aria-label` | pass |
@@ -580,7 +580,7 @@ CALENDAR_FIXTURE=design bun dev
 # Repo gates
 cd ../..
 bun run format && bun run format:check
-bun run lint
+bun run lint-workbench
 bun run typecheck
 ```
 

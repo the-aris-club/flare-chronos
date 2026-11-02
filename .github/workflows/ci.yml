@@ -68,3 +68,28 @@ jobs:
 
       - name: Type check (pyright)
         run: uv run pyright
+
+  workbench:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        working-directory: apps/workbench
+        run: bun install --frozen-lockfile
+
+      - name: Type check
+        run: bun run typecheck
+
+      - name: Lint
+        run: bun run lint-workbench
+
+      - name: Format check
+        run: bun run format:check
+
+      - name: Test
+        run: bun run test:workbench

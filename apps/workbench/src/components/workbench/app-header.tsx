@@ -41,14 +41,16 @@ export function AppHeader({
   const [menuOpen, setMenuOpen] = useState(false);
   const connected = reviewStore.connection === 'connected';
   const down = reviewStore.connection === 'unavailable';
-  const serviceLabel =
-    down ? t('serviceDown') : !connected ? t('serviceNotConnected') : t('serviceUp');
-  const serviceTone =
-    down
-      ? 'border-bad/50 text-bad'
-      : !connected
-        ? 'border-line text-ink-subtle'
-        : 'border-ok/45 text-ok';
+  const serviceLabel = down
+    ? t('serviceDown')
+    : !connected
+      ? t('serviceNotConnected')
+      : t('serviceUp');
+  const serviceTone = down
+    ? 'border-bad/50 text-bad'
+    : !connected
+      ? 'border-line text-ink-subtle'
+      : 'border-ok/45 text-ok';
 
   return (
     <HeaderBar>

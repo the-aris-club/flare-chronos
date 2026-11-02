@@ -9,10 +9,10 @@
     "doc:version": "changeset version && node scripts/apply-version.mjs && uv run python exports/export_pdf.py && uv run python exports/export_pdf.py -i exports/MODEL_FLOW.md -o exports/MODEL_FLOW.pdf",
     "release": "changeset publish",
     "credentials": "uv run python scripts/mint_credentials.py",
-    "check": "python3 scripts/check-docs.py --scan",
+    "check-docs": "python3 scripts/check-docs.py --scan",
     "format": "bun fmt apps/workbench",
     "format:check": "bun fmt --check apps/workbench",
-    "lint": "bun lint --no-script --max-warnings=0 --allow-unsupported apps/workbench",
+    "lint-workbench": "bun lint --max-warnings=0 --allow-unsupported apps/workbench",
     "typecheck": "bun run --cwd apps/workbench typecheck",
     "test:workbench": "bun run --cwd apps/workbench test"
   },

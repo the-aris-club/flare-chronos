@@ -31,7 +31,7 @@ bun dev
 ```
 
 Open `/`. Formatting and linting are repo-root gates: `bun run format`,
-`bun run lint`.
+`bun run lint-workbench`.
 
 ## Data
 
@@ -63,7 +63,7 @@ directory so `process.cwd()` resolves those paths.
 - `bun dev` — development server.
 - `bun build` — production build.
 - `bun start` — production server.
-- `bun run typecheck` — `tsc --noEmit`.
+- `bun run typecheck` — `bun check`.
 - `../../.venv/bin/python scripts/flag-map-points.py` — read the raw FIRMS
   slices, apply the core physics flags and sampling, and write
   `.cache/map-points.json` (git-ignored).

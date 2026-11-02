@@ -24,7 +24,13 @@ export default async function WorkbenchZonePage({
   const fallback = epochs.find((epoch) => epoch.year === 2024)?.year ?? epochs[0]?.year ?? 2001;
 
   return (
-    <Suspense fallback={<div className="bg-canvas text-ink flex h-dvh items-center justify-center">Loading workbench…</div>}>
+    <Suspense
+      fallback={
+        <div className="bg-canvas text-ink flex h-dvh items-center justify-center">
+          Loading workbench…
+        </div>
+      }
+    >
       <WorkbenchShell
         key={zone}
         dataset={dataset}

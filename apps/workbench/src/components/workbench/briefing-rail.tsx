@@ -103,11 +103,7 @@ export function BriefingRail({ region, state, onToggle }: BriefingRailProps) {
         <span
           aria-hidden="true"
           className={`size-2 rounded-full ${
-            service.connection === 'unavailable'
-              ? 'bg-bad'
-              : connected
-                ? 'bg-ok'
-                : 'bg-line-strong'
+            service.connection === 'unavailable' ? 'bg-bad' : connected ? 'bg-ok' : 'bg-line-strong'
           }`}
         />
       </button>

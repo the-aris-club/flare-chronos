@@ -56,7 +56,10 @@ export function BriefingRun({
       </div>
 
       {run.phase !== 'idle' && (
-        <section aria-live="polite" className="border-line bg-panel flex flex-col gap-2.5 rounded-lg border p-3">
+        <section
+          aria-live="polite"
+          className="border-line bg-panel flex flex-col gap-2.5 rounded-lg border p-3"
+        >
           <div className="flex flex-wrap items-center gap-2">
             <h3 className="text-subhead font-semibold">{t('timeline')}</h3>
             {run.useCaseId && (

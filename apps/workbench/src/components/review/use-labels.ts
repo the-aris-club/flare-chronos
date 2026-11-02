@@ -14,7 +14,8 @@ export function useLabels() {
   const regions = useTranslations('Header.regions');
 
   return {
-    reason: (code: string) => (review.has(`reasons.${code}`) ? review(`reasons.${code}`) : code || '—'),
+    reason: (code: string) =>
+      review.has(`reasons.${code}`) ? review(`reasons.${code}`) : code || '—',
     useCase: (id: string) =>
       review.has(`useCases.${messageKey(id)}`) ? review(`useCases.${messageKey(id)}`) : '',
     region: (region: string | undefined) =>

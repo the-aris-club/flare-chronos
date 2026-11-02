@@ -27,11 +27,12 @@ export function ThemeProvider({
 export function useTheme(): { theme: Theme; setTheme: (theme: Theme) => void } {
   const { theme: rawTheme, resolvedTheme, setTheme: setNextTheme } = useNextTheme();
 
-  const theme: Theme = rawTheme === 'light' || rawTheme === 'dark'
-    ? rawTheme
-    : resolvedTheme === 'light'
-      ? 'light'
-      : 'dark';
+  const theme: Theme =
+    rawTheme === 'light' || rawTheme === 'dark'
+      ? rawTheme
+      : resolvedTheme === 'light'
+        ? 'light'
+        : 'dark';
 
   return {
     theme,
