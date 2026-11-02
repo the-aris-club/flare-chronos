@@ -159,9 +159,9 @@ PROPOSAL_ARCH_SVG = """
   <text x="632" y="332" text-anchor="middle" font-size="9" font-weight="700" fill="#1e293b">Toán Tử 4 μm &amp; Phân Vị</text>
   <text x="632" y="350" text-anchor="middle" font-size="8.5" fill="#475569">Bù giới hạn góc quét</text>
   <text x="632" y="364" text-anchor="middle" font-size="8.5" font-weight="700" fill="#c2410c">FRP_lim(θ, SZA) + EQM</text>
-  <text x="632" y="382" text-anchor="middle" font-size="8.5" fill="#475569">11.553 cặp đồng thời</text>
+  <text x="632" y="382" text-anchor="middle" font-size="8.5" fill="#475569">20.552 cặp đồng thời</text>
   <text x="632" y="396" text-anchor="middle" font-size="8.5" fill="#475569">Aqua–SNPP (13:30 MLT)</text>
-  <text x="632" y="410" text-anchor="middle" font-size="8.5" font-weight="700" fill="#15803d">Giảm 70.2% sai số KS!</text>
+  <text x="632" y="410" text-anchor="middle" font-size="8.5" font-weight="700" fill="#15803d">Giảm 69.8% sai số KS!</text>
 
   <rect x="724" y="296" width="160" height="142" rx="8" fill="#ffffff" stroke="#fb923c" stroke-width="1.4"/>
   <rect x="724" y="296" width="160" height="24" rx="8" fill="#ffedd5"/>
@@ -414,9 +414,9 @@ REPORT_ARCH_SVG = """
   <text x="632" y="332" text-anchor="middle" font-size="9" font-weight="600" fill="#1e293b">radiometric_calibrator.py</text>
   <text x="632" y="350" text-anchor="middle" font-size="8.5" fill="#475569">Toán tử giới hạn góc quét</text>
   <text x="632" y="364" text-anchor="middle" font-size="8.5" font-weight="700" fill="#c2410c">FRP_lim(θ, SZA) + EQM</text>
-  <text x="632" y="382" text-anchor="middle" font-size="8.5" fill="#475569">11.553 cặp đồng thời</text>
+  <text x="632" y="382" text-anchor="middle" font-size="8.5" fill="#475569">20.552 cặp đồng thời</text>
   <text x="632" y="396" text-anchor="middle" font-size="8.5" fill="#475569">Aqua–SNPP (13:30 MLT)</text>
-  <text x="632" y="410" text-anchor="middle" font-size="8.5" font-weight="700" fill="#15803d">Giảm 70.2% sai số KS!</text>
+  <text x="632" y="410" text-anchor="middle" font-size="8.5" font-weight="700" fill="#15803d">Giảm 69.8% sai số KS!</text>
 
   <rect x="724" y="296" width="160" height="142" rx="8" fill="#ffffff" stroke="#fb923c" stroke-width="1.4"/>
   <rect x="724" y="296" width="160" height="24" rx="8" fill="#ffedd5"/>

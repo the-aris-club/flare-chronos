@@ -19,9 +19,10 @@ from typing import Any
 # The overlap gain and the era Omega ladder are still hand-set, not sourced; the
 # held-out invariance gap says how far that matters.
 FIT_TRAIN_LAST_YEAR = 2020
-# Refit on every Measured Epoch of the archive (25 per region, 2001-2025): the
-# Mekong factor moved 3.35 -> 3.54, the Amazon factor held at 1.82.
-SUBPIXEL_OMISSION_FACTOR = {"mekong": 3.54, "amazon": 1.82}
+# Refit on every Measured Epoch of the archive (25 per region, 2001-2025, with
+# the VIIRS slices FIRMS holds for each window): Mekong 3.35 -> 3.37, Amazon
+# 1.82 -> 1.85.
+SUBPIXEL_OMISSION_FACTOR = {"mekong": 3.37, "amazon": 1.85}
 # The hand-set values the fit replaced; kept so the artifact reports the real gain.
 HAND_SET_OMISSION_FACTOR = {"mekong": 3.65, "amazon": 2.55}
 STREAM_OVERLAP_GAIN = 0.24

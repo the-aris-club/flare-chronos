@@ -237,7 +237,7 @@ def tool_calibrate_cross_sensor_frp(
         "stage2_calibrated_viirs_eq_frp_mw": round(viirs_eq_frp, 3),
         "calibrated_viirs_eq_subpixel_count": round(viirs_eq_cnt, 3),
         "benchmark_coincident_pairs_n": emp_cal.get("n_pairs", 11553),
-        "benchmark_ks_before": emp_cal.get("ks_before", 0.1166),
+        "benchmark_ks_before": emp_cal.get("ks_before", 0.1151),
         "benchmark_ks_after": emp_cal.get("ks_after", 0.0237),
         "benchmark_r2_after": emp_cal.get("harm_r2", 0.747),
     }
@@ -654,7 +654,7 @@ def tool_uc1_3_thermal_source_origin_classification(
             "mean_coincident_viirs_to_modis_count_ratio", 3.56
         ),
         "coincident_viirs_to_modis_frp_ratio": cal.get(
-            "mean_coincident_viirs_to_modis_frp_ratio", 1.371
+            "mean_coincident_viirs_to_modis_frp_ratio", 1.335
         ),
         "static_industrial_persistence_min_days": 18,
         "static_industrial_span_days": 120,
@@ -806,18 +806,18 @@ def tool_uc3_2_multihop_spatiotemporal_cube_query() -> dict[str, Any]:
 def tool_uc3_3_autonomous_biome_recalibration() -> dict[str, Any]:
     """[UC-3.3] Audit and return the Two-Stage Observation Operator + Empirical Quantile Mapping (EQM) parameters fitted across N=11,553 co-incident Aqua-SNPP cells."""
     cal = _load_empirical_results().get("coincident_calibration", {})
-    ks_before = float(cal.get("ks_before", 0.1166))
+    ks_before = float(cal.get("ks_before", 0.1151))
     ks_after = float(cal.get("ks_after", 0.0237))
     ks_reduction_pct = round(100.0 * (ks_before - ks_after) / max(1e-6, ks_before), 1)
     return {
         "use_case_id": "UC-3.3",
         "coincident_cell_pairs_n": int(cal.get("n_pairs", 11553)),
-        "power_law_alpha": float(cal.get("alpha", 1.7121)),
-        "power_law_beta": float(cal.get("beta", 0.9271)),
+        "power_law_alpha": float(cal.get("alpha", 1.7433)),
+        "power_law_beta": float(cal.get("beta", 0.9219)),
         "scan_tail_kappa": float(cal.get("scan_tail_kappa", 0.1)),
-        "raw_r2": float(cal.get("raw_r2", 0.733)),
+        "raw_r2": float(cal.get("raw_r2", 0.7836)),
         "harmonized_r2": float(cal.get("harm_r2", 0.747)),
-        "raw_rmse_mw": float(cal.get("raw_rmse", 149.104)),
+        "raw_rmse_mw": float(cal.get("raw_rmse", 141.861)),
         "harmonized_rmse_mw": float(cal.get("harm_rmse", 145.155)),
         "ks_distance_before": ks_before,
         "ks_distance_after": ks_after,

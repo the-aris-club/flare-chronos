@@ -24,8 +24,8 @@ RESULTS = json.loads(
 # Held-out epochs must hold the all-sensor and MODIS-only counts within this gap.
 # Looser than the 0.10 aim of the strict xfail gate: one 5-day window per epoch.
 # With every archived epoch held out (2021-2025) the worst case is Mekong 2022 at
-# 0.23, so the gate is 0.25 rather than the 0.20 set on a smaller held-out sample.
-HELD_OUT_TOLERANCE = 0.25
+# 0.19 after the refit, inside the original 0.20 gate.
+HELD_OUT_TOLERANCE = 0.20
 
 
 def epoch(year: int, ratio: float) -> dict:
