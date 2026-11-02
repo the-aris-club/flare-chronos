@@ -181,7 +181,7 @@ export function MapPane({
             </span>
           )}
           <span className="border-line bg-panel/90 text-micro text-ink-muted max-tablet:hidden rounded-md border px-2 py-1 font-mono">
-            BBOX {data.bbox.join(' · ')}
+            {t('queryBox')} {data.queryBox.join(' · ')}
           </span>
           <span className="border-line bg-panel/90 text-micro text-ink-muted rounded-md border px-2 py-1 font-mono">
             {date}

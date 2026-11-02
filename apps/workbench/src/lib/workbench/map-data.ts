@@ -37,6 +37,9 @@ export type MapCountry = {
 
 export type MapRegion = {
   bbox: number[];
+  /** The box FIRMS was queried with, and its projected outline. */
+  queryBox: number[];
+  queryBoxPath: string;
   pxPerKm: number;
   saaPath: string;
   coveragePath: string;

@@ -50,6 +50,9 @@ type RawEmpirical = {
 
 const REGIONS: RegionId[] = ['mekong', 'amazon'];
 
+/** The raw-growth headline is read between these two Measured Epochs, as on the landing. */
+const GROWTH_WINDOW = [2005, 2024] as const;
+
 function fail(message: string): never {
   throw new Error(`Workbench data: ${message}`);
 }
@@ -175,9 +178,13 @@ export const loadWorkbench = cache(async (calendar: CalendarDataset): Promise<Wo
       };
     });
 
-    const start = shift.years.indexOf(2001);
-    const end = shift.years.indexOf(2024);
-    if (start < 0 || end < 0) fail(`${region} regime-shift series must span 2001 to 2024`);
+    const start = shift.years.indexOf(GROWTH_WINDOW[0]);
+    const end = shift.years.indexOf(GROWTH_WINDOW[1]);
+    if (start < 0 || end < 0)
+      fail(`${region} regime-shift series must span ${GROWTH_WINDOW.join(' to ')}`);
+    if (!GROWTH_WINDOW.every((year) => measured.includes(year))) {
+      fail(`${region} growth window ${GROWTH_WINDOW.join('–')} must be Measured Epochs`);
+    }
 
     series[region] = {
       years: shift.years,
@@ -185,6 +192,7 @@ export const loadWorkbench = cache(async (calendar: CalendarDataset): Promise<Wo
       harmonized,
       measured,
       rawGrowthPct: growthPct(raw, start, end),
+      growthWindow: GROWTH_WINDOW,
       trendPct: trendPct(shift.years.slice(0, end + 1), harmonized.slice(0, end + 1)),
     };
     epochs[region] = regionEpochs;

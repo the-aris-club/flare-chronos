@@ -148,6 +148,20 @@ export function MapLegend({
           {saa ? '' : ` · ${t('na')}`}
         </span>
       )}
+      <span className="inline-flex items-center gap-1.5">
+        <svg width={14} height={8} aria-hidden="true">
+          <rect
+            x={0.5}
+            y={0.5}
+            width={13}
+            height={7}
+            fill="none"
+            stroke="var(--cyan)"
+            strokeDasharray="4 2"
+          />
+        </svg>
+        {t('queryBox')}
+      </span>
       {layers.hex && (
         <span className="inline-flex items-center gap-1.5">
           <span aria-hidden="true" className="fc-hex-ramp h-2 w-14 rounded-xs" />
@@ -155,6 +169,7 @@ export function MapLegend({
         </span>
       )}
       <span className="ml-auto font-mono">{t('scaleNote')}</span>
+      <span className="basis-full font-mono">{t('borderCredit')}</span>
     </div>
   );
 }

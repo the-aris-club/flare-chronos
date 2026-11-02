@@ -259,8 +259,8 @@ export function ComparatorPane({
         </span>
         <span className="ml-auto font-mono">
           {t('summary', {
-            start: series.years[0],
-            end: series.years.at(-1) ?? 2024,
+            start: series.growthWindow[0],
+            end: series.growthWindow[1],
             pct: formatPercent(series.rawGrowthPct, locale),
             trend: formatPercent(series.trendPct, locale, 1),
           })}
