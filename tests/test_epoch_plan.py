@@ -74,6 +74,12 @@ class TestEpochPlan(unittest.TestCase):
 
         self.assertEqual(plan, [("2013-03-15", ["MODIS_SP"])])
 
+    def test_an_archive_with_no_measured_epoch_is_an_error_not_an_empty_plan(
+        self,
+    ) -> None:
+        with self.assertRaises(ValueError):
+            build_epoch_plan("mekong", self.raw, current_year=2026)
+
 
 if __name__ == "__main__":
     unittest.main()

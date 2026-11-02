@@ -39,4 +39,8 @@ def build_epoch_plan(
             s for s in _COMPANION_SOURCES if _has_data(raw_dir, region, s, date)
         ]
         plan.append((date, sources))
+    if not plan:
+        raise ValueError(
+            f"no Measured Epoch for {region!r} in {raw_dir} (is data/raw present?)"
+        )
     return plan

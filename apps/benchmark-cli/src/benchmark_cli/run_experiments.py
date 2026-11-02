@@ -75,7 +75,8 @@ from benchmark_cli.sensitivity import (
 HOLDOUT_TRAIN_LAST_YEAR = 2019
 
 RAW_DIR = ROOT / "data" / "raw"
-#: The year still in progress: its window is never a Measured Epoch.
+#: The year still in progress: its window is never a Measured Epoch. Bump it
+#: when the year closes and its slices are archived.
 CURRENT_YEAR = 2026
 PROC_DIR = ROOT / "data" / "processed"
 FIG_DIR = ROOT / "docs" / "figures"
