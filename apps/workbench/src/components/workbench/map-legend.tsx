@@ -168,6 +168,7 @@ export function MapLegend({
           {t('hexes')} · {t('hexShown', { grid, resolution })}
         </span>
       )}
+      <span className="text-ink-subtle font-mono">{t('borderCredit')}</span>
       <span className="ml-auto font-mono">{t('scaleNote')}</span>
     </div>
   );
