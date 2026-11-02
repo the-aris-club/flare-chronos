@@ -22,3 +22,5 @@ status: accepted
 - The map's client transforms do not rebuild the d3 projection on resize, so the pane keeps a stable aspect and may show more ocean than a live refit.
 - The static-source and archipelago limits are visible in `RUN.md` and `DESIGN.md`; they are data/design boundaries, not missing UI wiring.
 - Any move to a live review service must replace the app-local decisions route and the five markers together.
+
+> The "static review fixtures" and "five `TODO(api)` markers" clauses are superseded by [ADR-0016](./0016-workbench-wired-to-ai-service-review-from-run-events.md).

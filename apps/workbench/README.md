@@ -49,17 +49,12 @@ Open `/`. Formatting and linting are repo-root gates: `bun run format`,
   plus the merged focus-country silhouettes for the 3D globe. The runtime draws
   these into canvas textures; no d3 or topojson ships.
 - `public/globe/earth.jpg` — NASA Blue Marble, 2048 × 1024, served locally.
-- `src/data/fixtures/review*.ts` — the design's review runs, facts, brief
-  templates, decisions and audit rows. These are sample records; every boundary
-  that must become HTTP is marked `TODO(api)`. Do not add a fixture mode: the
-  Review pages and the Workbench briefing run read these records directly until
-  the analysis API is wired. The Workbench rail simulates the service states,
-  connect steps and run stream locally around RUN-0412.
-- `../../docs/design/fixtures/design-calendar.json` — the calendar parity
-  fixture (2000–2025). Enable it with `CALENDAR_FIXTURE=design`; never use it in
-  production.
+- `src/components/service/service-provider.tsx` — holds the pasted bearer token in memory
+  and calls `ai-service` directly (`NEXT_PUBLIC_AI_SERVICE_URL`, default
+  `http://127.0.0.1:8765`). Review and the briefing rail read the real service;
+  there are no fixtures and no fixture mode (ADR-0016).
 
-The loaders check `CALENDAR_DATA_PATH` / `CALENDAR_FIXTURE_PATH` /
+The loaders check `CALENDAR_DATA_PATH` /
 `EMPIRICAL_DATA_PATH` first, then the repo-relative paths. Run the app from this
 directory so `process.cwd()` resolves those paths.
 
@@ -91,11 +86,22 @@ The map build reads `.cache/map-points.json`; `MAP_POINTS_PATH` overrides it.
 Both map and globe scripts write minified JSON. Run `bun run format` from the
 repo root after regenerating so the committed files match `.oxfmtrc.json`.
 
-The Review surface and the Workbench briefing run use the design fixtures until
-the API exists. The markers are the 5 remaining `TODO(api)` comments in `src/`; decisions and
-audit rows persist through `/api/review/decisions`. Replace the remaining review
-run and analysis-stream boundaries with the endpoints described in
-`docs/openapi/ai-service.json`.
+## Running against the analysis service
+
+Review and the briefing rail need a running `ai-service`; the map, charts and Calendar do not.
+
+```bash
+# service (live System 1 / System 2 models read the workspace .env)
+AI_SERVICE_JWT_KEY=<32+ byte secret> AI_SERVICE_CORS_ORIGINS=http://localhost:3000 \
+  uv run python -m ai_service.serve --mode live
+# a token for a reviewer; the approver role may decide sign-offs
+AI_SERVICE_JWT_KEY=<same secret> uv run python scripts/mint_demo_token.py --sub examiner --roles approver
+# optional: fill Review with real runs
+AI_SERVICE_TOKEN=<token> uv run python scripts/seed_runs.py
+```
+
+Paste the token into the briefing rail or the Review page. It is kept in memory only, so a
+reload asks again. `NEXT_PUBLIC_AI_SERVICE_URL` overrides the service address.
 
 Replace `public/globe/earth.jpg` only with a public-domain NASA Blue Marble
 frame at the same 2:1 aspect. The globe falls back to a flat vector map when

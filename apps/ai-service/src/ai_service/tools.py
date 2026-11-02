@@ -48,6 +48,7 @@ from flare_chronos_core import (
 
 EMPIRICAL_JSON_PATH = ROOT / "data" / "processed" / "empirical_results.json"
 MANIFEST_JSON_PATH = ROOT / "data" / "raw" / "fetch_manifest.json"
+CALENDAR_JSON_PATH = ROOT / "data" / "processed" / "burning_calendar.json"
 RAW_DIR = ROOT / "data" / "raw"
 
 
@@ -55,6 +56,24 @@ def _load_empirical_results() -> dict[str, Any]:
     if EMPIRICAL_JSON_PATH.exists():
         return json.loads(EMPIRICAL_JSON_PATH.read_text(encoding="utf-8"))
     return {}
+
+
+def _peak_sfai(region: str) -> tuple[float, int]:
+    """Peak observed SFAI of a region and its year, from the artifact the Workbench shows.
+
+    A missing artifact is an error: a briefing must never disagree with the Calendar.
+    """
+    if not CALENDAR_JSON_PATH.exists():
+        raise RuntimeError("burning_calendar.json is missing; run the benchmark first")
+    cal = json.loads(CALENDAR_JSON_PATH.read_text(encoding="utf-8"))[region]
+    best: tuple[float, int] | None = None
+    for year, row in zip(cal["years"], cal["sfai_matrix"], strict=True):
+        for value in row:
+            if value is not None and (best is None or value > best[0]):
+                best = (float(value), int(year))
+    if best is None:
+        raise RuntimeError(f"burning_calendar.json has no observed SFAI for {region}")
+    return round(best[0], 3), best[1]
 
 
 def _calibration() -> dict[str, Any]:
@@ -696,6 +715,8 @@ def tool_uc2_1_phenological_phase_shift_detection(
     )
     mar_2007_modis = manifest.get("mekong__MODIS_SP__2007-03-15__5d.csv", 11296)
     mar_2005_modis = manifest.get("mekong__MODIS_SP__2005-03-15__5d.csv", 3580)
+    mekong_peak, mekong_year = _peak_sfai("mekong")
+    amazon_peak, amazon_year = _peak_sfai("amazon")
     return {
         "use_case_id": "UC-2.1",
         "region": region,
@@ -708,8 +729,10 @@ def tool_uc2_1_phenological_phase_shift_detection(
         "2024_feb05_snpp_detections": feb_2024_snpp,
         "drought_2007_mar15_modis_detections": mar_2007_modis,
         "baseline_2005_mar15_modis_detections": mar_2005_modis,
-        "peak_sfai_zscore_mekong_sigma": 3.1,
-        "peak_sfai_zscore_amazon_sigma": 2.9,
+        "peak_sfai_zscore_mekong_sigma": mekong_peak,
+        "peak_sfai_year_mekong": mekong_year,
+        "peak_sfai_zscore_amazon_sigma": amazon_peak,
+        "peak_sfai_year_amazon": amazon_year,
     }
 
 

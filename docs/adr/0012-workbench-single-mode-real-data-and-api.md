@@ -30,3 +30,5 @@ We chose this because a Replay mode would show a briefing and an Approve button 
 The supplied design export has no review queue, audit or sign-off endpoint, and the user asked for the full design surface without a fixture-mode flag or prototype banner. The Workbench therefore ships a local service simulator (Up / Degraded / Down, token handshake, run stream, retry) over the RUN-0412 sample, and the Review queue/run/audit read the design fixture runs. This supersedes the "no recorded runs" clause for the demo build only.
 
 The boundaries remain explicit: seven `TODO(api)` markers replace the run list/detail, decision, audit, briefing connect and briefing run with the real HTTP calls, and the Workbench never treats the simulated run as production evidence. The production rule in this ADR still applies to any deployment that connects a real analysis service.
+
+> The 2026-11-01 amendment is superseded by [ADR-0016](./0016-workbench-wired-to-ai-service-review-from-run-events.md): the simulator and fixture runs are removed.

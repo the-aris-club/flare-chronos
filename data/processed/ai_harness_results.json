@@ -303,9 +303,9 @@
         "tool_uc2_1_phenological_phase_shift_detection",
         "tool_query_seasonal_phenology_12m"
       ],
-      "verified_facts_ingested": 142,
+      "verified_facts_ingested": 148,
       "verification_passed": true,
-      "checked_numbers_count": 15,
+      "checked_numbers_count": 17,
       "unverified_numbers_count": 0,
       "self_correction_retries": 0,
       "clarification_requests": 0,
@@ -322,7 +322,7 @@
       "has_system2_reasoning_trace": true,
       "synthesis_mode": "deterministic",
       "duration_sec": 0.0,
-      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: clef-flash | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-2.1)\n- **Tool Executed (`tool_uc2_1_phenological_phase_shift_detection`)**:\n  - `use_case_id`: UC-2.1\n  - `region`: mekong\n  - `normal_peak_pentad_start`: **11**\n  - `normal_peak_pentad_end`: **22**\n  - `el_nino_early_onset_pentad`: **8**\n  - `phase_shift_advance_pentads`: **3**\n  - `phase_shift_advance_days`: **15**\n  - `el_nino_2010_feb05_modis_detections`: **3175**\n  - `2024_feb05_snpp_detections`: **10471**\n  - `drought_2007_mar15_modis_detections`: **11296**\n  - `baseline_2005_mar15_modis_detections`: **3580**\n  - `peak_sfai_zscore_mekong_sigma`: **3.1**\n  - `peak_sfai_zscore_amazon_sigma`: **2.9**\n- **Tool Executed (`tool_query_seasonal_phenology_12m`)**:\n  - `mekong_peak_window`: 2024-04-05\n  - `mekong_peak_count`: **26462**\n  - `mekong_trough_window`: 2024-07-15\n  - `mekong_trough_count`: **57**\n  - `amazon_peak_window`: 2024-09-05\n  - `amazon_peak_count`: **82079**\n  - `amazon_trough_window`: 2024-04-15\n  - `amazon_trough_count`: **71**"
+      "final_briefing_preview": "[CLIMATE_SCIENTIST BRIEFING | Cognitive Path: system2_deliberative | System 1: clef-flash | System 2: beam | Synthesis: deterministic]\n### Verified Analysis Report (UC-2.1)\n- **Tool Executed (`tool_uc2_1_phenological_phase_shift_detection`)**:\n  - `use_case_id`: UC-2.1\n  - `region`: mekong\n  - `normal_peak_pentad_start`: **11**\n  - `normal_peak_pentad_end`: **22**\n  - `el_nino_early_onset_pentad`: **8**\n  - `phase_shift_advance_pentads`: **3**\n  - `phase_shift_advance_days`: **15**\n  - `el_nino_2010_feb05_modis_detections`: **3175**\n  - `2024_feb05_snpp_detections`: **10471**\n  - `drought_2007_mar15_modis_detections`: **11296**\n  - `baseline_2005_mar15_modis_detections`: **3580**\n  - `peak_sfai_zscore_mekong_sigma`: **3.666**\n  - `peak_sfai_year_mekong`: **2007**\n  - `peak_sfai_zscore_amazon_sigma`: **3.793**\n  - `peak_sfai_year_amazon`: **2002**\n- **Tool Executed (`tool_query_seasonal_phenology_12m`)**:\n  - `mekong_peak_window`: 2024-04-05\n  - `mekong_peak_count`: **26462**\n  - `mekong_trough_window`: 2024-07-15\n  - `mekong_trough_count`: **57**\n  - `amazon_peak_window`: 2024-09-05\n  - `amazon_peak_count`: **82079**\n  - `amazon_trough_window`: 2024-04-15\n  - `amazon_trough_count`:"
     },
     {
       "use_case_id": "UC-2.2",

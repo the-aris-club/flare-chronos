@@ -29,6 +29,18 @@ describe('decodeClaims', () => {
     });
   });
 
+  test('decodes in a browser, where Node\'s Buffer does not exist, including non-ASCII names', () => {
+    const token = jwt({ sub: 'mai', name: 'Nguyễn Thị Mai', roles: ['approver'], exp: 2 });
+    const original = globalThis.Buffer;
+    // @ts-expect-error simulate a browser global scope
+    globalThis.Buffer = undefined;
+    try {
+      expect(decodeClaims(token)?.name).toBe('Nguyễn Thị Mai');
+    } finally {
+      globalThis.Buffer = original;
+    }
+  });
+
   test('text that is not a token, or has no subject, is not claims', () => {
     expect(decodeClaims('not-a-token')).toBeNull();
     expect(decodeClaims(jwt({ exp: 1 }))).toBeNull();

@@ -125,6 +125,20 @@ class TestReviewRunDetail(ApiCase):
         self.assertTrue(fact["source_tool"].startswith("tool_"))
         self.assertIn("tool_emit_flash_nrt_alert", run["tools"])
 
+    def test_the_fact_table_lists_each_fact_once_not_its_rounded_or_fragment_copies(
+        self,
+    ) -> None:
+        thread = self.start_signoff_run("ana")
+
+        run = self.client.get(
+            f"/api/v1/review/runs/{thread}", headers=token("ana")
+        ).json()
+
+        keys = [f["fact_key"] for f in run["facts"]]
+        self.assertGreater(len(keys), 0)
+        self.assertEqual(len(keys), len(set(keys)))
+        self.assertEqual([k for k in keys if "_round" in k or "_str[" in k], [])
+
     def test_a_stranger_cannot_read_the_detail_or_audit_and_an_unknown_run_is_404(
         self,
     ) -> None:

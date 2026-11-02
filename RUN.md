@@ -1,5 +1,8 @@
 # Design zip → `apps/workbench` — Region Globe, Workbench + Review run
 
+> **Superseded in part (2026-11-02, ADR-0016).** Review and the briefing rail no longer use design fixtures, the service simulator, `/api/review/decisions` or `CALENDAR_FIXTURE`; they read the real `ai-service`. The fixture-era decisions below (D17, D19, D23, the `TODO(api)` table) are kept as history.
+
+
 **Date:** 2026-11-01
 **Start:** 11:19 +07 (scaffold present; design intake followed)
 **End:** 17:54 +07

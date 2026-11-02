@@ -1,5 +1,5 @@
 ---
-status: proposed
+status: accepted
 ---
 
 # Workbench Is Wired To ai-service; Review Is Derived From Stored Run Events
@@ -13,6 +13,8 @@ Every Workbench surface that read a fixture reads the real source instead: the b
 `ai-service` gains an append-only events table, `GET /api/v1/review/runs`, `GET /api/v1/review/runs/{id}` and `GET /api/v1/review/runs/{id}/audit`, and an optional `reason_code` on resume and audit (migration keeps the append-only triggers). Approvers see every Review Run; other principals see their own. Run content (briefing, fact text) is shown as authored, never machine-translated; interface chrome stays EN/VI. The reviewer shown is the principal named by the token.
 
 The use cases that do not support the harmonization claim are removed (UC-5.1, UC-5.2, UC-5.3, UC-4.3, UC-3.2), leaving 15: five System 1 and ten System 2, with 18 registered tools. UC-3.3 was proposed for removal but kept: its tool reports the published Aqua→SNPP FRP calibration (KS 0.117 → 0.024), which is harmonization evidence, not autonomous recalibration.
+
+A briefing must not disagree with the Calendar. The live check found one: UC-2.1 reported a peak SFAI of 3.1σ (Mekong) and 2.9σ (Amazon) as hard-coded constants, while the Calendar peaks at 3.666σ (2007) and 3.793σ (2002). The tool now reads the peak from `burning_calendar.json`, and a test pins it.
 
 ## Considered Options
 

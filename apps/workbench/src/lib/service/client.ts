@@ -1,6 +1,6 @@
 import { createSseParser, type ServiceEvent } from './sse';
 
-export const SERVICE_URL = process.env.NEXT_PUBLIC_AI_SERVICE_URL ?? 'http://127.0.0.1:8000';
+export const SERVICE_URL = process.env.NEXT_PUBLIC_AI_SERVICE_URL ?? 'http://127.0.0.1:8765';
 
 export type FailureReason = 'unauthorized' | 'forbidden' | 'not_found' | 'unavailable';
 export type ServiceResult<T> = { ok: true; data: T } | { ok: false; reason: FailureReason };

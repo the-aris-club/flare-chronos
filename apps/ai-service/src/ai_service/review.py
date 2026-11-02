@@ -6,7 +6,12 @@ record holds, so Review shows exactly what the reviewer saw live (ADR-0016).
 
 from __future__ import annotations
 
+import re
 from typing import Any, Literal
+
+# The ledger also holds rounded copies (`x_round1`) and fragments of string values
+# (`x_str[0]`) so the verifier can match prose; a reviewer needs each fact once.
+_DERIVED_KEY = re.compile(r"(_round\d+|_str\[\d+\])$")
 
 ReviewStatus = Literal["needs", "published", "withheld", "failed"]
 
@@ -55,6 +60,7 @@ def project_run(
                 "provenance": f.get("provenance_tag", ""),
             }
             for f in evidence.get("verified_ledger_entries", [])
+            if not _DERIVED_KEY.search(f["fact_key"])
         ],
         "tools": tools,
     }

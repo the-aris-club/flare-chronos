@@ -1,5 +1,11 @@
 export type Claims = { sub: string; name: string | undefined; roles: string[]; exp: number };
 
+/** `Buffer` is Node-only; a browser has `atob` and `TextDecoder`. */
+function base64UrlToText(value: string): string {
+  const binary = atob(value.replaceAll('-', '+').replaceAll('_', '/'));
+  return new TextDecoder().decode(Uint8Array.from(binary, (char) => char.charCodeAt(0)));
+}
+
 /**
  * Reads a bearer token's claims for display only. The signature is never checked here:
  * `ai-service` is the only place a token is validated, so nothing in the Workbench may
@@ -10,10 +16,7 @@ export function decodeClaims(token: string): Claims | null {
   if (!payload) return null;
 
   try {
-    const claims = JSON.parse(Buffer.from(payload, 'base64url').toString('utf8')) as Record<
-      string,
-      unknown
-    >;
+    const claims = JSON.parse(base64UrlToText(payload)) as Record<string, unknown>;
     if (typeof claims.sub !== 'string' || claims.sub === '') return null;
 
     return {
