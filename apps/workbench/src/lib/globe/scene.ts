@@ -8,8 +8,8 @@ import { updateGlobeLabels } from './labels';
 import { createOrbits } from './orbits';
 import { RegionPicker, bindRegionPointer } from './picking';
 import { captureFrame } from './snapshot';
-import { createStars } from './stars';
-import { css, loadEarthPhoto } from './textures';
+import { createSky } from './sky';
+import { loadEarthPhoto } from './textures';
 import type { BootStep } from './types';
 
 const DEG = Math.PI / 180;
@@ -44,7 +44,7 @@ export class GlobeScene {
   private readonly controls: OrbitControls;
   private readonly earth: Earth;
   private readonly flight: CameraFlight;
-  private readonly stars = createStars();
+  private readonly sky: ReturnType<typeof createSky>;
   private readonly orbits = createOrbits();
 
   private photo: THREE.Texture | null = null;
@@ -97,6 +97,8 @@ export class GlobeScene {
     this.controls.autoRotate = !this.reducedMotion;
     this.controls.autoRotateSpeed = IDLE_SPEED;
 
+    this.sky = createSky(this.reducedMotion);
+    this.sky.setVisible(this.theme === 'dark');
     this.earth = createEarth(this.theme, this.maxAnisotropy());
     this.flight = new CameraFlight(
       this.camera,
@@ -108,7 +110,7 @@ export class GlobeScene {
       },
       this.reducedMotion,
     );
-    this.scene.add(this.earth.group, this.stars, this.orbits.group);
+    this.scene.add(this.sky.mesh, this.earth.group, this.orbits.group);
 
     this.bindControls();
     this.unbindPointer = bindRegionPointer({
@@ -136,6 +138,8 @@ export class GlobeScene {
         if (!this.disposed) this.onProgress('photo');
       },
     );
+
+    if (this.theme === 'dark') this.loadSky();
 
     this.renderer.setAnimationLoop(this.frame);
   }
@@ -186,13 +190,17 @@ export class GlobeScene {
     this.canvas.classList.toggle('cursor-grab', region === null);
   }
 
+  private loadSky() {
+    this.sky.load(this.maxAnisotropy(), this.renderer.capabilities.maxTextureSize);
+  }
+
   setTheme(theme: 'dark' | 'light') {
     if (this.theme === theme) return;
     this.theme = theme;
     this.earth.setTheme(theme, this.photo);
     this.orbits.setTheme(theme);
-    (this.stars.material as THREE.PointsMaterial).color.set(css('--text-subtle'));
-    this.stars.visible = theme === 'dark';
+    this.sky.setVisible(theme === 'dark');
+    if (theme === 'dark') this.loadSky();
   }
 
   flyTo(region: RegionId): boolean {
@@ -226,6 +234,8 @@ export class GlobeScene {
 
     this.renderer.setSize(width, height, false);
     this.camera.aspect = width / height;
+    const buffer = this.renderer.getDrawingBufferSize(new THREE.Vector2());
+    this.sky.resize(buffer.x, buffer.y, breakpoint === 'desktop');
 
     const f = width < height ? 0.9 : 0.82;
     this.idleDistance = height / (f * Math.min(width, height) * Math.tan(15 * DEG));
@@ -267,6 +277,8 @@ export class GlobeScene {
       if (!this.reducedMotion) this.orbits.update(delta);
     }
 
+    this.sky.update(delta);
+
     for (const id of REGION_IDS) {
       const target = this.hovered === id ? 0.42 : 0.22;
       const material = this.earth.coverage[id].fill;
@@ -289,8 +301,7 @@ export class GlobeScene {
     this.controls.dispose();
     this.earth.dispose();
     this.orbits.dispose();
-    this.stars.geometry.dispose();
-    (this.stars.material as THREE.PointsMaterial).dispose();
+    this.sky.dispose();
     this.photo?.dispose();
     this.renderer.dispose();
   }
