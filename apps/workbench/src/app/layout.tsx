@@ -5,7 +5,7 @@ import { cookies } from 'next/headers';
 import { NextIntlClientProvider } from 'next-intl';
 import { getLocale, getMessages, getTranslations } from 'next-intl/server';
 import { GlobeMorph } from '@/components/globe/globe-morph';
-import { ReviewStoreProvider } from '@/components/review/review-store';
+import { ServiceProvider } from '@/components/service/service-provider';
 import { ThemeProvider } from '@/components/ui/theme-provider';
 import { DEFAULT_THEME, isTheme, THEME_COOKIE } from '@/lib/theme';
 import './globals.css';
@@ -47,10 +47,10 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         </Script>
         <NextIntlClientProvider locale={locale} messages={messages}>
           <ThemeProvider initialTheme={theme}>
-            <ReviewStoreProvider>
+            <ServiceProvider>
               {children}
               <GlobeMorph />
-            </ReviewStoreProvider>
+            </ServiceProvider>
           </ThemeProvider>
         </NextIntlClientProvider>
       </body>

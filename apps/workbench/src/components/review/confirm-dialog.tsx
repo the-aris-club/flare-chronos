@@ -1,24 +1,32 @@
 'use client';
 
 import { useLocale, useTranslations } from 'next-intl';
-import { localized } from '@/lib/workbench/format';
-import { PRINCIPAL, type DecisionKind, type ReviewRun } from '@/data/fixtures/review';
-import { reasonLabel } from './review-bits';
+import { useService } from '@/components/service/service-provider';
+import type { ReviewRun } from '@/lib/review/api';
+import { reasonLabel } from '@/lib/review/reasons';
 import { ReviewDialog } from './review-dialog';
 
 type ConfirmDialogProps = {
   run: ReviewRun;
-  kind: DecisionKind;
+  approved: boolean;
   reason: string;
   note: string;
   onConfirm: () => void;
   onClose: () => void;
 };
 
-export function ConfirmDialog({ run, kind, reason, note, onConfirm, onClose }: ConfirmDialogProps) {
+export function ConfirmDialog({
+  run,
+  approved,
+  reason,
+  note,
+  onConfirm,
+  onClose,
+}: ConfirmDialogProps) {
   const t = useTranslations('Review');
   const locale = useLocale();
-  const approve = kind === 'approve';
+  const approve = approved;
+  const service = useService();
 
   return (
     <ReviewDialog
@@ -50,11 +58,11 @@ export function ConfirmDialog({ run, kind, reason, note, onConfirm, onClose }: C
         <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-2">
           {[
             [t('run'), `${run.id} · ${run.useCase}`],
-            [t('proposed'), run.action[localized<'en' | 'vi'>(locale, 'en', 'vi')]],
+            [t('proposed'), run.question],
             [t('decision'), approve ? t('approve') : t('reject')],
             [t('reason'), reasonLabel(reason, locale)],
             [t('note'), note || '—'],
-            [t('reviewer'), `${PRINCIPAL.name} · ${PRINCIPAL.role}`],
+            [t('reviewer'), service.claims?.name ?? service.claims?.sub ?? '—'],
           ].map(([label, value]) => (
             <div key={label} className="contents">
               <dt className="text-meta text-ink-subtle">{label}</dt>

@@ -320,51 +320,35 @@
       "tierFallback": "Cấp 1 · bộ phân loại dự phòng",
       "runId": "Lượt chạy {id}",
       "inProgress": "Lượt chạy đang diễn ra",
-      "sample": "Mẫu"
+      "sample": "Mẫu",
+      "presetDispatch": "Điều phối chiến thuật · UC-2.2",
+      "presetAlert": "Cảnh báo nhanh · UC-S1.4",
+      "mode": "Chế độ · {mode}",
+      "stepsLine": "Đã hoàn tất {count} bước của đồ thị",
+      "toolsLine": "{count} lần gọi công cụ tất định",
+      "doneLine": "Lượt chạy đã kết thúc.",
+      "doneApproved": "Đã phê duyệt trong Rà soát · lượt chạy {id}",
+      "doneRejected": "Đã từ chối trong Rà soát · lượt chạy {id}",
+      "failed": "Lượt chạy thất bại"
     },
     "service": {
       "down": "Không khả dụng",
       "notConnected": "Chưa kết nối"
     },
     "connect": {
-      "step": "Kết nối · bước 1/2",
       "title": "Kết nối dịch vụ phân tích",
       "body": "Chưa kết nối API phân tích. Bạn vẫn có thể tra cứu bản đồ và biểu đồ ở chế độ chỉ xem.",
       "token": "Mã truy cập",
       "empty": "Nhập mã truy cập.",
       "rejected": "Mã bị từ chối (401) — sai định dạng hoặc đã hết hạn.",
-      "verify": "Xác minh mã",
-      "useDemo": "Dùng mã mẫu",
-      "resolving": "Đang xác định danh tính…",
-      "resolvedStep": "Danh tính đã xác định · bước 2/2",
-      "role": "Vai trò",
-      "roleValue": "Người phê duyệt — được chạy báo cáo và ký",
-      "scopes": "Phạm vi",
-      "expires": "Hết hạn",
-      "connectAs": "Kết nối với tư cách {name}"
+      "unreachable": "Dịch vụ phân tích không phản hồi. Hãy kiểm tra dịch vụ đang chạy và cho phép nguồn gốc này.",
+      "checking": "Đang kiểm tra mã truy cập…",
+      "connect": "Kết nối"
     },
     "down": {
       "title": "Dịch vụ phân tích không khả dụng",
-      "reason": "Lý do",
-      "reasonValue": "Máy chủ mô hình không phản hồi sau 3 lần thử",
-      "tier": "Cấp",
-      "tierValue": "3 · Không khả dụng — tắt báo cáo và phê duyệt",
-      "lastHealthy": "Lành mạnh lần cuối",
-      "nextRetry": "Thử lại tiếp theo",
-      "nextRetryValue": "sau 30 giây",
-      "body": "Báo cáo tạm dừng. Mọi biểu đồ vẫn chạy trên dữ liệu đã hiệu chuẩn. Hệ thống sẽ tự thử lại.",
-      "retry": "Thử lại ngay"
-    },
-    "sim": {
-      "title": "Mẫu · mô phỏng dịch vụ",
-      "label": "Mô phỏng trạng thái dịch vụ",
-      "up": "Hoạt động",
-      "degraded": "Suy giảm",
-      "down": "Ngừng",
-      "reset": "Đặt lại lượt chạy"
-    },
-    "scopesValue": "Chạy báo cáo · Phê duyệt",
-    "sampleOtherRegion": "Lượt chạy mẫu này mô tả {runRegion}, không phải {region}. Đây là dữ liệu mẫu cho đến khi nối API phân tích."
+      "body": "Báo cáo tạm dừng. Mọi biểu đồ vẫn chạy trên dữ liệu đã hiệu chuẩn. Hệ thống sẽ tự thử lại."
+    }
   },
   "Evidence": {
     "title": "Dữ liệu kiểm chứng · 5 hình khoa học",
@@ -650,7 +634,14 @@
     "synthesis": "Tổng hợp",
     "synthesisValue": "Mô hình chính",
     "waitSince": "từ {time}",
-    "assignedTag": "đã giao"
+    "assignedTag": "đã giao",
+    "connectFirst": "Rà soát đọc từ dịch vụ phân tích. Hãy kết nối bằng mã truy cập để xem các lượt chạy.",
+    "queueFailed": "Dịch vụ phân tích không trả về kết quả dùng được. Không hiển thị gì thay vì đoán.",
+    "runNotFound": "Lượt chạy này không tồn tại.",
+    "runForbidden": "Chỉ chủ lượt chạy hoặc người phê duyệt mới được đọc.",
+    "mode": "Chế độ",
+    "factsInLedger": "dữ kiện trong sổ đã kiểm chứng",
+    "needApprover": "Chỉ chủ thể có vai trò phê duyệt mới được quyết định. Bạn có thể đọc lượt chạy này."
   },
   "Workbench": {
     "error": "Không tải được không gian phân tích. Kiểm tra kết nối rồi thử lại.",

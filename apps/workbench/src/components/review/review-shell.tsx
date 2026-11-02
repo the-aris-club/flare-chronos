@@ -3,18 +3,19 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useReviewStore } from '@/components/review/review-store';
+import { ReviewGate } from '@/components/review/review-gate';
+import { useService } from '@/components/service/service-provider';
 import { BrandMark } from '@/components/ui/brand-mark';
 import { HeaderBar } from '@/components/ui/header-bar';
 import { AmIcon, ICON } from '@/components/ui/icon';
 import { LocaleToggle } from '@/components/ui/locale-toggle';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
-import { PRINCIPAL } from '@/data/fixtures/review';
 
 export function ReviewShell({ children }: { children: React.ReactNode }) {
   const t = useTranslations('Review');
   const pathname = usePathname();
-  const store = useReviewStore();
+  const store = useService();
+  const name = store.claims?.name ?? store.claims?.sub ?? '';
   const queueActive = pathname === '/review' || pathname.startsWith('/review/runs/');
   const auditActive = pathname.startsWith('/review/audit');
 
@@ -65,34 +66,27 @@ export function ReviewShell({ children }: { children: React.ReactNode }) {
         </nav>
 
         <div className="ml-auto flex items-center gap-2">
-          <span className="border-line text-micro text-ink-muted tablet:inline-flex hidden h-8 items-center gap-2 rounded-md border px-2">
-            <span className="bg-seg text-ink text-micro inline-flex size-6 items-center justify-center rounded-full font-mono font-semibold">
-              {PRINCIPAL.initials}
-            </span>
-            <span className="flex flex-col leading-tight">
-              <span className="text-meta text-ink">{PRINCIPAL.name}</span>
-              <span className="text-micro text-ink-subtle font-mono uppercase">
-                {t('approver')}
+          {store.claims && (
+            <span className="border-line text-micro text-ink-muted tablet:inline-flex hidden h-8 items-center gap-2 rounded-md border px-2">
+              <span className="bg-seg text-ink text-micro inline-flex size-6 items-center justify-center rounded-full font-mono font-semibold">
+                {name.slice(0, 2).toUpperCase()}
+              </span>
+              <span className="flex flex-col leading-tight">
+                <span className="text-meta text-ink">{name}</span>
+                <span className="text-micro text-ink-subtle font-mono uppercase">
+                  {store.isApprover ? t('approver') : t('reviewer')}
+                </span>
               </span>
             </span>
-          </span>
+          )}
           <LocaleToggle />
           <ThemeToggle />
         </div>
       </HeaderBar>
 
-      {store.saveFailed && (
-        <p
-          role="alert"
-          className="text-meta text-bad border-bad flex items-center justify-between gap-3 border-b px-4 py-2"
-        >
-          {t('saveFailed')}
-          <button type="button" onClick={store.dismissSaveFailed} className="underline">
-            {t('close')}
-          </button>
-        </p>
-      )}
-      <main className="min-h-0 flex-1">{children}</main>
+      <main className="min-h-0 flex-1">
+        <ReviewGate>{children}</ReviewGate>
+      </main>
     </div>
   );
 }

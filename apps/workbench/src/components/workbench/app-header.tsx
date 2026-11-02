@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useReviewStore } from '@/components/review/review-store';
+import { useService } from '@/components/service/service-provider';
 import { useTranslations } from 'next-intl';
 import { AmIcon, ICON } from '@/components/ui/icon';
 import { BrandMark } from '@/components/ui/brand-mark';
@@ -10,14 +10,11 @@ import { HeaderBar } from '@/components/ui/header-bar';
 import { LocaleToggle } from '@/components/ui/locale-toggle';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import type { RegionId } from '@/lib/calendar/types';
-import type { ConnState, ServiceState } from '@/lib/workbench/service';
 
 type AppHeaderProps = {
   region: RegionId;
   period: { start: number; end: number };
   briefingOpen: boolean;
-  service: ServiceState;
-  conn: ConnState;
   onRegion: (region: RegionId) => void;
   onTour: () => void;
   onEvidence: () => void;
@@ -32,8 +29,6 @@ export function AppHeader({
   region,
   period,
   briefingOpen,
-  service,
-  conn,
   onRegion,
   onTour,
   onEvidence,
@@ -42,25 +37,18 @@ export function AppHeader({
 }: AppHeaderProps) {
   const t = useTranslations('Header');
   const review = useTranslations('Review');
-  const reviewStore = useReviewStore();
+  const reviewStore = useService();
   const [menuOpen, setMenuOpen] = useState(false);
-  const connected = conn === 'connected';
+  const connected = reviewStore.connection === 'connected';
+  const down = reviewStore.connection === 'unavailable';
   const serviceLabel =
-    service === 'down'
-      ? t('serviceDown')
-      : !connected
-        ? t('serviceNotConnected')
-        : service === 'degraded'
-          ? t('serviceDegraded')
-          : t('serviceUp');
+    down ? t('serviceDown') : !connected ? t('serviceNotConnected') : t('serviceUp');
   const serviceTone =
-    service === 'down'
+    down
       ? 'border-bad/50 text-bad'
       : !connected
         ? 'border-line text-ink-subtle'
-        : service === 'degraded'
-          ? 'border-warn/50 text-warn'
-          : 'border-ok/45 text-ok';
+        : 'border-ok/45 text-ok';
 
   return (
     <HeaderBar>
@@ -166,15 +154,13 @@ export function AppHeader({
           aria-label={`${t('serviceStatus')}: ${serviceLabel}`}
           className={`tablet:inline-flex text-micro hidden h-7 items-center gap-1.5 rounded-md border px-2 font-mono ${serviceTone}`}
         >
-          <AmIcon icon={service === 'down' ? ICON.xCircle : ICON.service} size="sm" />
+          <AmIcon icon={down ? ICON.xCircle : ICON.service} size="sm" />
           <span className="xl:hidden">
-            {service === 'down'
+            {down
               ? t('serviceShortDown')
               : !connected
                 ? t('serviceShortNotConnected')
-                : service === 'degraded'
-                  ? t('serviceShortDegraded')
-                  : t('serviceShortUp')}
+                : t('serviceShortUp')}
           </span>
           <span className="hidden xl:inline">{serviceLabel}</span>
         </button>

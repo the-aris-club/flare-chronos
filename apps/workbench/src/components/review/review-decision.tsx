@@ -2,24 +2,26 @@
 
 import { useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
-import { localized } from '@/lib/workbench/format';
-import { REASONS, PRINCIPAL, type Decision, type DecisionKind } from '@/data/fixtures/review';
-import { DecisionChip, reasonLabel, RoleText, utcTime } from './review-bits';
+import { useService } from '@/components/service/service-provider';
+import { REASONS, reasonLabel } from '@/lib/review/reasons';
+import type { AuditRow } from '@/lib/review/api';
+import { DecisionChip, utcTime } from './review-bits';
 
 type ReviewDecisionProps = {
-  decision: Decision | undefined;
+  decided: AuditRow | undefined;
   approveAvailable: boolean;
-  onRequest: (kind: DecisionKind, reason: string, note: string) => void;
+  onRequest: (approved: boolean, reasonCode: string, note: string) => void;
 };
 
-export function ReviewDecision({ decision, approveAvailable, onRequest }: ReviewDecisionProps) {
+export function ReviewDecision({ decided, approveAvailable, onRequest }: ReviewDecisionProps) {
   const t = useTranslations('Review');
   const locale = useLocale();
+  const service = useService();
   const [reason, setReason] = useState('');
   const [note, setNote] = useState('');
   const [error, setError] = useState<string | null>(null);
 
-  function request(kind: DecisionKind) {
+  function request(approved: boolean) {
     if (!reason) {
       setError(t('errReason'));
       return;
@@ -29,36 +31,47 @@ export function ReviewDecision({ decision, approveAvailable, onRequest }: Review
       return;
     }
     setError(null);
-    onRequest(kind, reason, note.trim());
+    onRequest(approved, reason, note.trim());
   }
 
-  if (decision) {
+  if (decided) {
     return (
       <section className="border-line bg-panel flex flex-col gap-2 rounded-lg border p-3">
         <span className="text-label text-ink-subtle font-mono tracking-widest uppercase">
           {t('decisionRec')}
         </span>
-        <DecisionChip kind={decision.kind} />
+        <DecisionChip approved={decided.approved} />
         <p className="text-meta text-ink-muted">
-          {decision.reviewer} · <RoleText role={decision.role} />
+          {decided.principal}
           <br />
           <span className="text-ink-subtle font-mono">
-            {utcTime(decision.at)} · {decision.audit}
+            {utcTime(decided.decidedAt)} · {decided.id}
           </span>
         </p>
         <p className="text-body">
           <span className="text-ink-subtle">{t('reason')}: </span>
-          {reasonLabel(decision.reason, locale)}
+          {reasonLabel(decided.reasonCode, locale)}
         </p>
-        {decision.note && (
+        {decided.reason && (
           <p className="text-meta text-ink-muted">
             <span className="text-ink-subtle">{t('note')}: </span>
-            {decision.note}
+            {decided.reason}
           </p>
         )}
         <p className="text-meta text-ink-subtle border-line border-t pt-2">
-          {decision.kind === 'approve' ? t('msgApprove') : t('withheldBody')}
+          {decided.approved ? t('msgApprove') : t('withheldBody')}
         </p>
+      </section>
+    );
+  }
+
+  if (!service.isApprover) {
+    return (
+      <section className="border-line bg-panel flex flex-col gap-2 rounded-lg border p-3">
+        <span className="text-label text-ink-subtle font-mono tracking-widest uppercase">
+          {t('decision')}
+        </span>
+        <p className="text-meta text-ink-muted">{t('needApprover')}</p>
       </section>
     );
   }
@@ -85,7 +98,7 @@ export function ReviewDecision({ decision, approveAvailable, onRequest }: Review
           <option value="">{t('chooseReason')}</option>
           {REASONS.map((item) => (
             <option key={item.value} value={item.value}>
-              {localized(locale, item.en, item.vi)}
+              {locale === 'vi' ? item.vi : item.en}
             </option>
           ))}
         </select>
@@ -109,7 +122,7 @@ export function ReviewDecision({ decision, approveAvailable, onRequest }: Review
       <div className="grid grid-cols-2 gap-2">
         <button
           type="button"
-          onClick={() => request('approve')}
+          onClick={() => request(true)}
           disabled={!approveAvailable}
           className="border-ok text-ok hover:bg-chip text-meta inline-flex h-8 items-center justify-center gap-1 rounded-md border font-semibold disabled:opacity-40"
         >
@@ -117,7 +130,7 @@ export function ReviewDecision({ decision, approveAvailable, onRequest }: Review
         </button>
         <button
           type="button"
-          onClick={() => request('reject')}
+          onClick={() => request(false)}
           className="border-bad text-bad hover:bg-chip text-meta inline-flex h-8 items-center justify-center gap-1 rounded-md border font-semibold"
         >
           {t('reject')}
@@ -128,11 +141,7 @@ export function ReviewDecision({ decision, approveAvailable, onRequest }: Review
           {t('approveUnavail')}. {t('rejectStill')}
         </p>
       )}
-      <p className="text-meta text-ink-subtle border-line border-t pt-2">
-        {PRINCIPAL.name} · {t('approver')}
-        <br />
-        {t('finalNote')}
-      </p>
+      <p className="text-meta text-ink-subtle border-line border-t pt-2">{t('finalNote')}</p>
     </section>
   );
 }

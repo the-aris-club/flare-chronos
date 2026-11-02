@@ -1,41 +1,67 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
-import { useReviewStore } from '@/components/review/review-store';
+import { useService } from '@/components/service/service-provider';
 import { AmIcon, ICON } from '@/components/ui/icon';
-import { reasonLabel, RoleText, utcTime } from './review-bits';
+import { parseAudit, type AuditRow } from '@/lib/review/api';
+import { reasonLabel } from '@/lib/review/reasons';
+import { utcTime } from './review-bits';
 import { FilterSelect } from './review-select';
-
-// Decision and audit rows persist through /api/review/decisions.
 
 function csvCell(value: string): string {
   return `"${value.replaceAll('"', '""')}"`;
 }
 
+type Row = AuditRow & { useCase: string };
+
 export function ReviewAudit() {
   const t = useTranslations('Review');
   const locale = useLocale();
-  const store = useReviewStore();
+  const service = useService();
+  const [all, setAll] = useState<Row[]>([]);
+  const [failed, setFailed] = useState(false);
   const [reviewer, setReviewer] = useState('all');
   const [decision, setDecision] = useState('all');
   const [date, setDate] = useState('all');
   const [useCase, setUseCase] = useState('all');
+  const { get, rows: runs } = service;
 
-  const reviewers = [...new Set(store.audit.map((row) => row.reviewer))];
-  const dates = [...new Set(store.audit.map((row) => row.at.slice(0, 10)))].sort().reverse();
-  const cases = [...new Set(store.audit.map((row) => row.useCase))];
+  useEffect(() => {
+    let live = true;
+    const decided = runs.filter((run) => run.status !== 'needs');
+    Promise.all(
+      decided.map(async (run) => {
+        const result = await get(`/api/v1/review/runs/${run.id}/audit`);
+        if (!result.ok) throw new Error(result.reason);
+        return parseAudit(result.data).map((row) => ({ ...row, useCase: run.useCase }));
+      }),
+    )
+      .then((groups) => {
+        if (!live) return;
+        setAll(groups.flat().sort((a, b) => b.decidedAt.localeCompare(a.decidedAt)));
+        setFailed(false);
+      })
+      .catch(() => live && setFailed(true));
+    return () => {
+      live = false;
+    };
+  }, [get, runs]);
+
+  const reviewers = [...new Set(all.map((row) => row.principal))];
+  const dates = [...new Set(all.map((row) => row.decidedAt.slice(0, 10)))].sort().reverse();
+  const cases = [...new Set(all.map((row) => row.useCase))];
 
   const rows = useMemo(
     () =>
-      store.audit.filter((row) => {
-        if (reviewer !== 'all' && row.reviewer !== reviewer) return false;
-        if (decision !== 'all' && row.kind !== decision) return false;
-        if (date !== 'all' && !row.at.startsWith(date)) return false;
+      all.filter((row) => {
+        if (reviewer !== 'all' && row.principal !== reviewer) return false;
+        if (decision !== 'all' && (row.approved ? 'approve' : 'reject') !== decision) return false;
+        if (date !== 'all' && !row.decidedAt.startsWith(date)) return false;
         if (useCase !== 'all' && row.useCase !== useCase) return false;
         return true;
       }),
-    [store.audit, reviewer, decision, date, useCase],
+    [all, reviewer, decision, date, useCase],
   );
 
   function download(name: string, content: string, type: string) {
@@ -49,26 +75,16 @@ export function ReviewAudit() {
   }
 
   function exportCsv() {
-    const header = [
-      'utc_time',
-      'run',
-      'reviewer',
-      'role',
-      'decision',
-      'reason',
-      'note',
-      'audit_id',
-    ];
+    const header = ['utc_time', 'run', 'reviewer', 'decision', 'reason_code', 'note', 'audit_id'];
     const body = rows.map((row) =>
       [
-        row.at,
+        row.decidedAt,
         row.runId,
-        row.reviewer,
-        row.role,
-        row.kind,
-        reasonLabel(row.reason, locale),
-        row.note,
-        row.audit,
+        row.principal,
+        row.approved ? 'approve' : 'reject',
+        row.reasonCode,
+        row.reason,
+        row.id,
       ]
         .map(csvCell)
         .join(','),
@@ -78,14 +94,13 @@ export function ReviewAudit() {
 
   function exportJson() {
     const data = rows.map((row) => ({
-      utc_time: row.at,
+      utc_time: row.decidedAt,
       run: row.runId,
-      reviewer: row.reviewer,
-      role: row.role,
-      decision: row.kind,
-      reason: row.reason,
-      note: row.note,
-      audit_id: row.audit,
+      reviewer: row.principal,
+      decision: row.approved ? 'approve' : 'reject',
+      reason_code: row.reasonCode,
+      note: row.reason,
+      audit_id: row.id,
     }));
     download('flare-chronos-audit.json', JSON.stringify(data, null, 2), 'application/json');
   }
@@ -149,20 +164,25 @@ export function ReviewAudit() {
         />
       </div>
 
+      {failed && (
+        <p role="alert" className="text-meta text-bad">
+          {t('queueFailed')}
+        </p>
+      )}
+
       {rows.length === 0 ? (
         <div className="border-line text-meta text-ink-muted rounded-lg border border-dashed px-4 py-10 text-center">
           {t('auditNone')}
         </div>
       ) : (
         <div className="border-line overflow-x-auto rounded-lg border">
-          <table className="w-full min-w-200 border-collapse text-left">
+          <table className="w-full min-w-180 border-collapse text-left">
             <thead>
               <tr className="bg-raised">
                 {[
                   t('time'),
                   t('run'),
                   t('reviewer'),
-                  t('role'),
                   t('decision'),
                   t('reason'),
                   t('noteShort'),
@@ -180,28 +200,25 @@ export function ReviewAudit() {
             </thead>
             <tbody>
               {rows.map((row) => (
-                <tr key={row.audit} className="border-line border-b last:border-0">
+                <tr key={row.id} className="border-line border-b last:border-0">
                   <td className="text-meta px-2.5 py-2 font-mono">
-                    {row.at.slice(0, 10)} {utcTime(row.at)}
+                    {row.decidedAt.slice(0, 10)} {utcTime(row.decidedAt)}
                   </td>
                   <td className="text-meta px-2.5 py-2 font-mono">{row.runId}</td>
-                  <td className="text-meta px-2.5 py-2">{row.reviewer}</td>
-                  <td className="text-meta text-ink-muted px-2.5 py-2">
-                    <RoleText role={row.role} />
-                  </td>
+                  <td className="text-meta px-2.5 py-2">{row.principal}</td>
                   <td className="px-2.5 py-2">
                     <span
                       className={`text-label inline-flex items-center gap-1 rounded-sm border px-1.5 font-mono ${
-                        row.kind === 'approve' ? 'border-ok text-ok' : 'border-bad text-bad'
+                        row.approved ? 'border-ok text-ok' : 'border-bad text-bad'
                       }`}
                     >
-                      <AmIcon icon={row.kind === 'approve' ? ICON.check : ICON.close} size="xs" />
-                      {row.kind === 'approve' ? t('approved') : t('rejected')}
+                      <AmIcon icon={row.approved ? ICON.check : ICON.close} size="xs" />
+                      {row.approved ? t('approved') : t('rejected')}
                     </span>
                   </td>
-                  <td className="text-meta px-2.5 py-2">{reasonLabel(row.reason, locale)}</td>
-                  <td className="text-meta text-ink-muted px-2.5 py-2">{row.note || '—'}</td>
-                  <td className="text-meta px-2.5 py-2 font-mono">{row.audit}</td>
+                  <td className="text-meta px-2.5 py-2">{reasonLabel(row.reasonCode, locale)}</td>
+                  <td className="text-meta text-ink-muted px-2.5 py-2">{row.reason || '—'}</td>
+                  <td className="text-meta px-2.5 py-2 font-mono">{row.id}</td>
                 </tr>
               ))}
             </tbody>

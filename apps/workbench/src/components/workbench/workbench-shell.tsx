@@ -7,7 +7,6 @@ import { useIsDesktop, useIsTablet } from '@/lib/use-media';
 import type { CalendarDataset, RegionId } from '@/lib/calendar/types';
 import type { MapFilters, WorkbenchData } from '@/lib/workbench/types';
 import { MAP_DATA } from '@/lib/workbench/map-data';
-import type { ConnState, ServiceState } from '@/lib/workbench/service';
 import { AppHeader } from './app-header';
 import { BriefingRail, type RailState } from './briefing-rail';
 import { BurningCalendar } from './burning-calendar';
@@ -52,8 +51,6 @@ export function WorkbenchShell({
   const isDesktop = useIsDesktop();
   const isTablet = useIsTablet();
   const [briefState, setBriefState] = useState<RailState>('auto');
-  const [service, setService] = useState<ServiceState>('up');
-  const [conn, setConn] = useState<ConnState>('connected');
   const [filters, setFilters] = useState<MapFilters>({
     sza: true,
     saa: true,
@@ -116,8 +113,6 @@ export function WorkbenchShell({
         region={region}
         period={dataset.period}
         briefingOpen={briefingPressed}
-        service={service}
-        conn={conn}
         onRegion={changeRegion}
         onTour={() => setTourOpen(true)}
         onEvidence={() => setEvidenceOpen(true)}
@@ -215,11 +210,7 @@ export function WorkbenchShell({
         <BriefingRail
           region={region}
           state={briefState}
-          service={service}
-          conn={conn}
           onToggle={toggleBrief}
-          onService={setService}
-          onConn={setConn}
         />
       </div>
 

@@ -1,7 +1,6 @@
 import { access, readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { cache } from 'react';
-import { buildDesignFixture } from './fixture';
 import { buildArtifact, fail, record, type Json } from './parse';
 import type { CalendarDataset } from './types';
 
@@ -30,16 +29,6 @@ async function readJson(file: string): Promise<Json> {
 }
 
 export const loadCalendar = cache(async (): Promise<CalendarDataset> => {
-  if (process.env.CALENDAR_FIXTURE === 'design') {
-    const file = await firstExisting([
-      process.env.CALENDAR_FIXTURE_PATH,
-      path.resolve(process.cwd(), '../../docs/design/fixtures/design-calendar.json'),
-      path.resolve(process.cwd(), 'docs/design/fixtures/design-calendar.json'),
-    ]);
-
-    return buildDesignFixture(await readJson(file));
-  }
-
   const file = await firstExisting([
     process.env.CALENDAR_DATA_PATH,
     path.resolve(process.cwd(), '../../data/processed/burning_calendar.json'),

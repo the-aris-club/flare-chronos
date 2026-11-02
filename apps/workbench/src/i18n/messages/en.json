@@ -122,7 +122,20 @@
     },
     "error": "The calendar could not be loaded.",
     "retry": "Try again",
-    "months": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+    "months": [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec"
+    ],
     "provenance": "{observed} of {total} cells are observed windows ({pct}%). The rest are modelled from the region's seasonal envelope: dimmed, hatched, and never scored."
   },
   "Map": {
@@ -207,7 +220,20 @@
   "Clock": {
     "title": "Phenology clock",
     "subtitle": "HFD · 5-day pentads · {region}",
-    "months": ["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"],
+    "months": [
+      "J",
+      "F",
+      "M",
+      "A",
+      "M",
+      "J",
+      "J",
+      "A",
+      "S",
+      "O",
+      "N",
+      "D"
+    ],
     "iqr": "IQR 2001–2025 (25 yrs)",
     "elnino": "El Niño 2016",
     "selected": "Selected {year}",
@@ -294,51 +320,35 @@
       "tierFallback": "Tier 1 · fallback classifier",
       "runId": "Run {id}",
       "inProgress": "Run in progress",
-      "sample": "Sample"
+      "sample": "Sample",
+      "presetDispatch": "Tactical dispatch · UC-2.2",
+      "presetAlert": "Flash alert · UC-S1.4",
+      "mode": "Mode · {mode}",
+      "stepsLine": "{count} graph steps completed",
+      "toolsLine": "{count} deterministic tool calls",
+      "doneLine": "Run finished.",
+      "doneApproved": "Approved in Review · run {id}",
+      "doneRejected": "Rejected in Review · run {id}",
+      "failed": "Run failed"
     },
     "service": {
       "down": "Unavailable",
       "notConnected": "Not connected"
     },
     "connect": {
-      "step": "Connect · step 1 of 2",
       "title": "Connect to the analysis service",
       "body": "Paste an access token to run briefings. Map, charts and calendar work without it.",
       "token": "Bearer token",
       "empty": "Enter a token.",
       "rejected": "Token rejected (401) — malformed or expired.",
-      "verify": "Verify token",
-      "useDemo": "Use demo token",
-      "resolving": "Resolving principal…",
-      "resolvedStep": "Resolved principal · step 2 of 2",
-      "role": "Role",
-      "roleValue": "Approver — may run briefings and sign off",
-      "scopes": "Scopes",
-      "expires": "Expires",
-      "connectAs": "Connect as {name}"
+      "unreachable": "The analysis service did not answer. Check that it is running and allows this origin.",
+      "checking": "Checking token…",
+      "connect": "Connect"
     },
     "down": {
       "title": "Analysis service unavailable",
-      "reason": "Reason",
-      "reasonValue": "Model endpoint timed out (HTTP 504) after 3 retries",
-      "tier": "Tier",
-      "tierValue": "3 · Unavailable — briefings and sign-off are off",
-      "lastHealthy": "Last healthy",
-      "nextRetry": "Next retry",
-      "nextRetryValue": "in 30 s",
-      "body": "Briefings are paused. All charts keep working on precomputed harmonized data.",
-      "retry": "Retry now"
-    },
-    "sim": {
-      "title": "Demo · simulate service",
-      "label": "Simulate service state",
-      "up": "Up",
-      "degraded": "Degraded",
-      "down": "Down",
-      "reset": "Reset run"
-    },
-    "scopesValue": "Run briefing · Approve",
-    "sampleOtherRegion": "This sample run describes {runRegion}, not {region}. It stays a fixture until the analysis API is connected."
+      "body": "Briefings are paused. All charts keep working on precomputed harmonized data."
+    }
   },
   "Evidence": {
     "title": "Evidence · 5 scientific figures",
@@ -624,7 +634,14 @@
     "synthesis": "Synthesis",
     "synthesisValue": "Primary model",
     "waitSince": "since {time}",
-    "assignedTag": "assigned"
+    "assignedTag": "assigned",
+    "connectFirst": "Review reads the analysis service. Connect with an access token to see runs.",
+    "queueFailed": "The analysis service did not return a usable answer. Nothing is shown rather than a guess.",
+    "runNotFound": "This run does not exist.",
+    "runForbidden": "Only the owner of this run, or an approver, may read it.",
+    "mode": "Mode",
+    "factsInLedger": "facts in the verified ledger",
+    "needApprover": "Only a principal with the approver role can decide. You can read this run."
   },
   "Workbench": {
     "error": "The Workbench could not be loaded.",
