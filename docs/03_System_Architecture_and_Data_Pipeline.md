@@ -101,7 +101,7 @@ flowchart TB
     subgraph COGNITION["6. Tầng Nhận Thức Kép (apps/ai-service — LangGraph)"]
         S1_LAYER["Tầng Phản Xạ — Decision Model<br/>Gán phân tích + vùng + khẩn cấp (xác suất hiệu chuẩn)"]
         FAST_TIER["Tầng Báo Cáo<br/>1 Atomic Tool · 0 mô hình · ~5 ms"]
-        S2_LAYER["Tầng Suy Luận — Chat Model<br/>Tự chọn tool trong bề mặt 23 tool"]
+        S2_LAYER["Tầng Suy Luận — Chat Model<br/>Tự chọn tool trong bề mặt 18 tool"]
         GATE["Cổng Công Cụ Tất Định & Sổ Cái Số Liệu<br/>Mọi số trong báo cáo phải có trong ledger"]
         SIGNOFF["Cổng Phê Duyệt Của Con Người<br/>Run dừng, chờ quyết định trước khi phát hành"]
         STREAM["Luồng Sự Kiện SSE<br/>Typed events cho mọi lần chạy"]

@@ -159,6 +159,25 @@ class TestReviewRunDetail(ApiCase):
         )
 
 
+class TestReviewFailedRun(ApiCase):
+    def test_a_run_that_errors_after_raising_sign_off_is_listed_as_failed(self) -> None:
+        thread = self.start_signoff_run("ana")
+        self.store.append_event(thread, "run_failed", {"error": "model unreachable"})
+
+        runs = self.client.get("/api/v1/review/runs", headers=token("ana")).json()
+
+        self.assertEqual(runs["runs"][0]["status"], "failed")
+
+    def test_a_decision_outranks_a_later_failure(self) -> None:
+        thread = self.start_signoff_run("ana")
+        self.store.record_decision(thread, "carol", True, "", "evidence")
+        self.store.append_event(thread, "run_failed", {"error": "late"})
+
+        runs = self.client.get("/api/v1/review/runs", headers=token("ana")).json()
+
+        self.assertEqual(runs["runs"][0]["status"], "published")
+
+
 class TestReviewSurvivesRestart(ApiCase):
     def test_the_queue_and_the_audit_outlive_the_service(self) -> None:
         thread = self.start_signoff_run("ana")
