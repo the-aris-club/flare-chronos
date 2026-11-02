@@ -108,7 +108,7 @@ export function WorkbenchShell({
   }
 
   return (
-    <div className="bg-canvas flex h-dvh flex-col overflow-hidden">
+    <div className="bg-canvas relative flex h-dvh flex-col overflow-hidden">
       <AppHeader
         region={region}
         period={dataset.period}
