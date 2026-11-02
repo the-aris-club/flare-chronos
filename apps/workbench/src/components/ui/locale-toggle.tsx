@@ -1,6 +1,6 @@
 'use client';
 
-import { useTransition } from 'react';
+import { useCallback, useTransition } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { writeCookie } from '@/lib/browser';
@@ -12,12 +12,15 @@ export function LocaleToggle() {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
 
-  function choose(next: Locale) {
-    if (next === locale) return;
+  const choose = useCallback(
+    (next: Locale) => {
+      if (next === locale) return;
 
-    writeCookie(LOCALE_COOKIE, next);
-    startTransition(() => router.refresh());
-  }
+      writeCookie(LOCALE_COOKIE, next);
+      startTransition(() => router.refresh());
+    },
+    [locale, router, startTransition],
+  );
 
   return (
     <div

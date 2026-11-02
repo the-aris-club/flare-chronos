@@ -1,15 +1,7 @@
 'use client';
 
-import { createContext, useCallback, useContext, useMemo, useState } from 'react';
-import { applyTheme, writeCookie } from '@/lib/browser';
-import { THEME_COOKIE, type Theme } from '@/lib/theme';
-
-type ThemeContextValue = {
-  theme: Theme;
-  setTheme: (theme: Theme) => void;
-};
-
-const ThemeContext = createContext<ThemeContextValue | null>(null);
+import { ThemeProvider as NextThemesProvider, useTheme as useNextTheme } from 'next-themes';
+import type { Theme } from '@/lib/theme';
 
 export function ThemeProvider({
   initialTheme,
@@ -18,25 +10,31 @@ export function ThemeProvider({
   initialTheme: Theme;
   children: React.ReactNode;
 }) {
-  const [theme, setThemeState] = useState<Theme>(initialTheme);
-
-  const setTheme = useCallback((next: Theme) => {
-    setThemeState(next);
-    applyTheme(next);
-    writeCookie(THEME_COOKIE, next);
-  }, []);
-
-  const value = useMemo(() => ({ theme, setTheme }), [theme, setTheme]);
-
-  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
+  return (
+    <NextThemesProvider
+      attribute="data-theme"
+      defaultTheme={initialTheme}
+      enableSystem={false}
+      disableTransitionOnChange
+      themes={['dark', 'light']}
+      storageKey="fc-theme"
+    >
+      {children}
+    </NextThemesProvider>
+  );
 }
 
-export function useTheme(): ThemeContextValue {
-  const value = useContext(ThemeContext);
+export function useTheme(): { theme: Theme; setTheme: (theme: Theme) => void } {
+  const { theme: rawTheme, resolvedTheme, setTheme: setNextTheme } = useNextTheme();
 
-  if (value === null) {
-    throw new Error('useTheme must be used inside ThemeProvider');
-  }
+  const theme: Theme = rawTheme === 'light' || rawTheme === 'dark'
+    ? rawTheme
+    : resolvedTheme === 'light'
+      ? 'light'
+      : 'dark';
 
-  return value;
+  return {
+    theme,
+    setTheme: (next: Theme) => setNextTheme(next),
+  };
 }

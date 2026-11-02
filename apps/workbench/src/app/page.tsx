@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { getTranslations } from 'next-intl/server';
 import { GlobeLanding } from '@/components/globe/globe-landing';
 import { loadCalendar } from '@/lib/calendar/load';
@@ -35,12 +36,14 @@ export default async function Home() {
   });
 
   return (
-    <GlobeLanding
-      period={dataset.period}
-      yearStart={dataset.period.start}
-      total={dataset.period.end - dataset.period.start + 1}
-      growth={{ mekong: growth('mekong'), amazon: growth('amazon') }}
-      regions={regions}
-    />
+    <Suspense fallback={<div className="bg-canvas h-dvh" />}>
+      <GlobeLanding
+        period={dataset.period}
+        yearStart={dataset.period.start}
+        total={dataset.period.end - dataset.period.start + 1}
+        growth={{ mekong: growth('mekong'), amazon: growth('amazon') }}
+        regions={regions}
+      />
+    </Suspense>
   );
 }
