@@ -81,6 +81,17 @@ export function ReviewShell({ children }: { children: React.ReactNode }) {
         </div>
       </HeaderBar>
 
+      {store.saveFailed && (
+        <p
+          role="alert"
+          className="text-meta text-bad border-bad flex items-center justify-between gap-3 border-b px-4 py-2"
+        >
+          {t('saveFailed')}
+          <button type="button" onClick={store.dismissSaveFailed} className="underline">
+            {t('close')}
+          </button>
+        </p>
+      )}
       <main className="min-h-0 flex-1">{children}</main>
     </div>
   );

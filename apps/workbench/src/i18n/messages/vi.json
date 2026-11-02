@@ -487,6 +487,7 @@
     "off": "Tắt {filters} · số liệu gốc không đổi"
   },
   "Review": {
+    "saveFailed": "Không lưu được quyết định. Chưa có gì được ghi nhận; hãy thử lại.",
     "review": "Xem xét",
     "queue": "Hàng chờ xem xét",
     "queueSub": "Các lượt chạy đề xuất hành động. Mỗi dòng mở toàn bộ dữ liệu kiểm chứng và khung quyết định.",

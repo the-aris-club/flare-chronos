@@ -154,7 +154,9 @@ export const loadWorkbench = cache(async (calendar: CalendarDataset): Promise<Wo
           date: null,
           raw: shift.raw_counts_by_year[String(year)] ?? 0,
           episodes: null,
-          harmonized: shift.modis_reference_counts_by_year[String(year)] ?? 0,
+          harmonized:
+            shift.modis_reference_counts_by_year[String(year)] ??
+            fail(`${region} ${year} has no MODIS reference count`),
           sensors: 0,
           saa: 0,
           szaPct: 0,
@@ -175,6 +177,7 @@ export const loadWorkbench = cache(async (calendar: CalendarDataset): Promise<Wo
 
     const start = shift.years.indexOf(2001);
     const end = shift.years.indexOf(2024);
+    if (start < 0 || end < 0) fail(`${region} regime-shift series must span 2001 to 2024`);
 
     series[region] = {
       years: shift.years,

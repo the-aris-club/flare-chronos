@@ -461,6 +461,7 @@
     "off": "{filters} off · artifact counts unchanged"
   },
   "Review": {
+    "saveFailed": "The decision could not be saved. Nothing was recorded; try again.",
     "review": "Review",
     "queue": "Review queue",
     "queueSub": "Agent runs that propose an action. Each row opens the full evidence and the decision rail.",

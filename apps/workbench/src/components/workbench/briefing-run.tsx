@@ -43,7 +43,7 @@ export function BriefingRun({
   const lang: 'en' | 'vi' = localized(locale, 'en', 'vi');
   const store = useReviewStore();
   const decision = store.decisionsFor(run.id);
-  const facts = Object.values(run.facts);
+  const facts = useMemo(() => Object.values(run.facts), [run.facts]);
   const [audience, setAudience] = useState<Audience>('rangers');
   const [factKey, setFactKey] = useState<string | null>(null);
   const fact = factKey ? run.facts[factKey] : null;
