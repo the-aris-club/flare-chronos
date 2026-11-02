@@ -68,7 +68,10 @@ export function ReviewRunView({ runId }: { runId: string }) {
 
   if (load !== 'ready' || !run) {
     return (
-      <p role={load === 'loading' ? 'status' : 'alert'} className="text-meta text-ink-muted px-4 py-10 text-center">
+      <p
+        role={load === 'loading' ? 'status' : 'alert'}
+        className="text-meta text-ink-muted px-4 py-10 text-center"
+      >
         {t(LOAD_MESSAGE[load === 'ready' ? 'failed' : load])}
       </p>
     );
@@ -90,8 +93,8 @@ export function ReviewRunView({ runId }: { runId: string }) {
   }
 
   return (
-    <div className="tablet:px-5 tablet:py-6 mx-auto flex w-full max-w-400 flex-col gap-3 px-3 py-4">
-      <div className="flex flex-wrap items-center gap-2">
+    <div className="tablet:px-5 tablet:py-6 mx-auto flex w-full max-w-400 flex-col gap-3 px-3 py-4 xl:h-[calc(100dvh-3.25rem)] xl:py-4">
+      <div className="flex shrink-0 flex-wrap items-center gap-2">
         <Link
           href="/review"
           className="text-meta text-ink-muted hover:text-ink border-line-strong inline-flex h-8 items-center gap-1 rounded-md border px-2"
@@ -99,7 +102,7 @@ export function ReviewRunView({ runId }: { runId: string }) {
           <Icon icon={ICON.back} size="sm" />
           {t('back')}
         </Link>
-        <h1 className="text-title font-mono font-semibold">{run.id}</h1>
+        <h1 className="text-title min-w-0 font-mono font-semibold break-all">{run.id}</h1>
         <span className="text-meta text-ink-muted">
           {run.useCase} · {labels.useCase(run.useCase)}
         </span>
@@ -113,10 +116,12 @@ export function ReviewRunView({ runId }: { runId: string }) {
         </p>
       )}
 
-      <div className="grid grid-cols-1 gap-3 xl:grid-cols-[18rem_minmax(0,1fr)_20rem]">
-        <RunSummary run={run} />
+      <div className="grid grid-cols-1 gap-3 xl:min-h-0 xl:flex-1 xl:grid-cols-[18rem_minmax(0,1fr)_20rem] xl:grid-rows-[minmax(0,1fr)]">
+        <div className="xl:min-h-0 xl:overflow-y-auto">
+          <RunSummary run={run} />
+        </div>
 
-        <section className="border-line bg-panel flex min-w-0 flex-col gap-3 rounded-lg border p-3">
+        <section className="border-line bg-panel flex max-h-[70dvh] min-w-0 flex-col gap-3 overflow-y-auto rounded-lg border p-3 *:shrink-0 xl:max-h-none xl:min-h-0">
           <h2 className="text-subhead font-semibold">{t('fullBrief')}</h2>
           {run.status === 'withheld' ? (
             <div className="border-purple/50 rounded-md border p-4">
@@ -146,7 +151,7 @@ export function ReviewRunView({ runId }: { runId: string }) {
           </p>
         </section>
 
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-3 xl:min-h-0 xl:overflow-y-auto">
           <EvidenceSummary run={run} />
           <ReviewDecision
             decided={decided}

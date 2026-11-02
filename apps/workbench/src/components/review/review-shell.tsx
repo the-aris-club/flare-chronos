@@ -22,10 +22,7 @@ export function ReviewShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="bg-canvas flex min-h-dvh flex-col">
       <HeaderBar>
-        <Link href="/workbench/mekong" className="shrink-0">
-          <span className="sr-only">{t('workbench')}</span>
-          <BrandMark />
-        </Link>
+        <BrandMark />
 
         <Link
           href="/workbench/mekong"
