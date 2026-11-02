@@ -12,6 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 for src in (
     ROOT / "apps" / "ai-service" / "src",
     ROOT / "packages" / "harmonization-core" / "src",
+    ROOT / "packages" / "firms-ingestion" / "src",
 ):
     sys.path.insert(0, str(src))
 
@@ -51,6 +52,18 @@ class TestToolNumbersComeFromTheArtifact(unittest.TestCase):
             self.assertRaisesRegex(RuntimeError, "coincident_calibration"),
         ):
             tools.tool_uc3_3_autonomous_biome_recalibration.invoke({})
+
+    def test_every_query_box_is_the_one_the_ingestion_uses(self) -> None:
+        from firms_ingestion import BBOX_MEKONG
+
+        sys.path.insert(0, str(ROOT / "apps" / "benchmark-cli" / "src"))
+        from benchmark_cli import fetch_cloud_cover
+
+        lon0, lat0, lon1, lat1 = fetch_cloud_cover.BBOX["mekong"]
+        self.assertEqual(f"{lon0},{lat0},{lon1},{lat1}", BBOX_MEKONG)
+
+        source = Path(tools.__file__).read_text()
+        self.assertIn(f'"corridor_bbox": "{BBOX_MEKONG}"', source)
 
 
 if __name__ == "__main__":

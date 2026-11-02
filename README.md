@@ -235,7 +235,7 @@ Hooks run: `ruff check` → `ruff format` → `pyright` → `pytest`.
 
 Raw NASA FIRMS CSVs are cached under `data/raw/` (Amazon & Mekong AOIs, 2000–2026). Empirical results and publication figures live under `data/processed/` and `docs/figures/`. See `data/raw/fetch_manifest.json` for provenance.
 
-The raw CSVs are committed so anyone can analyze the archive after a plain `git clone`, with no FIRMS key and no download. `data/raw/SHA256SUMS` pins every file; after adding or replacing a slice run `uv run python -m benchmark_cli.pin_raw_data` and commit the CSVs with the refreshed checksums (`tests/test_raw_data_integrity.py` fails until you do). The ERA5 cloud table is under `data/cloud/`.
+The raw CSVs are committed so anyone can analyze the archive after a plain `git clone`, with no FIRMS key and no download. `data/raw/SHA256SUMS` pins every file; after adding or replacing a slice run `uv run python -m benchmark_cli.pin_raw_data` and commit the CSVs with the refreshed checksums (`tests/test_raw_data_integrity.py` fails until you do). The ERA5 cloud table is under `data/cloud/`. The Mekong epoch slices are queried over `100.0,8.5,109.5,23.5` so the Mekong Delta is inside the measured area; the `mekong_season__*`, `2026` and `latest` files predate that change (they were fetched over `100.0,11.0,109.5,23.5`) and no epoch reads them.
 
 ---
 

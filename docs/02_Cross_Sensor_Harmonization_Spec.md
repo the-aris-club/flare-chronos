@@ -88,25 +88,25 @@ $$\text{FRP}_{\text{lim, VIIRS}}(A_p, \text{SZA}) = \left( 0.50 + 0.65 \cdot \ma
 
 ### 3.2. Hiệu Chuẩn Chéo Hai Giai Đoạn Trên Cặp Quỹ Đạo Đồng Thời Aqua–SNPP (`13:30 / 01:30 MLT`)
 
-Vệ tinh **Aqua (MODIS)** và **Suomi-NPP (VIIRS)** có cùng giờ địa phương bay qua xích đạo ($\sim 13\text{:}30\text{ MLT}$ ban ngày và $01\text{:}30\text{ MLT}$ ban đêm). Trong [`fit_coincident_aqua_snpp_model`](../packages/harmonization-core/src/flare_chronos_core/radiometric_calibrator.py), chúng tôi trích xuất **$N = 20.552$ cặp ô lưới đẳng diện tích đồng thời (Co-Incident Iso-Area Cells)** từ dữ liệu thực tế NASA FIRMS tại Tiểu vùng Mekong và Amazon trong giai đoạn chồng lấn `2012–2024`:
+Vệ tinh **Aqua (MODIS)** và **Suomi-NPP (VIIRS)** có cùng giờ địa phương bay qua xích đạo ($\sim 13\text{:}30\text{ MLT}$ ban ngày và $01\text{:}30\text{ MLT}$ ban đêm). Trong [`fit_coincident_aqua_snpp_model`](../packages/harmonization-core/src/flare_chronos_core/radiometric_calibrator.py), chúng tôi trích xuất **$N = 20.786$ cặp ô lưới đẳng diện tích đồng thời (Co-Incident Iso-Area Cells)** từ dữ liệu thực tế NASA FIRMS tại Tiểu vùng Mekong và Amazon trong giai đoạn chồng lấn `2012–2024`:
 
 1. **Giai đoạn 1 — Bù khuyết đuôi phân phối theo góc quét (Scan-Angle Observation Operator)**:
    $$\widetilde{\text{FRP}}_{\text{MODIS}}(\theta) = \text{FRP}_{\text{MODIS}} \cdot \left[ 1 + \kappa \cdot \ln\left(\max(1, A_p(\theta))\right) \right]$$
 2. **Giai đoạn 2 — Phép ánh xạ hỗn hợp Luật Lũy thừa & Phân vị Thực nghiệm (Parametric Power-Law + Empirical Quantile Mapping - EQM)**:
    $$\widehat{\text{FRP}}_{\text{VIIRS-eq}} = \gamma \cdot \left( \alpha \cdot \widetilde{\text{FRP}}_{\text{MODIS}}^{\beta} \right) + (1 - \gamma) \cdot F_{\text{VIIRS}}^{-1}\!\left( F_{\widetilde{\text{MODIS}}}\!\left(\widetilde{\text{FRP}}_{\text{MODIS}}\right) \right)$$
 
-#### Bảng Kết Quả Kiểm Định Thực Nghiệm Trên $N = 20.552$ Cặp Ô Lưới Đồng Thời Aqua–SNPP
+#### Bảng Kết Quả Kiểm Định Thực Nghiệm Trên $N = 20.786$ Cặp Ô Lưới Đồng Thời Aqua–SNPP
 
 | Chỉ Số Kiểm Định Thống Kê | Trước Đồng Bộ Hóa (Raw Aqua-MODIS vs. S-NPP VIIRS) | Sau Đồng Bộ Hóa (`Flare-Chronos` Two-Stage Operator) | Mức Cải Thiện Định Lượng |
 | :--- | :---: | :---: | :---: |
-| **Số cặp ô lưới đồng thời ($N_{\text{pairs}}$)** | $20.552\text{ ô lưới}$ | $20.552\text{ ô lưới}$ | Tập kiểm chứng thực tế NASA FIRMS |
-| **Tỷ số số điểm nóng trung bình ($\bar{N}_{\text{VIIRS}} / \bar{N}_{\text{MODIS}}$)** | $3.681\times$ | $1.000\times$ (Đã chuẩn hóa tương đương) | Khử sạch độ lệch mật độ $+256.0\%$ |
+| **Số cặp ô lưới đồng thời ($N_{\text{pairs}}$)** | $20.786\text{ ô lưới}$ | $20.786\text{ ô lưới}$ | Tập kiểm chứng thực tế NASA FIRMS |
+| **Tỷ số số điểm nóng trung bình ($\bar{N}_{\text{VIIRS}} / \bar{N}_{\text{MODIS}}$)** | $3.673\times$ | $1.000\times$ (Đã chuẩn hóa tương đương) | Khử sạch độ lệch mật độ $+256.0\%$ |
 | **Tỷ số tổng FRP trung bình ($\sum \text{FRP}_{\text{VIIRS}} / \sum \text{FRP}_{\text{MODIS}}$)** | $1.335\times$ | $1.004\times$ | Khử độ lệch thiếu hụt năng lượng $-27.1\%$ |
-| **Hệ số xác định ($R^2$)** | $0.7836$ | **$0.8046$** | Tăng độ tương quan giải thích phương sai |
-| **Sai số toàn phương trung bình ($\text{RMSE}$, $\text{MW/cell}$)** | $141.861\text{ MW}$ | **$134.807\text{ MW}$** | Giảm sai số bậc hai trên toàn dải |
-| **Khoảng cách phân phối Kolmogorov-Smirnov ($D_{\text{KS}}$)** | $0.1151$ | **$0.0348$** | **Giảm $69.8\%$ sai lệch phân phối xác suất!** |
+| **Hệ số xác định ($R^2$)** | $0.7839$ | **$0.8048$** | Tăng độ tương quan giải thích phương sai |
+| **Sai số toàn phương trung bình ($\text{RMSE}$, $\text{MW/cell}$)** | $141.087\text{ MW}$ | **$134.077\text{ MW}$** | Giảm sai số bậc hai trên toàn dải |
+| **Khoảng cách phân phối Kolmogorov-Smirnov ($D_{\text{KS}}$)** | $0.1153$ | **$0.0353$** | **Giảm $69.4\%$ sai lệch phân phối xác suất!** |
 
-**Kiểm định trên các năm giữ lại.** Các chỉ số trong bảng trên được tính trong mẫu nên lạc quan. Khi khớp trên các cặp đến năm $2019$ ($11.629$ cặp) và chấm điểm trên các cặp từ $2020$ ($8.923$ cặp): $\text{RMSE}$ giảm từ $156{,}5$ xuống $155{,}9\text{ MW}$ (giảm $0{,}7\text{ MW}$, khoảng $0{,}4\%$); khoảng tin cậy $95\%$ của mức giảm (bootstrap theo nhóm ngày–vùng) là $-6{,}1$ đến $+7{,}3\text{ MW}$, bao trùm số $0$; trọng số blend khớp được là $0{,}850$ (thay cho $0{,}65$ cố định). Vì vậy trên mẫu giữ lại, hiệu chuẩn công suất **không cho bằng chứng có ý nghĩa thống kê** về việc giảm sai số $\text{RMSE}$; phần cải thiện $R^2$ và $D_{\text{KS}}$ trong mẫu chủ yếu phản ánh việc khớp phân phối, và phần lớn sai số còn lại không giảm được bằng hiệu chuẩn công suất.
+**Kiểm định trên các năm giữ lại.** Các chỉ số trong bảng trên được tính trong mẫu nên lạc quan. Khi khớp trên các cặp đến năm $2019$ ($11.786$ cặp) và chấm điểm trên các cặp từ $2020$ ($9.000$ cặp): $\text{RMSE}$ giảm từ $155{,}9$ xuống $155{,}2\text{ MW}$ (giảm $0{,}7\text{ MW}$, khoảng $0{,}5\%$); khoảng tin cậy $95\%$ của mức giảm (bootstrap theo nhóm ngày–vùng) là $-6{,}0$ đến $+7{,}3\text{ MW}$, bao trùm số $0$; trọng số blend khớp được là $0{,}852$ (thay cho $0{,}65$ cố định). Vì vậy trên mẫu giữ lại, hiệu chuẩn công suất **không cho bằng chứng có ý nghĩa thống kê** về việc giảm sai số $\text{RMSE}$; phần cải thiện $R^2$ và $D_{\text{KS}}$ trong mẫu chủ yếu phản ánh việc khớp phân phối, và phần lớn sai số còn lại không giảm được bằng hiệu chuẩn công suất.
 
 ![Cross Sensor FRP Calibration](figures/fig3_cross_sensor_frp_quantile_mapping.png)
 

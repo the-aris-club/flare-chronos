@@ -7,3 +7,4 @@
 02/11/2026 — docs/05_Pitch_Deck_and_Video_Script.md — cập nhật: số cặp, D_KS và mức giảm 69,8% theo bộ dữ liệu mới
 02/11/2026 — exports/PROPOSAL.md — cập nhật: cùng các số liệu hiệu chuẩn mới
 02/11/2026 — exports/REPORT.md — cập nhật: cùng các số liệu hiệu chuẩn mới
+02/11/2026 — README.md — cập nhật: vùng truy vấn FIRMS Mê Kông mở rộng xuống 8,5°N để gồm Đồng bằng sông Cửu Long

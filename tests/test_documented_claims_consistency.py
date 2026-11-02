@@ -376,17 +376,17 @@ class DocumentedClaimsConsistencyTest(unittest.TestCase):
     def test_step_jump_figure_is_published(self) -> None:
         """The artificial multi-sensor step jump is quoted with its exact value.
 
-        The raw index (2005 = 100) for the 2024 epoch is 1,424.2, i.e. a
-        +1,324.2% jump over baseline. The Vietnamese convention puts the
-        thousands separator on the dot, so the figure renders as ``1.324,2%``;
-        a bare ``1.324%`` reads as 1.3% to an English reader and is the exact
+        The raw index (2005 = 100) for the 2024 epoch is 1,411.2, i.e. a
+        +1,311.2% jump over baseline. The Vietnamese convention puts the
+        thousands separator on the dot, so the figure renders as ``1.311,2%``;
+        a bare ``1.311%`` reads as 1.3% to an English reader and is the exact
         ambiguity ``docs/media/SOURCES.md`` rule 4 exists to prevent.
         """
         mekong = self.results["regime_shift_series"]["mekong"]
         years = mekong["years"]
         raw_index = mekong["raw_index_2005_eq_100"]
         jump_2024 = (raw_index[years.index(2024)] - 100.0) / 100.0 * 100.0
-        self.assertAlmostEqual(jump_2024, 1324.2, delta=0.05)
+        self.assertAlmostEqual(jump_2024, 1311.2, delta=0.05)
         for doc in (
             "docs/01_NASA_SpaceApps_Proposal.md",
             "exports/PROPOSAL.md",
@@ -400,8 +400,8 @@ class DocumentedClaimsConsistencyTest(unittest.TestCase):
             )
             self._assert_none_present(
                 doc,
-                "ambiguous step jump (bare 1.324%)",
-                ("+1.324%", "+1,324%"),
+                "ambiguous step jump (bare 1.311%)",
+                ("+1.311%", "+1,311%"),
             )
 
     def test_early_warning_claim_uses_the_display_threshold(self) -> None:
@@ -525,7 +525,7 @@ class DocumentedClaimsConsistencyTest(unittest.TestCase):
             list(self.results["mekong_empirical_epochs"]),
             list(self.results["amazon_empirical_epochs"]),
         )
-        expected_max = {"mekong": 1324.2, "amazon": 714.3}
+        expected_max = {"mekong": 1311.2, "amazon": 714.3}
         for region in ("mekong", "amazon"):
             rdata = series[region]
             years = rdata["years"]
