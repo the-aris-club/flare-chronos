@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Script from 'next/script';
 import { IBM_Plex_Mono, IBM_Plex_Sans } from 'next/font/google';
 import { cookies } from 'next/headers';
 import { NextIntlClientProvider } from 'next-intl';
@@ -41,6 +42,9 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   return (
     <html lang={locale} data-theme={theme} suppressHydrationWarning>
       <body className={`${sans.variable} ${mono.variable} bg-canvas text-ink`}>
+        <Script id="theme-cookie-sync" strategy="beforeInteractive">
+          {`(function(){try{var m=document.cookie.match(/(?:^|; )fc-theme=([^;]+)/);var v=m?decodeURIComponent(m[1]):null;if(v==='dark'||v==='light')localStorage.setItem('fc-theme',v);}catch(e){}})();`}
+        </Script>
         <NextIntlClientProvider locale={locale} messages={messages}>
           <ThemeProvider initialTheme={theme}>
             <ReviewStoreProvider>
