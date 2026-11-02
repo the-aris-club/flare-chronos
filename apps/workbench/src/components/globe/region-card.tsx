@@ -1,7 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { AmIcon, ICON } from '@/components/ui/icon';
+import { Icon, ICON } from '@/components/ui/icon';
 import type { RegionId } from '@/lib/calendar/types';
 
 export type RegionCardData = {
@@ -45,7 +45,7 @@ export function RegionCard({
       }`}
     >
       <span className="text-subhead font-semibold">{region.name}</span>
-      <AmIcon icon={ICON.arrow} size="sm" className="text-ink-muted" />
+      <Icon icon={ICON.arrow} size="sm" className="text-ink-muted" />
 
       <span className="text-label text-ink-subtle col-span-2 font-mono">{region.coverage}</span>
 

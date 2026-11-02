@@ -1,7 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { AmIcon, ICON } from '@/components/ui/icon';
+import { Icon, ICON } from '@/components/ui/icon';
 import type { RegionId } from '@/lib/calendar/types';
 import { RegionCard, type RegionCardData } from './region-card';
 
@@ -52,7 +52,7 @@ export function LandingPanel({
       >
         <span className="bg-line-strong h-1 w-9 rounded-full" />
         <span className="inline-flex items-center gap-1.5">
-          <AmIcon icon={ICON.chevron} size="sm" className={collapsed ? 'rotate-180' : ''} />
+          <Icon icon={ICON.chevron} size="sm" className={collapsed ? 'rotate-180' : ''} />
           {collapsed ? t('showPanel') : t('hidePanel')}
         </span>
       </button>
@@ -105,7 +105,7 @@ export function LandingPanel({
           onClick={onTour}
           className="bg-ink text-canvas text-body inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg px-3 font-semibold whitespace-nowrap"
         >
-          <AmIcon icon={ICON.tour} size="sm" />
+          <Icon icon={ICON.tour} size="sm" />
           {t('tour')}
         </button>
         <button

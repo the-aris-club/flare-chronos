@@ -7,7 +7,7 @@ import { ReviewGate } from '@/components/review/review-gate';
 import { useService } from '@/components/service/service-provider';
 import { BrandMark } from '@/components/ui/brand-mark';
 import { HeaderBar } from '@/components/ui/header-bar';
-import { AmIcon, ICON } from '@/components/ui/icon';
+import { Icon, ICON } from '@/components/ui/icon';
 import { LocaleToggle } from '@/components/ui/locale-toggle';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 
@@ -31,7 +31,7 @@ export function ReviewShell({ children }: { children: React.ReactNode }) {
           href="/workbench/mekong"
           className="text-body text-ink-muted hover:text-ink tablet:inline-flex hidden items-center gap-1"
         >
-          <AmIcon icon={ICON.back} size="sm" />
+          <Icon icon={ICON.back} size="sm" />
           {t('workbench')}
         </Link>
 

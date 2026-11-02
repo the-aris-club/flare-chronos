@@ -1,7 +1,7 @@
 'use client';
 
 import { useLocale, useTranslations } from 'next-intl';
-import { AmIcon, ICON } from '@/components/ui/icon';
+import { Icon, ICON } from '@/components/ui/icon';
 import { formatCount, formatDecimal } from '@/lib/workbench/format';
 import type { Calibration, MapPhysics } from '@/lib/workbench/types';
 
@@ -63,7 +63,7 @@ export function EvidenceQuickLook({
         onClick={onOpen}
         className="border-line-strong text-meta hover:bg-chip inline-flex h-8 items-center gap-1.5 self-start rounded-md border px-2.5 font-medium"
       >
-        <AmIcon icon={ICON.evidence} size="sm" />
+        <Icon icon={ICON.evidence} size="sm" />
         {t('quickOpen')}
       </button>
     </section>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { AmIcon, ICON } from '@/components/ui/icon';
+import { Icon, ICON } from '@/components/ui/icon';
 import type { MapLayers } from '@/lib/workbench/types';
 
 export const DEFAULT_LAYERS: MapLayers = {
@@ -95,7 +95,7 @@ export function MapZoom({
         onClick={() => onZoom(2)}
         className="text-ink-muted hover:bg-chip hover:text-ink inline-flex size-7 items-center justify-center"
       >
-        <AmIcon icon={ICON.plus} size="sm" />
+        <Icon icon={ICON.plus} size="sm" />
       </button>
       <button
         type="button"
@@ -103,7 +103,7 @@ export function MapZoom({
         onClick={() => onZoom(0.5)}
         className="border-line text-ink-muted hover:bg-chip hover:text-ink inline-flex size-7 items-center justify-center border-t"
       >
-        <AmIcon icon={ICON.minus} size="sm" />
+        <Icon icon={ICON.minus} size="sm" />
       </button>
       <button
         type="button"
@@ -111,7 +111,7 @@ export function MapZoom({
         onClick={onReset}
         className="border-line text-ink-muted hover:bg-chip hover:text-ink inline-flex size-7 items-center justify-center border-t"
       >
-        <AmIcon icon={ICON.reset} size="sm" />
+        <Icon icon={ICON.reset} size="sm" />
       </button>
     </div>
   );

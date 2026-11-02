@@ -1,7 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { AmIcon, ICON } from '@/components/ui/icon';
+import { Icon, ICON } from '@/components/ui/icon';
 import { useTheme } from '@/components/ui/theme-provider';
 import { writeCookie } from '@/lib/browser';
 import { THEME_COOKIE } from '@/lib/theme';
@@ -23,7 +23,7 @@ export function ThemeToggle() {
       title={label}
       className="border-line-strong text-ink-muted hover:bg-chip hover:text-ink inline-flex size-8 items-center justify-center rounded-md border transition-colors"
     >
-      <AmIcon icon={ICON.theme} size="sm" />
+      <Icon icon={ICON.theme} size="sm" />
     </button>
   );
 }

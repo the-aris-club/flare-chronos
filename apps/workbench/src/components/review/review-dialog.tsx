@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { useTranslations } from 'next-intl';
-import { AmIcon, ICON } from '@/components/ui/icon';
+import { Icon, ICON } from '@/components/ui/icon';
 
 type ReviewDialogProps = {
   title: string;
@@ -68,7 +68,7 @@ export function ReviewDialog({
             aria-label={t('close')}
             className="border-line text-ink-muted hover:bg-chip hover:text-ink inline-flex size-8 shrink-0 items-center justify-center rounded-md border"
           >
-            <AmIcon icon={ICON.close} size="sm" />
+            <Icon icon={ICON.close} size="sm" />
           </button>
         </header>
 

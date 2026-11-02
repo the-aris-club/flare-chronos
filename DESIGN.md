@@ -141,7 +141,7 @@ Location `apps/workbench/src/components/ui`. One concern per file, flat.
 
 | Primitive | Contract |
 |---|---|
-| `icon.tsx` | `ICON` concept registry and `AmIcon`. Renders `lucide-react`; sets `aria-hidden` and `focusable="false"`; `size` is `xs \| sm \| md \| lg`. |
+| `icon.tsx` | `ICON` concept registry and `Icon`. Renders `lucide-react`; sets `aria-hidden` and `focusable="false"`; `size` is `xs \| sm \| md \| lg \| xl`. |
 | `segmented-control.tsx` | `role="group"`, `aria-pressed` buttons, mono labels, 2 px inset track. |
 | `brand-mark.tsx` | CSS crop of `/logo.png` plus the `FLARE CHRONOS` wordmark; decorative image, `alt=""`. |
 | `theme-toggle.tsx` | Icon button; flips the theme cookie and `data-theme` without a reload. |
@@ -172,7 +172,7 @@ line count.
 ## 5. Icon vocabulary
 
 One concept-keyed registry in `components/ui/icon.tsx`. App code imports `ICON` and
-`AmIcon`; app code never imports `lucide-react` directly and never draws a Unicode
+`Icon`; app code never imports `lucide-react` directly and never draws a Unicode
 glyph, emoji, or fullwidth symbol in JSX.
 
 | Concept | Glyph | Use |
@@ -207,7 +207,7 @@ glyph, emoji, or fullwidth symbol in JSX.
 
 Rules: a new concept adds a key here in the same change. An icon-only `<button>` or
 `<a>` must carry `aria-label` or `aria-labelledby`. Decorative icons always
-`aria-hidden`. Text arrows are `AmIcon icon={ICON.external}`, not `→`.
+`aria-hidden`. Text arrows are `Icon icon={ICON.external}`, not `→`.
 
 ## 6. Copy voice
 

@@ -2,7 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 import { BrandMark } from '@/components/ui/brand-mark';
-import { AmIcon, ICON } from '@/components/ui/icon';
+import { Icon, ICON } from '@/components/ui/icon';
 import { LocaleToggle } from '@/components/ui/locale-toggle';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 
@@ -18,7 +18,7 @@ export function LandingHeader({ years }: { years: number }) {
 
       <div className="pointer-events-auto ml-auto flex items-center gap-2">
         <span className="border-line bg-panel/70 text-meta text-ink-muted tablet:inline-flex hidden h-8 items-center gap-1.5 rounded-md border px-2.5 backdrop-blur-sm">
-          <AmIcon icon={ICON.service} size="sm" className="text-amber" />
+          <Icon icon={ICON.service} size="sm" className="text-amber" />
           {header('notConnected')}
         </span>
         <LocaleToggle />

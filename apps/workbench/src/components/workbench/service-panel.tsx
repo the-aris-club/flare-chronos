@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useService } from '@/components/service/service-provider';
 import { Chip, type ChipTone } from '@/components/ui/chip';
-import { AmIcon, ICON } from '@/components/ui/icon';
+import { Icon, ICON } from '@/components/ui/icon';
 
 export function RailStatusChip({ tone, label }: { tone: ChipTone; label: string }) {
   return <Chip tone={tone}>{label}</Chip>;
@@ -20,7 +20,7 @@ export function ServiceDown() {
     >
       <div className="flex items-center gap-2.5">
         <span className="border-bad text-bad inline-flex size-7 items-center justify-center rounded-md border-[1.5px]">
-          <AmIcon icon={ICON.xCircle} size="sm" />
+          <Icon icon={ICON.xCircle} size="sm" />
         </span>
         <span className="text-subhead font-semibold">{t('title')}</span>
       </div>

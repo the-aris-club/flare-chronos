@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useService } from '@/components/service/service-provider';
-import { AmIcon, ICON } from '@/components/ui/icon';
+import { Icon, ICON } from '@/components/ui/icon';
 import { IDLE_RUN, reduceRun, type RunView } from '@/lib/service/run';
 import { BriefingRun, type Preset } from './briefing-run';
 import { ConnectPanel, RailStatusChip, ServiceDown } from './service-panel';
@@ -78,7 +78,7 @@ export function BriefingRail({ region, state, onToggle }: BriefingRailProps) {
             aria-label={t('close')}
             className="border-line text-ink-muted hover:bg-chip hover:text-ink ml-auto inline-flex size-7 items-center justify-center rounded-md border"
           >
-            <AmIcon icon={ICON.chevron} size="sm" className="rotate-90" />
+            <Icon icon={ICON.chevron} size="sm" className="rotate-90" />
           </button>
         </header>
 
@@ -98,7 +98,7 @@ export function BriefingRail({ region, state, onToggle }: BriefingRailProps) {
         aria-label={t('open')}
         className="fc-rail-collapsed text-ink-muted hover:bg-chip hover:text-ink hidden h-full flex-col items-center gap-2 py-3 group-data-[state=closed]:flex"
       >
-        <AmIcon icon={ICON.chevron} size="sm" className="-rotate-90" />
+        <Icon icon={ICON.chevron} size="sm" className="-rotate-90" />
         <span className="fc-vertical text-meta">{t('title')}</span>
         <span
           aria-hidden="true"

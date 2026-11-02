@@ -2,7 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 import { Chip } from '@/components/ui/chip';
-import { AmIcon, ICON } from '@/components/ui/icon';
+import { Icon, ICON } from '@/components/ui/icon';
 import type { ReviewStatus } from '@/lib/review/api';
 
 const UTC_CLOCK = new Intl.DateTimeFormat('en-GB', {
@@ -55,7 +55,7 @@ export function CheckRow({ ok, label, detail }: { ok: boolean; label: string; de
 
   return (
     <div className="border-line flex items-start gap-2 border-b py-2 last:border-0">
-      <AmIcon
+      <Icon
         icon={ok ? ICON.check : ICON.alert}
         size="sm"
         className={`mt-0.5 shrink-0 ${ok ? 'text-ok' : 'text-warn'}`}

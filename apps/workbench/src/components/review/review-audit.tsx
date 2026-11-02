@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useService } from '@/components/service/service-provider';
-import { AmIcon, ICON } from '@/components/ui/icon';
+import { Icon, ICON } from '@/components/ui/icon';
 import { parseAudit, type AuditRow } from '@/lib/review/api';
 import { utcTime } from './review-bits';
 import { FilterSelect } from './review-select';
@@ -118,7 +118,7 @@ export function ReviewAudit() {
             onClick={exportCsv}
             className="border-line-strong text-meta hover:bg-chip inline-flex h-8 items-center gap-1.5 rounded-md border px-2.5 font-medium"
           >
-            <AmIcon icon={ICON.download} size="sm" />
+            <Icon icon={ICON.download} size="sm" />
             {t('exportCsv')}
           </button>
           <button
@@ -126,7 +126,7 @@ export function ReviewAudit() {
             onClick={exportJson}
             className="border-line-strong text-meta hover:bg-chip inline-flex h-8 items-center gap-1.5 rounded-md border px-2.5 font-medium"
           >
-            <AmIcon icon={ICON.download} size="sm" />
+            <Icon icon={ICON.download} size="sm" />
             {t('exportJson')}
           </button>
         </div>
@@ -212,7 +212,7 @@ export function ReviewAudit() {
                         row.approved ? 'border-ok text-ok' : 'border-bad text-bad'
                       }`}
                     >
-                      <AmIcon icon={row.approved ? ICON.check : ICON.close} size="xs" />
+                      <Icon icon={row.approved ? ICON.check : ICON.close} size="xs" />
                       {row.approved ? t('approved') : t('rejected')}
                     </span>
                   </td>

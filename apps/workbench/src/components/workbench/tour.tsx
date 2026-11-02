@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
-import { AmIcon, ICON } from '@/components/ui/icon';
+import { Icon, ICON } from '@/components/ui/icon';
 import { formatSigma } from '@/lib/calendar/format';
 import type { TourFigures } from '@/lib/workbench/tour-figures';
 
@@ -94,7 +94,7 @@ export function TourOverlay({ onClose, figures }: { onClose: () => void; figures
             aria-label={t('close')}
             className="text-ink-muted hover:bg-chip hover:text-ink inline-flex size-6 items-center justify-center rounded-sm"
           >
-            <AmIcon icon={ICON.close} size="sm" />
+            <Icon icon={ICON.close} size="sm" />
           </button>
         </div>
 

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { AmIcon, ICON } from '@/components/ui/icon';
+import { Icon, ICON } from '@/components/ui/icon';
 import { Markdown } from '@/components/ui/markdown';
 import { useLabels } from '@/components/review/use-labels';
 import type { RunView } from '@/lib/service/run';
@@ -73,11 +73,11 @@ export function BriefingRun({
 
           <ul className="text-meta flex flex-col gap-1.5">
             <li className="flex items-center gap-2">
-              <AmIcon icon={run.nodes.length > 0 ? ICON.check : ICON.dot} size="xs" />
+              <Icon icon={run.nodes.length > 0 ? ICON.check : ICON.dot} size="xs" />
               {t('stepsLine', { count: run.nodes.length })}
             </li>
             <li className="flex items-start gap-2">
-              <AmIcon icon={run.tools.length > 0 ? ICON.check : ICON.dot} size="xs" />
+              <Icon icon={run.tools.length > 0 ? ICON.check : ICON.dot} size="xs" />
               <span className="min-w-0">
                 {t('toolsLine', { count: run.tools.length })}
                 <span className="text-ink-subtle block font-mono break-words">
@@ -87,7 +87,7 @@ export function BriefingRun({
             </li>
             {verification && (
               <li className="flex items-center gap-2">
-                <AmIcon
+                <Icon
                   icon={verification.passed ? ICON.check : ICON.alert}
                   size="xs"
                   className={verification.passed ? 'text-ok' : 'text-bad'}

@@ -99,7 +99,7 @@ packages/i18n/               # messages/en.json, messages/vi.json
 ### 4.3 `packages/ui` minimum
 
 - `tokens.css` with `@theme inline` mappings for the §6.1 tokens. Name them by role, not by hex.
-- `icon.tsx` with `ICON` and `<AmIcon>`; `lucide-react` is the only icon dependency.
+- `icon.tsx` with `ICON` and `<Icon>`; `lucide-react` is the only icon dependency.
 - `cn` from `cn`; do not write a wrapper.
 - No app-specific components yet.
 

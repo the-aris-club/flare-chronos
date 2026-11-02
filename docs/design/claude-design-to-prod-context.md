@@ -120,7 +120,7 @@ Reviewer surfaces:
 | `<iframe src="map.html">` | Client island with a real map renderer, or a native SVG map |
 | `?screen=` routing | Next.js App Router routes |
 | `window.innerWidth` breakpoints | CSS-first Tailwind breakpoints |
-| Unicode glyph icons | `ICON` registry + `<AmIcon>` |
+| Unicode glyph icons | `ICON` registry + `<Icon>` |
 | Inline `style="..."` | Tailwind utilities + `@theme` tokens |
 | Google Fonts `<link>` | `next/font` |
 | `image-slot` figures | Native SVG / chart components |
@@ -375,7 +375,7 @@ apps/workbench/
   src/lib/data/figures.ts             # one figureData source
   src/lib/api/client.ts               # axios
   src/lib/api/stream.ts               # fetch + SSE reader
-  src/components/ui/                  # primitives, ICON + AmIcon
+  src/components/ui/                  # primitives, ICON + Icon
   src/i18n/                           # en.ts, vi.ts
 ```
 

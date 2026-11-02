@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
 import { useService } from '@/components/service/service-provider';
-import { AmIcon, ICON } from '@/components/ui/icon';
+import { Icon, ICON } from '@/components/ui/icon';
 import { Markdown } from '@/components/ui/markdown';
 import type { FailureReason } from '@/lib/service/client';
 import { parseAudit, parseRun, type AuditRow, type ReviewRun } from '@/lib/review/api';
@@ -96,7 +96,7 @@ export function ReviewRunView({ runId }: { runId: string }) {
           href="/review"
           className="text-meta text-ink-muted hover:text-ink border-line-strong inline-flex h-8 items-center gap-1 rounded-md border px-2"
         >
-          <AmIcon icon={ICON.back} size="sm" />
+          <Icon icon={ICON.back} size="sm" />
           {t('back')}
         </Link>
         <h1 className="text-title font-mono font-semibold">{run.id}</h1>

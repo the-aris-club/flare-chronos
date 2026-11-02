@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import Image from 'next/image';
 import { useLocale, useTranslations } from 'next-intl';
-import { AmIcon, ICON } from '@/components/ui/icon';
+import { Icon, ICON } from '@/components/ui/icon';
 import type { CalendarRegionData } from '@/lib/calendar/types';
 import { buildEvidenceTables } from '@/lib/workbench/evidence-tables';
 import type { AnnualSeries, Calibration, Epoch, MapPhysics } from '@/lib/workbench/types';
@@ -91,7 +91,7 @@ export function EvidenceDrawer({
             autoFocus
             className="border-line text-ink-muted hover:bg-chip hover:text-ink ml-auto inline-flex size-7 items-center justify-center rounded-md border"
           >
-            <AmIcon icon={ICON.close} size="sm" />
+            <Icon icon={ICON.close} size="sm" />
           </button>
         </header>
 

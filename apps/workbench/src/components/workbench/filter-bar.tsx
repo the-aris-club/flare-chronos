@@ -1,7 +1,7 @@
 'use client';
 
 import { useLocale, useTranslations } from 'next-intl';
-import { AmIcon, ICON } from '@/components/ui/icon';
+import { Icon, ICON } from '@/components/ui/icon';
 import type { Epoch, MapFilters } from '@/lib/workbench/types';
 import { formatCount } from '@/lib/workbench/format';
 
@@ -64,7 +64,7 @@ export function FilterBar({
                 : 'border-line-strong text-transparent'
             }`}
           >
-            <AmIcon icon={ICON.check} size="xs" />
+            <Icon icon={ICON.check} size="xs" />
           </span>
           {labels[key]}
         </button>

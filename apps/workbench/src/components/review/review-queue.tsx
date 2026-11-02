@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { useService } from '@/components/service/service-provider';
-import { AmIcon, ICON } from '@/components/ui/icon';
+import { Icon, ICON } from '@/components/ui/icon';
 import type { ReviewStatus } from '@/lib/review/api';
 import { useLabels } from './use-labels';
 import { StatusChip, utcTime } from './review-bits';
@@ -65,7 +65,7 @@ export function ReviewQueue() {
                 : 'text-ink-muted hover:text-ink border-transparent'
             }`}
           >
-            <AmIcon icon={ICONS[value]} size="xs" />
+            <Icon icon={ICONS[value]} size="xs" />
             {t(value)}
             <span className="text-label text-ink-subtle font-mono">{counts[value]}</span>
           </button>
@@ -74,7 +74,7 @@ export function ReviewQueue() {
 
       <label className="relative max-w-md">
         <span className="sr-only">{t('search')}</span>
-        <AmIcon
+        <Icon
           icon={ICON.search}
           size="sm"
           className="text-ink-subtle pointer-events-none absolute top-2.5 left-2.5"
