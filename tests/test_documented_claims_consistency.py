@@ -246,6 +246,26 @@ class DocumentedClaimsConsistencyTest(unittest.TestCase):
         for doc in CALIBRATION_DOCS:
             self._assert_any_present(doc, "KS-error reduction percentage", forms)
 
+    def test_r2_before_and_after_are_published_together(self) -> None:
+        """The R^2 row of the calibration table quotes both artifact values."""
+        calib = self.results["coincident_calibration"]
+        for doc in (
+            "docs/02_Cross_Sensor_Harmonization_Spec.md",
+            "exports/PROPOSAL.md",
+        ):
+            row = next(
+                line
+                for line in self.docs[doc].splitlines()
+                if "Hệ số xác định" in line and "R^2" in line
+            )
+            with self.subTest(doc=doc):
+                self.assertTrue(
+                    any(v in row for v in either(calib["raw_r2"], 4)), msg=row
+                )
+                self.assertTrue(
+                    any(v in row for v in either(calib["harm_r2"], 4)), msg=row
+                )
+
     def test_calibration_parameters_are_published(self) -> None:
         """alpha and beta of the fitted power-law transfer function are published."""
         calib = self.results["coincident_calibration"]

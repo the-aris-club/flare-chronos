@@ -102,7 +102,7 @@ Vệ tinh **Aqua (MODIS)** và **Suomi-NPP (VIIRS)** có cùng giờ địa phư
 | **Số cặp ô lưới đồng thời ($N_{\text{pairs}}$)** | $20.552\text{ ô lưới}$ | $20.552\text{ ô lưới}$ | Tập kiểm chứng thực tế NASA FIRMS |
 | **Tỷ số số điểm nóng trung bình ($\bar{N}_{\text{VIIRS}} / \bar{N}_{\text{MODIS}}$)** | $3.681\times$ | $1.000\times$ (Đã chuẩn hóa tương đương) | Khử sạch độ lệch mật độ $+256.0\%$ |
 | **Tỷ số tổng FRP trung bình ($\sum \text{FRP}_{\text{VIIRS}} / \sum \text{FRP}_{\text{MODIS}}$)** | $1.335\times$ | $1.004\times$ | Khử độ lệch thiếu hụt năng lượng $-27.1\%$ |
-| **Hệ số xác định ($R^2$)** | $0.7330$ | **$0.8046$** | Tăng độ tương quan giải thích phương sai |
+| **Hệ số xác định ($R^2$)** | $0.7836$ | **$0.8046$** | Tăng độ tương quan giải thích phương sai |
 | **Sai số toàn phương trung bình ($\text{RMSE}$, $\text{MW/cell}$)** | $141.861\text{ MW}$ | **$134.807\text{ MW}$** | Giảm sai số bậc hai trên toàn dải |
 | **Khoảng cách phân phối Kolmogorov-Smirnov ($D_{\text{KS}}$)** | $0.1151$ | **$0.0348$** | **Giảm $69.8\%$ sai lệch phân phối xác suất!** |
 
