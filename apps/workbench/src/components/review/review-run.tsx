@@ -52,8 +52,6 @@ export function ReviewRunView({ runId }: { runId: string }) {
   }, [get, runId]);
 
   useEffect(() => {
-    // The first fetch happens after the connection exists; this is the only subscription.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     void refetch();
   }, [refetch]);
 
