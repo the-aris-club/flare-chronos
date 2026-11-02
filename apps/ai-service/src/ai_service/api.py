@@ -18,6 +18,7 @@ from __future__ import annotations
 import asyncio
 import json
 import os
+import re
 import tempfile
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
@@ -93,6 +94,9 @@ def _unauthorized(detail: str) -> HTTPException:
 
 
 _bearer = HTTPBearer(auto_error=False)
+# `fc-dev-<jwt>` / `fc-examiner-<jwt>`: the prefix tells a human whose token it is. It is
+# stripped before validation and never read as a claim, so it cannot grant anything.
+_TOKEN_LABEL = re.compile(r"^fc-(?:dev|examiner)-")
 
 
 def authenticate(
@@ -104,7 +108,7 @@ def authenticate(
         return Principal("demo", frozenset({APPROVER_ROLE}))
     if credentials is None or not credentials.credentials or not cfg.key:
         raise _unauthorized("a bearer token is required")
-    bearer = credentials.credentials
+    bearer = _TOKEN_LABEL.sub("", credentials.credentials, count=1)
     try:
         claims = jwt.decode(
             bearer,

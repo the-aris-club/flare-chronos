@@ -12,7 +12,8 @@ function base64UrlToText(value: string): string {
  * treat these claims as authorization.
  */
 export function decodeClaims(token: string): Claims | null {
-  const payload = token.split('.')[1];
+  // `fc-dev-<jwt>` / `fc-examiner-<jwt>`: the prefix is a label, the JWT is the credential.
+  const payload = token.replace(/^fc-(?:dev|examiner)-/, '').split('.')[1];
   if (!payload) return null;
 
   try {

@@ -20,6 +20,14 @@ describe('decodeClaims', () => {
     });
   });
 
+  test('reads a token carrying an fc-dev- or fc-examiner- label', () => {
+    for (const label of ['fc-dev-', 'fc-examiner-']) {
+      expect(
+        decodeClaims(`${label}${jwt({ sub: 'dev-1', roles: ['approver'], exp: 3 })}`)?.sub,
+      ).toBe('dev-1');
+    }
+  });
+
   test('a token without a name or roles still has a subject and no roles', () => {
     expect(decodeClaims(jwt({ sub: 'bob', exp: 1 }))).toEqual({
       sub: 'bob',
@@ -29,7 +37,7 @@ describe('decodeClaims', () => {
     });
   });
 
-  test('decodes in a browser, where Node\'s Buffer does not exist, including non-ASCII names', () => {
+  test("decodes in a browser, where Node's Buffer does not exist, including non-ASCII names", () => {
     const token = jwt({ sub: 'mai', name: 'Nguyễn Thị Mai', roles: ['approver'], exp: 2 });
     const original = globalThis.Buffer;
     // @ts-expect-error simulate a browser global scope

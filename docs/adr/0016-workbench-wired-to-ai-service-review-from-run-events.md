@@ -8,7 +8,7 @@ status: accepted
 
 ## Decision
 
-Every Workbench surface that read a fixture reads the real source instead: the briefing run and sign-off call `ai-service` directly with a pasted bearer token (held in memory, CORS set for the Workbench origin, stream read with `fetch`), the Calendar reads only the exported artifact, and Review is a projection of a **Run Event Log** the service now stores. The simulator, the `data/fixtures/review*` files, the app-local `/api/review/decisions` route and `CALENDAR_FIXTURE` are deleted.
+Every Workbench surface that read a fixture reads the real source instead: the briefing run and sign-off call `ai-service` directly with a pasted bearer token (held in memory and in a SameSite=Strict `fc_token` cookie that expires with the token, CORS set for the Workbench origin, stream read with `fetch`), the Calendar reads only the exported artifact, and Review is a projection of a **Run Event Log** the service now stores. The simulator, the `data/fixtures/review*` files, the app-local `/api/review/decisions` route and `CALENDAR_FIXTURE` are deleted.
 
 `ai-service` gains an append-only events table, `GET /api/v1/review/runs`, `GET /api/v1/review/runs/{id}` and `GET /api/v1/review/runs/{id}/audit`, and an optional `reason_code` on resume and audit (migration keeps the append-only triggers). Approvers see every Review Run; other principals see their own. Run content (briefing, fact text) is shown as authored, never machine-translated; interface chrome stays EN/VI. The reviewer shown is the principal named by the token.
 

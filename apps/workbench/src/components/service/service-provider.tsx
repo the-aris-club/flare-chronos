@@ -17,6 +17,7 @@ import {
   type ServiceResult,
 } from '@/lib/service/client';
 import type { ServiceEvent } from '@/lib/service/sse';
+import { CLEAR_TOKEN_COOKIE, readTokenCookie, saveTokenCookie } from '@/lib/service/cookie';
 import { decodeClaims, type Claims } from '@/lib/service/token';
 
 export type Connection = 'none' | 'checking' | 'connected' | 'rejected' | 'unavailable';
@@ -40,7 +41,7 @@ type ServiceValue = {
 
 const ServiceContext = createContext<ServiceValue | null>(null);
 
-/** The pasted bearer token lives in this component's memory only (ADR-0016). */
+/** The pasted bearer token is kept in memory and in a `fc_token` cookie (ADR-0016). */
 export function ServiceProvider({ children }: { children: React.ReactNode }) {
   const [token, setToken] = useState('');
   const [connection, setConnection] = useState<Connection>('none');
@@ -48,10 +49,7 @@ export function ServiceProvider({ children }: { children: React.ReactNode }) {
   const [rowsFailure, setRowsFailure] = useState<ServiceValue['rowsFailure']>(null);
   const tokenRef = useRef('');
 
-  const get = useCallback(
-    (path: string) => callService(fetch, tokenRef.current, path),
-    [],
-  );
+  const get = useCallback((path: string) => callService(fetch, tokenRef.current, path), []);
 
   const refresh = useCallback(async () => {
     if (!tokenRef.current) return;
@@ -74,10 +72,17 @@ export function ServiceProvider({ children }: { children: React.ReactNode }) {
       setConnection('checking');
       const result = await callService(fetch, value, '/api/v1/analysis/use-cases');
       if (!result.ok) {
+        if (result.reason === 'unauthorized') document.cookie = CLEAR_TOKEN_COOKIE;
         setConnection(result.reason === 'unauthorized' ? 'rejected' : 'unavailable');
         return;
       }
       tokenRef.current = value;
+      document.cookie = saveTokenCookie(
+        value,
+        decodeClaims(value)?.exp ?? 0,
+        Date.now(),
+        window.location.protocol === 'https:',
+      );
       setToken(value);
       setConnection('connected');
       await refresh();
@@ -86,6 +91,7 @@ export function ServiceProvider({ children }: { children: React.ReactNode }) {
   );
 
   const disconnect = useCallback(() => {
+    document.cookie = CLEAR_TOKEN_COOKIE;
     tokenRef.current = '';
     setToken('');
     setRows([]);
@@ -117,6 +123,12 @@ export function ServiceProvider({ children }: { children: React.ReactNode }) {
     },
     [stream, refresh],
   );
+
+  // A reload reconnects with the stored token instead of asking for it again.
+  useEffect(() => {
+    const stored = readTokenCookie(document.cookie);
+    if (stored) void connect(stored);
+  }, [connect]);
 
   // Rows go stale while a reviewer reads; keep the queue current without a manual reload.
   useEffect(() => {

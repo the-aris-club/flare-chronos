@@ -48,6 +48,28 @@ class TestReviewQueue(ApiCase):
         self.assertEqual(runs.json()["runs"], [])
 
 
+class TestPrefixedTokens(ApiCase):
+    def test_a_role_prefix_is_a_label_the_signed_claims_stay_the_authority(
+        self,
+    ) -> None:
+        thread = self.start_signoff_run("ana")
+        bearer = token("carol", APPROVER)["Authorization"].removeprefix("Bearer ")
+
+        for prefix in ("fc-dev-", "fc-examiner-"):
+            response = self.client.get(
+                "/api/v1/review/runs",
+                headers={"Authorization": f"Bearer {prefix}{bearer}"},
+            )
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual([r["id"] for r in response.json()["runs"]], [thread])
+
+        forged = self.client.get(
+            "/api/v1/review/runs",
+            headers={"Authorization": f"Bearer fc-dev-{bearer}x"},
+        )
+        self.assertEqual(forged.status_code, 401)
+
+
 class TestReviewDecision(ApiCase):
     def decide(self, thread: str, who: str, approved: bool, code: str) -> None:
         response = self.client.post(
