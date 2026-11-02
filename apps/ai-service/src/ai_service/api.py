@@ -23,7 +23,7 @@ from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Annotated, Any
+from typing import Annotated, Any, Literal
 from uuid import uuid4
 
 import jwt
@@ -35,6 +35,7 @@ from pydantic import BaseModel, Field
 
 from ai_service.events import HarnessEvent
 from ai_service.harness import DEFAULT_CHECKPOINT_PATH, FlareChronosDualSystemHarness
+from ai_service.review import project_run, summarize
 from ai_service.schemas import UseCaseId
 from ai_service.store import RunStore
 
@@ -75,10 +76,16 @@ class Principal:
     roles: frozenset[str] = field(default_factory=frozenset)
 
 
+ReasonCode = Literal[
+    "evidence", "stale", "duplicate", "conflict", "authority", "degraded", "other"
+]
+
+
 class ResumeRequest(BaseModel):
     thread_id: str = Field(min_length=1)
     approved: bool
     reason: str = ""
+    reason_code: ReasonCode | None = None
 
 
 def _unauthorized(detail: str) -> HTTPException:
@@ -184,9 +191,21 @@ def create_app(
             allow_headers=["Authorization", "Content-Type", "Last-Event-ID"],
         )
 
+    def recorded(
+        store: RunStore, thread_id: str, events: AsyncIterator[HarnessEvent]
+    ) -> AsyncIterator[HarnessEvent]:
+        async def run() -> AsyncIterator[HarnessEvent]:
+            async for event in events:
+                store.append_event(thread_id, event.type, event.data)
+                yield event
+
+        return run()
+
     def stream_response(
-        request: Request, events: AsyncIterator[HarnessEvent]
+        request: Request, events: AsyncIterator[HarnessEvent], thread_id: str
     ) -> StreamingResponse:
+        events = recorded(request.app.state.store, thread_id, events)
+
         async def locked() -> AsyncIterator[bytes]:
             async with request.app.state.run_lock:
                 async for frame in _frames(events, request.app.state.run_timeout_s):
@@ -233,6 +252,7 @@ def create_app(
             request.app.state.harness.astream_use_case(
                 user_query=query, use_case_id=use_case_id or None, thread_id=thread
             ),
+            thread,
         )
 
     @app.post(
@@ -263,15 +283,88 @@ def create_app(
         pending = await request.app.state.harness.apending_requests(body.thread_id)
         if not any(p.get("kind") == "sign_off" for p in pending):
             raise HTTPException(409, "this run has no sign-off request waiting")
-        store.record_decision(body.thread_id, principal.sub, body.approved, body.reason)
+        store.record_decision(
+            body.thread_id,
+            principal.sub,
+            body.approved,
+            body.reason,
+            body.reason_code or "",
+        )
         answer = {
             "approved": body.approved,
             "reason": body.reason,
             "decided_by": principal.sub,
         }
         return stream_response(
-            request, request.app.state.harness.astream_resume(body.thread_id, answer)
+            request,
+            request.app.state.harness.astream_resume(body.thread_id, answer),
+            body.thread_id,
         )
+
+    @app.get("/api/v1/review/runs")
+    def review_runs(
+        request: Request,
+        principal: Annotated[Principal, Depends(authenticate)],
+    ) -> dict[str, Any]:
+        store: RunStore = request.app.state.store
+        runs = []
+        for row in store.runs():
+            if APPROVER_ROLE not in principal.roles and row["owner"] != principal.sub:
+                continue
+            run = project_run(
+                row["thread_id"],
+                row["owner"],
+                store.events(row["thread_id"]),
+                store.decisions(row["thread_id"]),
+            )
+            if run is not None:
+                runs.append(summarize(run))
+        return {"runs": runs}
+
+    def visible_run(request: Request, principal: Principal, run_id: str) -> str:
+        """The run's owner, or 404 / 403 when it is missing or not the caller's."""
+        owner = request.app.state.store.owner_of(run_id)
+        if owner is None:
+            raise HTTPException(404, "no such run")
+        if principal.sub != owner and APPROVER_ROLE not in principal.roles:
+            raise HTTPException(403, "only the run's owner or an approver may read it")
+        return owner
+
+    @app.get("/api/v1/review/runs/{run_id}")
+    def review_run(
+        run_id: str,
+        request: Request,
+        principal: Annotated[Principal, Depends(authenticate)],
+    ) -> dict[str, Any]:
+        owner = visible_run(request, principal, run_id)
+        store: RunStore = request.app.state.store
+        run = project_run(run_id, owner, store.events(run_id), store.decisions(run_id))
+        if run is None:
+            raise HTTPException(404, "this run never asked for a sign-off")
+        return run
+
+    @app.get("/api/v1/review/runs/{run_id}/audit")
+    def review_audit(
+        run_id: str,
+        request: Request,
+        principal: Annotated[Principal, Depends(authenticate)],
+    ) -> dict[str, Any]:
+        visible_run(request, principal, run_id)
+        rows = request.app.state.store.decisions(run_id)
+        return {
+            "audit": [
+                {
+                    "id": f"A-{r['id']:04d}",
+                    "thread_id": r["thread_id"],
+                    "principal": r["principal"],
+                    "approved": bool(r["approved"]),
+                    "reason": r["reason"],
+                    "reason_code": r["reason_code"],
+                    "decided_at": r["decided_at"],
+                }
+                for r in rows
+            ]
+        }
 
     return app
 

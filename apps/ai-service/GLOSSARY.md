@@ -79,7 +79,7 @@ The authenticated identity that owns a run or is assigned to approve it, establi
 _Avoid_: User, approver name, decided-by string, operator
 
 **Review Run**:
-A run that raised a Sign-off Request. It is Needs decision while the request is pending, Published once approved, Withheld once rejected, and Failed if it ended in error. A run that never raised a Sign-off Request is not a Review Run.
+A run that raised a Sign-off Request. It is Needs decision while the request is pending, Published once approved, Withheld once rejected, and Failed if it ended in error after raising the request. A run that never raised a Sign-off Request is not a Review Run.
 _Avoid_: Run log entry, review item, ticket
 
 **Reason Code**:

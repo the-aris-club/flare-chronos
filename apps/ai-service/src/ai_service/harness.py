@@ -791,6 +791,15 @@ class FlareChronosDualSystemHarness:
             "evidence": {
                 "final_briefing": state.get("final_briefing", ""),
                 "verification_report": state.get("verification_report", {}),
+                "verified_ledger_entries": list(
+                    state.get("verified_ledger_entries", [])
+                ),
+                "entity": {
+                    key: entity.get(key)
+                    for key in ("region", "epoch_years", "stakeholder_tier")
+                    if key in entity
+                },
+                "self_corrections": int(state.get("self_correction_retries", 0)),
             },
         }
         answer = interrupt(request)

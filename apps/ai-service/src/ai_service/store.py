@@ -8,6 +8,7 @@ rewrite who approved what.
 
 from __future__ import annotations
 
+import json
 import sqlite3
 import threading
 from pathlib import Path
@@ -27,6 +28,18 @@ CREATE TABLE IF NOT EXISTS audit (
     reason TEXT NOT NULL,
     decided_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
 );
+CREATE TABLE IF NOT EXISTS events (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    thread_id TEXT NOT NULL,
+    type TEXT NOT NULL,
+    data TEXT NOT NULL,
+    at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+);
+CREATE INDEX IF NOT EXISTS events_thread ON events (thread_id, id);
+CREATE TRIGGER IF NOT EXISTS events_no_update BEFORE UPDATE ON events
+BEGIN SELECT RAISE(ABORT, 'the run event log is append-only'); END;
+CREATE TRIGGER IF NOT EXISTS events_no_delete BEFORE DELETE ON events
+BEGIN SELECT RAISE(ABORT, 'the run event log is append-only'); END;
 CREATE TRIGGER IF NOT EXISTS audit_no_update BEFORE UPDATE ON audit
 BEGIN SELECT RAISE(ABORT, 'the sign-off audit record is append-only'); END;
 CREATE TRIGGER IF NOT EXISTS audit_no_delete BEFORE DELETE ON audit
@@ -44,6 +57,12 @@ class RunStore:
         self._lock = threading.Lock()
         with self._lock:
             self._db.executescript(_SCHEMA)
+            columns = {r["name"] for r in self._db.execute("PRAGMA table_info(audit)")}
+            if "reason_code" not in columns:
+                # ALTER leaves the append-only triggers in place.
+                self._db.execute(
+                    "ALTER TABLE audit ADD COLUMN reason_code TEXT NOT NULL DEFAULT ''"
+                )
 
     def claim(self, thread_id: str, owner: str) -> bool:
         """Bind a new thread to ``owner``; True if the caller owns it afterwards."""
@@ -62,17 +81,51 @@ class RunStore:
         return None if row is None else str(row["owner"])
 
     def record_decision(
-        self, thread_id: str, principal: str, approved: bool, reason: str
+        self,
+        thread_id: str,
+        principal: str,
+        approved: bool,
+        reason: str,
+        reason_code: str = "",
     ) -> None:
         with self._lock, self._db:
             self._db.execute(
-                "INSERT INTO audit (thread_id, principal, approved, reason) VALUES (?, ?, ?, ?)",
-                (thread_id, principal, int(approved), reason),
+                "INSERT INTO audit (thread_id, principal, approved, reason, reason_code)"
+                " VALUES (?, ?, ?, ?, ?)",
+                (thread_id, principal, int(approved), reason, reason_code),
             )
 
     def decisions(self, thread_id: str) -> list[dict[str, Any]]:
         with self._lock:
             rows = self._db.execute(
                 "SELECT * FROM audit WHERE thread_id = ? ORDER BY id", (thread_id,)
+            ).fetchall()
+        return [dict(r) for r in rows]
+
+    def append_event(
+        self, thread_id: str, event_type: str, data: dict[str, Any]
+    ) -> None:
+        """Append one stream event to the run's log."""
+        with self._lock, self._db:
+            self._db.execute(
+                "INSERT INTO events (thread_id, type, data) VALUES (?, ?, ?)",
+                (thread_id, event_type, json.dumps(data, ensure_ascii=False)),
+            )
+
+    def events(self, thread_id: str) -> list[dict[str, Any]]:
+        with self._lock:
+            rows = self._db.execute(
+                "SELECT type, data, at FROM events WHERE thread_id = ? ORDER BY id",
+                (thread_id,),
+            ).fetchall()
+        return [
+            {"type": r["type"], "at": r["at"], **json.loads(r["data"])} for r in rows
+        ]
+
+    def runs(self) -> list[dict[str, str]]:
+        """Every claimed run, newest first."""
+        with self._lock:
+            rows = self._db.execute(
+                "SELECT thread_id, owner, created_at FROM runs ORDER BY created_at DESC, rowid DESC"
             ).fetchall()
         return [dict(r) for r in rows]
