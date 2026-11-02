@@ -15,22 +15,32 @@ function failure(status: number): { ok: false; reason: FailureReason } {
   return { ok: false, reason: REASONS[status] ?? 'unavailable' };
 }
 
-/** One authenticated JSON call to `ai-service`. A network error is `unavailable`. */
+/** The one place a bearer token meets a request. A network error is `unavailable`. */
+async function authedFetch(
+  fetcher: typeof fetch,
+  token: string,
+  path: string,
+  init: RequestInit,
+): Promise<Response | null> {
+  try {
+    return await fetcher(`${SERVICE_URL}${path}`, {
+      ...init,
+      headers: { ...init.headers, authorization: `Bearer ${token}` },
+    });
+  } catch {
+    return null;
+  }
+}
+
+/** One authenticated JSON call to `ai-service`. */
 export async function callService(
   fetcher: typeof fetch,
   token: string,
   path: string,
   init: RequestInit = {},
 ): Promise<ServiceResult<unknown>> {
-  let response: Response;
-  try {
-    response = await fetcher(`${SERVICE_URL}${path}`, {
-      ...init,
-      headers: { ...init.headers, authorization: `Bearer ${token}` },
-    });
-  } catch {
-    return { ok: false, reason: 'unavailable' };
-  }
+  const response = await authedFetch(fetcher, token, path, init);
+  if (!response) return { ok: false, reason: 'unavailable' };
   if (!response.ok) return failure(response.status);
 
   try {
@@ -50,15 +60,8 @@ export async function* streamService(
   path: string,
   init: RequestInit = {},
 ): AsyncGenerator<ServiceEvent, FailureReason | null> {
-  let response: Response;
-  try {
-    response = await fetcher(`${SERVICE_URL}${path}`, {
-      ...init,
-      headers: { ...init.headers, authorization: `Bearer ${token}` },
-    });
-  } catch {
-    return 'unavailable';
-  }
+  const response = await authedFetch(fetcher, token, path, init);
+  if (!response) return 'unavailable';
   if (!response.ok || !response.body) return failure(response.status).reason;
 
   const parse = createSseParser();

@@ -5,20 +5,36 @@ import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
 import { useService } from '@/components/service/service-provider';
 import { AmIcon, ICON } from '@/components/ui/icon';
+import type { FailureReason } from '@/lib/service/client';
 import { parseAudit, parseRun, type AuditRow, type ReviewRun } from '@/lib/review/api';
-import { useCaseLabel } from '@/lib/review/labels';
 import { DecisionChip, StatusChip, utcTime } from './review-bits';
 import { ConfirmDialog } from './confirm-dialog';
 import { ReviewDecision } from './review-decision';
+import { useLabels } from './use-labels';
 import { EvidenceSummary, RunSummary } from './run-summary';
 import { VerificationTable } from './verification-table';
 
 type Pending = { approved: boolean; reason: string; note: string } | null;
 type Load = 'loading' | 'ready' | 'not_found' | 'forbidden' | 'failed';
 
+const FAILURE_LOAD: Record<FailureReason, Load> = {
+  not_found: 'not_found',
+  forbidden: 'forbidden',
+  unauthorized: 'failed',
+  unavailable: 'failed',
+};
+
+const LOAD_MESSAGE: Record<Exclude<Load, 'ready'>, string> = {
+  loading: 'loadingQ',
+  not_found: 'runNotFound',
+  forbidden: 'runForbidden',
+  failed: 'queueFailed',
+};
+
 export function ReviewRunView({ runId }: { runId: string }) {
   const t = useTranslations('Review');
   const locale = useLocale();
+  const labels = useLabels();
   const service = useService();
   const [run, setRun] = useState<ReviewRun | null>(null);
   const [audit, setAudit] = useState<AuditRow[]>([]);
@@ -33,13 +49,7 @@ export function ReviewRunView({ runId }: { runId: string }) {
       get(`/api/v1/review/runs/${runId}/audit`),
     ]);
     if (!detail.ok) {
-      setLoad(
-        detail.reason === 'not_found'
-          ? 'not_found'
-          : detail.reason === 'forbidden'
-            ? 'forbidden'
-            : 'failed',
-      );
+      setLoad(FAILURE_LOAD[detail.reason]);
       return;
     }
     try {
@@ -58,13 +68,7 @@ export function ReviewRunView({ runId }: { runId: string }) {
   if (load !== 'ready' || !run) {
     return (
       <p role={load === 'loading' ? 'status' : 'alert'} className="text-meta text-ink-muted px-4 py-10 text-center">
-        {load === 'loading'
-          ? t('loadingQ')
-          : load === 'not_found'
-            ? t('runNotFound')
-            : load === 'forbidden'
-              ? t('runForbidden')
-              : t('queueFailed')}
+        {t(LOAD_MESSAGE[load === 'ready' ? 'failed' : load])}
       </p>
     );
   }
@@ -96,7 +100,7 @@ export function ReviewRunView({ runId }: { runId: string }) {
         </Link>
         <h1 className="text-title font-mono font-semibold">{run.id}</h1>
         <span className="text-meta text-ink-muted">
-          {run.useCase} · {useCaseLabel(run.useCase, locale)}
+          {run.useCase} · {labels.useCase(run.useCase)}
         </span>
         <StatusChip status={run.status} />
         {decided && <DecisionChip approved={decided.approved} />}

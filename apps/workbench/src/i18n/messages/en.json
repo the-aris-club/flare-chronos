@@ -641,7 +641,33 @@
     "runForbidden": "Only the owner of this run, or an approver, may read it.",
     "mode": "Mode",
     "factsInLedger": "facts in the verified ledger",
-    "needApprover": "Only a principal with the approver role can decide. You can read this run."
+    "needApprover": "Only a principal with the approver role can decide. You can read this run.",
+    "reasons": {
+      "evidence": "Evidence confirmed",
+      "stale": "Stale data",
+      "duplicate": "Duplicate alert",
+      "conflict": "Evidence conflict",
+      "authority": "Outside authority",
+      "degraded": "Service degraded",
+      "other": "Other"
+    },
+    "useCases": {
+      "UC_S1_1": "Intent and urgency triage",
+      "UC_S1_2": "Spatio-temporal entity extraction",
+      "UC_S1_3": "Single-hop metric lookup",
+      "UC_S1_4": "NRT crisis alert",
+      "UC_S1_5": "Stakeholder fact card",
+      "UC_1_1": "Regime-shift attribution",
+      "UC_1_2": "Cross-sensor discrepancy",
+      "UC_1_3": "Thermal source origin",
+      "UC_2_1": "Phenology phase shift",
+      "UC_2_2": "Footprint to dispatch",
+      "UC_2_3": "Verified situation briefing",
+      "UC_3_1": "Constellation retirement",
+      "UC_3_3": "Calibration audit",
+      "UC_4_1": "Orbital drift and SZA audit",
+      "UC_4_2": "NRT vs standard fidelity"
+    }
   },
   "Workbench": {
     "error": "The Workbench could not be loaded.",

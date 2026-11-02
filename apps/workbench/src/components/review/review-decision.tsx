@@ -1,11 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { useLocale, useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import { useService } from '@/components/service/service-provider';
-import { REASONS, reasonLabel } from '@/lib/review/reasons';
+import { REASON_CODES } from '@/lib/review/reasons';
 import type { AuditRow } from '@/lib/review/api';
 import { DecisionChip, utcTime } from './review-bits';
+import { useLabels } from './use-labels';
 
 type ReviewDecisionProps = {
   decided: AuditRow | undefined;
@@ -15,7 +16,7 @@ type ReviewDecisionProps = {
 
 export function ReviewDecision({ decided, approveAvailable, onRequest }: ReviewDecisionProps) {
   const t = useTranslations('Review');
-  const locale = useLocale();
+  const labels = useLabels();
   const service = useService();
   const [reason, setReason] = useState('');
   const [note, setNote] = useState('');
@@ -50,7 +51,7 @@ export function ReviewDecision({ decided, approveAvailable, onRequest }: ReviewD
         </p>
         <p className="text-body">
           <span className="text-ink-subtle">{t('reason')}: </span>
-          {reasonLabel(decided.reasonCode, locale)}
+          {labels.reason(decided.reasonCode)}
         </p>
         {decided.reason && (
           <p className="text-meta text-ink-muted">
@@ -96,9 +97,9 @@ export function ReviewDecision({ decided, approveAvailable, onRequest }: ReviewD
           className="border-line-strong bg-raised text-meta text-ink h-8 rounded-md border px-2"
         >
           <option value="">{t('chooseReason')}</option>
-          {REASONS.map((item) => (
-            <option key={item.value} value={item.value}>
-              {locale === 'vi' ? item.vi : item.en}
+          {REASON_CODES.map((code) => (
+            <option key={code} value={code}>
+              {labels.reason(code)}
             </option>
           ))}
         </select>

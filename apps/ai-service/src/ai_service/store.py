@@ -122,6 +122,28 @@ class RunStore:
             {"type": r["type"], "at": r["at"], **json.loads(r["data"])} for r in rows
         ]
 
+    def events_by_thread(self) -> dict[str, list[dict[str, Any]]]:
+        """Every run's event log in one query, oldest first."""
+        with self._lock:
+            rows = self._db.execute(
+                "SELECT thread_id, type, data, at FROM events ORDER BY id"
+            ).fetchall()
+        grouped: dict[str, list[dict[str, Any]]] = {}
+        for r in rows:
+            grouped.setdefault(r["thread_id"], []).append(
+                {"type": r["type"], "at": r["at"], **json.loads(r["data"])}
+            )
+        return grouped
+
+    def decisions_by_thread(self) -> dict[str, list[dict[str, Any]]]:
+        """Every Sign-off Decision in one query, oldest first."""
+        with self._lock:
+            rows = self._db.execute("SELECT * FROM audit ORDER BY id").fetchall()
+        grouped: dict[str, list[dict[str, Any]]] = {}
+        for r in rows:
+            grouped.setdefault(r["thread_id"], []).append(dict(r))
+        return grouped
+
     def runs(self) -> list[dict[str, str]]:
         """Every claimed run, newest first."""
         with self._lock:

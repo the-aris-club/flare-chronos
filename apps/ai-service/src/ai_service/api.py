@@ -35,7 +35,7 @@ from pydantic import BaseModel, Field
 
 from ai_service.events import HarnessEvent
 from ai_service.harness import DEFAULT_CHECKPOINT_PATH, FlareChronosDualSystemHarness
-from ai_service.review import project_run, summarize
+from ai_service.review import audit_rows, project_run, review_queue
 from ai_service.schemas import UseCaseId
 from ai_service.store import RunStore
 
@@ -306,19 +306,11 @@ def create_app(
         request: Request,
         principal: Annotated[Principal, Depends(authenticate)],
     ) -> dict[str, Any]:
-        store: RunStore = request.app.state.store
-        runs = []
-        for row in store.runs():
-            if APPROVER_ROLE not in principal.roles and row["owner"] != principal.sub:
-                continue
-            run = project_run(
-                row["thread_id"],
-                row["owner"],
-                store.events(row["thread_id"]),
-                store.decisions(row["thread_id"]),
-            )
-            if run is not None:
-                runs.append(summarize(run))
+        runs = review_queue(
+            request.app.state.store,
+            principal.sub,
+            is_approver=APPROVER_ROLE in principal.roles,
+        )
         return {"runs": runs}
 
     def visible_run(request: Request, principal: Principal, run_id: str) -> str:
@@ -350,21 +342,7 @@ def create_app(
         principal: Annotated[Principal, Depends(authenticate)],
     ) -> dict[str, Any]:
         visible_run(request, principal, run_id)
-        rows = request.app.state.store.decisions(run_id)
-        return {
-            "audit": [
-                {
-                    "id": f"A-{r['id']:04d}",
-                    "thread_id": r["thread_id"],
-                    "principal": r["principal"],
-                    "approved": bool(r["approved"]),
-                    "reason": r["reason"],
-                    "reason_code": r["reason_code"],
-                    "decided_at": r["decided_at"],
-                }
-                for r in rows
-            ]
-        }
+        return {"audit": audit_rows(request.app.state.store.decisions(run_id))}
 
     return app
 

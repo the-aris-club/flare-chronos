@@ -1,9 +1,9 @@
 'use client';
 
-import { useLocale, useTranslations } from 'next-intl';
-import { regionLabel, useCaseLabel } from '@/lib/review/labels';
+import { useTranslations } from 'next-intl';
 import type { ReviewRun } from '@/lib/review/api';
 import { CheckRow } from './review-bits';
+import { useLabels } from './use-labels';
 
 function Section({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -18,7 +18,7 @@ function Section({ label, children }: { label: string; children: React.ReactNode
 
 export function RunSummary({ run }: { run: ReviewRun }) {
   const t = useTranslations('Review');
-  const locale = useLocale();
+  const labels = useLabels();
 
   return (
     <div className="flex flex-col gap-4">
@@ -26,7 +26,7 @@ export function RunSummary({ run }: { run: ReviewRun }) {
         <div className="border-line bg-panel rounded-lg border p-3">
           <span className="text-label text-ink-subtle font-mono uppercase">{t('proposed')}</span>
           <p className="text-body-lg mt-1.5 font-semibold">
-            {useCaseLabel(run.useCase, locale) || run.useCase}
+            {labels.useCase(run.useCase) || run.useCase}
           </p>
           <p className="text-meta text-ink-subtle mt-1">{run.question}</p>
         </div>
@@ -35,7 +35,7 @@ export function RunSummary({ run }: { run: ReviewRun }) {
       <Section label={t('regionPeriod')}>
         <dl className="border-line bg-panel grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-1 rounded-lg border p-3">
           <dt className="text-meta text-ink-subtle">{t('region')}</dt>
-          <dd className="text-meta text-right">{regionLabel(run.entity.region, locale)}</dd>
+          <dd className="text-meta text-right">{labels.region(run.entity.region)}</dd>
           <dt className="text-meta text-ink-subtle">{t('period')}</dt>
           <dd className="text-meta text-right">{run.entity.epochYears.join(', ') || '—'}</dd>
           <dt className="text-meta text-ink-subtle">{t('owner')}</dt>

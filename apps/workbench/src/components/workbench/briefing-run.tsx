@@ -1,9 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { useLocale, useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import { AmIcon, ICON } from '@/components/ui/icon';
-import { regionLabel, useCaseLabel } from '@/lib/review/labels';
+import { useLabels } from '@/components/review/use-labels';
 import type { RunView } from '@/lib/service/run';
 import { PrincipalRow } from './service-panel';
 
@@ -24,7 +24,7 @@ export function BriefingRun({
   onStart: (preset: Preset) => void;
 }) {
   const t = useTranslations('Briefing.run');
-  const locale = useLocale();
+  const labels = useLabels();
   const busy = run.phase === 'running';
   const verification = run.signOff?.verification ?? run.verification;
   const unverified = verification?.unverified_numbers?.length ?? 0;
@@ -37,7 +37,7 @@ export function BriefingRun({
 
       <div className="border-line bg-panel flex flex-col gap-2 rounded-lg border p-3">
         <span className="text-micro text-ink-subtle font-mono tracking-widest uppercase">
-          {t('target', { region: regionLabel(region, locale), period: '2024' })}
+          {t('target', { region: labels.region(region), period: '2024' })}
         </span>
         <div className="flex flex-wrap gap-2">
           {PRESETS.map((preset) => (
@@ -60,7 +60,7 @@ export function BriefingRun({
             <h3 className="text-subhead font-semibold">{t('timeline')}</h3>
             {run.useCaseId && (
               <span className="text-label text-ink-subtle font-mono">
-                {run.useCaseId} · {useCaseLabel(run.useCaseId, locale)}
+                {run.useCaseId} · {labels.useCase(run.useCaseId)}
               </span>
             )}
             {run.mode && (

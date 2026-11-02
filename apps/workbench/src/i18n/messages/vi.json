@@ -641,7 +641,33 @@
     "runForbidden": "Chỉ chủ lượt chạy hoặc người phê duyệt mới được đọc.",
     "mode": "Chế độ",
     "factsInLedger": "dữ kiện trong sổ đã kiểm chứng",
-    "needApprover": "Chỉ chủ thể có vai trò phê duyệt mới được quyết định. Bạn có thể đọc lượt chạy này."
+    "needApprover": "Chỉ chủ thể có vai trò phê duyệt mới được quyết định. Bạn có thể đọc lượt chạy này.",
+    "reasons": {
+      "evidence": "Dữ liệu kiểm chứng đã xác nhận",
+      "stale": "Dữ liệu lỗi thời",
+      "duplicate": "Cảnh báo trùng lặp",
+      "conflict": "Dữ liệu kiểm chứng mâu thuẫn",
+      "authority": "Ngoài thẩm quyền",
+      "degraded": "Dịch vụ suy giảm",
+      "other": "Khác"
+    },
+    "useCases": {
+      "UC_S1_1": "Phân loại ý định và mức khẩn cấp",
+      "UC_S1_2": "Trích xuất thực thể không-thời gian",
+      "UC_S1_3": "Tra cứu một bước",
+      "UC_S1_4": "Cảnh báo nguy cấp gần thời gian thực",
+      "UC_S1_5": "Thẻ dữ kiện cho bên liên quan",
+      "UC_1_1": "Quy kết dịch chuyển chế độ cháy",
+      "UC_1_2": "Chênh lệch giữa các cảm biến",
+      "UC_1_3": "Nguồn gốc nguồn nhiệt",
+      "UC_2_1": "Dịch pha vật hậu",
+      "UC_2_2": "Từ vết quét đến điều phối",
+      "UC_2_3": "Báo cáo tình huống đã kiểm chứng",
+      "UC_3_1": "Ngừng hoạt động chòm vệ tinh",
+      "UC_3_3": "Kiểm toán hiệu chuẩn",
+      "UC_4_1": "Kiểm toán trôi quỹ đạo và góc thiên đỉnh",
+      "UC_4_2": "Độ trung thực NRT so với chuẩn"
+    }
   },
   "Workbench": {
     "error": "Không tải được không gian phân tích. Kiểm tra kết nối rồi thử lại.",

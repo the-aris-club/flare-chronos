@@ -48,14 +48,14 @@ type Json = Record<string, unknown>;
 
 class ShapeError extends Error {}
 
-function object(value: unknown, name: string): Json {
+function asObject(value: unknown, name: string): Json {
   if (!value || typeof value !== 'object' || Array.isArray(value)) {
     throw new ShapeError(`${name} must be an object`);
   }
   return value as Json;
 }
 
-function string(node: Json, key: string): string {
+function requireString(node: Json, key: string): string {
   const value = node[key];
   if (typeof value !== 'string') throw new ShapeError(`${key} must be a string`);
   return value;
@@ -66,36 +66,36 @@ function optionalString(node: Json, key: string): string {
   return typeof value === 'string' ? value : '';
 }
 
-function array(node: Json, key: string): unknown[] {
+function requireList(node: Json, key: string): unknown[] {
   const value = node[key];
   if (!Array.isArray(value)) throw new ShapeError(`${key} must be a list`);
   return value;
 }
 
 function row(raw: unknown): ReviewRow {
-  const node = object(raw, 'run');
-  const status = string(node, 'status') as ReviewStatus;
+  const node = asObject(raw, 'run');
+  const status = requireString(node, 'status') as ReviewStatus;
   if (!REVIEW_STATUSES.includes(status)) throw new ShapeError(`unknown status ${status}`);
 
   return {
-    id: string(node, 'id'),
-    owner: string(node, 'owner'),
+    id: requireString(node, 'id'),
+    owner: requireString(node, 'owner'),
     useCase: optionalString(node, 'use_case_id'),
     status,
-    startedAt: string(node, 'started_at'),
-    updatedAt: string(node, 'updated_at'),
+    startedAt: requireString(node, 'started_at'),
+    updatedAt: requireString(node, 'updated_at'),
   };
 }
 
 /** Parse the queue. Anything off-contract throws: Review never shows a guessed row. */
 export function parseRunList(body: unknown): ReviewRow[] {
-  return array(object(body, 'body'), 'runs').map(row);
+  return requireList(asObject(body, 'body'), 'runs').map(row);
 }
 
 export function parseRun(body: unknown): ReviewRun {
-  const node = object(body, 'run');
-  const verification = object(node.verification ?? {}, 'verification');
-  const entity = object(node.entity ?? {}, 'entity');
+  const node = asObject(body, 'run');
+  const verification = asObject(node.verification ?? {}, 'verification');
+  const entity = asObject(node.entity ?? {}, 'entity');
 
   return {
     ...row(node),
@@ -117,32 +117,32 @@ export function parseRun(body: unknown): ReviewRun {
       region: typeof entity.region === 'string' ? entity.region : undefined,
       epochYears: Array.isArray(entity.epoch_years) ? (entity.epoch_years as number[]) : [],
     },
-    facts: array(node, 'facts').map((raw) => {
-      const fact = object(raw, 'fact');
+    facts: requireList(node, 'facts').map((raw) => {
+      const fact = asObject(raw, 'fact');
       if (typeof fact.value !== 'number') throw new ShapeError('fact value must be a number');
       return {
-        key: string(fact, 'fact_key'),
+        key: requireString(fact, 'fact_key'),
         value: fact.value,
         unit: optionalString(fact, 'unit'),
-        tool: string(fact, 'source_tool'),
+        tool: requireString(fact, 'source_tool'),
         provenance: optionalString(fact, 'provenance'),
       };
     }),
-    tools: array(node, 'tools').map(String),
+    tools: requireList(node, 'tools').map(String),
   };
 }
 
 export function parseAudit(body: unknown): AuditRow[] {
-  return array(object(body, 'body'), 'audit').map((raw) => {
-    const node = object(raw, 'audit row');
+  return requireList(asObject(body, 'body'), 'audit').map((raw) => {
+    const node = asObject(raw, 'audit row');
     return {
-      id: string(node, 'id'),
-      runId: string(node, 'thread_id'),
-      principal: string(node, 'principal'),
+      id: requireString(node, 'id'),
+      runId: requireString(node, 'thread_id'),
+      principal: requireString(node, 'principal'),
       approved: node.approved === true,
       reason: optionalString(node, 'reason'),
       reasonCode: optionalString(node, 'reason_code'),
-      decidedAt: string(node, 'decided_at'),
+      decidedAt: requireString(node, 'decided_at'),
     };
   });
 }

@@ -249,6 +249,15 @@ Rules: a new concept adds a key here in the same change. An icon-only `<button>`
 | Evidence summary | Evidence summary | Tóm tắt kiểm chứng |
 | Reason | Reason | Lý do |
 | Note | Note | Ghi chú |
+| Review Run | Review run | Lượt chạy xem xét |
+| Reason Code | Reason | Lý do |
+| Reason: evidence | Evidence confirmed | Dữ liệu kiểm chứng đã xác nhận |
+| Reason: stale | Stale data | Dữ liệu lỗi thời |
+| Reason: duplicate | Duplicate alert | Cảnh báo trùng lặp |
+| Reason: conflict | Evidence conflict | Dữ liệu kiểm chứng mâu thuẫn |
+| Reason: authority | Outside authority | Ngoài thẩm quyền |
+| Reason: degraded | Service degraded | Dịch vụ suy giảm |
+| Reason: other | Other | Khác |
 | Measured epoch | Measured epoch | Quan trắc thực tế |
 | Raw | Raw | Thô |
 | Harmonized | Harmonized | Đã chuẩn hóa |

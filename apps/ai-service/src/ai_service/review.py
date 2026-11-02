@@ -9,6 +9,8 @@ from __future__ import annotations
 import re
 from typing import Any, Literal
 
+from ai_service.store import RunStore
+
 # The ledger also holds rounded copies (`x_round1`) and fragments of string values
 # (`x_str[0]`) so the verifier can match prose; a reviewer needs each fact once.
 _DERIVED_KEY = re.compile(r"(_round\d+|_str\[\d+\])$")
@@ -79,3 +81,38 @@ SUMMARY_FIELDS = (
 def summarize(run: dict[str, Any]) -> dict[str, Any]:
     """The queue row: the run without its evidence."""
     return {key: run[key] for key in SUMMARY_FIELDS}
+
+
+def review_queue(
+    store: RunStore, sub: str, *, is_approver: bool
+) -> list[dict[str, Any]]:
+    """The Review Runs a principal may see: every run for an approver, else their own."""
+    events = store.events_by_thread()
+    decisions = store.decisions_by_thread()
+    runs = []
+    for row in store.runs():
+        if not is_approver and row["owner"] != sub:
+            continue
+        thread = row["thread_id"]
+        run = project_run(
+            thread, row["owner"], events.get(thread, []), decisions.get(thread, [])
+        )
+        if run is not None:
+            runs.append(summarize(run))
+    return runs
+
+
+def audit_rows(decisions: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """The audit view of a run's decisions, with `A-NNNN` ids."""
+    return [
+        {
+            "id": f"A-{d['id']:04d}",
+            "thread_id": d["thread_id"],
+            "principal": d["principal"],
+            "approved": bool(d["approved"]),
+            "reason": d["reason"],
+            "reason_code": d["reason_code"],
+            "decided_at": d["decided_at"],
+        }
+        for d in decisions
+    ]

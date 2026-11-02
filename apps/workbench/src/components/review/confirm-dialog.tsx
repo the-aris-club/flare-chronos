@@ -1,10 +1,10 @@
 'use client';
 
-import { useLocale, useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import { useService } from '@/components/service/service-provider';
 import type { ReviewRun } from '@/lib/review/api';
-import { reasonLabel } from '@/lib/review/reasons';
 import { ReviewDialog } from './review-dialog';
+import { useLabels } from './use-labels';
 
 type ConfirmDialogProps = {
   run: ReviewRun;
@@ -24,7 +24,7 @@ export function ConfirmDialog({
   onClose,
 }: ConfirmDialogProps) {
   const t = useTranslations('Review');
-  const locale = useLocale();
+  const labels = useLabels();
   const approve = approved;
   const service = useService();
 
@@ -60,7 +60,7 @@ export function ConfirmDialog({
             [t('run'), `${run.id} · ${run.useCase}`],
             [t('proposed'), run.question],
             [t('decision'), approve ? t('approve') : t('reject')],
-            [t('reason'), reasonLabel(reason, locale)],
+            [t('reason'), labels.reason(reason)],
             [t('note'), note || '—'],
             [t('reviewer'), service.claims?.name ?? service.claims?.sub ?? '—'],
           ].map(([label, value]) => (

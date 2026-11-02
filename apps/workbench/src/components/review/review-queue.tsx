@@ -2,11 +2,11 @@
 
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
-import { useLocale, useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import { useService } from '@/components/service/service-provider';
 import { AmIcon, ICON } from '@/components/ui/icon';
 import type { ReviewStatus } from '@/lib/review/api';
-import { useCaseLabel } from '@/lib/review/labels';
+import { useLabels } from './use-labels';
 import { StatusChip, utcTime } from './review-bits';
 
 const TABS: ReviewStatus[] = ['needs', 'published', 'withheld', 'failed'];
@@ -19,7 +19,7 @@ const ICONS = {
 
 export function ReviewQueue() {
   const t = useTranslations('Review');
-  const locale = useLocale();
+  const labels = useLabels();
   const service = useService();
   const [tab, setTab] = useState<ReviewStatus>('needs');
   const [query, setQuery] = useState('');
@@ -124,7 +124,7 @@ export function ReviewQueue() {
                   <td className="px-2.5 py-2.5 align-top">
                     <span className="text-meta font-mono">{row.useCase}</span>
                     <span className="text-meta text-ink-muted block">
-                      {useCaseLabel(row.useCase, locale)}
+                      {labels.useCase(row.useCase)}
                     </span>
                   </td>
                   <td className="px-2.5 py-2.5 align-top">

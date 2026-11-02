@@ -1,13 +1,13 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { useLocale, useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import { useService } from '@/components/service/service-provider';
 import { AmIcon, ICON } from '@/components/ui/icon';
 import { parseAudit, type AuditRow } from '@/lib/review/api';
-import { reasonLabel } from '@/lib/review/reasons';
 import { utcTime } from './review-bits';
 import { FilterSelect } from './review-select';
+import { useLabels } from './use-labels';
 
 function csvCell(value: string): string {
   return `"${value.replaceAll('"', '""')}"`;
@@ -17,7 +17,7 @@ type Row = AuditRow & { useCase: string };
 
 export function ReviewAudit() {
   const t = useTranslations('Review');
-  const locale = useLocale();
+  const labels = useLabels();
   const service = useService();
   const [all, setAll] = useState<Row[]>([]);
   const [failed, setFailed] = useState(false);
@@ -216,7 +216,7 @@ export function ReviewAudit() {
                       {row.approved ? t('approved') : t('rejected')}
                     </span>
                   </td>
-                  <td className="text-meta px-2.5 py-2">{reasonLabel(row.reasonCode, locale)}</td>
+                  <td className="text-meta px-2.5 py-2">{labels.reason(row.reasonCode)}</td>
                   <td className="text-meta text-ink-muted px-2.5 py-2">{row.reason || '—'}</td>
                   <td className="text-meta px-2.5 py-2 font-mono">{row.id}</td>
                 </tr>
