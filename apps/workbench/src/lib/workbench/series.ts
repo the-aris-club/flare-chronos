@@ -31,6 +31,12 @@ type RawCalibration = {
   ks_before: number;
   ks_after: number;
   n_pairs: number;
+  holdout: {
+    raw_rmse_mw: number;
+    harmonized_rmse_mw: number;
+    rmse_gain_ci95_mw: [number, number];
+    train_last_year: number;
+  };
 };
 
 type RawEmpirical = {
@@ -223,6 +229,12 @@ export const loadWorkbench = cache(async (calendar: CalendarDataset): Promise<Wo
       ksBefore: calibration.ks_before,
       ksAfter: calibration.ks_after,
       pairs: calibration.n_pairs,
+      holdout: {
+        gainMw: calibration.holdout.raw_rmse_mw - calibration.holdout.harmonized_rmse_mw,
+        ciLowMw: calibration.holdout.rmse_gain_ci95_mw[0],
+        ciHighMw: calibration.holdout.rmse_gain_ci95_mw[1],
+        trainLastYear: calibration.holdout.train_last_year,
+      },
     },
   };
 });

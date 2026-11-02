@@ -18,6 +18,8 @@ import { EvidenceQuickLook } from './evidence-quick-look';
 import { FilterBar } from './filter-bar';
 import { KpiStrip } from './kpi-strip';
 import { MapPane } from './map-pane';
+import { tourFigures } from '@/lib/workbench/tour-figures';
+import { ConclusionStrip } from './conclusion-strip';
 import { TourOverlay } from './tour';
 
 type Tab = 'map' | 'trend' | 'cal' | 'brief';
@@ -128,6 +130,12 @@ export function WorkbenchShell({
 
       <div className="flex min-h-0 flex-1">
         <main className="tablet:p-3 tablet:pb-3 min-w-0 flex-1 overflow-y-auto p-2.5 pb-20">
+          <ConclusionStrip
+            series={series}
+            calibration={workbench.calibration}
+            measured={calendar.observedYears.length}
+            total={calendar.years.length}
+          />
           <div className="grid grid-cols-1 gap-2.5 xl:grid-cols-3">
             <div
               className={`${tab === 'map' ? 'block' : 'hidden'} tablet:block tablet:order-2 xl:order-1 xl:col-span-3`}
@@ -202,6 +210,7 @@ export function WorkbenchShell({
         )}
 
         <BriefingRail
+          region={region}
           state={briefState}
           service={service}
           conn={conn}
@@ -245,7 +254,12 @@ export function WorkbenchShell({
         calibration={workbench.calibration}
         calendar={calendar}
       />
-      {tourOpen && <TourOverlay onClose={() => setTourOpen(false)} />}
+      {tourOpen && (
+        <TourOverlay
+          onClose={() => setTourOpen(false)}
+          figures={tourFigures(dataset, workbench, region)}
+        />
+      )}
     </div>
   );
 }

@@ -169,7 +169,6 @@ export function MapLegend({
         </span>
       )}
       <span className="ml-auto font-mono">{t('scaleNote')}</span>
-      <span className="basis-full font-mono">{t('borderCredit')}</span>
     </div>
   );
 }

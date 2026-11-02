@@ -1,7 +1,7 @@
 'use client';
 
 import { useLocale, useTranslations } from 'next-intl';
-import { formatDecimal } from '@/lib/workbench/format';
+import { formatCount, formatDecimal } from '@/lib/workbench/format';
 import type { Calibration, MapPhysics } from '@/lib/workbench/types';
 
 export function EvidenceIntro({
@@ -80,10 +80,10 @@ export function EvidenceIntro({
               {t('modisNadir')}
             </text>
             <text
-              x={232}
-              y={78}
+              x={258}
+              y={94}
               fontSize={8}
-              textAnchor="middle"
+              textAnchor="end"
               fill="var(--text-subtle)"
               fontFamily="var(--font-plex-mono)"
               className="max-tablet:hidden"
@@ -125,8 +125,27 @@ export function EvidenceIntro({
           ))}
         </div>
         <span className="text-micro text-ink-subtle font-mono">
-          {t('pairs', { count: calibration.pairs })}
+          {t('pairs', { count: formatCount(calibration.pairs, locale) })}
         </span>
+      </section>
+
+      <section className="border-line bg-raised flex flex-col gap-2 rounded-md border p-3 lg:col-span-2">
+        <span className="text-body font-semibold">3 · {t('limitsTitle')}</span>
+        <ul className="text-meta text-ink-muted flex list-disc flex-col gap-1 pl-4 leading-relaxed">
+          <li>{t('limitWindow')}</li>
+          <li>
+            {t('limitHoldout', {
+              year: calibration.holdout.trainLastYear,
+              gain: formatDecimal(calibration.holdout.gainMw, locale, 1),
+              low: formatDecimal(calibration.holdout.ciLowMw, locale, 1),
+              high: formatDecimal(calibration.holdout.ciHighMw, locale, 1),
+              significant:
+                calibration.holdout.ciLowMw > 0 || calibration.holdout.ciHighMw < 0 ? 'yes' : 'no',
+            })}
+          </li>
+          <li>{t('limitInSample')}</li>
+          <li>{t('limitReproduce')}</li>
+        </ul>
       </section>
     </div>
   );

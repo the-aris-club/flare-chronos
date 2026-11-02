@@ -34,6 +34,7 @@ export function BurningCalendar({
 
   const cells = useMemo(() => buildCells(region), [region]);
   const focused = hover ?? active;
+  const observedCells = cells.filter((cell) => cell.observed).length;
   const focusedCell = cells[focused.yearIndex * PENTADS_PER_YEAR + focused.pentadIndex];
 
   const start = region.years[0];
@@ -133,6 +134,16 @@ export function BurningCalendar({
         <span aria-hidden="true" className="flex-1" />
         <CalendarLegend metric={metric} scoredCells={region.scoredCells} />
       </header>
+
+      <p className="text-meta text-ink-muted px-1" data-testid="calendar-provenance">
+        {t('provenance', {
+          observed: observedCells,
+          total: cells.length,
+          pct: new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(
+            (observedCells / cells.length) * 100,
+          ),
+        })}
+      </p>
 
       <p id="calendar-instructions" className="sr-only">
         {t('aria.instructions')}

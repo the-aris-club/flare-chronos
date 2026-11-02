@@ -66,8 +66,8 @@
       "amazon": "Vành đai lửa Amazon"
     },
     "coverage": {
-      "mekong": "Đại lục VNM · LAO · KHM · THA",
-      "amazon": "Đại lục Amazon · 5,2°N–20,5°S · 79,5–49,0°T"
+      "mekong": "Đại lục VNM · LAO · KHM · THA · FIRMS {box}",
+      "amazon": "Đại lục Amazon · FIRMS {box}"
     },
     "boot": {
       "fonts": "Đang tải phông chữ",
@@ -135,7 +135,8 @@
       "Th10",
       "Th11",
       "Th12"
-    ]
+    ],
+    "provenance": "{observed} trên {total} ô là cửa sổ quan trắc thực ({pct}%). Phần còn lại được mô hình hóa từ bao mùa vụ của vùng: mờ, gạch chéo và không có điểm SFAI."
   },
   "Map": {
     "title": "Bản đồ · bảo toàn diện tích",
@@ -362,7 +363,8 @@
       "down": "Ngừng",
       "reset": "Đặt lại lượt chạy"
     },
-    "scopesValue": "Chạy báo cáo · Phê duyệt"
+    "scopesValue": "Chạy báo cáo · Phê duyệt",
+    "sampleOtherRegion": "Lượt chạy mẫu này mô tả {runRegion}, không phải {region}. Đây là dữ liệu mẫu cho đến khi nối API phân tích."
   },
   "Evidence": {
     "title": "Dữ liệu kiểm chứng · 5 hình khoa học",
@@ -423,7 +425,12 @@
     "modisEdge": "MODIS rìa quét",
     "modisNadir": "MODIS tâm quét",
     "viirsNadir": "VIIRS tâm quét",
-    "pairsLabel": "Cặp"
+    "pairsLabel": "Cặp",
+    "limitsTitle": "Giới hạn của bằng chứng này",
+    "limitWindow": "Mỗi kỳ quan trắc thực chỉ là một cửa sổ 5 ngày. Các kỳ 5 ngày còn lại của lịch được mô hình hóa từ bao mùa vụ và không bao giờ được chấm điểm.",
+    "limitHoldout": "Trên các năm giữ lại sau {year}, hiệu chuẩn giảm RMSE {gain} MW; khoảng tin cậy 95% ({low} đến {high} MW) {significant, select, yes {không chứa số 0} other {chứa số 0, nên mức giảm trên mẫu giữ lại chưa có ý nghĩa thống kê}}.",
+    "limitInSample": "Các cải thiện về R² và KS được đo trong mẫu, trên các cặp Aqua–Suomi-NPP đồng thời.",
+    "limitReproduce": "Tái lập bằng `uv run python -m benchmark_cli.run_experiments`; mọi số trên trang này đọc từ data/processed/empirical_results.json."
   },
   "Tour": {
     "title": "Hướng dẫn",
@@ -435,20 +442,20 @@
     "step1": {
       "title": "Bản đồ · bảo toàn diện tích",
       "body": "Chọn một kỳ quan trắc. Các điểm là lượt ghi nhận gốc của MODIS và VIIRS trong cửa sổ 5 ngày đó.",
-      "figure": "26 năm",
-      "figureLabel": "2001–2026"
+      "figure": "{measured} / {total}",
+      "figureLabel": "năm quan trắc thực · {first}–{last}"
     },
     "step2": {
       "title": "Chỉ số chính",
       "body": "Số điểm nóng thô, đợt cháy sau lọc trùng và SFAI đỉnh của kỳ đã chọn.",
-      "figure": "10 / 8",
-      "figureLabel": "kỳ quan trắc thực tế"
+      "figure": "{measured}",
+      "figureLabel": "kỳ quan trắc thực"
     },
     "step3": {
       "title": "Trước / Sau",
       "body": "Số thô tăng khi thêm cảm biến. Chuỗi đã chuẩn hóa loại bỏ các bước nhảy đó.",
-      "figure": "14 lần",
-      "figureLabel": "tăng thô, 2005–2024"
+      "figure": "{growth}×",
+      "figureLabel": "tăng thô, {growthFrom}–{growthTo}"
     },
     "step4": {
       "title": "Chu kỳ mùa cháy",
@@ -458,9 +465,9 @@
     },
     "step5": {
       "title": "Lịch hoạt động cháy",
-      "body": "26 năm × 73 kỳ. Phím mũi tên di chuyển ô đang trỏ; năm quan trắc thực tế cũng cập nhật kỳ.",
-      "figure": "+2,9σ",
-      "figureLabel": "đỉnh 2007"
+      "body": "{total} năm × 73 kỳ. Phím mũi tên di chuyển ô đang trỏ; năm quan trắc thực tế cũng cập nhật kỳ.",
+      "figure": "{peak}",
+      "figureLabel": "đỉnh {peakYear}"
     },
     "step6": {
       "title": "Báo cáo & Phê duyệt",
@@ -649,5 +656,9 @@
     "error": "Không tải được không gian phân tích. Kiểm tra kết nối rồi thử lại.",
     "retry": "Thử lại",
     "loading": "Đang tải không gian phân tích…"
+  },
+  "Conclusion": {
+    "label": "Kết quả",
+    "text": "Điểm nóng thô {from}→{to}: {raw}% · xu hướng đã chuẩn hóa {trend}%/năm · khoảng cách KS {ksBefore} → {ksAfter} · {measured}/{total} năm quan trắc thực"
   }
 }

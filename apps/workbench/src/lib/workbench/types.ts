@@ -51,6 +51,13 @@ export type Calibration = {
   ksBefore: number;
   ksAfter: number;
   pairs: number;
+  /** The held-out check: RMSE gain in MW on years after `trainLastYear`, with its 95% interval. */
+  holdout: {
+    gainMw: number;
+    ciLowMw: number;
+    ciHighMw: number;
+    trainLastYear: number;
+  };
 };
 
 export type SfaiPeak = {

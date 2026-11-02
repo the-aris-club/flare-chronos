@@ -1,15 +1,19 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { AmIcon, ICON } from '@/components/ui/icon';
+import { formatSigma } from '@/lib/calendar/format';
+import type { TourFigures } from '@/lib/workbench/tour-figures';
 
 const STEPS = 6;
 const TARGETS = ['map', 'kpi', 'cmp', 'clock', 'cal', 'brief'] as const;
 const PROGRESS = [1, 2, 3, 4, 5, 6];
 
-export function TourOverlay({ onClose }: { onClose: () => void }) {
+export function TourOverlay({ onClose, figures }: { onClose: () => void; figures: TourFigures }) {
   const t = useTranslations('Tour');
+  const locale = useLocale();
+  const values = { ...figures, peak: formatSigma(figures.peakSfai, locale) };
   const [step, setStep] = useState(0);
   const spot = useRef<HTMLDivElement>(null);
   const last = step === STEPS - 1;
@@ -96,10 +100,16 @@ export function TourOverlay({ onClose }: { onClose: () => void }) {
 
         <h2 className="text-subhead font-semibold">{t(`step${step + 1}.title`)}</h2>
         <div className="flex items-baseline gap-2">
-          <span className="text-metric font-mono font-semibold">{t(`step${step + 1}.figure`)}</span>
-          <span className="text-meta text-ink-subtle">{t(`step${step + 1}.figureLabel`)}</span>
+          <span className="text-metric font-mono font-semibold">
+            {t(`step${step + 1}.figure`, values)}
+          </span>
+          <span className="text-meta text-ink-subtle">
+            {t(`step${step + 1}.figureLabel`, values)}
+          </span>
         </div>
-        <p className="text-body text-ink-muted leading-relaxed">{t(`step${step + 1}.body`)}</p>
+        <p className="text-body text-ink-muted leading-relaxed">
+          {t(`step${step + 1}.body`, values)}
+        </p>
 
         <div className="flex items-center gap-2">
           <button
