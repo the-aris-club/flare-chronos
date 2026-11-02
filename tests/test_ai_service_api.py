@@ -107,7 +107,7 @@ class TestAuthentication(ApiCase):
         response = self.client.get("/api/v1/analysis/use-cases", headers=token("ana"))
         self.assertEqual(response.status_code, 200)
         ids = [item["id"] for item in response.json()["use_cases"]]
-        self.assertEqual(len(ids), 20)
+        self.assertEqual(len(ids), 15)
 
 
 class TestStream(ApiCase):

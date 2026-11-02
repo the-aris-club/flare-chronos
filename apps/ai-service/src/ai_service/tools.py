@@ -1,6 +1,6 @@
 """Deterministic Tool Registry for Flare-Chronos Dual-System LangGraph Harness.
 
-Implements 23 strict `@tool` functions (8 Atomic Physics/Data Tools + 15 Domain Use-Case Tools)
+Implements 18 strict `@tool` functions (9 Atomic + 9 Domain Diagnostic)
 backed by `flare_chronos_core`, `data/processed/empirical_results.json`, and `data/raw/`.
 Every mathematical, geometric, radiometric, and statistical value is computed in Python
 so the LLM never performs free-form arithmetic (ADR-0005).
@@ -797,33 +797,6 @@ def tool_uc3_1_constellation_retirement_simulation(
 
 
 @tool
-def tool_uc3_2_multihop_spatiotemporal_cube_query() -> dict[str, Any]:
-    """[UC-3.2] Execute a multi-hop analytical query across the 26-year (2001-2026) empirical cube comparing Mekong and Amazon extremes."""
-    res = _load_empirical_results()
-    manifest = _load_fetch_manifest()
-    mek_series = res.get("regime_shift_series", {}).get("mekong", {})
-    amz_series = res.get("regime_shift_series", {}).get("amazon", {})
-
-    return {
-        "use_case_id": "UC-3.2",
-        "total_cached_slices": len(manifest),
-        "total_verified_thermal_detections": sum(manifest.values()),
-        "mekong_max_raw_year": 2019,
-        "mekong_max_raw_count": int(
-            mek_series.get("raw_counts_by_year", {}).get("2019", 51974)
-        ),
-        "mekong_max_harmonized_year": 2007,
-        "mekong_max_harmonized_index": 297.8,
-        "amazon_max_raw_2024_count": int(
-            amz_series.get("raw_counts_by_year", {}).get("2024", 112405)
-        ),
-        "amazon_2024_saa_rejected_count": 18097,
-        "amazon_2024_dedup_compression_ratio": 4.978,
-        "amazon_2024_harmonized_index": 70.7,
-    }
-
-
-@tool
 def tool_uc3_3_autonomous_biome_recalibration() -> dict[str, Any]:
     """[UC-3.3] Audit and return the Two-Stage Observation Operator + Empirical Quantile Mapping (EQM) parameters fitted across the co-incident Aqua-SNPP cell pairs in the published artifact."""
     cal = _calibration()
@@ -911,125 +884,6 @@ def tool_uc4_2_nrt_vs_sp_fidelity_audit() -> dict[str, Any]:
 
 
 @tool
-def tool_uc4_3_adaptive_firms_rate_limit_planner() -> dict[str, Any]:
-    """[UC-4.3] Compute transaction budget and optimal pacing across the 134 cached NASA FIRMS slices under the 5,000 transactions per 10-minute rate limit."""
-    manifest = _load_fetch_manifest()
-    total_files = len(manifest)
-    total_rows = sum(manifest.values())
-    open_7d_files = sum(1 for k in manifest if k.startswith("open7d__"))
-    api_area_files = total_files - open_7d_files
-    return {
-        "use_case_id": "UC-4.3",
-        "firms_rate_limit_tx_per_10min": 5000,
-        "min_request_pacing_sec": 0.35,
-        "total_cached_slices": total_files,
-        "api_area_slices_count": api_area_files,
-        "zero_cost_open7d_slices_count": open_7d_files,
-        "total_cached_detections": total_rows,
-        "mean_rows_per_slice": round(total_rows / max(1, total_files), 1),
-    }
-
-
-@tool
-def tool_uc5_1_redd_plus_carbon_mrv_baseline_audit(
-    region: str = "amazon",
-) -> dict[str, Any]:
-    """[UC-5.1] Audit sensor-invariant Fire Radiative Power (FRP) and Harmonized Radiative Flux (HRF) for REDD+ forest carbon MRV baselines across 2005-2026."""
-    res = _load_empirical_results()
-    reg = "amazon" if "amazon" in region.lower() else "mekong"
-    epochs = {e["year"]: e for e in res.get(f"{reg}_empirical_epochs", [])}
-    e2005 = epochs.get(2005, {})
-    e2012 = epochs.get(2012, {})
-    e2024 = epochs.get(2024, {})
-    e2025 = epochs.get(2025, {})
-
-    return {
-        "use_case_id": "UC-5.1",
-        "region": reg,
-        "baseline_2005_raw_frp_mw": float(e2005.get("raw_total_frp_mw", 917080.2)),
-        "baseline_2005_harmonized_frp_mw": float(
-            e2005.get("harmonized_total_frp_mw", 1130862.5)
-        ),
-        "transition_2012_raw_frp_mw": float(e2012.get("raw_total_frp_mw", 864588.6)),
-        "transition_2012_harmonized_frp_mw": float(
-            e2012.get("harmonized_total_frp_mw", 973432.6)
-        ),
-        "drought_2024_raw_frp_mw": float(e2024.get("raw_total_frp_mw", 1990752.4)),
-        "drought_2024_harmonized_frp_mw": float(
-            e2024.get("harmonized_total_frp_mw", 814613.6)
-        ),
-        "post_drought_2025_raw_frp_mw": float(e2025.get("raw_total_frp_mw", 401081.2)),
-        "post_drought_2025_harmonized_frp_mw": float(
-            e2025.get("harmonized_total_frp_mw", 68321.5)
-        ),
-    }
-
-
-@tool
-def tool_uc5_2_burn_ban_policy_counterfactual_audit(
-    region: str = "mekong",
-) -> dict[str, Any]:
-    """[UC-5.2] Evaluate agricultural residue burn-ban and forest protection policy effectiveness across 2019-2026 after removing sensor multiplicity and ENSO variance."""
-    res = _load_empirical_results()
-    reg = "amazon" if "amazon" in region.lower() else "mekong"
-    series = res.get("regime_shift_series", {}).get(reg, {})
-    years = series.get("years", [])
-    raw_idx = dict(zip(years, series.get("raw_index_2005_eq_100", []), strict=False))
-    harm_idx = dict(
-        zip(years, series.get("harmonized_index_2005_eq_100", []), strict=False)
-    )
-
-    h_2019 = float(harm_idx.get(2019, 147.3))
-    h_2024 = float(harm_idx.get(2024, 94.2))
-    h_2025 = float(harm_idx.get(2025, 59.5))
-    h_2026 = float(harm_idx.get(2026, 56.3))
-    net_reduction_2019_to_2026_pct = round(
-        100.0 * (h_2019 - h_2026) / max(1.0, h_2019), 1
-    )
-
-    return {
-        "use_case_id": "UC-5.2",
-        "region": reg,
-        "raw_index_2019": float(raw_idx.get(2019, 1451.8)),
-        "harmonized_index_2019": h_2019,
-        "raw_index_2024": float(raw_idx.get(2024, 1424.2)),
-        "harmonized_index_2024": h_2024,
-        "raw_index_2025": float(raw_idx.get(2025, 878.4)),
-        "harmonized_index_2025": h_2025,
-        "raw_index_2026": float(raw_idx.get(2026, 967.9)),
-        "harmonized_index_2026": h_2026,
-        "net_harmonized_reduction_2019_to_2026_pct": net_reduction_2019_to_2026_pct,
-    }
-
-
-@tool
-def tool_uc5_3_transboundary_fire_propagation_forensics() -> dict[str, Any]:
-    """[UC-5.3] Analyze transboundary fire episode clustering and H3 hexagonal ring propagation across the Mekong corridor (Vietnam-Laos-Cambodia-Thailand)."""
-    res = _load_empirical_results()
-    mek_epochs = {e["year"]: e for e in res.get("mekong_empirical_epochs", [])}
-    e2016 = mek_epochs.get(2016, {})
-    e2024 = mek_epochs.get(2024, {})
-    return {
-        "use_case_id": "UC-5.3",
-        "corridor_bbox": "100.0,8.5,109.5,23.5",
-        "h3_res7_cell_area_km2": 5.161,
-        "h3_res8_cell_area_km2": 0.737,
-        "el_nino_2016_raw_detections": int(e2016.get("total_raw_detections", 43342)),
-        "el_nino_2016_fire_episodes": int(
-            e2016.get("deduplicated_fire_episodes", 22573)
-        ),
-        "el_nino_2016_harmonized_episodes": float(
-            e2016.get("harmonized_viirs_eq_episodes", 15124.3)
-        ),
-        "2024_raw_detections": int(e2024.get("total_raw_detections", 50988)),
-        "2024_fire_episodes": int(e2024.get("deduplicated_fire_episodes", 22557)),
-        "2024_harmonized_episodes": float(
-            e2024.get("harmonized_viirs_eq_episodes", 7266.4)
-        ),
-    }
-
-
-@tool
 def tool_harmonize_real_firms_csv_slice(
     slice_filename: str = "mekong__MODIS_SP__2024-03-15__5d.csv",
     sample_limit: int = 500,
@@ -1090,14 +944,9 @@ DOMAIN_DIAGNOSTIC_TOOLS: list[BaseTool] = [
     tool_uc2_1_phenological_phase_shift_detection,
     tool_uc2_2_uncertainty_aware_tactical_dispatch,
     tool_uc3_1_constellation_retirement_simulation,
-    tool_uc3_2_multihop_spatiotemporal_cube_query,
     tool_uc3_3_autonomous_biome_recalibration,
     tool_uc4_1_orbital_drift_and_sza_audit,
     tool_uc4_2_nrt_vs_sp_fidelity_audit,
-    tool_uc4_3_adaptive_firms_rate_limit_planner,
-    tool_uc5_1_redd_plus_carbon_mrv_baseline_audit,
-    tool_uc5_2_burn_ban_policy_counterfactual_audit,
-    tool_uc5_3_transboundary_fire_propagation_forensics,
 ]
 
 ALL_DETERMINISTIC_TOOLS: list[BaseTool] = [
@@ -1116,14 +965,9 @@ ALL_DETERMINISTIC_TOOLS: list[BaseTool] = [
     tool_uc2_1_phenological_phase_shift_detection,
     tool_uc2_2_uncertainty_aware_tactical_dispatch,
     tool_uc3_1_constellation_retirement_simulation,
-    tool_uc3_2_multihop_spatiotemporal_cube_query,
     tool_uc3_3_autonomous_biome_recalibration,
     tool_uc4_1_orbital_drift_and_sza_audit,
     tool_uc4_2_nrt_vs_sp_fidelity_audit,
-    tool_uc4_3_adaptive_firms_rate_limit_planner,
-    tool_uc5_1_redd_plus_carbon_mrv_baseline_audit,
-    tool_uc5_2_burn_ban_policy_counterfactual_audit,
-    tool_uc5_3_transboundary_fire_propagation_forensics,
 ]
 
 TOOL_MAP: dict[str, BaseTool] = {t.name: t for t in ALL_DETERMINISTIC_TOOLS}
@@ -1162,10 +1006,6 @@ USE_CASE_PRIMARY_TOOLS: dict[UseCaseId, list[str]] = {
     UseCaseId.UC_3_1_CONSTELLATION_RETIREMENT: [
         "tool_uc3_1_constellation_retirement_simulation",
     ],
-    UseCaseId.UC_3_2_MULTIHOP_SPATIOTEMPORAL: [
-        "tool_uc3_2_multihop_spatiotemporal_cube_query",
-        "tool_query_seasonal_phenology_12m",
-    ],
     UseCaseId.UC_3_3_BIOME_RECALIBRATION: [
         "tool_uc3_3_autonomous_biome_recalibration",
         "tool_calibrate_cross_sensor_frp",
@@ -1176,17 +1016,5 @@ USE_CASE_PRIMARY_TOOLS: dict[UseCaseId, list[str]] = {
     ],
     UseCaseId.UC_4_2_NRT_VS_SP_FIDELITY: [
         "tool_uc4_2_nrt_vs_sp_fidelity_audit",
-    ],
-    UseCaseId.UC_4_3_ADAPTIVE_RATE_LIMIT: [
-        "tool_uc4_3_adaptive_firms_rate_limit_planner",
-    ],
-    UseCaseId.UC_5_1_REDD_CARBON_MRV: [
-        "tool_uc5_1_redd_plus_carbon_mrv_baseline_audit",
-    ],
-    UseCaseId.UC_5_2_POLICY_COUNTERFACTUAL: [
-        "tool_uc5_2_burn_ban_policy_counterfactual_audit",
-    ],
-    UseCaseId.UC_5_3_TRANSBOUNDARY_FORENSICS: [
-        "tool_uc5_3_transboundary_fire_propagation_forensics",
     ],
 }

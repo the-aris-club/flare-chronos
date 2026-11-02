@@ -158,7 +158,7 @@ def _stub_credential() -> Any:
 
 
 class TestFlareChronosDualSystemHarness(unittest.TestCase):
-    """Verify the LangGraph Dual-System Harness, 23 Tools, 20 Use Cases, and Symbiosis."""
+    """Verify the LangGraph Dual-System Harness, 18 Tools, 15 Use Cases, and Symbiosis."""
 
     def test_01_harness_config_declares_explicit_endpoint_profiles(self) -> None:
         cfg = load_harness_config()
@@ -199,19 +199,44 @@ class TestFlareChronosDualSystemHarness(unittest.TestCase):
         self.assertTrue(fallback_profile.model_id)
 
     def test_02_tool_registry_completeness(self) -> None:
-        self.assertEqual(len(ALL_DETERMINISTIC_TOOLS), 23)
-        self.assertEqual(len(USE_CASE_PRIMARY_TOOLS), 20)
+        self.assertEqual(len(ALL_DETERMINISTIC_TOOLS), 18)
+        self.assertEqual(len(USE_CASE_PRIMARY_TOOLS), 15)
         for uc_id, tool_names in USE_CASE_PRIMARY_TOOLS.items():
             self.assertIsInstance(uc_id, UseCaseId)
             self.assertGreaterEqual(len(tool_names), 1)
             for t_name in tool_names:
                 self.assertIn(t_name, TOOL_MAP)
 
-    def test_03_all_20_use_cases_execute_and_pass_verification(self) -> None:
+    def test_02b_only_the_use_cases_that_support_harmonization_remain(self) -> None:
+        """ADR-0016: the cut use cases cannot be named by any classifier path."""
+        from ai_service.classification import USE_CASE_MENU
+
+        kept = {
+            "UC-S1.1",
+            "UC-S1.2",
+            "UC-S1.3",
+            "UC-S1.4",
+            "UC-S1.5",
+            "UC-1.1",
+            "UC-1.2",
+            "UC-1.3",
+            "UC-2.1",
+            "UC-2.2",
+            "UC-2.3",
+            "UC-3.1",
+            "UC-3.3",
+            "UC-4.1",
+            "UC-4.2",
+        }
+        self.assertEqual({u.value for u in UseCaseId}, kept)
+        self.assertEqual(set(USE_CASE_MENU), kept)
+        self.assertLessEqual({u.value for u in USE_CASE_PRIMARY_TOOLS}, kept)
+
+    def test_03_all_15_use_cases_execute_and_pass_verification(self) -> None:
         harness = FlareChronosDualSystemHarness(
             mode="deterministic", enable_cache=False
         )
-        self.assertEqual(len(USE_CASE_BENCHMARK_QUERIES), 20)
+        self.assertEqual(len(USE_CASE_BENCHMARK_QUERIES), 15)
 
         for idx, (uc_enum, query) in enumerate(USE_CASE_BENCHMARK_QUERIES, start=1):
             with self.subTest(use_case=uc_enum.value):
@@ -438,7 +463,7 @@ class TestFlareChronosDualSystemHarness(unittest.TestCase):
         registered = {tool.name for tool in ALL_DETERMINISTIC_TOOLS}
         self.assertEqual(atomic | diagnostic, registered)
         self.assertEqual(atomic & diagnostic, set())
-        self.assertEqual(len(registered), 23)
+        self.assertEqual(len(registered), 18)
 
     def test_15_raw_firms_harmoniser_is_outside_the_model_registry(self) -> None:
         """The raw CSV harmoniser stays unreachable by the model."""
@@ -977,7 +1002,7 @@ class TestFlareChronosDualSystemHarness(unittest.TestCase):
         self.assertEqual(out["cognitive_tier"], "fast")
         # The payload asked for the analysis, so the endpoint could name one.
         self.assertIn("use_case", stub.received[0]["questions"])
-        self.assertEqual(len(stub.received[0]["questions"]["use_case"]["criteria"]), 20)
+        self.assertEqual(len(stub.received[0]["questions"]["use_case"]["criteria"]), 15)
 
     def test_34_the_fallback_classifier_answers_when_the_first_one_is_down(
         self,

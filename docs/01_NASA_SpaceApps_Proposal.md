@@ -179,7 +179,7 @@ python3 apps/benchmark-cli/src/benchmark_cli/run_experiments.py
 python3 -m pytest -q
 python3 -m pytest -m live -q
 
-# 5. Chạy toàn bộ 20 Use Case trên mô hình thật và ghi đo lường từng Use Case
+# 5. Chạy toàn bộ 15 Use Case trên mô hình thật và ghi đo lường từng Use Case
 python3 apps/ai-service/src/ai_service/run_all_usecases.py --live
 ```
 

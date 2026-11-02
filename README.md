@@ -77,7 +77,7 @@ See [`docs/00_Project_Name_and_Acronym.md`](docs/00_Project_Name_and_Acronym.md)
 - **Spatio-temporal deduplication**: multi-satellite overpass clustering into Fire Episodes (τ = 60 min).
 - **Effort normalization**: Ω(year, latitude) prevents constellation-expansion artificial trends.
 - **Burning Activity Calendar**: 26 Years × 73 Pentads matrix of HFD / HRF / SFAI with robust seasonal Z-scores.
-- **Dual-System Cognitive AI Harness (`apps/ai-service`)**: LangGraph orchestration pairing a **System 1 decision model** (assigns the analysis, the region and the urgency with calibrated probabilities) with a **System 2 native chat endpoint** (deliberative reasoning) across **20 Use Cases** and **23 deterministic `@tool` functions**. The Reflexive Layer runs a chain — decision model, then chat model, then deterministic extraction — so a run never depends on one service being up ([MODEL_FLOW](exports/MODEL_FLOW.md)). The model chooses its own tool calls; the harness only decides which tools each tier may reach. Every briefing is a **Grounded Narrative**: the model authors the interpretation while the harness injects every quantity from the `VerifiedFactsLedger`, checked by a `NumericGroundingVerifier`. Briefings that authorize a field action pause for a **human sign-off** before they are released. Each layer is bound through an **Endpoint Profile** (protocol, endpoint, model, API key, request options) resolved from explicit configuration only — never from the host's agent tooling configuration ([ADR-0006](docs/adr/0006-explicit-endpoint-profiles-and-grounded-narrative-assembly.md), [ADR-0008](docs/adr/0008-model-driven-tool-selection-sign-off-and-event-stream.md)).
+- **Dual-System Cognitive AI Harness (`apps/ai-service`)**: LangGraph orchestration pairing a **System 1 decision model** (assigns the analysis, the region and the urgency with calibrated probabilities) with a **System 2 native chat endpoint** (deliberative reasoning) across **15 Use Cases** and **18 deterministic `@tool` functions**. The Reflexive Layer runs a chain — decision model, then chat model, then deterministic extraction — so a run never depends on one service being up ([MODEL_FLOW](exports/MODEL_FLOW.md)). The model chooses its own tool calls; the harness only decides which tools each tier may reach. Every briefing is a **Grounded Narrative**: the model authors the interpretation while the harness injects every quantity from the `VerifiedFactsLedger`, checked by a `NumericGroundingVerifier`. Briefings that authorize a field action pause for a **human sign-off** before they are released. Each layer is bound through an **Endpoint Profile** (protocol, endpoint, model, API key, request options) resolved from explicit configuration only — never from the host's agent tooling configuration ([ADR-0006](docs/adr/0006-explicit-endpoint-profiles-and-grounded-narrative-assembly.md), [ADR-0008](docs/adr/0008-model-driven-tool-selection-sign-off-and-event-stream.md)).
 - **Deep-module monorepo**: pure core (zero I/O) behind a clean seam; ingestion adapter; benchmark CLI; dual-system AI service; PDF exports (`exports/PROPOSAL.pdf` & `exports/REPORT.pdf`).
 
 ---
@@ -99,7 +99,7 @@ NASA FIRMS (MODIS / VIIRS / NRT) ──► firms-ingestion (rate-limited, cached
                                             │
                                             ▼
                      ai-service (LangGraph System 1 ↔ System 2)
-        24 deterministic @tools → VerifiedFactsLedger → NumericGroundingVerifier
+        19 deterministic @tools → VerifiedFactsLedger → NumericGroundingVerifier
                                             │
                                             ▼
                               DuckDB / Parquet cube + REST API + Deck.gl UI
@@ -148,7 +148,7 @@ flare-chronos/
 │   └── firms-ingestion/               # [Adapter Seam] NASA LANCE FIRMS client + cache
 ├── apps/
 │   ├── benchmark-cli/                 # [Application] data fetch, experiments, figures
-│   └── ai-service/                    # [Cognitive Layer] LangGraph System 1 + System 2 (20 UCs, 24 @tools) + event-stream server
+│   └── ai-service/                    # [Cognitive Layer] LangGraph System 1 + System 2 (15 UCs, 19 @tools) + event-stream server
 ├── exports/
 │   ├── PROPOSAL.md / PROPOSAL.pdf     # Official Technical Proposal (Vietnamese A4 PDF)
 │   ├── REPORT.md / REPORT.pdf         # Codebase Architecture & Empirical Report (A4 PDF)

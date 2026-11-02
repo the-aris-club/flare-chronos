@@ -62,9 +62,6 @@ class TestToolNumbersComeFromTheArtifact(unittest.TestCase):
         lon0, lat0, lon1, lat1 = fetch_cloud_cover.BBOX["mekong"]
         self.assertEqual(f"{lon0},{lat0},{lon1},{lat1}", BBOX_MEKONG)
 
-        source = Path(tools.__file__).read_text()
-        self.assertIn(f'"corridor_bbox": "{BBOX_MEKONG}"', source)
-
 
 if __name__ == "__main__":
     unittest.main()

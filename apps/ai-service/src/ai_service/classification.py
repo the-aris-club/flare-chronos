@@ -36,14 +36,9 @@ USE_CASE_MENU: dict[str, str] = {
     "UC-2.2": "compute uncertainty-aware tactical dispatch for rangers",
     "UC-2.3": "assemble a cross-verified multi-stakeholder situation briefing",
     "UC-3.1": "simulate the effect of constellation retirement",
-    "UC-3.2": "run a multi-hop spatio-temporal cube query over the archive",
     "UC-3.3": "audit the biome recalibration and its goodness of fit",
     "UC-4.1": "audit orbital drift and solar zenith angle stability",
     "UC-4.2": "audit near-real-time versus standard processing fidelity",
-    "UC-4.3": "plan the provider rate-limit budget across cached slices",
-    "UC-5.1": "audit the carbon baseline for REDD+ reporting",
-    "UC-5.2": "evaluate a burn-ban policy counterfactual",
-    "UC-5.3": "forensic analysis of transboundary fire propagation",
 }
 
 UseCaseChoice = Literal[
@@ -59,14 +54,9 @@ UseCaseChoice = Literal[
     "UC-2.2",
     "UC-2.3",
     "UC-3.1",
-    "UC-3.2",
     "UC-3.3",
     "UC-4.1",
     "UC-4.2",
-    "UC-4.3",
-    "UC-5.1",
-    "UC-5.2",
-    "UC-5.3",
 ]
 
 _USE_CASE_CATALOGUE = "; ".join(
