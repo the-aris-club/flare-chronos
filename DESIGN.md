@@ -148,10 +148,10 @@ Location `apps/workbench/src/components/ui`. One concern per file, flat.
 | `locale-toggle.tsx` | Two-state EN/VI control; flips the locale cookie and refreshes server copy. |
 
 Domain components live in `apps/workbench/src/components/workbench` and are named by
-role, never by sequence: `app-header`, `filter-bar`, `map-pane`, `workbench-map`,
+role, never by sequence: `app-header`, `physics-filters`, `map-pane`, `workbench-map`,
 `kpi-strip`, `comparator-pane`, `clock-pane`, `burning-calendar`, `calendar-grid`,
 `calendar-legend`, `calendar-summary`, `briefing-rail`, `briefing-run`,
-`briefing-events`, `service-panel`, `map-controls`, `map-legend`, `evidence-drawer`,
+`briefing-events`, `service-panel`, `map-controls`, `map-legend`, `map-guide`, `evidence-drawer`,
 `tour`.
 The Region Globe island lives in `apps/workbench/src/components/globe`:
 `globe-landing`, `landing-header`, `landing-panel`, `region-card`, `boot-overlay`,

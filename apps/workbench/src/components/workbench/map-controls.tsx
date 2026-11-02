@@ -8,7 +8,6 @@ export const DEFAULT_LAYERS: MapLayers = {
   footprints: true,
   hex: false,
   overlay: true,
-  lens: true,
 };
 
 type MapControlsProps = {
@@ -18,15 +17,14 @@ type MapControlsProps = {
   onGrid: (grid: number) => void;
 };
 
-const LAYERS: (keyof MapLayers)[] = ['footprints', 'hex', 'overlay', 'lens'];
+// The Static & SAA layer is switched in the map's guide panel, next to its legend.
+const LAYERS: (keyof MapLayers)[] = ['footprints', 'hex'];
 
 export function MapControls({ layers, onLayer, grid, onGrid }: MapControlsProps) {
   const t = useTranslations('Map');
-  const labels: Record<keyof MapLayers, string> = {
+  const labels: Partial<Record<keyof MapLayers, string>> = {
     footprints: t('footprints'),
     hex: t('hexes'),
-    overlay: t('staticSaa'),
-    lens: t('lens'),
   };
 
   return (

@@ -13,11 +13,10 @@ import { BurningCalendar } from './burning-calendar';
 import { ClockPane } from './clock-pane';
 import dynamic from 'next/dynamic';
 const ComparatorPane = dynamic(() => import('./comparator-pane').then((m) => m.ComparatorPane), {
-  loading: () => <div className="h-64 animate-pulse rounded-md bg-chip" />,
+  loading: () => <div className="bg-chip h-64 animate-pulse rounded-md" />,
 });
 import { EvidenceDrawer } from './evidence-drawer';
 import { EvidenceQuickLook } from './evidence-quick-look';
-import { FilterBar } from './filter-bar';
 import { KpiStrip } from './kpi-strip';
 import { MapPane } from './map-pane';
 import { tourFigures } from '@/lib/workbench/tour-figures';
@@ -120,12 +119,6 @@ export function WorkbenchShell({
         onService={() => setBriefState('open')}
       />
 
-      <FilterBar
-        epoch={epoch}
-        filters={filters}
-        onFilter={(key) => setFilters((current) => ({ ...current, [key]: !current[key] }))}
-      />
-
       <div className="flex min-h-0 flex-1">
         <main className="tablet:p-3 tablet:pb-3 min-w-0 flex-1 overflow-y-auto p-2.5 pb-20">
           <ConclusionStrip
@@ -145,6 +138,7 @@ export function WorkbenchShell({
                 physics={workbench.physics}
                 year={year}
                 filters={filters}
+                onFilter={(key) => setFilters((current) => ({ ...current, [key]: !current[key] }))}
                 onYear={setYear}
               />
             </div>
@@ -207,11 +201,7 @@ export function WorkbenchShell({
           />
         )}
 
-        <BriefingRail
-          region={region}
-          state={briefState}
-          onToggle={toggleBrief}
-        />
+        <BriefingRail region={region} state={briefState} onToggle={toggleBrief} />
       </div>
 
       <nav

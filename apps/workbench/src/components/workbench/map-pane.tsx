@@ -8,9 +8,9 @@ import { clampView, MAP_VIEW, zoomAt, type MapView } from '@/lib/workbench/map-v
 import type { Epoch, MapFilters, MapLayers, MapPhysics } from '@/lib/workbench/types';
 import { formatEpochDate, formatEpochDays } from '@/lib/workbench/format';
 import type { RegionId } from '@/lib/calendar/types';
-import { FootprintLens } from './footprint-lens';
+import { MapGuide } from './map-guide';
 import { DEFAULT_LAYERS, MapControls, MapZoom } from './map-controls';
-import { MapLegend, MapScale } from './map-legend';
+import { MapFooter, MapScale } from './map-legend';
 import { MapTooltip } from './map-tooltip';
 import { WorkbenchMap } from './workbench-map';
 
@@ -21,6 +21,7 @@ type MapPaneProps = {
   physics: MapPhysics;
   year: number;
   filters: MapFilters;
+  onFilter: (key: keyof MapFilters) => void;
   onYear: (year: number) => void;
 };
 
@@ -31,6 +32,7 @@ export function MapPane({
   physics,
   year,
   filters,
+  onFilter,
   onYear,
 }: MapPaneProps) {
   const t = useTranslations('Map');
@@ -39,6 +41,7 @@ export function MapPane({
   const [grid, setGrid] = useState(7);
   const [view, setView] = useState<MapView>(MAP_VIEW);
   const [hover, setHover] = useState<MapHover | null>(null);
+  const clamped = useMemo(() => clampView(view, MAP_DATA.width, MAP_DATA.height), [view]);
   const mapArea = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ width: 0, height: 0 });
 
@@ -159,7 +162,7 @@ export function MapPane({
         <WorkbenchMap
           region={region}
           year={year}
-          view={clampView(view, MAP_DATA.width, MAP_DATA.height)}
+          view={clamped}
           grid={grid}
           filters={filters}
           layers={layers}
@@ -190,15 +193,21 @@ export function MapPane({
 
         <MapZoom onZoom={zoom} onReset={() => setView(MAP_VIEW)} />
 
-        {layers.lens && <FootprintLens physics={physics} />}
         {pxPerKm > 0 && <MapScale pxPerKm={pxPerKm} />}
-        <MapLegend
-          layers={layers}
-          saa={region === 'amazon'}
-          islands={region === 'mekong'}
+        <MapGuide
+          physics={physics}
+          overlay={layers.overlay}
+          epoch={epochs.find((epoch) => epoch.year === year)}
+          filters={filters}
+          onFilterAction={onFilter}
+          onOverlayAction={() => toggleLayer('overlay')}
+          hex={layers.hex}
           grid={grid}
           resolution={resolution}
+          saa={region === 'amazon'}
+          islands={region === 'mekong'}
         />
+        <MapFooter />
         <MapTooltip hover={hover} container={mapArea} />
       </div>
     </section>
