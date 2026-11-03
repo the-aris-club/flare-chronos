@@ -733,7 +733,7 @@
       "Empirical results in data/processed/empirical_results.json and the burning calendar in data/processed/burning_calendar.json."
     ],
     "creditsTitle": "Credits",
-    "credits": "Built for the 2026 NASA Space Apps Challenge. Harmonization core in packages/harmonization-core; workbench in apps/workbench.",
+    "credits": "Built for the 2026 NASA Space Apps Challenge. Authors: Flare Chronos Team, The Aris Club Team, Lê Thành Trung (lethanhtrung.trungle@gmail.com). Harmonization core in packages/harmonization-core; workbench in apps/workbench.",
     "licenseTitle": "License",
     "license": "See the repository LICENSE. Data are derived from public NASA and Natural Earth products.",
     "cta": "Explore the workbench"

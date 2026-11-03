@@ -37,3 +37,4 @@ Every figure is read from `data/processed/empirical_results.json`. Reproduce wit
 ## Contact
 
 Project: Flare Chronos. Repository: flare-chronos.
+Authors: Flare Chronos Team, The Aris Club Team, Lê Thành Trung <lethanhtrung.trungle@gmail.com>.

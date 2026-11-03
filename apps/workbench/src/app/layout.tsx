@@ -51,9 +51,13 @@ export async function generateMetadata(): Promise<Metadata> {
       'H3',
       'phenology',
     ],
-    authors: [{ name: 'Flare Chronos' }],
-    creator: 'Flare Chronos',
-    publisher: 'Flare Chronos',
+    authors: [
+      { name: 'Flare Chronos Team' },
+      { name: 'The Aris Club Team' },
+      { name: 'Lê Thành Trung', url: 'mailto:lethanhtrung.trungle@gmail.com' },
+    ],
+    creator: 'Flare Chronos Team',
+    publisher: 'Flare Chronos Team',
     robots: {
       index: true,
       follow: true,
@@ -117,6 +121,11 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
                 logo: `${SITE_URL}/logo.png`,
                 description:
                   'Cross-sensor harmonization of satellite active-fire records (MODIS + VIIRS) for the Mekong and Amazon regions.',
+                author: [
+                  { '@type': 'Person', name: 'Lê Thành Trung', email: 'lethanhtrung.trungle@gmail.com' },
+                  { '@type': 'Organization', name: 'Flare Chronos Team' },
+                  { '@type': 'Organization', name: 'The Aris Club Team' },
+                ],
               },
               {
                 '@type': 'WebApplication',
