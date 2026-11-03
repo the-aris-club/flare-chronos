@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
 export function BrandGlyph({ large = false }: { large?: boolean }) {
@@ -25,7 +26,7 @@ export function BrandMark({ large = false, subtitle }: { large?: boolean; subtit
   const t = useTranslations('Brand');
 
   return (
-    <div className="flex shrink-0 items-center gap-2">
+    <Link href="/" className="flex shrink-0 items-center gap-2">
       <BrandGlyph large={large} />
       <span className={`${large ? 'flex' : 'tablet:flex hidden'} flex-col leading-none`}>
         <span className={`${large ? 'text-display' : 'text-title'} font-bold tracking-tight`}>
@@ -40,6 +41,6 @@ export function BrandMark({ large = false, subtitle }: { large?: boolean; subtit
           {subtitle ?? t('product')}
         </span>
       </span>
-    </div>
+    </Link>
   );
 }

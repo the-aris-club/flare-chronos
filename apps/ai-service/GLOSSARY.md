@@ -78,6 +78,18 @@ _Avoid_: Approval log, audit trail, sign-off record
 The authenticated identity that owns a run or is assigned to approve it, established from validated token claims and never from the request body. A Sign-off Decision names a Sign-off Principal.
 _Avoid_: User, approver name, decided-by string, operator
 
+**Review Run**:
+A run that raised a Sign-off Request. It is Needs decision while the request is pending, Published once approved, Withheld once rejected, and Failed if it ended in error after raising the request. A run that never raised a Sign-off Request is not a Review Run.
+_Avoid_: Run log entry, review item, ticket
+
+**Reason Code**:
+The categorical ground a Sign-off Principal gives for a Sign-off Decision, recorded beside the free-text note.
+_Avoid_: Reason string, decision tag
+
+**Run Event Log**:
+The append-only record of every event a run emitted, from which a Review Run is derived. It is what the run showed live, kept after the stream ends.
+_Avoid_: Run history, transcript, trace
+
 **Clarification Request**:
 A request for a human to supply information the analysis cannot infer, raised without authorizing any action.
 _Avoid_: Question, prompt, clarification

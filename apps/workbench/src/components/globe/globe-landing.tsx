@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { useTheme } from '@/components/ui/theme-provider';
@@ -93,23 +93,37 @@ export function GlobeLanding({ period, yearStart, total, growth, regions }: Glob
     [enterNow],
   );
 
-  const cards = regions.map((region) => ({
-    id: region.id,
-    name: regionNames(`${region.id}Long`),
-    coverage: t(`coverage.${region.id}`, {
-      box: formatQueryBox(REGION_DEFS[region.id].queryBox, locale),
-    }),
-    measured: region.measured,
-    lastEpoch: region.lastEpoch,
-  }));
+  const handleToggle = useCallback(() => setCollapsed((value) => !value), []);
 
-  const labels: GlobeLabel[] = regions.map((region) => ({
-    id: region.id,
-    name: t(`short.${region.id}`),
-    measured: region.measured,
-    yearStart,
-    total,
-  }));
+  const handleExplore = useCallback(() => router.push('/workbench/mekong'), [router]);
+
+  const handleTour = useCallback(() => router.push('/workbench/mekong?tour=1'), [router]);
+
+  const cards = useMemo(
+    () =>
+      regions.map((region) => ({
+        id: region.id,
+        name: regionNames(`${region.id}Long`),
+        coverage: t(`coverage.${region.id}`, {
+          box: formatQueryBox(REGION_DEFS[region.id].queryBox, locale),
+        }),
+        measured: region.measured,
+        lastEpoch: region.lastEpoch,
+      })),
+    [regions, regionNames, t, locale],
+  );
+
+  const labels = useMemo<GlobeLabel[]>(
+    () =>
+      regions.map((region) => ({
+        id: region.id,
+        name: t(`short.${region.id}`),
+        measured: region.measured,
+        yearStart,
+        total,
+      })),
+    [regions, t, yearStart, total],
+  );
 
   return (
     <div className="fc-globe-bg text-ink relative h-dvh overflow-hidden">
@@ -135,11 +149,11 @@ export function GlobeLanding({ period, yearStart, total, growth, regions }: Glob
           total={total}
           collapsed={collapsed}
           hovered={hovered}
-          onToggle={() => setCollapsed((value) => !value)}
+          onToggle={handleToggle}
           onHover={setHovered}
           onSelect={beginEnter}
-          onExplore={() => router.push('/workbench/mekong')}
-          onTour={() => router.push('/workbench/mekong?tour=1')}
+          onExplore={handleExplore}
+          onTour={handleTour}
         />
       </main>
 

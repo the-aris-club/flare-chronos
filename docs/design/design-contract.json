@@ -905,7 +905,7 @@
     "rule": "Concept keys only. No shape keys. No Unicode glyphs in JSX. Every icon-only control carries an aria-label."
   },
   "primitives": [
-    "AmIcon",
+    "Icon",
     "SegmentedControl",
     "BrandMark",
     "ThemeToggle",

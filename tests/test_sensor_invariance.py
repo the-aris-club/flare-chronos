@@ -64,10 +64,12 @@ class TestSensorInvarianceIsPublished(unittest.TestCase):
     ),
 )
 def test_harmonized_count_is_sensor_invariant() -> None:
-    assert EPOCHS
+    if not EPOCHS:
+        raise AssertionError("EPOCHS is empty")
     for region, epoch in EPOCHS:
         gap = abs(epoch["sensor_invariance_ratio"] - 1.0)
-        assert gap <= INVARIANCE_TOLERANCE, (region, epoch["year"], gap)
+        if not (gap <= INVARIANCE_TOLERANCE):
+            raise AssertionError((region, epoch["year"], gap))
 
 
 if __name__ == "__main__":

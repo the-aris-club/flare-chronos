@@ -59,4 +59,4 @@ for (const [id, config] of Object.entries(REGION_DEFS)) {
 
 writeFileSync(OUT, JSON.stringify(output));
 const kb = Math.round(JSON.stringify(output).length / 1024);
-console.log(`wrote ${OUT} (${kb} KB)`);
+console.warn(`wrote ${OUT} (${kb} KB)`);

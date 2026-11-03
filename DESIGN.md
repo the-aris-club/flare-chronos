@@ -141,17 +141,17 @@ Location `apps/workbench/src/components/ui`. One concern per file, flat.
 
 | Primitive | Contract |
 |---|---|
-| `icon.tsx` | `ICON` concept registry and `AmIcon`. Renders `lucide-react`; sets `aria-hidden` and `focusable="false"`; `size` is `xs \| sm \| md \| lg`. |
+| `icon.tsx` | `ICON` concept registry and `Icon`. Renders `lucide-react`; sets `aria-hidden` and `focusable="false"`; `size` is `xs \| sm \| md \| lg \| xl`. |
 | `segmented-control.tsx` | `role="group"`, `aria-pressed` buttons, mono labels, 2 px inset track. |
 | `brand-mark.tsx` | CSS crop of `/logo.png` plus the `FLARE CHRONOS` wordmark; decorative image, `alt=""`. |
 | `theme-toggle.tsx` | Icon button; flips the theme cookie and `data-theme` without a reload. |
 | `locale-toggle.tsx` | Two-state EN/VI control; flips the locale cookie and refreshes server copy. |
 
 Domain components live in `apps/workbench/src/components/workbench` and are named by
-role, never by sequence: `app-header`, `filter-bar`, `map-pane`, `workbench-map`,
+role, never by sequence: `app-header`, `physics-filters`, `map-pane`, `workbench-map`,
 `kpi-strip`, `comparator-pane`, `clock-pane`, `burning-calendar`, `calendar-grid`,
 `calendar-legend`, `calendar-summary`, `briefing-rail`, `briefing-run`,
-`briefing-events`, `service-panel`, `map-controls`, `map-legend`, `evidence-drawer`,
+`briefing-events`, `service-panel`, `map-controls`, `map-legend`, `map-guide`, `evidence-drawer`,
 `tour`.
 The Region Globe island lives in `apps/workbench/src/components/globe`:
 `globe-landing`, `landing-header`, `landing-panel`, `region-card`, `boot-overlay`,
@@ -172,7 +172,7 @@ line count.
 ## 5. Icon vocabulary
 
 One concept-keyed registry in `components/ui/icon.tsx`. App code imports `ICON` and
-`AmIcon`; app code never imports `lucide-react` directly and never draws a Unicode
+`Icon`; app code never imports `lucide-react` directly and never draws a Unicode
 glyph, emoji, or fullwidth symbol in JSX.
 
 | Concept | Glyph | Use |
@@ -207,7 +207,7 @@ glyph, emoji, or fullwidth symbol in JSX.
 
 Rules: a new concept adds a key here in the same change. An icon-only `<button>` or
 `<a>` must carry `aria-label` or `aria-labelledby`. Decorative icons always
-`aria-hidden`. Text arrows are `AmIcon icon={ICON.external}`, not `→`.
+`aria-hidden`. Text arrows are `Icon icon={ICON.external}`, not `→`.
 
 ## 6. Copy voice
 
@@ -249,6 +249,15 @@ Rules: a new concept adds a key here in the same change. An icon-only `<button>`
 | Evidence summary | Evidence summary | Tóm tắt kiểm chứng |
 | Reason | Reason | Lý do |
 | Note | Note | Ghi chú |
+| Review Run | Review run | Lượt chạy xem xét |
+| Reason Code | Reason | Lý do |
+| Reason: evidence | Evidence confirmed | Dữ liệu kiểm chứng đã xác nhận |
+| Reason: stale | Stale data | Dữ liệu lỗi thời |
+| Reason: duplicate | Duplicate alert | Cảnh báo trùng lặp |
+| Reason: conflict | Evidence conflict | Dữ liệu kiểm chứng mâu thuẫn |
+| Reason: authority | Outside authority | Ngoài thẩm quyền |
+| Reason: degraded | Service degraded | Dịch vụ suy giảm |
+| Reason: other | Other | Khác |
 | Measured epoch | Measured epoch | Quan trắc thực tế |
 | Raw | Raw | Thô |
 | Harmonized | Harmonized | Đã chuẩn hóa |

@@ -169,7 +169,7 @@ React and components:
 
 Team rules:
 - Tailwind v4 utilities only. No inline style={{}}. No raw hex or [Npx]. Use @theme tokens. Custom classes go in @layer components.
-- No Unicode glyphs in JSX. Add concept keys to the ICON registry (lucide-react) and render with AmIcon. Text labels are acceptable until the registry exists.
+- No Unicode glyphs in JSX. Add concept keys to the ICON registry (lucide-react) and render with Icon. Text labels are acceptable until the registry exists.
 - No machinery leaks or raw enums in copy. All copy goes through the locale catalog. EN and VI.
 - Accessibility: semantic elements first, label every control, keyboard path for every interaction, visible focus, never colour alone.
 - Imports: workspace packages through package.json#exports; app files by path; no export * barrels.

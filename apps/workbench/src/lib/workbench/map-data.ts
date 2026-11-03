@@ -43,6 +43,10 @@ export type MapRegion = {
   pxPerKm: number;
   saaPath: string;
   coveragePath: string;
+  /** Every drawn country merged: the area the shaded relief is clipped to. */
+  landPath: string;
+  rivers: string;
+  lakes: string;
   staticSources: { id: string; x: number; y: number }[];
   islands: {
     id: string;
@@ -60,6 +64,8 @@ export type MapRegion = {
 export type MapData = {
   width: number;
   height: number;
+  /** How far past the viewBox the base layers and relief are drawn, on each side. */
+  pad: { x: number; y: number };
   saa: { lon: number; lat: number; rx: number; ry: number };
   regions: Record<'mekong' | 'amazon', MapRegion>;
 };

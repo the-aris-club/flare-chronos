@@ -1,7 +1,7 @@
 """FLARE-CHRONOS Dual-System Cognitive Harness (`apps/ai-service`).
 
 Exports the LangGraph `StateGraph` builder, schemas, endpoint profiles, model
-adapters, prompts, human-input tools, event stream, and the 23 deterministic
+adapters, prompts, human-input tools, event stream, and the 18 deterministic
 `@tool` functions.
 """
 

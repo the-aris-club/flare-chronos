@@ -19,3 +19,5 @@ We orchestrate all 20 AI decision-support and scientific reasoning use cases (5 
 3. **Zero-Math-By-LLM Rule (`Deterministic Tool Gate` & `VerifiedFactsLedger`):**
    - Every numerical calculation and data retrieval is exposed as a strict `@tool` (9 atomic physics/data tools + 14 domain diagnostic/simulation tools; the raw CSV harmoniser stays outside the model-facing registry).
    - Every tool call records its exact numeric outputs into the session's `VerifiedFactsLedger`, and the `NumericGroundingVerifier` node blocks any response containing unverified numbers.
+
+> Amended by [ADR-0016](./0016-workbench-wired-to-ai-service-review-from-run-events.md): the harness now ships 15 use cases (5 System 1, 10 System 2) and 18 registered tools; the decision above is unchanged.

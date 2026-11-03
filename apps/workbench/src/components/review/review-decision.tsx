@@ -1,64 +1,96 @@
 'use client';
 
-import { useState } from 'react';
-import { useLocale, useTranslations } from 'next-intl';
-import { localized } from '@/lib/workbench/format';
-import { REASONS, PRINCIPAL, type Decision, type DecisionKind } from '@/data/fixtures/review';
-import { DecisionChip, reasonLabel, RoleText, utcTime } from './review-bits';
+import { useCallback, useState, type ChangeEvent } from 'react';
+import { useTranslations } from 'next-intl';
+import { useService } from '@/components/service/service-provider';
+import { REASON_CODES } from '@/lib/review/reasons';
+import type { AuditRow } from '@/lib/review/api';
+import { DecisionChip, utcTime } from './review-bits';
+import { useLabels } from './use-labels';
 
 type ReviewDecisionProps = {
-  decision: Decision | undefined;
+  decided: AuditRow | undefined;
   approveAvailable: boolean;
-  onRequest: (kind: DecisionKind, reason: string, note: string) => void;
+  onRequest: (approved: boolean, reasonCode: string, note: string) => void;
 };
 
-export function ReviewDecision({ decision, approveAvailable, onRequest }: ReviewDecisionProps) {
+export function ReviewDecision({ decided, approveAvailable, onRequest }: ReviewDecisionProps) {
   const t = useTranslations('Review');
-  const locale = useLocale();
+  const labels = useLabels();
+  const service = useService();
   const [reason, setReason] = useState('');
   const [note, setNote] = useState('');
   const [error, setError] = useState<string | null>(null);
 
-  function request(kind: DecisionKind) {
-    if (!reason) {
-      setError(t('errReason'));
-      return;
-    }
-    if (reason === 'other' && !note.trim()) {
-      setError(t('errNote'));
-      return;
-    }
-    setError(null);
-    onRequest(kind, reason, note.trim());
-  }
+  const request = useCallback(
+    (approved: boolean) => {
+      if (!reason) {
+        setError(t('errReason'));
+        return;
+      }
+      if (reason === 'other' && !note.trim()) {
+        setError(t('errNote'));
+        return;
+      }
+      setError(null);
+      onRequest(approved, reason, note.trim());
+    },
+    [reason, note, t, onRequest],
+  );
 
-  if (decision) {
+  const handleReasonChange = useCallback(
+    (event: ChangeEvent<HTMLSelectElement>) => {
+      setReason(event.target.value);
+      if (error) setError(null);
+    },
+    [error],
+  );
+
+  const handleNoteChange = useCallback((event: ChangeEvent<HTMLTextAreaElement>) => {
+    setNote(event.target.value);
+  }, []);
+
+  const handleApprove = useCallback(() => request(true), [request]);
+  const handleReject = useCallback(() => request(false), [request]);
+
+  if (decided) {
     return (
       <section className="border-line bg-panel flex flex-col gap-2 rounded-lg border p-3">
         <span className="text-label text-ink-subtle font-mono tracking-widest uppercase">
           {t('decisionRec')}
         </span>
-        <DecisionChip kind={decision.kind} />
+        <DecisionChip approved={decided.approved} />
         <p className="text-meta text-ink-muted">
-          {decision.reviewer} · <RoleText role={decision.role} />
+          {decided.principal}
           <br />
           <span className="text-ink-subtle font-mono">
-            {utcTime(decision.at)} · {decision.audit}
+            {utcTime(decided.decidedAt)} · {decided.id}
           </span>
         </p>
         <p className="text-body">
           <span className="text-ink-subtle">{t('reason')}: </span>
-          {reasonLabel(decision.reason, locale)}
+          {labels.reason(decided.reasonCode)}
         </p>
-        {decision.note && (
+        {decided.reason && (
           <p className="text-meta text-ink-muted">
             <span className="text-ink-subtle">{t('note')}: </span>
-            {decision.note}
+            {decided.reason}
           </p>
         )}
         <p className="text-meta text-ink-subtle border-line border-t pt-2">
-          {decision.kind === 'approve' ? t('msgApprove') : t('withheldBody')}
+          {decided.approved ? t('msgApprove') : t('withheldBody')}
         </p>
+      </section>
+    );
+  }
+
+  if (!service.isApprover) {
+    return (
+      <section className="border-line bg-panel flex flex-col gap-2 rounded-lg border p-3">
+        <span className="text-label text-ink-subtle font-mono tracking-widest uppercase">
+          {t('decision')}
+        </span>
+        <p className="text-meta text-ink-muted">{t('needApprover')}</p>
       </section>
     );
   }
@@ -76,16 +108,13 @@ export function ReviewDecision({ decision, approveAvailable, onRequest }: Review
           id="decision-reason"
           name="decision-reason"
           value={reason}
-          onChange={(event) => {
-            setReason(event.target.value);
-            if (error) setError(null);
-          }}
+          onChange={handleReasonChange}
           className="border-line-strong bg-raised text-meta text-ink h-8 rounded-md border px-2"
         >
           <option value="">{t('chooseReason')}</option>
-          {REASONS.map((item) => (
-            <option key={item.value} value={item.value}>
-              {localized(locale, item.en, item.vi)}
+          {REASON_CODES.map((code) => (
+            <option key={code} value={code}>
+              {labels.reason(code)}
             </option>
           ))}
         </select>
@@ -96,7 +125,7 @@ export function ReviewDecision({ decision, approveAvailable, onRequest }: Review
           id="decision-note"
           name="decision-note"
           value={note}
-          onChange={(event) => setNote(event.target.value)}
+          onChange={handleNoteChange}
           rows={2}
           className="border-line-strong bg-raised text-meta text-ink resize-none rounded-md border px-2 py-1.5"
         />
@@ -109,7 +138,7 @@ export function ReviewDecision({ decision, approveAvailable, onRequest }: Review
       <div className="grid grid-cols-2 gap-2">
         <button
           type="button"
-          onClick={() => request('approve')}
+          onClick={handleApprove}
           disabled={!approveAvailable}
           className="border-ok text-ok hover:bg-chip text-meta inline-flex h-8 items-center justify-center gap-1 rounded-md border font-semibold disabled:opacity-40"
         >
@@ -117,7 +146,7 @@ export function ReviewDecision({ decision, approveAvailable, onRequest }: Review
         </button>
         <button
           type="button"
-          onClick={() => request('reject')}
+          onClick={handleReject}
           className="border-bad text-bad hover:bg-chip text-meta inline-flex h-8 items-center justify-center gap-1 rounded-md border font-semibold"
         >
           {t('reject')}
@@ -128,11 +157,7 @@ export function ReviewDecision({ decision, approveAvailable, onRequest }: Review
           {t('approveUnavail')}. {t('rejectStill')}
         </p>
       )}
-      <p className="text-meta text-ink-subtle border-line border-t pt-2">
-        {PRINCIPAL.name} · {t('approver')}
-        <br />
-        {t('finalNote')}
-      </p>
+      <p className="text-meta text-ink-subtle border-line border-t pt-2">{t('finalNote')}</p>
     </section>
   );
 }

@@ -25,6 +25,26 @@
             "title": "Reason",
             "type": "string"
           },
+          "reason_code": {
+            "anyOf": [
+              {
+                "enum": [
+                  "evidence",
+                  "stale",
+                  "duplicate",
+                  "conflict",
+                  "authority",
+                  "degraded",
+                  "other"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason Code"
+          },
           "thread_id": {
             "minLength": 1,
             "title": "Thread Id",
@@ -248,6 +268,123 @@
           }
         ],
         "summary": "Use Cases"
+      }
+    },
+    "/api/v1/review/runs": {
+      "get": {
+        "operationId": "review_runs_api_v1_review_runs_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Review Runs Api V1 Review Runs Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Review Runs"
+      }
+    },
+    "/api/v1/review/runs/{run_id}": {
+      "get": {
+        "operationId": "review_run_api_v1_review_runs__run_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "run_id",
+            "required": true,
+            "schema": {
+              "title": "Run Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Review Run Api V1 Review Runs  Run Id  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Review Run"
+      }
+    },
+    "/api/v1/review/runs/{run_id}/audit": {
+      "get": {
+        "operationId": "review_audit_api_v1_review_runs__run_id__audit_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "run_id",
+            "required": true,
+            "schema": {
+              "title": "Run Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Review Audit Api V1 Review Runs  Run Id  Audit Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Review Audit"
       }
     }
   }

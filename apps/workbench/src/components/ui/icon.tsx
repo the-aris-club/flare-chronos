@@ -64,20 +64,23 @@ export const ICON = {
   rewrite: RefreshCw,
 } as const;
 
+export type IconComponent = LucideIcon;
+
 const SIZES = {
-  xs: 10,
+  xs: 12,
   sm: 14,
   md: 16,
   lg: 20,
+  xl: 24,
 } as const;
 
-type AmIconProps = {
-  icon: LucideIcon;
+type IconProps = {
+  icon: IconComponent;
   size?: keyof typeof SIZES;
   className?: string;
 };
 
-export function AmIcon({ icon: Glyph, size = 'md', className }: AmIconProps) {
+export function Icon({ icon: Glyph, size = 'md', className }: IconProps) {
   return (
     <Glyph
       aria-hidden="true"

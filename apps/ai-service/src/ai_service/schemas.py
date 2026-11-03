@@ -77,7 +77,7 @@ def resolve_citations(text: str, citations: dict[str, Any]) -> tuple[str, list[s
 
 
 class UseCaseId(StrEnum):
-    """Canonical identifiers for all 20 Dual-System Use Cases (5 System-1 + 15 System-2)."""
+    """Canonical identifiers for all 15 Dual-System Use Cases (5 System-1 + 10 System-2)."""
 
     # System 1 Reflexive Layer Use Cases
     UC_S1_1_INTENT_TRIAGE = "UC-S1.1"
@@ -86,7 +86,7 @@ class UseCaseId(StrEnum):
     UC_S1_4_FLASH_NRT_ALERT = "UC-S1.4"
     UC_S1_5_STAKEHOLDER_SYNTHESIS = "UC-S1.5"
 
-    # System 2 Deliberative Layer Use Cases (5 Groups x 3 Use Cases = 15)
+    # System 2 Deliberative Use Cases (5 groups, 10 use cases)
     UC_1_1_REGIME_SHIFT_ATTRIBUTION = "UC-1.1"
     UC_1_2_CROSS_SENSOR_DISCREPANCY = "UC-1.2"
     UC_1_3_THERMAL_SOURCE_ORIGIN = "UC-1.3"
@@ -96,16 +96,10 @@ class UseCaseId(StrEnum):
     UC_2_3_VERIFIED_BRIEFING = "UC-2.3"
 
     UC_3_1_CONSTELLATION_RETIREMENT = "UC-3.1"
-    UC_3_2_MULTIHOP_SPATIOTEMPORAL = "UC-3.2"
     UC_3_3_BIOME_RECALIBRATION = "UC-3.3"
 
     UC_4_1_ORBITAL_DRIFT_SZA_AUDIT = "UC-4.1"
     UC_4_2_NRT_VS_SP_FIDELITY = "UC-4.2"
-    UC_4_3_ADAPTIVE_RATE_LIMIT = "UC-4.3"
-
-    UC_5_1_REDD_CARBON_MRV = "UC-5.1"
-    UC_5_2_POLICY_COUNTERFACTUAL = "UC-5.2"
-    UC_5_3_TRANSBOUNDARY_FORENSICS = "UC-5.3"
 
 
 class CognitivePath(StrEnum):

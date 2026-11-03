@@ -18,6 +18,7 @@ build/
 # Secrets & Environment
 .env
 .env.local
+.credentials
 
 # OS & Editor
 .DS_Store

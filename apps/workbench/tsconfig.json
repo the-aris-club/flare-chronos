@@ -30,18 +30,5 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": [
-    "node_modules",
-    "src/i18n/messages.test.ts",
-    "src/i18n/config.test.ts",
-    "src/lib/workbench/format.test.ts",
-    "src/lib/theme.test.ts",
-    "src/data/fixtures/review-facts.test.ts",
-    "src/lib/review/decisions-route.test.ts",
-    "src/lib/review/submit-decision.test.ts",
-    "src/lib/workbench/regions.test.ts",
-    "src/lib/workbench/series.test.ts",
-    "src/lib/workbench/tour-figures.test.ts",
-    "src/lib/workbench/query-box.test.ts"
-  ]
+  "exclude": ["node_modules"]
 }

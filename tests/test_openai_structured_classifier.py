@@ -102,7 +102,8 @@ class TestOpenAIStructuredClassifier(unittest.TestCase):
             request=RequestOptions(timeout_ms=5000),
         )
         built = build_chat_model_for_profile(profile)
-        assert isinstance(built, OpenAIStructuredChatModel)
+        if not isinstance(built, OpenAIStructuredChatModel):
+            raise TypeError("built is not OpenAIStructuredChatModel")
         return built
 
     def entity(self) -> SpatioTemporalQueryEntity:

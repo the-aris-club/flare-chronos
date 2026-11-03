@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
-import { AmIcon, ICON } from '@/components/ui/icon';
+import { Icon, ICON } from '@/components/ui/icon';
 import { formatSigma } from '@/lib/calendar/format';
 import type { TourFigures } from '@/lib/workbench/tour-figures';
 
@@ -17,6 +17,13 @@ export function TourOverlay({ onClose, figures }: { onClose: () => void; figures
   const [step, setStep] = useState(0);
   const spot = useRef<HTMLDivElement>(null);
   const last = step === STEPS - 1;
+
+  const handleBack = useCallback(() => setStep((value) => Math.max(0, value - 1)), []);
+
+  const handleNext = useCallback(() => {
+    if (last) onClose();
+    else setStep((value) => value + 1);
+  }, [last, onClose]);
 
   useEffect(() => {
     const target = document.querySelector(`[data-tour="${TARGETS[step]}"]`);
@@ -94,7 +101,7 @@ export function TourOverlay({ onClose, figures }: { onClose: () => void; figures
             aria-label={t('close')}
             className="text-ink-muted hover:bg-chip hover:text-ink inline-flex size-6 items-center justify-center rounded-sm"
           >
-            <AmIcon icon={ICON.close} size="sm" />
+            <Icon icon={ICON.close} size="sm" />
           </button>
         </div>
 
@@ -114,7 +121,7 @@ export function TourOverlay({ onClose, figures }: { onClose: () => void; figures
         <div className="flex items-center gap-2">
           <button
             type="button"
-            onClick={() => setStep((value) => Math.max(0, value - 1))}
+            onClick={handleBack}
             disabled={step === 0}
             className="border-line-strong text-meta text-ink h-7 rounded-md border px-2.5 disabled:opacity-40"
           >
@@ -122,10 +129,7 @@ export function TourOverlay({ onClose, figures }: { onClose: () => void; figures
           </button>
           <button
             type="button"
-            onClick={() => {
-              if (last) onClose();
-              else setStep((value) => value + 1);
-            }}
+            onClick={handleNext}
             className="border-line-strong bg-seg text-meta text-ink h-7 rounded-md border px-2.5 font-medium"
           >
             {last ? t('done') : t('next')}

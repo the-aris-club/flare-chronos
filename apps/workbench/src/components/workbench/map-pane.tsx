@@ -8,9 +8,9 @@ import { clampView, MAP_VIEW, zoomAt, type MapView } from '@/lib/workbench/map-v
 import type { Epoch, MapFilters, MapLayers, MapPhysics } from '@/lib/workbench/types';
 import { formatEpochDate, formatEpochDays } from '@/lib/workbench/format';
 import type { RegionId } from '@/lib/calendar/types';
-import { FootprintLens } from './footprint-lens';
+import { MapGuide } from './map-guide';
 import { DEFAULT_LAYERS, MapControls, MapZoom } from './map-controls';
-import { MapLegend, MapScale } from './map-legend';
+import { MapFooter, MapScale } from './map-legend';
 import { MapTooltip } from './map-tooltip';
 import { WorkbenchMap } from './workbench-map';
 
@@ -21,6 +21,7 @@ type MapPaneProps = {
   physics: MapPhysics;
   year: number;
   filters: MapFilters;
+  onFilter: (key: keyof MapFilters) => void;
   onYear: (year: number) => void;
 };
 
@@ -31,6 +32,7 @@ export function MapPane({
   physics,
   year,
   filters,
+  onFilter,
   onYear,
 }: MapPaneProps) {
   const t = useTranslations('Map');
@@ -39,6 +41,7 @@ export function MapPane({
   const [grid, setGrid] = useState(7);
   const [view, setView] = useState<MapView>(MAP_VIEW);
   const [hover, setHover] = useState<MapHover | null>(null);
+  const clamped = useMemo(() => clampView(view, MAP_DATA.width, MAP_DATA.height), [view]);
   const mapArea = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ width: 0, height: 0 });
 
@@ -73,22 +76,41 @@ export function MapPane({
     size.width > 0 ? Math.min(size.width / MAP_DATA.width, size.height / MAP_DATA.height) : 0;
   const pxPerKm = data.pxPerKm * scale * view.k;
 
-  function zoom(factor: number) {
-    setView(
-      zoomAt(
-        view,
-        factor,
-        MAP_DATA.width / 2,
-        MAP_DATA.height / 2,
-        MAP_DATA.width,
-        MAP_DATA.height,
-      ),
-    );
-  }
+  const zoom = useCallback(
+    (factor: number) => {
+      setView(
+        zoomAt(
+          view,
+          factor,
+          MAP_DATA.width / 2,
+          MAP_DATA.height / 2,
+          MAP_DATA.width,
+          MAP_DATA.height,
+        ),
+      );
+    },
+    [view],
+  );
 
-  function toggleLayer(layer: keyof MapLayers) {
+  const toggleLayer = useCallback((layer: keyof MapLayers) => {
     setLayers((current) => ({ ...current, [layer]: !current[layer] }));
-  }
+  }, []);
+
+  const handleScroll = useCallback((event: React.UIEvent<HTMLDivElement>) => {
+    event.currentTarget.dataset.scrolled = event.currentTarget.scrollLeft > 4 ? 'true' : 'false';
+  }, []);
+
+  const handleEpochClick = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>) => {
+      setHover(null);
+      onYear(Number(event.currentTarget.value));
+    },
+    [onYear],
+  );
+
+  const handleReset = useCallback(() => setView(MAP_VIEW), []);
+
+  const handleOverlay = useCallback(() => toggleLayer('overlay'), [toggleLayer]);
 
   return (
     <section
@@ -118,13 +140,7 @@ export function MapPane({
             aria-hidden="true"
             className="fc-epoch-fade pointer-events-none absolute inset-y-0 left-0 z-10"
           />
-          <div
-            className="fc-epoch-scroll flex gap-1.5 overflow-x-auto"
-            onScroll={(event) => {
-              event.currentTarget.dataset.scrolled =
-                event.currentTarget.scrollLeft > 4 ? 'true' : 'false';
-            }}
-          >
+          <div className="fc-epoch-scroll flex gap-1.5 overflow-x-auto" onScroll={handleScroll}>
             {epochs.map((epoch) => {
               const pressed = epoch.year === year;
 
@@ -134,10 +150,8 @@ export function MapPane({
                   ref={pressed ? scrollSelected : undefined}
                   type="button"
                   aria-pressed={pressed}
-                  onClick={() => {
-                    setHover(null);
-                    onYear(epoch.year);
-                  }}
+                  value={epoch.year}
+                  onClick={handleEpochClick}
                   className={`flex shrink-0 flex-col items-start rounded-md border px-2 py-1 text-left transition-colors ${
                     pressed
                       ? 'border-line-strong bg-seg text-ink'
@@ -159,7 +173,7 @@ export function MapPane({
         <WorkbenchMap
           region={region}
           year={year}
-          view={clampView(view, MAP_DATA.width, MAP_DATA.height)}
+          view={clamped}
           grid={grid}
           filters={filters}
           layers={layers}
@@ -188,17 +202,23 @@ export function MapPane({
           </span>
         </div>
 
-        <MapZoom onZoom={zoom} onReset={() => setView(MAP_VIEW)} />
+        <MapZoom onZoom={zoom} onReset={handleReset} />
 
-        {layers.lens && <FootprintLens physics={physics} />}
         {pxPerKm > 0 && <MapScale pxPerKm={pxPerKm} />}
-        <MapLegend
-          layers={layers}
-          saa={region === 'amazon'}
-          islands={region === 'mekong'}
+        <MapGuide
+          physics={physics}
+          overlay={layers.overlay}
+          epoch={epochs.find((epoch) => epoch.year === year)}
+          filters={filters}
+          onFilterAction={onFilter}
+          onOverlayAction={handleOverlay}
+          hex={layers.hex}
           grid={grid}
           resolution={resolution}
+          saa={region === 'amazon'}
+          islands={region === 'mekong'}
         />
+        <MapFooter />
         <MapTooltip hover={hover} container={mapArea} />
       </div>
     </section>

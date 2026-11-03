@@ -1,4 +1,4 @@
-"""Execute all 20 Dual-System Use Cases (`UC-S1.1..UC-S1.5` & `UC-1.1..UC-5.3`) through LangGraph.
+"""Execute all 15 Dual-System Use Cases (`UC-S1.1..UC-S1.5` & `UC-1.1..UC-4.2`) through LangGraph.
 
 Saves the complete execution trace, verified facts counts, and symbiosis benchmarks to
 `data/processed/ai_harness_results.json`.
@@ -23,6 +23,7 @@ for pkg_src in (
 
 from ai_service.harness import FlareChronosDualSystemHarness
 from ai_service.schemas import UseCaseId
+from ai_service.tools import ALL_DETERMINISTIC_TOOLS
 
 USE_CASE_BENCHMARK_QUERIES: list[tuple[UseCaseId, str]] = [
     # 5 System-1 Reflexive Use Cases
@@ -46,7 +47,7 @@ USE_CASE_BENCHMARK_QUERIES: list[tuple[UseCaseId, str]] = [
         UseCaseId.UC_S1_5_STAKEHOLDER_SYNTHESIS,
         "UC-S1.5 Format executive policy summary for ASEAN forestry_executive in 2024 mekong.",
     ),
-    # 15 System-2 Deliberative Use Cases
+    # 10 System-2 Deliberative Use Cases
     (
         UseCaseId.UC_1_1_REGIME_SHIFT_ATTRIBUTION,
         "UC-1.1 Decompose the 2005 to 2024 fire regime shift in mekong between sensor multiplicity and physical trend.",
@@ -76,10 +77,6 @@ USE_CASE_BENCHMARK_QUERIES: list[tuple[UseCaseId, str]] = [
         "UC-3.1 Simulate post-2026 constellation retirement of Terra, Aqua, and Suomi-NPP using JPSS-only in mekong 2024.",
     ),
     (
-        UseCaseId.UC_3_2_MULTIHOP_SPATIOTEMPORAL,
-        "UC-3.2 Execute multi-hop spatio-temporal cube query across the 26-year 2001 to 2026 Mekong and Amazon archives.",
-    ),
-    (
         UseCaseId.UC_3_3_BIOME_RECALIBRATION,
         "UC-3.3 Audit the N=11553 Aqua-SNPP co-incident calibration transfer function and KS reduction.",
     ),
@@ -90,22 +87,6 @@ USE_CASE_BENCHMARK_QUERIES: list[tuple[UseCaseId, str]] = [
     (
         UseCaseId.UC_4_2_NRT_VS_SP_FIDELITY,
         "UC-4.2 Audit Near-Real-Time vs Standard Processing fidelity and SAA nighttime false alarm filtering.",
-    ),
-    (
-        UseCaseId.UC_4_3_ADAPTIVE_RATE_LIMIT,
-        "UC-4.3 Compute adaptive NASA FIRMS rate-limit budget across the 134 cached slices.",
-    ),
-    (
-        UseCaseId.UC_5_1_REDD_CARBON_MRV,
-        "UC-5.1 Audit sensor-invariant FRP and Harmonized Radiative Flux for REDD+ carbon MRV in amazon 2024.",
-    ),
-    (
-        UseCaseId.UC_5_2_POLICY_COUNTERFACTUAL,
-        "UC-5.2 Evaluate agricultural residue burn-ban policy counterfactual effectiveness across 2019 to 2026 in mekong.",
-    ),
-    (
-        UseCaseId.UC_5_3_TRANSBOUNDARY_FORENSICS,
-        "UC-5.3 Analyze transboundary fire episode clustering and H3 hexagonal propagation across the mekong corridor.",
     ),
 ]
 
@@ -121,7 +102,7 @@ def _measure(label: str, run: Any) -> dict[str, Any]:
 def run_all_benchmarks(
     mode: str = "deterministic", enable_sign_off: bool = False
 ) -> dict[str, Any]:
-    """Run all 20 use cases + 3 symbiosis stress tests through the compiled LangGraph harness."""
+    """Run all 15 use cases + 3 symbiosis stress tests through the compiled LangGraph harness."""
     harness = FlareChronosDualSystemHarness(
         mode=mode,  # type: ignore[arg-type]
         enable_cache=True,
@@ -252,8 +233,8 @@ def run_all_benchmarks(
         "mode": harness.mode,
         "total_use_cases_executed": len(use_case_runs),
         "system1_use_cases_count": 5,
-        "system2_use_cases_count": 15,
-        "deterministic_tools_registered": 23,
+        "system2_use_cases_count": 10,
+        "deterministic_tools_registered": len(ALL_DETERMINISTIC_TOOLS),
         "all_verifications_passed": all(
             r["verification_passed"] for r in use_case_runs
         ),
@@ -326,7 +307,7 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(
-        description="Chạy toàn bộ 20 Use Cases của Dual-System Harness."
+        description="Chạy toàn bộ 15 Use Cases của Dual-System Harness."
     )
     parser.add_argument(
         "--live",

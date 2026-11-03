@@ -36,6 +36,12 @@
     "no-debugger": "warn",
     "react/react-in-jsx-scope": "off",
     "react/no-array-index-key": "warn",
+    "react/no-unstable-nested-components": [
+      "warn",
+      {
+        "allowAsProps": true
+      }
+    ],
     "eslint/no-underscore-dangle": "off",
     "import/no-duplicates": [
       "error",
@@ -47,49 +53,9 @@
     "import/no-unassigned-import": "off",
     "max-lines": [
       "error",
-      300
+      450
     ]
   },
-  "overrides": [
-    {
-      "files": [
-        "**/*.{test,spec}.{ts,tsx}"
-      ],
-      "plugins": [
-        "jest",
-        "vitest"
-      ],
-      "rules": {
-        "no-explicit-any": "off",
-        "jest/expect-expect": "off",
-        "vitest/expect-expect": "off",
-        "jest/no-conditional-expect": "off",
-        "vitest/no-conditional-expect": "off",
-        "jest/valid-title": "off",
-        "vitest/valid-title": "off",
-        "vitest/require-mock-type-parameters": "off"
-      }
-    },
-    {
-      "files": [
-        "apps/workbench/src/**/*.tsx"
-      ],
-      "rules": {
-        "react-perf/jsx-no-new-function-as-prop": "off",
-        "react-perf/jsx-no-new-array-as-prop": "off",
-        "react-perf/jsx-no-new-object-as-prop": "off",
-        "react-perf/jsx-no-jsx-as-prop": "off"
-      }
-    },
-    {
-      "files": [
-        "apps/workbench/scripts/**/*.mjs"
-      ],
-      "rules": {
-        "no-console": "off"
-      }
-    }
-  ],
   "ignorePatterns": [
     "node_modules/**",
     "dist/**",

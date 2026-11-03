@@ -19,8 +19,8 @@ function ingestionBox(name: string): number[] {
 
 describe('region query boxes', () => {
   test('mirror the boxes the FIRMS ingestion queries', () => {
-    expect([...REGION_DEFS.mekong.queryBox]).toEqual(ingestionBox('BBOX_MEKONG'));
-    expect([...REGION_DEFS.amazon.queryBox]).toEqual(ingestionBox('BBOX_AMAZON'));
+    expect([...REGION_DEFS.mekong.queryBox] as number[]).toEqual(ingestionBox('BBOX_MEKONG'));
+    expect([...REGION_DEFS.amazon.queryBox] as number[]).toEqual(ingestionBox('BBOX_AMAZON'));
   });
 
   test('lie inside the display box', () => {

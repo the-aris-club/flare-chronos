@@ -1,5 +1,4 @@
-import type { LucideIcon } from 'lucide-react';
-import { AmIcon } from './icon';
+import { Icon, type IconComponent } from './icon';
 
 export type ChipTone = 'ok' | 'warn' | 'bad' | 'neutral' | 'cyan' | 'purple' | 'raw';
 
@@ -19,14 +18,14 @@ export function Chip({
   children,
 }: {
   tone: ChipTone;
-  icon?: LucideIcon;
+  icon?: IconComponent;
   children: React.ReactNode;
 }) {
   return (
     <span
       className={`text-label inline-flex h-5 items-center gap-1 rounded-sm border px-1.5 font-mono font-medium whitespace-nowrap ${TONE[tone]}`}
     >
-      {icon && <AmIcon icon={icon} size="xs" />}
+      {icon && <Icon icon={icon} size="xs" />}
       {children}
     </span>
   );

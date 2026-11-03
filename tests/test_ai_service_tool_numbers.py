@@ -34,6 +34,23 @@ class TestToolNumbersComeFromTheArtifact(unittest.TestCase):
         self.assertEqual(out["harmonized_r2"], cal["harm_r2"])
         self.assertEqual(out["harmonized_rmse_mw"], cal["harm_rmse"])
 
+    def test_the_phenology_peak_sfai_is_the_one_the_calendar_shows(self) -> None:
+        """Q15 / ADR-0016: the briefing and the Calendar must not disagree on SFAI."""
+        out = tools.tool_uc2_1_phenological_phase_shift_detection.invoke({})
+
+        # Literals read from data/processed/burning_calendar.json (observed cells only).
+        self.assertAlmostEqual(out["peak_sfai_zscore_mekong_sigma"], 3.666, places=3)
+        self.assertEqual(out["peak_sfai_year_mekong"], 2007)
+        self.assertAlmostEqual(out["peak_sfai_zscore_amazon_sigma"], 3.793, places=3)
+        self.assertEqual(out["peak_sfai_year_amazon"], 2002)
+
+    def test_a_missing_calendar_is_an_error_not_a_stale_default(self) -> None:
+        with (
+            mock.patch.object(tools, "CALENDAR_JSON_PATH", Path("/nonexistent/c.json")),
+            self.assertRaisesRegex(RuntimeError, "burning_calendar"),
+        ):
+            tools.tool_uc2_1_phenological_phase_shift_detection.invoke({})
+
     def test_the_source_classifier_reports_the_fitted_omission_factors(self) -> None:
         out = tools.tool_uc1_3_thermal_source_origin_classification.invoke({})
 
@@ -61,9 +78,6 @@ class TestToolNumbersComeFromTheArtifact(unittest.TestCase):
 
         lon0, lat0, lon1, lat1 = fetch_cloud_cover.BBOX["mekong"]
         self.assertEqual(f"{lon0},{lat0},{lon1},{lat1}", BBOX_MEKONG)
-
-        source = Path(tools.__file__).read_text()
-        self.assertIn(f'"corridor_bbox": "{BBOX_MEKONG}"', source)
 
 
 if __name__ == "__main__":

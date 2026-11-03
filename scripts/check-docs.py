@@ -58,8 +58,11 @@ warnings: list[str] = []
 
 
 def git(*args: str) -> str:
-    result = subprocess.run(
-        ["git", *args], check=False, cwd=ROOT, text=True, capture_output=True
+    git_bin = shutil.which("git")
+    if git_bin is None:
+        raise RuntimeError("git not found")
+    result = subprocess.run(  # noqa: S603
+        [git_bin, *args], check=False, cwd=ROOT, text=True, capture_output=True
     )
     return result.stdout
 
@@ -144,8 +147,11 @@ def check_version_match(require_tools: bool) -> None:
         if not md_match:
             failures.append(f"{md_name} has no '**Phiên bản:**' line")
             continue
-        pdf_text = subprocess.run(
-            ["pdftotext", "-q", str(pdf_file), "-"],
+        pdftotext_bin = shutil.which("pdftotext")
+        if pdftotext_bin is None:
+            raise RuntimeError("pdftotext not found")
+        pdf_text = subprocess.run(  # noqa: S603
+            [pdftotext_bin, "-q", str(pdf_file), "-"],
             check=False,
             text=True,
             capture_output=True,

@@ -1,23 +1,20 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import Link from 'next/link';
-import { useReviewStore } from '@/components/review/review-store';
+import { useService } from '@/components/service/service-provider';
 import { useTranslations } from 'next-intl';
-import { AmIcon, ICON } from '@/components/ui/icon';
+import { Icon, ICON } from '@/components/ui/icon';
 import { BrandMark } from '@/components/ui/brand-mark';
 import { HeaderBar } from '@/components/ui/header-bar';
 import { LocaleToggle } from '@/components/ui/locale-toggle';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import type { RegionId } from '@/lib/calendar/types';
-import type { ConnState, ServiceState } from '@/lib/workbench/service';
 
 type AppHeaderProps = {
   region: RegionId;
   period: { start: number; end: number };
   briefingOpen: boolean;
-  service: ServiceState;
-  conn: ConnState;
   onRegion: (region: RegionId) => void;
   onTour: () => void;
   onEvidence: () => void;
@@ -32,8 +29,6 @@ export function AppHeader({
   region,
   period,
   briefingOpen,
-  service,
-  conn,
   onRegion,
   onTour,
   onEvidence,
@@ -42,25 +37,43 @@ export function AppHeader({
 }: AppHeaderProps) {
   const t = useTranslations('Header');
   const review = useTranslations('Review');
-  const reviewStore = useReviewStore();
+  const reviewStore = useService();
   const [menuOpen, setMenuOpen] = useState(false);
-  const connected = conn === 'connected';
-  const serviceLabel =
-    service === 'down'
-      ? t('serviceDown')
-      : !connected
-        ? t('serviceNotConnected')
-        : service === 'degraded'
-          ? t('serviceDegraded')
-          : t('serviceUp');
-  const serviceTone =
-    service === 'down'
-      ? 'border-bad/50 text-bad'
-      : !connected
-        ? 'border-line text-ink-subtle'
-        : service === 'degraded'
-          ? 'border-warn/50 text-warn'
-          : 'border-ok/45 text-ok';
+  const connected = reviewStore.connection === 'connected';
+  const down = reviewStore.connection === 'unavailable';
+  const serviceLabel = down
+    ? t('serviceDown')
+    : !connected
+      ? t('serviceNotConnected')
+      : t('serviceUp');
+  const serviceTone = down
+    ? 'border-bad/50 text-bad'
+    : !connected
+      ? 'border-line text-ink-subtle'
+      : 'border-ok/45 text-ok';
+
+  const handleRegionChange = useCallback(
+    (event: React.ChangeEvent<HTMLSelectElement>) => onRegion(event.target.value as RegionId),
+    [onRegion],
+  );
+  const toggleMenu = useCallback(() => setMenuOpen((value) => !value), []);
+  const closeMenu = useCallback(() => setMenuOpen(false), []);
+  const handleServiceMenu = useCallback(() => {
+    setMenuOpen(false);
+    onService();
+  }, [onService]);
+  const handleTourMenu = useCallback(() => {
+    setMenuOpen(false);
+    onTour();
+  }, [onTour]);
+  const handleEvidenceMenu = useCallback(() => {
+    setMenuOpen(false);
+    onEvidence();
+  }, [onEvidence]);
+  const handleBriefingMenu = useCallback(() => {
+    setMenuOpen(false);
+    onBriefing();
+  }, [onBriefing]);
 
   return (
     <HeaderBar>
@@ -75,13 +88,13 @@ export function AppHeader({
           name="region"
           autoComplete="off"
           value={region}
-          onChange={(event) => onRegion(event.target.value as RegionId)}
+          onChange={handleRegionChange}
           className="border-line-strong bg-raised text-body text-ink tablet:max-w-56 max-tablet:max-w-none max-tablet:flex-1 h-8 max-w-44 appearance-none truncate rounded-md border py-0 pr-7 pl-2.5 font-medium"
         >
           <option value="mekong">{t('regions.mekongLong')}</option>
           <option value="amazon">{t('regions.amazonLong')}</option>
         </select>
-        <AmIcon
+        <Icon
           icon={ICON.chevron}
           size="sm"
           className="text-ink-subtle pointer-events-none absolute right-2"
@@ -105,7 +118,7 @@ export function AppHeader({
           title={t('walkthrough')}
           className={buttonClass}
         >
-          <AmIcon icon={ICON.tour} size="sm" />
+          <Icon icon={ICON.tour} size="sm" />
           <span className="hidden xl:inline">{t('walkthrough')}</span>
         </button>
         <button
@@ -115,7 +128,7 @@ export function AppHeader({
           title={t('evidence')}
           className={buttonClass}
         >
-          <AmIcon icon={ICON.evidence} size="sm" />
+          <Icon icon={ICON.evidence} size="sm" />
           <span className="hidden xl:inline">{t('evidence')}</span>
         </button>
         <button
@@ -126,11 +139,11 @@ export function AppHeader({
           title={t('briefing')}
           className={`${buttonClass} ${briefingOpen ? 'bg-seg' : ''}`}
         >
-          <AmIcon icon={ICON.briefing} size="sm" />
+          <Icon icon={ICON.briefing} size="sm" />
           <span className="hidden xl:inline">{t('briefing')}</span>
         </button>
         <Link href="/" aria-label={t('globe')} title={t('globe')} className={buttonClass}>
-          <AmIcon icon={ICON.globe} size="sm" />
+          <Icon icon={ICON.globe} size="sm" />
           <span className="hidden xl:inline">{t('globe')}</span>
         </Link>
       </div>
@@ -144,14 +157,14 @@ export function AppHeader({
           title={t('briefing')}
           className="border-line-strong text-ink hover:bg-chip text-meta tablet:inline-flex hidden h-7 items-center gap-1.5 rounded-md border px-2 font-medium xl:hidden"
         >
-          <AmIcon icon={ICON.briefing} size="sm" />
+          <Icon icon={ICON.briefing} size="sm" />
         </button>
         <Link
           href="/review"
           title={review('review')}
           className="border-line-strong text-ink hover:bg-chip text-meta tablet:inline-flex hidden h-7 items-center gap-1.5 rounded-md border px-2 font-medium"
         >
-          <AmIcon icon={ICON.review} size="sm" />
+          <Icon icon={ICON.review} size="sm" />
           <span>{review('review')}</span>
           {reviewStore.needsDecision > 0 && (
             <span className="bg-cyan text-canvas text-micro inline-flex h-4 min-w-4 items-center justify-center rounded-full px-1 font-mono font-semibold">
@@ -166,15 +179,13 @@ export function AppHeader({
           aria-label={`${t('serviceStatus')}: ${serviceLabel}`}
           className={`tablet:inline-flex text-micro hidden h-7 items-center gap-1.5 rounded-md border px-2 font-mono ${serviceTone}`}
         >
-          <AmIcon icon={service === 'down' ? ICON.xCircle : ICON.service} size="sm" />
+          <Icon icon={down ? ICON.xCircle : ICON.service} size="sm" />
           <span className="xl:hidden">
-            {service === 'down'
+            {down
               ? t('serviceShortDown')
               : !connected
                 ? t('serviceShortNotConnected')
-                : service === 'degraded'
-                  ? t('serviceShortDegraded')
-                  : t('serviceShortUp')}
+                : t('serviceShortUp')}
           </span>
           <span className="hidden xl:inline">{serviceLabel}</span>
         </button>
@@ -184,58 +195,46 @@ export function AppHeader({
         <div className="relative xl:hidden">
           <button
             type="button"
-            onClick={() => setMenuOpen((value) => !value)}
+            onClick={toggleMenu}
             aria-label={t('menu')}
             aria-expanded={menuOpen}
             className={buttonClass}
           >
-            <AmIcon icon={ICON.menu} size="sm" />
+            <Icon icon={ICON.menu} size="sm" />
           </button>
           {menuOpen && (
             <div className="border-line bg-panel absolute top-full right-0 z-50 mt-1 flex w-44 flex-col rounded-md border p-1">
               <button
                 type="button"
-                onClick={() => {
-                  setMenuOpen(false);
-                  onService();
-                }}
+                onClick={handleServiceMenu}
                 className="text-body text-ink hover:bg-chip rounded-sm px-2 py-1.5 text-left"
               >
                 {serviceLabel}
               </button>
               <button
                 type="button"
-                onClick={() => {
-                  setMenuOpen(false);
-                  onTour();
-                }}
+                onClick={handleTourMenu}
                 className="text-body text-ink hover:bg-chip rounded-sm px-2 py-1.5 text-left"
               >
                 {t('walkthrough')}
               </button>
               <button
                 type="button"
-                onClick={() => {
-                  setMenuOpen(false);
-                  onEvidence();
-                }}
+                onClick={handleEvidenceMenu}
                 className="text-body text-ink hover:bg-chip rounded-sm px-2 py-1.5 text-left"
               >
                 {t('evidence')}
               </button>
               <button
                 type="button"
-                onClick={() => {
-                  setMenuOpen(false);
-                  onBriefing();
-                }}
+                onClick={handleBriefingMenu}
                 className="text-body text-ink hover:bg-chip rounded-sm px-2 py-1.5 text-left"
               >
                 {t('briefing')}
               </button>
               <Link
                 href="/review"
-                onClick={() => setMenuOpen(false)}
+                onClick={closeMenu}
                 className="text-body text-ink hover:bg-chip flex items-center justify-between rounded-sm px-2 py-1.5 text-left"
               >
                 {review('review')}
@@ -247,7 +246,7 @@ export function AppHeader({
               </Link>
               <Link
                 href="/"
-                onClick={() => setMenuOpen(false)}
+                onClick={closeMenu}
                 className="text-body text-ink hover:bg-chip rounded-sm px-2 py-1.5 text-left"
               >
                 {t('globe')}

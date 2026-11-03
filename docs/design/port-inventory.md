@@ -100,7 +100,7 @@ Query: `?view=`, `&run=A|B|C`, `&overlay=briefing|confirm|citation`, `&theme=`, 
 | Calendar legend / metric toggle | Workbench | **Yes** | `calendar-legend.tsx` |
 | Calendar readout | Workbench fixed card | **Yes** | `calendar-summary.tsx` replaces the tooltip |
 | Segmented control | Workbench | **Yes** | `segmented-control.tsx` |
-| Icon registry | — | **Yes** | `icon.tsx` (`ICON`, `AmIcon`, lucide) |
+| Icon registry | — | **Yes** | `icon.tsx` (`ICON`, `Icon`, lucide) |
 | Map pane / equal-area map | Workbench `map.html` | **Yes** | `map-pane.tsx`, `workbench-map.tsx` (pre-projected SVG) |
 | Physics filter bar | Workbench | **Yes (interactive)** | `filter-bar.tsx` |
 | H3 heatmap + Res 7/8 | Workbench `map.html` | **Yes** | `workbench-map.tsx`, `lib/workbench/h3.ts` |

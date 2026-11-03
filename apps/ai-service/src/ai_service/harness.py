@@ -5,8 +5,8 @@ Orchestrates:
   (`UC-S1.2`), Single-Hop Fast Lookup (`UC-S1.3`), Flash NRT Alert (`UC-S1.4`),
   and Stakeholder Fact Card (`UC-S1.5`). It classifies with a calibrated
   typed-questions endpoint and never derives an analysis.
-- System 2 Deliberative Layer: 15 Deliberative Use Cases (`UC-1.1` through
-  `UC-5.3`). It chooses its own deterministic tool calls and writes the
+- System 2 Deliberative Layer: 10 Deliberative Use Cases (`UC-1.1` through
+  `UC-4.2`). It chooses its own deterministic tool calls and writes the
   analytical narrative.
 - Symbiosis:
   1. System 1 -> System 2 Context & Tool Pruning
@@ -791,6 +791,15 @@ class FlareChronosDualSystemHarness:
             "evidence": {
                 "final_briefing": state.get("final_briefing", ""),
                 "verification_report": state.get("verification_report", {}),
+                "verified_ledger_entries": list(
+                    state.get("verified_ledger_entries", [])
+                ),
+                "entity": {
+                    key: entity.get(key)
+                    for key in ("region", "epoch_years", "stakeholder_tier")
+                    if key in entity
+                },
+                "self_corrections": int(state.get("self_correction_retries", 0)),
             },
         }
         answer = interrupt(request)

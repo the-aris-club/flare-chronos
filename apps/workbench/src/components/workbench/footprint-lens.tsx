@@ -16,18 +16,18 @@ export function FootprintLens({ physics }: { physics: MapPhysics }) {
   const spacing = 3.94;
 
   return (
-    <div className="border-line bg-panel/95 text-micro text-ink-muted tablet:bottom-9 max-tablet:hidden absolute bottom-16 left-2 w-44 rounded-md border p-2">
+    <section className="border-line flex flex-col border-t pt-3">
       <div className="flex items-baseline justify-between gap-2">
-        <span className="text-micro text-ink-subtle font-mono tracking-widest uppercase">
+        <h3 className="text-label text-ink-subtle font-mono tracking-widest uppercase">
           {t('lensTitle')}
-        </span>
+        </h3>
         <span className="text-micro font-mono">12 km</span>
       </div>
       <svg
         viewBox="0 0 160 112"
         role="img"
         aria-label={t('lensTitle')}
-        className="mt-1 block h-auto w-full"
+        className="mt-1 block h-auto w-44 max-w-full"
       >
         <rect width={160} height={112} fill="var(--map-ocean)" opacity={0.55} />
         <ellipse
@@ -108,6 +108,6 @@ export function FootprintLens({ physics }: { physics: MapPhysics }) {
       <div className="border-line text-label mt-1 border-t pt-1 font-mono">
         {t('ratio', { ratio: formatDecimal(physics.ratio, locale) })}
       </div>
-    </div>
+    </section>
   );
 }

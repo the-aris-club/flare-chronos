@@ -462,18 +462,9 @@ class HarnessChatModel(BaseChatModel):
                 "region": region,
                 "year": year,
             },
-            "tool_uc3_2_multihop_spatiotemporal_cube_query": {},
             "tool_uc3_3_autonomous_biome_recalibration": {},
             "tool_uc4_1_orbital_drift_and_sza_audit": {},
             "tool_uc4_2_nrt_vs_sp_fidelity_audit": {},
-            "tool_uc4_3_adaptive_firms_rate_limit_planner": {},
-            "tool_uc5_1_redd_plus_carbon_mrv_baseline_audit": {
-                "region": region,
-            },
-            "tool_uc5_2_burn_ban_policy_counterfactual_audit": {
-                "region": region,
-            },
-            "tool_uc5_3_transboundary_fire_propagation_forensics": {},
         }
         return arg_map.get(tool_name, {})
 

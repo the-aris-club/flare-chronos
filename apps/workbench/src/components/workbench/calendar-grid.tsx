@@ -1,8 +1,9 @@
 'use client';
 
-import type { MouseEvent, PointerEvent } from 'react';
+import { useCallback, memo, type MouseEvent, type PointerEvent } from 'react';
 import { useTranslations } from 'next-intl';
 import { useTheme } from '@/components/ui/theme-provider';
+import type { Theme } from '@/lib/theme';
 import { monthIndexAt } from '@/lib/calendar/pentad';
 import { divColor, seqColor } from '@/lib/calendar/ramp';
 import { PENTADS_PER_YEAR, type CalendarCell } from '@/lib/calendar/model';
@@ -39,6 +40,70 @@ function refFromPoint(
   };
 }
 
+type CellsProps = {
+  region: CalendarRegionData;
+  cells: CalendarCell[];
+  metric: Metric;
+  theme: Theme;
+};
+
+// The ~1,900 cells never change while the pointer moves; the focus rings are drawn
+// separately so a hover repaints two rects, not the grid.
+const CalendarCells = memo(function CalendarCells({ region, cells, metric, theme }: CellsProps) {
+  function fillFor(cell: CalendarCell): string | null {
+    if (metric === 'hfd') {
+      return seqColor(Math.sqrt(cell.hfd / region.maxHfd), theme);
+    }
+
+    return cell.sfai === null ? null : divColor(cell.sfai, theme);
+  }
+
+  return region.years.map((year, yearIndex) =>
+    Array.from({ length: PENTADS_PER_YEAR }, (_, pentadIndex) => {
+      const cell = cells[yearIndex * PENTADS_PER_YEAR + pentadIndex];
+      const modelled = !cell.observed;
+      const fill = fillFor(cell) ?? (modelled ? 'var(--panel)' : 'var(--raised)');
+
+      return (
+        <g key={`${year}-${pentadIndex}`}>
+          <rect
+            x={pentadIndex}
+            y={yearIndex}
+            width={0.92}
+            height={0.92}
+            rx={0.06}
+            fill={fill}
+            fillOpacity={modelled ? 0.4 : 1}
+          />
+          {modelled && (
+            <rect
+              x={pentadIndex}
+              y={yearIndex}
+              width={0.92}
+              height={0.92}
+              rx={0.06}
+              fill="url(#fc-hatch)"
+            />
+          )}
+          {cell.alert && (
+            <rect
+              x={pentadIndex + 0.05}
+              y={yearIndex + 0.05}
+              width={0.82}
+              height={0.82}
+              fill="none"
+              stroke="var(--cyan)"
+              strokeWidth={1.5}
+              vectorEffect="non-scaling-stroke"
+            />
+          )}
+          {cell.crisis && <path d={`M${pentadIndex} ${yearIndex}h0.32v0.32z`} fill="var(--cyan)" />}
+        </g>
+      );
+    }),
+  );
+});
+
 export function CalendarGrid({
   region,
   cells,
@@ -54,33 +119,34 @@ export function CalendarGrid({
   const months = t.raw('months') as string[];
   const observedYears = new Set(region.observedYears);
 
-  function fillFor(cell: CalendarCell): string | null {
-    if (metric === 'hfd') {
-      return seqColor(Math.sqrt(cell.hfd / region.maxHfd), theme);
-    }
+  const handleMove = useCallback(
+    (event: PointerEvent<SVGSVGElement>) => {
+      if (event.pointerType !== 'mouse') return;
 
-    return cell.sfai === null ? null : divColor(cell.sfai, theme);
-  }
+      const next = refFromPoint(
+        event.currentTarget,
+        event.clientX,
+        event.clientY,
+        region.years.length,
+      );
+      if (!sameRef(hover, next)) onHover(next);
+      onTip?.(event.clientX, event.clientY);
+    },
+    [hover, onHover, onTip, region.years.length],
+  );
 
-  function handleMove(event: PointerEvent<SVGSVGElement>) {
-    if (event.pointerType !== 'mouse') return;
+  const handleClick = useCallback(
+    (event: MouseEvent<SVGSVGElement>) => {
+      const next =
+        hover ??
+        refFromPoint(event.currentTarget, event.clientX, event.clientY, region.years.length);
+      onActive(next);
+      onHover(null);
+    },
+    [hover, onActive, onHover, region.years.length],
+  );
 
-    const next = refFromPoint(
-      event.currentTarget,
-      event.clientX,
-      event.clientY,
-      region.years.length,
-    );
-    if (!sameRef(hover, next)) onHover(next);
-    onTip?.(event.clientX, event.clientY);
-  }
-
-  function handleClick(event: MouseEvent<SVGSVGElement>) {
-    const next =
-      hover ?? refFromPoint(event.currentTarget, event.clientX, event.clientY, region.years.length);
-    onActive(next);
-    onHover(null);
-  }
+  const handlePointerLeave = useCallback(() => onHover(null), [onHover]);
 
   return (
     <div>
@@ -144,84 +210,28 @@ export function CalendarGrid({
           aria-hidden="true"
           className="fc-calendar-svg block w-full cursor-crosshair"
           onPointerMove={handleMove}
-          onPointerLeave={() => onHover(null)}
+          onPointerLeave={handlePointerLeave}
           onClick={handleClick}
         >
-          {region.years.map((year, yearIndex) =>
-            Array.from({ length: PENTADS_PER_YEAR }, (_, pentadIndex) => {
-              const cell = cells[yearIndex * PENTADS_PER_YEAR + pentadIndex];
-              const modelled = !cell.observed;
-              const fill = fillFor(cell) ?? (modelled ? 'var(--panel)' : 'var(--raised)');
-              const isActive = active.yearIndex === yearIndex && active.pentadIndex === pentadIndex;
-              const isHover =
-                hover !== null &&
-                hover.yearIndex === yearIndex &&
-                hover.pentadIndex === pentadIndex;
-
-              return (
-                <g key={`${year}-${pentadIndex}`}>
-                  <rect
-                    x={pentadIndex}
-                    y={yearIndex}
-                    width={0.92}
-                    height={0.92}
-                    rx={0.06}
-                    fill={fill}
-                    fillOpacity={modelled ? 0.4 : 1}
-                  />
-                  {modelled && (
-                    <rect
-                      x={pentadIndex}
-                      y={yearIndex}
-                      width={0.92}
-                      height={0.92}
-                      rx={0.06}
-                      fill="url(#fc-hatch)"
-                    />
-                  )}
-                  {cell.alert && (
-                    <rect
-                      x={pentadIndex + 0.05}
-                      y={yearIndex + 0.05}
-                      width={0.82}
-                      height={0.82}
-                      fill="none"
-                      stroke="var(--cyan)"
-                      strokeWidth={1.5}
-                      vectorEffect="non-scaling-stroke"
-                    />
-                  )}
-                  {cell.crisis && (
-                    <path d={`M${pentadIndex} ${yearIndex}h0.32v0.32z`} fill="var(--cyan)" />
-                  )}
-                  {isActive && (
-                    <rect
-                      x={pentadIndex + 0.03}
-                      y={yearIndex + 0.03}
-                      width={0.86}
-                      height={0.86}
-                      fill="none"
-                      stroke="var(--focus)"
-                      strokeWidth={2}
-                      vectorEffect="non-scaling-stroke"
-                    />
-                  )}
-                  {!isActive && isHover && (
-                    <rect
-                      x={pentadIndex + 0.04}
-                      y={yearIndex + 0.04}
-                      width={0.84}
-                      height={0.84}
-                      fill="none"
-                      stroke="var(--focus)"
-                      strokeWidth={1}
-                      vectorEffect="non-scaling-stroke"
-                    />
-                  )}
-                </g>
-              );
-            }),
-          )}
+          <CalendarCells region={region} cells={cells} metric={metric} theme={theme} />
+          {[
+            { ref: active, inset: 0.03, size: 0.86, width: 2 },
+            ...(hover && !sameRef(hover, active)
+              ? [{ ref: hover, inset: 0.04, size: 0.84, width: 1 }]
+              : []),
+          ].map(({ ref, inset, size, width }) => (
+            <rect
+              key={width}
+              x={ref.pentadIndex + inset}
+              y={ref.yearIndex + inset}
+              width={size}
+              height={size}
+              fill="none"
+              stroke="var(--focus)"
+              strokeWidth={width}
+              vectorEffect="non-scaling-stroke"
+            />
+          ))}
         </svg>
       </div>
     </div>

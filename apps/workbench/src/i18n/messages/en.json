@@ -141,7 +141,9 @@
     "aria": "Map of {region}, measured epoch {year}",
     "modis": "MODIS 1 km",
     "viirs": "VIIRS 375 m",
-    "lens": "Lens",
+    "guide": "Legend & lens",
+    "filtersOff": "{count} physics filters off",
+    "symbols": "Symbols",
     "lensTitle": "Footprint lens · true scale",
     "modisNadir": "MODIS nadir",
     "modisEdge": "MODIS edge",
@@ -153,7 +155,7 @@
     "h3Grid": "H3 grid resolution",
     "resLabel": "Resolution {resolution}",
     "scale": "≈ {km} km",
-    "borderCredit": "Borders: Natural Earth (110m); reference islands are labelled, not measured",
+    "borderCredit": "Borders, rivers, lakes and shaded relief: Natural Earth (1:10m); reference islands are labelled, not measured",
     "scaleNote": "Footprints to scale from ×8 zoom",
     "excludedStatic": "Excluded · static source",
     "excludedNoise": "Excluded · SAA / SZA noise",
@@ -191,7 +193,7 @@
     "filtersOff": "{count} filters off — inflated"
   },
   "Comparator": {
-    "title": "Before / After · annual detections",
+    "title": "Annual detections",
     "mode": "Comparator mode",
     "both": "Both",
     "raw": "Raw",
@@ -294,51 +296,35 @@
       "tierFallback": "Tier 1 · fallback classifier",
       "runId": "Run {id}",
       "inProgress": "Run in progress",
-      "sample": "Sample"
+      "sample": "Sample",
+      "presetDispatch": "Tactical dispatch · UC-2.2",
+      "presetAlert": "Flash alert · UC-S1.4",
+      "mode": "Mode · {mode}",
+      "stepsLine": "{count} graph steps completed",
+      "toolsLine": "{count, plural, one {# deterministic tool call} other {# deterministic tool calls}}",
+      "doneLine": "Run finished.",
+      "doneApproved": "Approved in Review · run {id}",
+      "doneRejected": "Rejected in Review · run {id}",
+      "failed": "Run failed"
     },
     "service": {
       "down": "Unavailable",
       "notConnected": "Not connected"
     },
     "connect": {
-      "step": "Connect · step 1 of 2",
       "title": "Connect to the analysis service",
       "body": "Paste an access token to run briefings. Map, charts and calendar work without it.",
       "token": "Bearer token",
       "empty": "Enter a token.",
       "rejected": "Token rejected (401) — malformed or expired.",
-      "verify": "Verify token",
-      "useDemo": "Use demo token",
-      "resolving": "Resolving principal…",
-      "resolvedStep": "Resolved principal · step 2 of 2",
-      "role": "Role",
-      "roleValue": "Approver — may run briefings and sign off",
-      "scopes": "Scopes",
-      "expires": "Expires",
-      "connectAs": "Connect as {name}"
+      "unreachable": "The analysis service did not answer. Check that it is running and allows this origin.",
+      "checking": "Checking token…",
+      "connect": "Connect"
     },
     "down": {
       "title": "Analysis service unavailable",
-      "reason": "Reason",
-      "reasonValue": "Model endpoint timed out (HTTP 504) after 3 retries",
-      "tier": "Tier",
-      "tierValue": "3 · Unavailable — briefings and sign-off are off",
-      "lastHealthy": "Last healthy",
-      "nextRetry": "Next retry",
-      "nextRetryValue": "in 30 s",
-      "body": "Briefings are paused. All charts keep working on precomputed harmonized data.",
-      "retry": "Retry now"
-    },
-    "sim": {
-      "title": "Demo · simulate service",
-      "label": "Simulate service state",
-      "up": "Up",
-      "degraded": "Degraded",
-      "down": "Down",
-      "reset": "Reset run"
-    },
-    "scopesValue": "Run briefing · Approve",
-    "sampleOtherRegion": "This sample run describes {runRegion}, not {region}. It stays a fixture until the analysis API is connected."
+      "body": "Briefings are paused. All charts keep working on precomputed harmonized data."
+    }
   },
   "Evidence": {
     "title": "Evidence · 5 scientific figures",
@@ -488,7 +474,7 @@
     "owner": "Owner",
     "assignedMe": "Assigned to me",
     "clear": "Clear filters",
-    "search": "Search run, action, or owner",
+    "search": "Search run, use case, or owner",
     "run": "Run",
     "period": "Period",
     "proposed": "Proposed action",
@@ -624,7 +610,40 @@
     "synthesis": "Synthesis",
     "synthesisValue": "Primary model",
     "waitSince": "since {time}",
-    "assignedTag": "assigned"
+    "assignedTag": "assigned",
+    "connectFirst": "Review reads the analysis service. Connect with an access token to see runs.",
+    "queueFailed": "The analysis service did not return a usable answer. Nothing is shown rather than a guess.",
+    "runNotFound": "This run does not exist.",
+    "runForbidden": "Only the owner of this run, or an approver, may read it.",
+    "mode": "Mode",
+    "factsInLedger": "facts in the verified ledger",
+    "needApprover": "Only a principal with the approver role can decide. You can read this run.",
+    "reasons": {
+      "evidence": "Evidence confirmed",
+      "stale": "Stale data",
+      "duplicate": "Duplicate alert",
+      "conflict": "Evidence conflict",
+      "authority": "Outside authority",
+      "degraded": "Service degraded",
+      "other": "Other"
+    },
+    "useCases": {
+      "UC_S1_1": "Intent and urgency triage",
+      "UC_S1_2": "Spatio-temporal entity extraction",
+      "UC_S1_3": "Single-hop metric lookup",
+      "UC_S1_4": "NRT crisis alert",
+      "UC_S1_5": "Stakeholder fact card",
+      "UC_1_1": "Regime-shift attribution",
+      "UC_1_2": "Cross-sensor discrepancy",
+      "UC_1_3": "Thermal source origin",
+      "UC_2_1": "Phenology phase shift",
+      "UC_2_2": "Footprint to dispatch",
+      "UC_2_3": "Verified situation briefing",
+      "UC_3_1": "Constellation retirement",
+      "UC_3_3": "Calibration audit",
+      "UC_4_1": "Orbital drift and SZA audit",
+      "UC_4_2": "NRT vs standard fidelity"
+    }
   },
   "Workbench": {
     "error": "The Workbench could not be loaded.",

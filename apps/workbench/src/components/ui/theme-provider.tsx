@@ -3,6 +3,8 @@
 import { ThemeProvider as NextThemesProvider, useTheme as useNextTheme } from 'next-themes';
 import type { Theme } from '@/lib/theme';
 
+const THEMES = ['dark', 'light'];
+
 export function ThemeProvider({
   initialTheme,
   children,
@@ -16,7 +18,7 @@ export function ThemeProvider({
       defaultTheme={initialTheme}
       enableSystem={false}
       disableTransitionOnChange
-      themes={['dark', 'light']}
+      themes={THEMES}
       storageKey="fc-theme"
     >
       {children}
@@ -27,11 +29,12 @@ export function ThemeProvider({
 export function useTheme(): { theme: Theme; setTheme: (theme: Theme) => void } {
   const { theme: rawTheme, resolvedTheme, setTheme: setNextTheme } = useNextTheme();
 
-  const theme: Theme = rawTheme === 'light' || rawTheme === 'dark'
-    ? rawTheme
-    : resolvedTheme === 'light'
-      ? 'light'
-      : 'dark';
+  const theme: Theme =
+    rawTheme === 'light' || rawTheme === 'dark'
+      ? rawTheme
+      : resolvedTheme === 'light'
+        ? 'light'
+        : 'dark';
 
   return {
     theme,

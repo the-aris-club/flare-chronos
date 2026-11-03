@@ -40,7 +40,6 @@ export type MapLayers = {
   footprints: boolean;
   hex: boolean;
   overlay: boolean;
-  lens: boolean;
 };
 
 export type Calibration = {

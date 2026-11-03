@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, type MouseEvent } from 'react';
 import { useTranslations } from 'next-intl';
-import { AmIcon, ICON } from '@/components/ui/icon';
+import { Icon, ICON } from '@/components/ui/icon';
 
 type ReviewDialogProps = {
   title: string;
@@ -24,6 +24,13 @@ export function ReviewDialog({
   const panel = useRef<HTMLDivElement>(null);
   const t = useTranslations('Review');
 
+  const handleBackdropClick = useCallback(
+    (event: MouseEvent<HTMLDivElement>) => {
+      if (event.target === event.currentTarget) onClose();
+    },
+    [onClose],
+  );
+
   useEffect(() => {
     const previous = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
@@ -43,9 +50,7 @@ export function ReviewDialog({
     <div
       className="bg-scrim fixed inset-0 z-50 flex items-center justify-center p-3"
       role="presentation"
-      onClick={(event) => {
-        if (event.target === event.currentTarget) onClose();
-      }}
+      onClick={handleBackdropClick}
     >
       <div
         ref={panel}
@@ -68,7 +73,7 @@ export function ReviewDialog({
             aria-label={t('close')}
             className="border-line text-ink-muted hover:bg-chip hover:text-ink inline-flex size-8 shrink-0 items-center justify-center rounded-md border"
           >
-            <AmIcon icon={ICON.close} size="sm" />
+            <Icon icon={ICON.close} size="sm" />
           </button>
         </header>
 

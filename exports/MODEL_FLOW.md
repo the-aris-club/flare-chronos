@@ -37,8 +37,8 @@ flowchart TD
     Q["Yêu cầu vận hành"] --> S1["Tầng phản xạ — Decision model"]
     S1 -->|"phân tích + vùng + khẩn cấp<br/>(xác suất hiệu chuẩn)"| ROUTE{"Phân tích thuộc<br/>tầng báo cáo?"}
     ROUTE -->|"có"| FAST["Tầng báo cáo<br/>1 Atomic Tool, 0 mô hình<br/>~5 ms, 0 token"]
-    ROUTE -->|"không"| S2["Tầng suy luận — Chat model<br/>chọn tool trong bề mặt 23 tool"]
-    S2 --> TOOLS["ToolNode — 23 tool tất định"]
+    ROUTE -->|"không"| S2["Tầng suy luận — Chat model<br/>chọn tool trong bề mặt 18 tool"]
+    S2 --> TOOLS["ToolNode — 18 tool tất định"]
     TOOLS --> GATE{"Cổng kiểm chứng định lượng<br/>mọi số phải có trong sổ cái"}
     GATE -->|"đạt"| SIGN{"Cần phê duyệt<br/>người không?"}
     GATE -->|"không đạt"| S2

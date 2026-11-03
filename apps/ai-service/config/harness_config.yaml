@@ -84,14 +84,9 @@ models:
       - "UC-2.2"  # Uncertainty-Aware Tactical Dispatch (Elliptical Footprint)
       - "UC-2.3"  # Self-Verifying Multi-Stakeholder Situation Briefing
       - "UC-3.1"  # Counterfactual Constellation Retirement Simulation (2026+)
-      - "UC-3.2"  # Multi-Hop Spatio-Temporal Cube Analytics
       - "UC-3.3"  # Autonomous Biome-Specific Operator Recalibration
       - "UC-4.1"  # End-of-Life Orbital Drift & Solar Zenith Angle Audit
       - "UC-4.2"  # Near-Real-Time (URT/RT/NRT) vs Standard (SP) Fidelity Audit
-      - "UC-4.3"  # Adaptive NASA FIRMS Rate-Limit & Transaction Budgeting
-      - "UC-5.1"  # Sensor-Invariant REDD+ Carbon MRV Baseline Audit
-      - "UC-5.2"  # Agricultural Burn-Ban Policy Counterfactual Evaluation
-      - "UC-5.3"  # Transboundary Smoke & Fire Propagation Forensics (H3 Rings)
 
 symbiosis_protocol:
   context_pruning_enabled: true

@@ -7,15 +7,25 @@
  * the map and the harmonization core cannot drift. This script owns the
  * projection and the country geometry.
  *
- * Run from apps/workbench:
- *   ../../.venv/bin/python scripts/flag-map-points.py
- *   WORLD_ATLAS_PATH=/path/to/countries-110m.json bun scripts/build-map-data.mjs
+ * The base layers are Natural Earth 1:10m (public domain): countries from world-atlas,
+ * rivers and lakes from natural-earth-vector. Shaded relief is rendered separately by
+ * scripts/build-map-relief.py from the grid this script writes, so it lands on exactly
+ * the same Lambert projection as the points.
  *
- * Download the atlas once:
- *   curl -sSL -o countries-110m.json \
- *     https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-110m.json
+ * Run from apps/workbench (download the inputs once into .cache/ne):
+ *   ../../.venv/bin/python scripts/flag-map-points.py
+ *   bun scripts/build-map-data.mjs
+ *   ../../.venv/bin/python -I scripts/build-map-relief.py
+ *
+ *   curl -sSL -o .cache/ne/atlas/countries-10m.json \
+ *     https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-10m.json
+ *   curl -sSL -o .cache/ne/vector/ne_10m_rivers_lake_centerlines.geojson \
+ *     https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_10m_rivers_lake_centerlines.geojson
+ *   curl -sSL -o .cache/ne/vector/ne_10m_lakes.geojson \
+ *     https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_10m_lakes.geojson
+ *   (relief: SR_HR.zip from https://naturalearth.s3.amazonaws.com/10m_raster/, see build-map-relief.py)
  */
-import { readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import nodePath from 'node:path';
 import { geoAzimuthalEqualArea, geoBounds, geoGraticule10, geoPath } from 'd3-geo';
@@ -25,13 +35,26 @@ import { REGION_DEFS } from '../src/lib/workbench/regions';
 const ROOT = nodePath.resolve(nodePath.dirname(fileURLToPath(import.meta.url)), '../../..');
 const APP = nodePath.resolve(ROOT, 'apps/workbench');
 const OUT = nodePath.resolve(APP, 'src/data/map-data.json');
-const ATLAS = process.env.WORLD_ATLAS_PATH ?? nodePath.resolve(APP, 'countries-110m.json');
+const NE = nodePath.resolve(APP, '.cache/ne');
+const ATLAS = process.env.WORLD_ATLAS_PATH ?? nodePath.resolve(NE, 'atlas/countries-10m.json');
+const RIVERS = nodePath.resolve(NE, 'vector/ne_10m_rivers_lake_centerlines.geojson');
+const LAKES = nodePath.resolve(NE, 'vector/ne_10m_lakes.geojson');
+const GRID_DIR = nodePath.resolve(APP, '.cache/relief-grid');
+/** Relief is rendered at this multiple of the viewBox so it stays sharp when zoomed. */
+const RELIEF_SCALE = 2;
+/**
+ * The pane is wider (or taller) than the 1000x730 viewBox, and `meet` shows the extra space.
+ * Base layers are drawn this far past each edge so that space is map, not blank.
+ */
+const PAD = { x: 450, y: 260 };
 const POINTS = process.env.MAP_POINTS_PATH ?? nodePath.resolve(APP, '.cache/map-points.json');
 const WIDTH = 1000;
 const HEIGHT = 730;
 
 const world = JSON.parse(readFileSync(ATLAS, 'utf8'));
 const flagged = JSON.parse(readFileSync(POINTS, 'utf8'));
+const rivers = JSON.parse(readFileSync(RIVERS, 'utf8')).features;
+const lakes = JSON.parse(readFileSync(LAKES, 'utf8')).features;
 
 function haversineKm(a, b) {
   const radius = 6371;
@@ -72,7 +95,14 @@ function buildProjection(region) {
 
 function buildBase(region) {
   const projection = buildProjection(region);
-  const projectPath = geoPath(projection);
+  // Detail beyond the canvas is dead weight in a 1:10m dataset; 0.01 viewBox units is far
+  // below a pixel at the 64x maximum zoom.
+  // Clipping only affects streamed geometry; projecting a single point is unchanged.
+  projection.clipExtent([
+    [-PAD.x, -PAD.y],
+    [WIDTH + PAD.x, HEIGHT + PAD.y],
+  ]);
+  const projectPath = geoPath(projection).digits(2);
   const islands = (region.islands ?? []).map((island) => {
     const [west, south, east, north] = island.box;
     const ring = [
@@ -97,6 +127,13 @@ function buildBase(region) {
   });
   const countries = feature(world, world.objects.countries).features;
   const visible = countries.filter((country) => intersects(geoBounds(country), region.bbox));
+  const nearby = (country) => intersects(geoBounds(country), region.bbox);
+  const land = merge(
+    world,
+    world.objects.countries.geometries.filter((geometry) =>
+      visible.some((country) => String(country.id) === String(geometry.id)),
+    ),
+  );
   const coverage = merge(
     world,
     world.objects.countries.geometries.filter((geometry) =>
@@ -135,6 +172,9 @@ function buildBase(region) {
     pxPerKm,
     saaPath: projectPath({ type: 'Polygon', coordinates: [saaRing] }),
     coveragePath: projectPath(coverage),
+    landPath: projectPath(land),
+    rivers: projectPath({ type: 'FeatureCollection', features: rivers.filter(nearby) }),
+    lakes: projectPath({ type: 'FeatureCollection', features: lakes.filter(nearby) }),
     islands,
     countries: visible.map((country) => ({
       id: String(country.id),
@@ -144,6 +184,28 @@ function buildBase(region) {
     borders: projectPath(mesh(world, world.objects.countries, (a, b) => a !== b)),
     graticule: projectPath(geoGraticule10()),
   };
+}
+
+/** lon/lat under every relief pixel, for scripts/build-map-relief.py to sample the raster. */
+function writeReliefGrid(name, projection) {
+  const width = Math.round((WIDTH + 2 * PAD.x) * RELIEF_SCALE);
+  const height = Math.round((HEIGHT + 2 * PAD.y) * RELIEF_SCALE);
+  const grid = new Float32Array(width * height * 2).fill(Number.NaN);
+  for (let row = 0; row < height; row += 1) {
+    for (let column = 0; column < width; column += 1) {
+      const lonLat = projection.invert([
+        -PAD.x + ((column + 0.5) / width) * (WIDTH + 2 * PAD.x),
+        -PAD.y + ((row + 0.5) / height) * (HEIGHT + 2 * PAD.y),
+      ]);
+      if (!lonLat) continue;
+      const at = (row * width + column) * 2;
+      grid[at] = lonLat[0];
+      grid[at + 1] = lonLat[1];
+    }
+  }
+  mkdirSync(GRID_DIR, { recursive: true });
+  writeFileSync(nodePath.resolve(GRID_DIR, `${name}.f32`), Buffer.from(grid.buffer));
+  writeFileSync(nodePath.resolve(GRID_DIR, `${name}.json`), JSON.stringify({ width, height }));
 }
 
 function projectPoints(epoch, projection) {
@@ -173,12 +235,14 @@ function projectPoints(epoch, projection) {
 const output = {
   width: WIDTH,
   height: HEIGHT,
+  pad: PAD,
   saa: flagged.saaZone,
   regions: {},
 };
 
 for (const [region, config] of Object.entries(REGION_DEFS)) {
   const base = buildBase(config);
+  writeReliefGrid(region, base.projection);
   const staticSources = config.staticSources
     .map((source) => {
       const projected = base.projection([source.lon, source.lat]);
@@ -200,6 +264,9 @@ for (const [region, config] of Object.entries(REGION_DEFS)) {
     pxPerKm: base.pxPerKm,
     saaPath: base.saaPath,
     coveragePath: base.coveragePath,
+    landPath: base.landPath,
+    rivers: base.rivers,
+    lakes: base.lakes,
     islands: base.islands,
     staticSources,
     countries: base.countries,
@@ -212,8 +279,8 @@ for (const [region, config] of Object.entries(REGION_DEFS)) {
   const summary = Object.entries(epochs)
     .map(([year, points]) => `${year}:${points.length}`)
     .join(' ');
-  console.log(`${region}: ${base.countries.length} countries · ${summary}`);
+  console.warn(`${region}: ${base.countries.length} countries · ${summary}`);
 }
 
 writeFileSync(OUT, JSON.stringify(output));
-console.log(`wrote ${OUT} (${Math.round(JSON.stringify(output).length / 1024)} KB)`);
+console.warn(`wrote ${OUT} (${Math.round(JSON.stringify(output).length / 1024)} KB)`);

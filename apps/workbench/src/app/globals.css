@@ -89,12 +89,17 @@
   --scrim: rgba(3, 6, 12, 0.7);
   --chip: rgba(150, 170, 210, 0.07);
   --calendar-pitch: 10px;
-  --map-ocean: #0a101c;
-  --map-land: #141d2c;
-  --map-focus: #1a2537;
+  /* Cool, desaturated base so the amber and red fire detections are the only warm marks. */
+  --map-ocean: #060b14;
+  --map-land: #1f2b3c;
+  --map-focus: #263549;
   --map-border: rgba(170, 190, 230, 0.32);
   --map-grat: rgba(170, 190, 230, 0.07);
   --map-bbox: rgba(238, 242, 248, 0.6);
+  --map-river: rgba(110, 160, 225, 0.5);
+  --map-relief-opacity: 0.85;
+  --map-relief-blend: soft-light;
+  --map-relief-filter: none;
 }
 
 [data-theme='light'] {
@@ -124,12 +129,17 @@
   --focus: #121a2b;
   --scrim: rgba(18, 26, 43, 0.46);
   --chip: rgba(20, 30, 60, 0.04);
-  --map-ocean: #e4eaf2;
-  --map-land: #fbfbf9;
-  --map-focus: #ffffff;
+  --map-ocean: #d6e1ec;
+  --map-land: #edebe6;
+  --map-focus: #f6f4ef;
   --map-border: rgba(30, 40, 70, 0.28);
   --map-grat: rgba(30, 40, 70, 0.07);
   --map-bbox: rgba(20, 28, 46, 0.6);
+  --map-river: rgba(40, 105, 185, 0.6);
+  /* multiply only darkens: lift the grey so flat land stays white and hills shade it */
+  --map-relief-opacity: 0.75;
+  --map-relief-blend: multiply;
+  --map-relief-filter: brightness(1.9);
 }
 
 @media (max-width: 1279px) {
