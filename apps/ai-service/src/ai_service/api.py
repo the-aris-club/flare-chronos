@@ -29,7 +29,7 @@ from uuid import uuid4
 import jwt
 from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, StreamingResponse
+from fastapi.responses import StreamingResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import BaseModel, Field
 
@@ -38,7 +38,6 @@ from ai_service.harness import DEFAULT_CHECKPOINT_PATH, FlareChronosDualSystemHa
 from ai_service.schemas import UseCaseId
 from ai_service.store import RunStore
 
-DEMO_PAGE = Path(__file__).parent / "demo" / "index.html"
 DEFAULT_STORE_PATH = DEFAULT_CHECKPOINT_PATH.with_name("service.sqlite")
 DEFAULT_RUN_TIMEOUT_S = 120.0
 APPROVER_ROLE = "approver"
@@ -198,10 +197,6 @@ def create_app(
             media_type="text/event-stream",
             headers={"Cache-Control": "no-cache"},
         )
-
-    @app.get("/", include_in_schema=False)
-    def page() -> FileResponse:
-        return FileResponse(DEMO_PAGE, media_type="text/html")
 
     @app.get("/api/v1/analysis/use-cases")
     def use_cases(_: Annotated[Principal, Depends(authenticate)]) -> dict[str, Any]:

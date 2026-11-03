@@ -11,3 +11,7 @@ Default canonical labels: `needs-triage`, `needs-info`, `ready-for-agent`, `read
 ### Domain docs
 
 Multi-context: root `GLOSSARY-MAP.md` points to per-context `GLOSSARY.md` files under `packages/`, `apps/`, and `src/`. See `docs/agents/domain.md`.
+
+### UI/UX and copy
+
+Read [`DESIGN.md`](./DESIGN.md) before changing any web surface. It owns tokens, icon vocabulary, responsive rules, component naming, and the EN/VI term table.

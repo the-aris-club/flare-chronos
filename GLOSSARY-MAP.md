@@ -1,6 +1,6 @@
 # Glossary Map
 
-This repo uses a **multi-context** layout. Each context owns its own `GLOSSARY.md`; system-wide decisions live in `docs/adr/`, context-specific ones in `<context>/docs/adr/`.
+This repo uses a **multi-context** layout. Each context owns its own `GLOSSARY.md`; system-wide decisions live in `docs/adr/`, context-specific ones in `<context>/docs/adr/`. UI/UX rules, tokens, icon vocabulary, and the user-facing copy term table live in [`DESIGN.md`](./DESIGN.md).
 
 | Context | Glossary | Notes |
 | --- | --- | --- |

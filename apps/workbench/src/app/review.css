@@ -1,0 +1,5 @@
+@layer components {
+  .fc-review-dialog {
+    max-height: calc(100dvh - 1.5rem);
+  }
+}

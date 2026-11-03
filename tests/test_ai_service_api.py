@@ -68,6 +68,12 @@ class ApiCase(unittest.TestCase):
         return json.loads(started[5:])["thread_id"]
 
 
+class TestRootPage(ApiCase):
+    def test_root_does_not_serve_html(self) -> None:
+        response = self.client.get("/")
+        self.assertEqual(response.status_code, 404)
+
+
 class TestAuthentication(ApiCase):
     def test_a_request_without_a_token_is_refused(self) -> None:
         self.assertEqual(self.client.get("/api/v1/analysis/use-cases").status_code, 401)
