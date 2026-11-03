@@ -26,8 +26,7 @@ const mono = IBM_Plex_Mono({
   display: 'swap',
 });
 
-const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ?? 'https://flare-chronos.resonance.io.vn';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://flare-chronos.resonance.io.vn';
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('Meta');

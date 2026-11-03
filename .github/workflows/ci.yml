@@ -75,7 +75,7 @@ jobs:
         with:
           enable-cache: true
       - name: Sync dependencies
-        run: uv sync --group dev
+        run: uv sync --all-packages --group dev
       - name: Check formatting (ruff)
         run: uv run ruff format --check .
       - name: Lint (ruff)
@@ -98,7 +98,7 @@ jobs:
         with:
           enable-cache: true
       - name: Sync dependencies
-        run: uv sync --group dev
+        run: uv sync --all-packages --group dev
       - name: Type check (pyright)
         run: uv run pyright
 
@@ -117,7 +117,7 @@ jobs:
         with:
           enable-cache: true
       - name: Sync dependencies
-        run: uv sync --group dev
+        run: uv sync --all-packages --group dev
       - name: Run API tests
         run: uv run python -m pytest tests/test_ai_service_api.py tests/test_ai_service_review.py tests/test_ai_service_harness.py tests/test_ai_service_tool_numbers.py
       - name: Check OpenAPI contract drift
@@ -135,6 +135,8 @@ jobs:
         with:
           bun-version: latest
           cache: true
+      - name: Install root tooling
+        run: bun install --frozen-lockfile
       - name: Install dependencies
         working-directory: apps/workbench
         run: bun install --frozen-lockfile
