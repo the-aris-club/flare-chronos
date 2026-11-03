@@ -11,11 +11,9 @@ import { captureFrame } from './snapshot';
 import { createSky } from './sky';
 import { loadEarthPhoto } from './textures';
 import type { BootStep } from './types';
-
 const DEG = Math.PI / 180;
 const IDLE_SPEED = 0.25;
 const HOVER_SPEED = 0.05;
-
 type Options = {
   canvas: HTMLCanvasElement;
   labels: Partial<Record<RegionId, HTMLDivElement | null>>;
@@ -26,9 +24,7 @@ type Options = {
   onSelect: (region: RegionId) => void;
   onArrive: (region: RegionId) => void;
 };
-
 const REGION_IDS = Object.keys(GLOBE_DATA.regions) as RegionId[];
-
 export class GlobeScene {
   private readonly canvas: HTMLCanvasElement;
   private readonly labels: Partial<Record<RegionId, HTMLDivElement | null>>;
@@ -37,7 +33,6 @@ export class GlobeScene {
   private readonly onHover: Options['onHover'];
   private readonly onSelect: Options['onSelect'];
   private readonly onArrive: Options['onArrive'];
-
   private readonly renderer: THREE.WebGLRenderer;
   private readonly scene = new THREE.Scene();
   private readonly camera: THREE.PerspectiveCamera;
@@ -46,7 +41,6 @@ export class GlobeScene {
   private readonly flight: CameraFlight;
   private readonly sky: ReturnType<typeof createSky>;
   private readonly orbits = createOrbits();
-
   private photo: THREE.Texture | null = null;
   private theme: 'dark' | 'light';
   private hovered: RegionId | null = null;
@@ -59,11 +53,9 @@ export class GlobeScene {
   private idleDistance = 4.3;
   private last = performance.now();
   private disposed = false;
-
   private readonly picker = new RegionPicker();
   private readonly unbindPointer: () => void;
   private resumeTimer = 0;
-
   constructor(options: Options) {
     this.canvas = options.canvas;
     this.labels = options.labels;

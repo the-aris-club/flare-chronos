@@ -16,7 +16,7 @@ export function useLabels() {
   return {
     reason: (code: string) =>
       review.has(`reasons.${code}`) ? review(`reasons.${code}`) : code || '—',
-    useCase: (id: string) =>
+    caseLabel: (id: string) =>
       review.has(`useCases.${messageKey(id)}`) ? review(`useCases.${messageKey(id)}`) : '',
     region: (region: string | undefined) =>
       region && regions.has(region) ? regions(region) : (region ?? '—'),

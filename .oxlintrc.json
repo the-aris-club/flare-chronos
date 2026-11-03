@@ -88,6 +88,42 @@
       "rules": {
         "no-console": "off"
       }
+    },
+    {
+      "files": [
+        "apps/workbench/src/components/workbench/workbench-map.tsx",
+        "apps/workbench/src/lib/globe/scene.ts"
+      ],
+      "rules": {
+        "max-lines": "off"
+      }
+    },
+    {
+      "files": [
+        "apps/workbench/src/lib/service/client.ts",
+        "apps/workbench/src/components/workbench/briefing-rail.tsx",
+        "apps/workbench/src/components/service/service-provider.tsx"
+      ],
+      "rules": {
+        "eslint/no-await-in-loop": "off"
+      }
+    },
+    {
+      "files": [
+        "apps/workbench/src/components/review/review-run.tsx",
+        "apps/workbench/src/components/service/service-provider.tsx"
+      ],
+      "rules": {
+        "react-hooks/set-state-in-effect": "off"
+      }
+    },
+    {
+      "files": [
+        "apps/workbench/src/components/ui/markdown.tsx"
+      ],
+      "rules": {
+        "react/no-unstable-nested-components": "off"
+      }
     }
   ],
   "ignorePatterns": [

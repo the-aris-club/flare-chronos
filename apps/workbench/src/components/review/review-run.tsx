@@ -104,7 +104,7 @@ export function ReviewRunView({ runId }: { runId: string }) {
         </Link>
         <h1 className="text-title min-w-0 font-mono font-semibold break-all">{run.id}</h1>
         <span className="text-meta text-ink-muted">
-          {run.useCase} · {labels.useCase(run.useCase)}
+          {run.useCase} · {labels.caseLabel(run.useCase)}
         </span>
         <StatusChip status={run.status} />
         {decided && <DecisionChip approved={decided.approved} />}

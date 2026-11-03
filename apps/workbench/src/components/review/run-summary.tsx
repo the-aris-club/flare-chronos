@@ -26,7 +26,7 @@ export function RunSummary({ run }: { run: ReviewRun }) {
         <div className="border-line bg-panel rounded-lg border p-3">
           <span className="text-label text-ink-subtle font-mono uppercase">{t('proposed')}</span>
           <p className="text-body-lg mt-1.5 font-semibold">
-            {labels.useCase(run.useCase) || run.useCase}
+            {labels.caseLabel(run.useCase) || run.useCase}
           </p>
           <p className="text-meta text-ink-subtle mt-1">{run.question}</p>
         </div>

@@ -64,7 +64,7 @@ export function BriefingRun({
             <h3 className="text-subhead font-semibold">{t('timeline')}</h3>
             {run.useCaseId && (
               <span className="text-label text-ink-subtle font-mono">
-                {run.useCaseId} · {labels.useCase(run.useCaseId)}
+                {run.useCaseId} · {labels.caseLabel(run.useCaseId)}
               </span>
             )}
             {run.mode && (

@@ -124,7 +124,7 @@ export function ReviewQueue() {
                   <td className="px-2.5 py-2.5 align-top">
                     <span className="text-meta font-mono">{row.useCase}</span>
                     <span className="text-meta text-ink-muted block">
-                      {labels.useCase(row.useCase)}
+                      {labels.caseLabel(row.useCase)}
                     </span>
                   </td>
                   <td className="px-2.5 py-2.5 align-top">

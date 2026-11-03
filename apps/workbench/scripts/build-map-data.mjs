@@ -127,7 +127,7 @@ function buildBase(region) {
   });
   const countries = feature(world, world.objects.countries).features;
   const visible = countries.filter((country) => intersects(geoBounds(country), region.bbox));
-  const nearby = (feature) => intersects(geoBounds(feature), region.bbox);
+  const nearby = (country) => intersects(geoBounds(country), region.bbox);
   const land = merge(
     world,
     world.objects.countries.geometries.filter((geometry) =>
