@@ -199,6 +199,16 @@ def create_app(
             allow_headers=["Authorization", "Content-Type", "Last-Event-ID"],
         )
 
+    # No caching: every retry after a reload must hit the service, not a stale
+    # browser/CDN response (otherwise connect() can read a cached 401/200).
+    @app.middleware("http")
+    async def _no_cache(request: Request, call_next: Any) -> Any:
+        response = await call_next(request)
+        response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+        return response
+
     def recorded(
         store: RunStore, thread_id: str, events: AsyncIterator[HarnessEvent]
     ) -> AsyncIterator[HarnessEvent]:
