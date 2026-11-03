@@ -118,8 +118,19 @@ function buildBase(region) {
   const p2 = projection(east);
   const pxPerKm = Math.hypot(p2[0] - p1[0], p2[1] - p1[1]) / haversineKm(center, east);
 
+  const [qw, qs, qe, qn] = region.queryBox;
+  const queryRing = [
+    [qw, qs],
+    [qw, qn],
+    [qe, qn],
+    [qe, qs],
+    [qw, qs],
+  ];
+
   return {
     bbox: region.bbox,
+    queryBox: region.queryBox,
+    queryBoxPath: projectPath({ type: 'Polygon', coordinates: [queryRing] }),
     projection,
     pxPerKm,
     saaPath: projectPath({ type: 'Polygon', coordinates: [saaRing] }),
@@ -184,6 +195,8 @@ for (const [region, config] of Object.entries(REGION_DEFS)) {
 
   output.regions[region] = {
     bbox: base.bbox,
+    queryBox: base.queryBox,
+    queryBoxPath: base.queryBoxPath,
     pxPerKm: base.pxPerKm,
     saaPath: base.saaPath,
     coveragePath: base.coveragePath,

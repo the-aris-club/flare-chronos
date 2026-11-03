@@ -53,6 +53,9 @@ export function RunSummary({ run }: { run: ReviewRun }) {
               {run.sfai === 'Not evaluated' ? t('notEvaluated') : run.sfai}
             </span>
           </div>
+          {run.sfai === 'Not evaluated' && (
+            <p className="text-meta text-ink-subtle">{t('sfaiNotUsed')}</p>
+          )}
           <div className="grid grid-cols-2 gap-2">
             <div className="border-cyan/60 rounded-md border border-dashed p-2">
               <span className="text-micro text-ink-subtle block font-mono uppercase">

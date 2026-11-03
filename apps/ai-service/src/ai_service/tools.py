@@ -57,6 +57,26 @@ def _load_empirical_results() -> dict[str, Any]:
     return {}
 
 
+def _calibration() -> dict[str, Any]:
+    """The published Aqua-SNPP calibration. A missing artifact is an error, never a default."""
+    cal = _load_empirical_results().get("coincident_calibration")
+    if not cal:
+        raise RuntimeError(
+            "coincident_calibration is missing from empirical_results.json"
+        )
+    return cal
+
+
+def _omission_factor(region: str) -> float:
+    """The fitted MODIS-only sub-pixel omission factor for ``region``."""
+    fit = _load_empirical_results().get("omission_factor_fit", {}).get(region)
+    if not fit:
+        raise RuntimeError(
+            f"omission_factor_fit[{region!r}] is missing from the artifact"
+        )
+    return float(fit["k_fit"])
+
+
 def _load_fetch_manifest() -> dict[str, int]:
     if MANIFEST_JSON_PATH.exists():
         return json.loads(MANIFEST_JSON_PATH.read_text(encoding="utf-8"))
@@ -227,7 +247,7 @@ def tool_calibrate_cross_sensor_frp(
             det, fp, sza_deg, harmonized_daynight, default_calibration_model()
         )
     )
-    emp_cal = _load_empirical_results().get("coincident_calibration", {})
+    emp_cal = _calibration()
     return {
         "raw_modis_frp_mw": round(raw_modis_frp_mw, 3),
         "scan_angle_deg": round(scan_angle_deg, 2),
@@ -236,10 +256,10 @@ def tool_calibrate_cross_sensor_frp(
         "stage1_scan_corrected_frp_mw": round(scan_corr_frp, 3),
         "stage2_calibrated_viirs_eq_frp_mw": round(viirs_eq_frp, 3),
         "calibrated_viirs_eq_subpixel_count": round(viirs_eq_cnt, 3),
-        "benchmark_coincident_pairs_n": emp_cal.get("n_pairs", 11553),
-        "benchmark_ks_before": emp_cal.get("ks_before", 0.1151),
-        "benchmark_ks_after": emp_cal.get("ks_after", 0.0237),
-        "benchmark_r2_after": emp_cal.get("harm_r2", 0.747),
+        "benchmark_coincident_pairs_n": emp_cal["n_pairs"],
+        "benchmark_ks_before": emp_cal["ks_before"],
+        "benchmark_ks_after": emp_cal["ks_after"],
+        "benchmark_r2_after": emp_cal["harm_r2"],
     }
 
 
@@ -643,19 +663,20 @@ def tool_uc1_3_thermal_source_origin_classification(
     region: str = "mekong",
 ) -> dict[str, Any]:
     """[UC-1.3] Classify thermal detections into agricultural residue burning, peat/understory smoldering, deforestation slash-and-burn, and persistent static industrial sources."""
-    res = _load_empirical_results()
-    cal = res.get("coincident_calibration", {})
+    cal = _calibration()
     return {
         "use_case_id": "UC-1.3",
         "region": region,
-        "agricultural_small_fire_subpixel_multiplier_mekong": 3.65,
-        "deforestation_front_subpixel_multiplier_amazon": 2.55,
-        "coincident_viirs_to_modis_count_ratio": cal.get(
-            "mean_coincident_viirs_to_modis_count_ratio", 3.56
+        "agricultural_small_fire_subpixel_multiplier_mekong": _omission_factor(
+            "mekong"
         ),
-        "coincident_viirs_to_modis_frp_ratio": cal.get(
-            "mean_coincident_viirs_to_modis_frp_ratio", 1.335
-        ),
+        "deforestation_front_subpixel_multiplier_amazon": _omission_factor("amazon"),
+        "coincident_viirs_to_modis_count_ratio": cal[
+            "mean_coincident_viirs_to_modis_count_ratio"
+        ],
+        "coincident_viirs_to_modis_frp_ratio": cal[
+            "mean_coincident_viirs_to_modis_frp_ratio"
+        ],
         "static_industrial_persistence_min_days": 18,
         "static_industrial_span_days": 120,
         "saa_night_false_alarms_filtered_snpp_7d": 2674,
@@ -804,21 +825,21 @@ def tool_uc3_2_multihop_spatiotemporal_cube_query() -> dict[str, Any]:
 
 @tool
 def tool_uc3_3_autonomous_biome_recalibration() -> dict[str, Any]:
-    """[UC-3.3] Audit and return the Two-Stage Observation Operator + Empirical Quantile Mapping (EQM) parameters fitted across N=11,553 co-incident Aqua-SNPP cells."""
-    cal = _load_empirical_results().get("coincident_calibration", {})
-    ks_before = float(cal.get("ks_before", 0.1151))
-    ks_after = float(cal.get("ks_after", 0.0237))
+    """[UC-3.3] Audit and return the Two-Stage Observation Operator + Empirical Quantile Mapping (EQM) parameters fitted across the co-incident Aqua-SNPP cell pairs in the published artifact."""
+    cal = _calibration()
+    ks_before = float(cal["ks_before"])
+    ks_after = float(cal["ks_after"])
     ks_reduction_pct = round(100.0 * (ks_before - ks_after) / max(1e-6, ks_before), 1)
     return {
         "use_case_id": "UC-3.3",
-        "coincident_cell_pairs_n": int(cal.get("n_pairs", 11553)),
-        "power_law_alpha": float(cal.get("alpha", 1.7433)),
-        "power_law_beta": float(cal.get("beta", 0.9219)),
-        "scan_tail_kappa": float(cal.get("scan_tail_kappa", 0.1)),
-        "raw_r2": float(cal.get("raw_r2", 0.7836)),
-        "harmonized_r2": float(cal.get("harm_r2", 0.747)),
-        "raw_rmse_mw": float(cal.get("raw_rmse", 141.861)),
-        "harmonized_rmse_mw": float(cal.get("harm_rmse", 145.155)),
+        "coincident_cell_pairs_n": int(cal["n_pairs"]),
+        "power_law_alpha": float(cal["alpha"]),
+        "power_law_beta": float(cal["beta"]),
+        "scan_tail_kappa": float(cal["scan_tail_kappa"]),
+        "raw_r2": float(cal["raw_r2"]),
+        "harmonized_r2": float(cal["harm_r2"]),
+        "raw_rmse_mw": float(cal["raw_rmse"]),
+        "harmonized_rmse_mw": float(cal["harm_rmse"]),
         "ks_distance_before": ks_before,
         "ks_distance_after": ks_after,
         "ks_error_reduction_pct": ks_reduction_pct,

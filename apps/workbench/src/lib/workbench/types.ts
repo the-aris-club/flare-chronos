@@ -3,7 +3,10 @@ export type AnnualSeries = {
   raw: number[];
   harmonized: number[];
   measured: number[];
+  /** Raw growth between two Measured Epochs, in percent. */
   rawGrowthPct: number;
+  /** The two Measured Epochs `rawGrowthPct` is read between. */
+  growthWindow: readonly [from: number, to: number];
   trendPct: number;
 };
 

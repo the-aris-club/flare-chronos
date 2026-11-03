@@ -2,6 +2,8 @@ export type BBox = readonly [west: number, south: number, east: number, north: n
 
 export type RegionDef = {
   bbox: BBox;
+  /** The box FIRMS was actually queried with; mirrors `firms_ingestion.BBOX_*`. */
+  queryBox: BBox;
   anchor: readonly [lon: number, lat: number];
   focus: readonly string[];
   staticSources: readonly { id: string; lon: number; lat: number }[];
@@ -21,6 +23,7 @@ export type RegionDef = {
 export const REGION_DEFS = {
   mekong: {
     bbox: [97, 5.4, 110, 23.6],
+    queryBox: [100, 11, 109.5, 23.5],
     anchor: [105.8, 16.0],
     focus: ['704', '418', '116', '764'],
     staticSources: [
@@ -68,6 +71,7 @@ export const REGION_DEFS = {
   },
   amazon: {
     bbox: [-79.5, -20.5, -49, 5.2],
+    queryBox: [-62, -14, -50, -4],
     anchor: [-63.0, -6.5],
     focus: ['076', '604', '068', '170', '218', '862', '328', '740'],
     staticSources: [

@@ -200,6 +200,15 @@ export function WorkbenchMap({
           strokeWidth={0.8}
           vectorEffect="non-scaling-stroke"
         />
+        <path
+          d={data.queryBoxPath}
+          fill="none"
+          stroke="var(--cyan)"
+          strokeWidth={1}
+          strokeDasharray="6 3"
+          vectorEffect="non-scaling-stroke"
+          data-testid="firms-query-box"
+        />
         <MapIslands islands={data.islands} zoom={view.k} />
 
         {region === 'amazon' && layers.overlay && (
