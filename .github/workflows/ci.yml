@@ -135,8 +135,6 @@ jobs:
         with:
           bun-version: latest
           cache: true
-      - name: Install root tooling
-        run: bun install --frozen-lockfile
       - name: Install dependencies
         working-directory: apps/workbench
         run: bun install --frozen-lockfile

@@ -12,13 +12,12 @@
     "check-docs": "python3 scripts/check-docs.py --scan",
     "format": "bun fmt apps/workbench",
     "format:check": "bun fmt --check apps/workbench",
-    "lint-workbench": "oxlint --max-warnings=0 apps/workbench",
+    "lint-workbench": "bun run --cwd apps/workbench lint",
     "typecheck": "bun run --cwd apps/workbench typecheck",
     "test:workbench": "bun run --cwd apps/workbench test"
   },
   "devDependencies": {
-    "@changesets/cli": "^3.0.3",
-    "oxlint": "^1.91.0"
+    "@changesets/cli": "^3.0.3"
   },
   "engines": {
     "node": ">=20"
