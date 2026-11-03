@@ -2,9 +2,11 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useTheme } from '@/components/ui/theme-provider';
 import type { RegionId } from '@/lib/calendar/types';
+import { formatQueryBox } from '@/lib/workbench/query-box';
+import { REGION_DEFS } from '@/lib/workbench/regions';
 import { BOOT_STEPS, type BootStep, type GlobeHandle } from '@/lib/globe/types';
 import { BootOverlay } from './boot-overlay';
 import { GlobeCanvas, type GlobeLabel } from './globe-canvas';
@@ -27,6 +29,7 @@ type GlobeLandingProps = {
 
 export function GlobeLanding({ period, yearStart, total, growth, regions }: GlobeLandingProps) {
   const t = useTranslations('Globe');
+  const locale = useLocale();
   const regionNames = useTranslations('Header.regions');
   const router = useRouter();
   const { theme } = useTheme();
@@ -88,7 +91,9 @@ export function GlobeLanding({ period, yearStart, total, growth, regions }: Glob
   const cards = regions.map((region) => ({
     id: region.id,
     name: regionNames(`${region.id}Long`),
-    coverage: t(`coverage.${region.id}`),
+    coverage: t(`coverage.${region.id}`, {
+      box: formatQueryBox(REGION_DEFS[region.id].queryBox, locale),
+    }),
     measured: region.measured,
     lastEpoch: region.lastEpoch,
   }));

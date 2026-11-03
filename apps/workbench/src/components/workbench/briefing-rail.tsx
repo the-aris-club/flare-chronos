@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { StatusChip, utcNow } from '@/components/review/review-bits';
 import { useReviewStore } from '@/components/review/review-store';
 import { AmIcon, ICON } from '@/components/ui/icon';
@@ -20,6 +20,7 @@ import { ConnectPanel, RailStatusChip, ServiceDown, ServiceSimulator } from './s
 export type RailState = 'auto' | 'open' | 'closed';
 
 type BriefingRailProps = {
+  region: 'mekong' | 'amazon';
   state: RailState;
   service: ServiceState;
   conn: ConnState;
@@ -32,6 +33,7 @@ type BriefingRailProps = {
 const RUN_ID = 'RUN-0412';
 
 export function BriefingRail({
+  region,
   state,
   service,
   conn,
@@ -41,6 +43,8 @@ export function BriefingRail({
 }: BriefingRailProps) {
   const t = useTranslations('Briefing');
   const review = useTranslations('Review');
+  const regionNames = useTranslations('Header.regions');
+  const lang = useLocale() === 'vi' ? 'vi' : 'en';
   const store = useReviewStore();
   const run = runById(RUN_ID);
   const decision = run ? store.decisionsFor(run.id) : undefined;
@@ -164,14 +168,27 @@ export function BriefingRail({
               onConnect={connect}
             />
           ) : run ? (
-            <BriefingRun
-              run={run}
-              service={service}
-              runState={runState}
-              schedule={schedule}
-              onStart={start}
-              onDisconnect={disconnect}
-            />
+            <>
+              {(run.region.en === 'Amazon' ? 'amazon' : 'mekong') !== region && (
+                <p
+                  role="note"
+                  className="text-meta text-ink-muted border-line rounded-md border border-dashed p-2"
+                >
+                  {t('sampleOtherRegion', {
+                    runRegion: run.region[lang],
+                    region: regionNames(`${region}Long`),
+                  })}
+                </p>
+              )}
+              <BriefingRun
+                run={run}
+                service={service}
+                runState={runState}
+                schedule={schedule}
+                onStart={start}
+                onDisconnect={disconnect}
+              />
+            </>
           ) : null}
         </div>
 

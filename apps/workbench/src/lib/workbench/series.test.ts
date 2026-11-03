@@ -31,4 +31,14 @@ describe('workbench series', () => {
       );
     }
   });
+
+  test('the held-out calibration gain and its interval come from the artifact', () => {
+    const holdout = results.coincident_calibration.holdout;
+    const published = workbench.calibration.holdout;
+
+    expect(published.gainMw).toBeCloseTo(holdout.raw_rmse_mw - holdout.harmonized_rmse_mw, 6);
+    expect(published.ciLowMw).toBe(holdout.rmse_gain_ci95_mw[0]);
+    expect(published.ciHighMw).toBe(holdout.rmse_gain_ci95_mw[1]);
+    expect(published.trainLastYear).toBe(holdout.train_last_year);
+  });
 });

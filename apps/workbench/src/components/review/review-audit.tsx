@@ -181,7 +181,9 @@ export function ReviewAudit() {
             <tbody>
               {rows.map((row) => (
                 <tr key={row.audit} className="border-line border-b last:border-0">
-                  <td className="text-meta px-2.5 py-2 font-mono">{utcTime(row.at)}</td>
+                  <td className="text-meta px-2.5 py-2 font-mono">
+                    {row.at.slice(0, 10)} {utcTime(row.at)}
+                  </td>
                   <td className="text-meta px-2.5 py-2 font-mono">{row.runId}</td>
                   <td className="text-meta px-2.5 py-2">{row.reviewer}</td>
                   <td className="text-meta text-ink-muted px-2.5 py-2">

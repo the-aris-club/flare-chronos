@@ -16,7 +16,7 @@ export function FootprintLens({ physics }: { physics: MapPhysics }) {
   const spacing = 3.94;
 
   return (
-    <div className="border-line bg-panel/95 text-micro text-ink-muted tablet:bottom-9 absolute bottom-16 left-2 w-44 rounded-md border p-2">
+    <div className="border-line bg-panel/95 text-micro text-ink-muted tablet:bottom-9 max-tablet:hidden absolute bottom-16 left-2 w-44 rounded-md border p-2">
       <div className="flex items-baseline justify-between gap-2">
         <span className="text-micro text-ink-subtle font-mono tracking-widest uppercase">
           {t('lensTitle')}

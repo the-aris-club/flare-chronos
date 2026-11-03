@@ -58,7 +58,7 @@ export function MapPane({
     const box = node.getBoundingClientRect();
     const bounds = viewport.getBoundingClientRect();
     if (box.left >= bounds.left && box.right <= bounds.right) return;
-    node.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+    node.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
   }, []);
 
   const data = MAP_DATA.regions[region];
@@ -191,6 +191,9 @@ export function MapPane({
         <MapZoom onZoom={zoom} onReset={() => setView(MAP_VIEW)} />
 
         {layers.lens && <FootprintLens physics={physics} />}
+        <span className="text-micro text-ink-subtle max-tablet:hidden pointer-events-none absolute bottom-1 left-1/2 -translate-x-1/2 font-mono whitespace-nowrap opacity-80">
+          {t('borderCredit')}
+        </span>
         {pxPerKm > 0 && <MapScale pxPerKm={pxPerKm} />}
         <MapLegend
           layers={layers}

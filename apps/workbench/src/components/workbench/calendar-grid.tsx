@@ -167,6 +167,7 @@ export function CalendarGrid({
                     height={0.92}
                     rx={0.06}
                     fill={fill}
+                    fillOpacity={modelled ? 0.4 : 1}
                   />
                   {modelled && (
                     <rect

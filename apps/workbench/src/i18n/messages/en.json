@@ -66,8 +66,8 @@
       "amazon": "Amazon fire arc"
     },
     "coverage": {
-      "mekong": "Mainland VNM · LAO · KHM · THA",
-      "amazon": "Amazon mainland · 5.2°N–20.5°S · 79.5–49.0°W"
+      "mekong": "Mainland VNM · LAO · KHM · THA · FIRMS {box}",
+      "amazon": "Amazon mainland · FIRMS {box}"
     },
     "boot": {
       "fonts": "Loading typefaces",
@@ -122,7 +122,8 @@
     },
     "error": "The calendar could not be loaded.",
     "retry": "Try again",
-    "months": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+    "months": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+    "provenance": "{observed} of {total} cells are observed windows ({pct}%). The rest are modelled from the region's seasonal envelope: dimmed, hatched, and never scored."
   },
   "Map": {
     "title": "Map · equal-area",
@@ -336,7 +337,8 @@
       "down": "Down",
       "reset": "Reset run"
     },
-    "scopesValue": "Run briefing · Approve"
+    "scopesValue": "Run briefing · Approve",
+    "sampleOtherRegion": "This sample run describes {runRegion}, not {region}. It stays a fixture until the analysis API is connected."
   },
   "Evidence": {
     "title": "Evidence · 5 scientific figures",
@@ -397,7 +399,12 @@
     "modisEdge": "MODIS edge",
     "modisNadir": "MODIS nadir",
     "viirsNadir": "VIIRS nadir",
-    "pairsLabel": "Pairs"
+    "pairsLabel": "Pairs",
+    "limitsTitle": "Limits of this evidence",
+    "limitWindow": "Each Measured Epoch is a single 5-day window. The other pentads of the calendar are modelled from the seasonal envelope and are never scored.",
+    "limitHoldout": "On held-out years after {year}, the calibration lowers RMSE by {gain} MW; its 95% interval ({low} to {high} MW) {significant, select, yes {excludes zero} other {spans zero, so the held-out gain is not significant}}.",
+    "limitInSample": "The R² and KS improvements are measured in-sample on the co-incident Aqua–Suomi-NPP pairs.",
+    "limitReproduce": "Reproduce with `uv run python -m benchmark_cli.run_experiments`; every figure on this page is read from data/processed/empirical_results.json."
   },
   "Tour": {
     "title": "Walkthrough",
@@ -409,20 +416,20 @@
     "step1": {
       "title": "Map · equal-area",
       "body": "Choose a measured epoch. The points are real MODIS and VIIRS detections from that 5-day window.",
-      "figure": "26 yrs",
-      "figureLabel": "2001–2026"
+      "figure": "{measured} / {total}",
+      "figureLabel": "years measured · {first}–{last}"
     },
     "step2": {
       "title": "Key figures",
       "body": "Raw detections, de-duplicated fire episodes and the peak SFAI for the selected epoch.",
-      "figure": "10 / 8",
+      "figure": "{measured}",
       "figureLabel": "measured epochs"
     },
     "step3": {
       "title": "Before / After",
       "body": "Raw counts grow as sensors are added. The harmonized series removes those step changes.",
-      "figure": "14×",
-      "figureLabel": "raw growth, 2005–2024"
+      "figure": "{growth}×",
+      "figureLabel": "raw growth, {growthFrom}–{growthTo}"
     },
     "step4": {
       "title": "Phenology clock",
@@ -432,9 +439,9 @@
     },
     "step5": {
       "title": "Burning Activity Calendar",
-      "body": "26 years by 73 pentads. Arrow keys move the active cell; measured years also update the epoch.",
-      "figure": "+2.9σ",
-      "figureLabel": "2007 peak"
+      "body": "{total} years by 73 pentads. Arrow keys move the active cell; measured years also update the epoch.",
+      "figure": "{peak}",
+      "figureLabel": "{peakYear} peak"
     },
     "step6": {
       "title": "Briefing & Sign-off",
@@ -623,5 +630,9 @@
     "error": "The Workbench could not be loaded.",
     "retry": "Try again",
     "loading": "Loading the Workbench…"
+  },
+  "Conclusion": {
+    "label": "Result",
+    "text": "Raw detections {from}→{to}: {raw}% · harmonized trend {trend}%/yr · KS distance {ksBefore} → {ksAfter} · {measured} of {total} years measured"
   }
 }
