@@ -34,6 +34,8 @@
     "node_modules",
     "src/i18n/messages.test.ts",
     "src/lib/workbench/format.test.ts",
-    "src/data/fixtures/review-facts.test.ts"
+    "src/data/fixtures/review-facts.test.ts",
+    "src/lib/review/decisions-route.test.ts",
+    "src/lib/review/submit-decision.test.ts"
   ]
 }

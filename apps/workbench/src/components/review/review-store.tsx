@@ -1,6 +1,14 @@
 'use client';
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import {
   INITIAL_DECISIONS,
   type Decision,
@@ -9,6 +17,7 @@ import {
 } from '@/data/fixtures/review';
 import { REVIEW_RUNS } from '@/data/fixtures/review-runs';
 import { makeDecision } from '@/lib/review/decision';
+import { submitDecision } from '@/lib/review/submit-decision';
 
 type AuditRow = {
   at: string;
@@ -29,12 +38,20 @@ type ReviewStoreValue = {
   record: (id: string, kind: DecisionKind, reason: string, note: string) => void;
   needsDecision: number;
   audit: AuditRow[];
+  /** Set when the last decision could not be persisted and was rolled back. */
+  saveFailed: boolean;
+  dismissSaveFailed: () => void;
 };
 
 const ReviewStoreContext = createContext<ReviewStoreValue | null>(null);
 
 export function ReviewStoreProvider({ children }: { children: React.ReactNode }) {
   const [decisions, setDecisions] = useState<Record<string, Decision>>(INITIAL_DECISIONS);
+  const [saveFailed, setSaveFailed] = useState(false);
+  const decisionsRef = useRef(decisions);
+  useEffect(() => {
+    decisionsRef.current = decisions;
+  }, [decisions]);
 
   useEffect(() => {
     let live = true;
@@ -52,23 +69,27 @@ export function ReviewStoreProvider({ children }: { children: React.ReactNode })
   }, []);
 
   const record = useCallback((id: string, kind: DecisionKind, reason: string, note: string) => {
-    setDecisions((current) => {
-      if (current[id]) return current;
-      const next = makeDecision(kind, reason, note, Object.values(current));
-      void fetch('/api/review/decisions', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ runId: id, kind, reason, note }),
-      })
-        .then((response) => (response.ok ? response.json() : null))
-        .then((data: { decision?: Decision } | null) => {
-          if (data?.decision)
-            setDecisions((latest) => ({ ...latest, [id]: data.decision as Decision }));
-        })
-        .catch(() => {});
-      return { ...current, [id]: next };
+    const current = decisionsRef.current;
+    if (current[id]) return;
+    const optimistic = makeDecision(kind, reason, note, Object.values(current));
+    decisionsRef.current = { ...current, [id]: optimistic };
+    setDecisions((latest) => (latest[id] ? latest : { ...latest, [id]: optimistic }));
+    setSaveFailed(false);
+
+    void submitDecision(fetch, id, kind, reason, note).then((result) => {
+      if (result.ok) {
+        setDecisions((latest) => ({ ...latest, [id]: result.decision }));
+        return;
+      }
+      setDecisions((latest) => {
+        const { [id]: _rolledBack, ...rest } = latest;
+        return rest;
+      });
+      setSaveFailed(true);
     });
   }, []);
+
+  const dismissSaveFailed = useCallback(() => setSaveFailed(false), []);
 
   const value = useMemo<ReviewStoreValue>(() => {
     const audit = Object.entries(decisions)
@@ -95,8 +116,10 @@ export function ReviewStoreProvider({ children }: { children: React.ReactNode })
       record,
       needsDecision: REVIEW_RUNS.filter((run) => !decisions[run.id]).length,
       audit,
+      saveFailed,
+      dismissSaveFailed,
     };
-  }, [decisions, record]);
+  }, [decisions, record, saveFailed, dismissSaveFailed]);
 
   return <ReviewStoreContext.Provider value={value}>{children}</ReviewStoreContext.Provider>;
 }
