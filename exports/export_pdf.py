@@ -1184,7 +1184,7 @@ def build_pdf(
         "-o",
         str(temp_html),
     ]
-    res = subprocess.run(pandoc_cmd, capture_output=True, text=True, check=False)
+    res = subprocess.run(pandoc_cmd, capture_output=True, text=True, check=False)  # noqa: S603
     if res.returncode != 0:
         pandoc_cmd = [
             _resolve_binary("pandoc"),
@@ -1197,7 +1197,7 @@ def build_pdf(
             "-o",
             str(temp_html),
         ]
-        subprocess.run(pandoc_cmd, check=True)
+        subprocess.run(pandoc_cmd, check=True)  # noqa: S603
 
     body_html = temp_html.read_text(encoding="utf-8")
     for token, svg_html in html_injections.items():
@@ -1249,7 +1249,7 @@ def build_pdf(
         str(temp_html),
         str(pdf_path),
     ]
-    subprocess.run(weasy_cmd, check=True)
+    subprocess.run(weasy_cmd, check=True)  # noqa: S603
 
     for tmp in (temp_md, temp_html, temp_css):
         if tmp.exists():

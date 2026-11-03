@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useService } from '@/components/service/service-provider';
 import { Icon, ICON } from '@/components/ui/icon';
@@ -29,25 +29,36 @@ export function BriefingRail({ region, state, onToggle }: BriefingRailProps) {
   const [run, setRun] = useState<RunView>(IDLE_RUN);
   const connected = service.connection === 'connected';
 
-  async function start(preset: Preset) {
-    const params = new URLSearchParams({
-      use_case_id: preset.useCase,
-      query: QUERIES[preset.useCase](region),
-    });
-    setRun({ ...IDLE_RUN, phase: 'running' });
+  const start = useCallback(
+    async (preset: Preset) => {
+      const params = new URLSearchParams({
+        use_case_id: preset.useCase,
+        query: QUERIES[preset.useCase](region),
+      });
+      setRun({ ...IDLE_RUN, phase: 'running' });
 
-    const events = service.stream(`/api/v1/analysis/stream?${params}`);
-    let next = await events.next();
-    while (!next.done) {
-      const event = next.value;
-      setRun((current) => reduceRun(current, event));
-      next = await events.next();
-    }
-    if (next.value) {
-      setRun((current) => ({ ...current, phase: 'failed', error: next.value ?? 'unavailable' }));
-    }
-    await service.refresh();
-  }
+      const events = service.stream(`/api/v1/analysis/stream?${params}`);
+      let next = await events.next();
+      while (!next.done) {
+        const event = next.value;
+        setRun((current) => reduceRun(current, event));
+        // eslint-disable-next-line eslint/no-await-in-loop
+        next = await events.next();
+      }
+      if (next.value) {
+        setRun((current) => ({ ...current, phase: 'failed', error: next.value ?? 'unavailable' }));
+      }
+      await service.refresh();
+    },
+    [region, service],
+  );
+
+  const handleStart = useCallback(
+    (preset: Preset) => {
+      void start(preset);
+    },
+    [start],
+  );
 
   return (
     <aside
@@ -85,7 +96,7 @@ export function BriefingRail({ region, state, onToggle }: BriefingRailProps) {
         <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto p-3">
           {service.connection === 'unavailable' && <ServiceDown />}
           {connected ? (
-            <BriefingRun run={run} region={region} onStart={(preset) => void start(preset)} />
+            <BriefingRun run={run} region={region} onStart={handleStart} />
           ) : (
             <ConnectPanel />
           )}

@@ -279,8 +279,8 @@ for (const [region, config] of Object.entries(REGION_DEFS)) {
   const summary = Object.entries(epochs)
     .map(([year, points]) => `${year}:${points.length}`)
     .join(' ');
-  console.log(`${region}: ${base.countries.length} countries · ${summary}`);
+  console.warn(`${region}: ${base.countries.length} countries · ${summary}`);
 }
 
 writeFileSync(OUT, JSON.stringify(output));
-console.log(`wrote ${OUT} (${Math.round(JSON.stringify(output).length / 1024)} KB)`);
+console.warn(`wrote ${OUT} (${Math.round(JSON.stringify(output).length / 1024)} KB)`);

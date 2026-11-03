@@ -117,6 +117,7 @@ export function ServiceProvider({ children }: { children: React.ReactNode }) {
         }),
       });
       let next = await events.next();
+      // eslint-disable-next-line eslint/no-await-in-loop
       while (!next.done) next = await events.next();
       await refresh();
       return next.value;
@@ -127,7 +128,9 @@ export function ServiceProvider({ children }: { children: React.ReactNode }) {
   // A reload reconnects with the stored token instead of asking for it again.
   useEffect(() => {
     const stored = readTokenCookie(document.cookie);
-    if (stored) void connect(stored);
+    if (!stored) return;
+    const id = window.setTimeout(() => void connect(stored), 0);
+    return () => window.clearTimeout(id);
   }, [connect]);
 
   // Rows go stale while a reviewer reads; keep the queue current without a manual reload.

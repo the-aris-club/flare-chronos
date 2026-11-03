@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { SegmentedControl } from '@/components/ui/segmented-control';
 import { buildCells, findInitialCell, PENTADS_PER_YEAR } from '@/lib/calendar/model';
@@ -41,61 +41,75 @@ export function BurningCalendar({
   const end = region.years[region.years.length - 1];
   const lastYear = region.years.length - 1;
 
-  function moveTip(x: number, y: number) {
+  const moveTip = useCallback((x: number, y: number) => {
     const node = tipRef.current;
     if (!node) return;
     node.style.setProperty('--cal-tip-x', `${Math.min(x + 14, window.innerWidth - 190)}px`);
     node.style.setProperty('--cal-tip-y', `${Math.min(y + 18, window.innerHeight - 92)}px`);
-  }
+  }, []);
 
-  function activate(next: CellRef) {
-    setActive(next);
-    const year = region.years[next.yearIndex];
-    if (region.observedYears.includes(year)) onMeasuredYear(year);
-  }
+  const activate = useCallback(
+    (next: CellRef) => {
+      setActive(next);
+      const year = region.years[next.yearIndex];
+      if (region.observedYears.includes(year)) onMeasuredYear(year);
+    },
+    [region, onMeasuredYear],
+  );
 
-  function handleKeyDown(event: React.KeyboardEvent<HTMLDivElement>) {
-    const { yearIndex, pentadIndex } = active;
-    let next: CellRef;
+  const handleKeyDown = useCallback(
+    (event: React.KeyboardEvent<HTMLDivElement>) => {
+      const { yearIndex, pentadIndex } = active;
+      let next: CellRef;
 
-    switch (event.key) {
-      case 'ArrowRight':
-        next = { yearIndex, pentadIndex: Math.min(PENTADS_PER_YEAR - 1, pentadIndex + 1) };
-        break;
-      case 'ArrowLeft':
-        next = { yearIndex, pentadIndex: Math.max(0, pentadIndex - 1) };
-        break;
-      case 'ArrowDown':
-        next = { yearIndex: Math.min(lastYear, yearIndex + 1), pentadIndex };
-        break;
-      case 'ArrowUp':
-        next = { yearIndex: Math.max(0, yearIndex - 1), pentadIndex };
-        break;
-      case 'Home':
-        next = { yearIndex, pentadIndex: 0 };
-        break;
-      case 'End':
-        next = { yearIndex, pentadIndex: PENTADS_PER_YEAR - 1 };
-        break;
-      case 'PageUp':
-        next = { yearIndex: Math.max(0, yearIndex - 5), pentadIndex };
-        break;
-      case 'PageDown':
-        next = { yearIndex: Math.min(lastYear, yearIndex + 5), pentadIndex };
-        break;
-      case 'Enter':
-      case ' ':
-        setHover(null);
-        event.preventDefault();
-        return;
-      default:
-        return;
-    }
+      switch (event.key) {
+        case 'ArrowRight':
+          next = { yearIndex, pentadIndex: Math.min(PENTADS_PER_YEAR - 1, pentadIndex + 1) };
+          break;
+        case 'ArrowLeft':
+          next = { yearIndex, pentadIndex: Math.max(0, pentadIndex - 1) };
+          break;
+        case 'ArrowDown':
+          next = { yearIndex: Math.min(lastYear, yearIndex + 1), pentadIndex };
+          break;
+        case 'ArrowUp':
+          next = { yearIndex: Math.max(0, yearIndex - 1), pentadIndex };
+          break;
+        case 'Home':
+          next = { yearIndex, pentadIndex: 0 };
+          break;
+        case 'End':
+          next = { yearIndex, pentadIndex: PENTADS_PER_YEAR - 1 };
+          break;
+        case 'PageUp':
+          next = { yearIndex: Math.max(0, yearIndex - 5), pentadIndex };
+          break;
+        case 'PageDown':
+          next = { yearIndex: Math.min(lastYear, yearIndex + 5), pentadIndex };
+          break;
+        case 'Enter':
+        case ' ':
+          setHover(null);
+          event.preventDefault();
+          return;
+        default:
+          return;
+      }
 
-    event.preventDefault();
-    activate(next);
-    setHover(null);
-  }
+      event.preventDefault();
+      activate(next);
+      setHover(null);
+    },
+    [active, lastYear, activate, setHover],
+  );
+
+  const metricOptions = useMemo<ReadonlyArray<{ value: Metric; label: string }>>(
+    () => [
+      { value: 'hfd', label: t('metrics.hfd') },
+      { value: 'sfai', label: t('metrics.sfai') },
+    ],
+    [t],
+  );
 
   return (
     <section
@@ -125,10 +139,7 @@ export function BurningCalendar({
         <SegmentedControl
           label={t('metric')}
           value={metric}
-          options={[
-            { value: 'hfd', label: t('metrics.hfd') },
-            { value: 'sfai', label: t('metrics.sfai') },
-          ]}
+          options={metricOptions}
           onChange={setMetric}
         />
         <span aria-hidden="true" className="flex-1" />

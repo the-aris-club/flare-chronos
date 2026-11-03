@@ -1,5 +1,7 @@
 'use client';
 
+import { useCallback, type ChangeEvent } from 'react';
+
 export function FilterSelect({
   label,
   value,
@@ -15,13 +17,20 @@ export function FilterSelect({
   labels?: Record<string, string>;
   all: string;
 }) {
+  const handleChange = useCallback(
+    (event: ChangeEvent<HTMLSelectElement>) => {
+      onChange(event.target.value);
+    },
+    [onChange],
+  );
+
   return (
     <label className="flex flex-col gap-1">
       <span className="text-micro text-ink-subtle font-mono uppercase">{label}</span>
       <select
         name={label}
         value={value}
-        onChange={(event) => onChange(event.target.value)}
+        onChange={handleChange}
         className="border-line-strong bg-raised text-meta text-ink h-9 rounded-md border px-2"
       >
         <option value="all">{all}</option>

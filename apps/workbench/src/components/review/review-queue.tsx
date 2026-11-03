@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState, type ChangeEvent, type MouseEvent } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { useService } from '@/components/service/service-provider';
@@ -23,6 +23,15 @@ export function ReviewQueue() {
   const service = useService();
   const [tab, setTab] = useState<ReviewStatus>('needs');
   const [query, setQuery] = useState('');
+
+  const handleTabClick = useCallback((event: MouseEvent<HTMLButtonElement>) => {
+    const value = event.currentTarget.dataset.value as ReviewStatus;
+    setTab(value);
+  }, []);
+
+  const handleQueryChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
+    setQuery(event.target.value);
+  }, []);
 
   const counts = useMemo(() => {
     const next: Record<ReviewStatus, number> = { needs: 0, published: 0, withheld: 0, failed: 0 };
@@ -57,7 +66,8 @@ export function ReviewQueue() {
           <button
             key={value}
             type="button"
-            onClick={() => setTab(value)}
+            onClick={handleTabClick}
+            data-value={value}
             aria-pressed={tab === value}
             className={`text-body -mb-px inline-flex items-center gap-1.5 border-b-2 px-2.5 py-2 font-medium ${
               tab === value
@@ -84,7 +94,7 @@ export function ReviewQueue() {
           id="review-search"
           name="review-search"
           value={query}
-          onChange={(event) => setQuery(event.target.value)}
+          onChange={handleQueryChange}
           placeholder={t('search')}
           className="border-line-strong bg-raised text-body text-ink placeholder:text-ink-subtle h-9 w-full rounded-md border pr-2.5 pl-8"
         />

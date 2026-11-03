@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useTransition } from 'react';
+import { useCallback, useTransition, type MouseEvent } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { writeCookie } from '@/lib/browser';
@@ -22,6 +22,14 @@ export function LocaleToggle() {
     [locale, router, startTransition],
   );
 
+  const handleChoose = useCallback(
+    (event: MouseEvent<HTMLButtonElement>) => {
+      const next = event.currentTarget.dataset.locale as Locale | undefined;
+      if (next) choose(next);
+    },
+    [choose],
+  );
+
   return (
     <div
       role="group"
@@ -32,7 +40,8 @@ export function LocaleToggle() {
         <button
           key={option}
           type="button"
-          onClick={() => choose(option)}
+          data-locale={option}
+          onClick={handleChoose}
           aria-pressed={locale === option}
           aria-label={`${t(`lang.${option}`)} (${option.toUpperCase()})`}
           disabled={pending}

@@ -9,6 +9,12 @@ import { MapIslands } from './map-islands';
 import type { MapFilters, MapLayers } from '@/lib/workbench/types';
 import type { RegionId } from '@/lib/calendar/types';
 
+const RELIEF_STYLE = {
+  mixBlendMode: 'var(--map-relief-blend)' as never,
+  opacity: 'var(--map-relief-opacity)',
+  filter: 'var(--map-relief-filter)',
+};
+
 type WorkbenchMapProps = {
   region: RegionId;
   year: number;
@@ -144,18 +150,21 @@ export const WorkbenchMap = memo(function WorkbenchMap({
   }, [glide, width, height, toViewBox]);
 
   // Pan and pinch follow the pointer exactly: paint now, tell the parent on release.
-  function follow(next: MapView) {
-    cancelAnimationFrame(frame.current);
-    frame.current = -1;
-    viewRef.current = next;
-    paint(next);
-  }
+  const follow = useCallback(
+    (next: MapView) => {
+      cancelAnimationFrame(frame.current);
+      frame.current = -1;
+      viewRef.current = next;
+      paint(next);
+    },
+    [paint],
+  );
 
-  function release() {
+  const release = useCallback(() => {
     if (frame.current === -1) settle();
-  }
+  }, [settle]);
 
-  function pointerDown(event: React.PointerEvent<SVGSVGElement>) {
+  const pointerDown = useCallback((event: React.PointerEvent<SVGSVGElement>) => {
     event.currentTarget.setPointerCapture(event.pointerId);
     pointers.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
     if (pointers.current.size === 1) {
@@ -166,47 +175,65 @@ export const WorkbenchMap = memo(function WorkbenchMap({
       pinch.current = { distance: Math.hypot(a.x - b.x, a.y - b.y) };
       lastPointer.current = null;
     }
-  }
+  }, []);
 
-  function pointerMove(event: React.PointerEvent<SVGSVGElement>) {
-    if (!pointers.current.has(event.pointerId)) return;
-    pointers.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
-    if (pointers.current.size === 1 && lastPointer.current) {
-      const from = toViewBox(lastPointer.current.x, lastPointer.current.y);
-      const to = toViewBox(event.clientX, event.clientY);
-      follow(panView(viewRef.current, to.x - from.x, to.y - from.y, width, height));
-      lastPointer.current = { x: event.clientX, y: event.clientY };
-    } else if (pointers.current.size === 2) {
-      const [a, b] = [...pointers.current.values()];
-      const distance = Math.hypot(a.x - b.x, a.y - b.y);
-      if (pinch.current && pinch.current.distance > 0) {
-        const anchor = toViewBox((a.x + b.x) / 2, (a.y + b.y) / 2);
-        follow(
-          zoomAt(
-            viewRef.current,
-            distance / pinch.current.distance,
-            anchor.x,
-            anchor.y,
-            width,
-            height,
-          ),
-        );
+  const pointerMove = useCallback(
+    (event: React.PointerEvent<SVGSVGElement>) => {
+      if (!pointers.current.has(event.pointerId)) return;
+      pointers.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
+      if (pointers.current.size === 1 && lastPointer.current) {
+        const from = toViewBox(lastPointer.current.x, lastPointer.current.y);
+        const to = toViewBox(event.clientX, event.clientY);
+        follow(panView(viewRef.current, to.x - from.x, to.y - from.y, width, height));
+        lastPointer.current = { x: event.clientX, y: event.clientY };
+      } else if (pointers.current.size === 2) {
+        const [a, b] = [...pointers.current.values()];
+        const distance = Math.hypot(a.x - b.x, a.y - b.y);
+        if (pinch.current && pinch.current.distance > 0) {
+          const anchor = toViewBox((a.x + b.x) / 2, (a.y + b.y) / 2);
+          follow(
+            zoomAt(
+              viewRef.current,
+              distance / pinch.current.distance,
+              anchor.x,
+              anchor.y,
+              width,
+              height,
+            ),
+          );
+        }
+        pinch.current = { distance };
       }
-      pinch.current = { distance };
-    }
-  }
+    },
+    [toViewBox, width, height, follow],
+  );
 
-  function pointerUp(event: React.PointerEvent<SVGSVGElement>) {
-    pointers.current.delete(event.pointerId);
-    if (pointers.current.size === 0) release();
-    if (pointers.current.size < 2) pinch.current = null;
-    if (pointers.current.size === 1) {
-      const [remaining] = [...pointers.current.values()];
-      lastPointer.current = { x: remaining.x, y: remaining.y };
-    } else {
-      lastPointer.current = null;
-    }
-  }
+  const pointerUp = useCallback(
+    (event: React.PointerEvent<SVGSVGElement>) => {
+      pointers.current.delete(event.pointerId);
+      if (pointers.current.size === 0) release();
+      if (pointers.current.size < 2) pinch.current = null;
+      if (pointers.current.size === 1) {
+        const [remaining] = [...pointers.current.values()];
+        lastPointer.current = { x: remaining.x, y: remaining.y };
+      } else {
+        lastPointer.current = null;
+      }
+    },
+    [release],
+  );
+
+  const handlePointerLeave = useCallback(() => onHover(null), [onHover]);
+
+  const handlePointerEnter = useCallback(
+    (point: MapPoint, status: 'keep' | 'sza' | 'saa' | 'static' | 'dup') =>
+      (event: React.PointerEvent<SVGElement>) => {
+        if (event.pointerType === 'mouse') {
+          onHover({ point, status, clientX: event.clientX, clientY: event.clientY });
+        }
+      },
+    [onHover],
+  );
 
   return (
     <svg
@@ -220,7 +247,7 @@ export const WorkbenchMap = memo(function WorkbenchMap({
       onPointerMove={pointerMove}
       onPointerUp={pointerUp}
       onPointerCancel={pointerUp}
-      onPointerLeave={() => onHover(null)}
+      onPointerLeave={handlePointerLeave}
     >
       <defs>
         <clipPath id={`fc-land-${region}`}>
@@ -263,11 +290,7 @@ export const WorkbenchMap = memo(function WorkbenchMap({
           height={height + 2 * pad.y}
           preserveAspectRatio="none"
           clipPath={`url(#fc-land-${region})`}
-          style={{
-            mixBlendMode: 'var(--map-relief-blend)' as never,
-            opacity: 'var(--map-relief-opacity)',
-            filter: 'var(--map-relief-filter)',
-          }}
+          style={RELIEF_STYLE}
           aria-hidden="true"
         />
         <path
@@ -366,10 +389,7 @@ export const WorkbenchMap = memo(function WorkbenchMap({
               transform={`rotate(${point.dn === 'N' ? -8 : 8} ${point.x} ${point.y})`}
               fill={point.s === 'm' ? 'var(--amber)' : 'var(--raw)'}
               fillOpacity={0.9}
-              onPointerEnter={(event) =>
-                event.pointerType === 'mouse' &&
-                onHover({ point, status: 'keep', clientX: event.clientX, clientY: event.clientY })
-              }
+              onPointerEnter={handlePointerEnter(point, 'keep')}
             />
           ))}
 
@@ -389,10 +409,7 @@ export const WorkbenchMap = memo(function WorkbenchMap({
               strokeDasharray={status === 'static' ? undefined : '2 1.5'}
               vectorEffect="non-scaling-stroke"
               opacity={0.7}
-              onPointerEnter={(event) =>
-                event.pointerType === 'mouse' &&
-                onHover({ point, status, clientX: event.clientX, clientY: event.clientY })
-              }
+              onPointerEnter={handlePointerEnter(point, status)}
             />
           ))}
       </g>

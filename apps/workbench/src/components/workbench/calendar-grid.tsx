@@ -1,6 +1,6 @@
 'use client';
 
-import { memo, type MouseEvent, type PointerEvent } from 'react';
+import { useCallback, memo, type MouseEvent, type PointerEvent } from 'react';
 import { useTranslations } from 'next-intl';
 import { useTheme } from '@/components/ui/theme-provider';
 import type { Theme } from '@/lib/theme';
@@ -119,25 +119,34 @@ export function CalendarGrid({
   const months = t.raw('months') as string[];
   const observedYears = new Set(region.observedYears);
 
-  function handleMove(event: PointerEvent<SVGSVGElement>) {
-    if (event.pointerType !== 'mouse') return;
+  const handleMove = useCallback(
+    (event: PointerEvent<SVGSVGElement>) => {
+      if (event.pointerType !== 'mouse') return;
 
-    const next = refFromPoint(
-      event.currentTarget,
-      event.clientX,
-      event.clientY,
-      region.years.length,
-    );
-    if (!sameRef(hover, next)) onHover(next);
-    onTip?.(event.clientX, event.clientY);
-  }
+      const next = refFromPoint(
+        event.currentTarget,
+        event.clientX,
+        event.clientY,
+        region.years.length,
+      );
+      if (!sameRef(hover, next)) onHover(next);
+      onTip?.(event.clientX, event.clientY);
+    },
+    [hover, onHover, onTip, region.years.length],
+  );
 
-  function handleClick(event: MouseEvent<SVGSVGElement>) {
-    const next =
-      hover ?? refFromPoint(event.currentTarget, event.clientX, event.clientY, region.years.length);
-    onActive(next);
-    onHover(null);
-  }
+  const handleClick = useCallback(
+    (event: MouseEvent<SVGSVGElement>) => {
+      const next =
+        hover ??
+        refFromPoint(event.currentTarget, event.clientX, event.clientY, region.years.length);
+      onActive(next);
+      onHover(null);
+    },
+    [hover, onActive, onHover, region.years.length],
+  );
+
+  const handlePointerLeave = useCallback(() => onHover(null), [onHover]);
 
   return (
     <div>
@@ -201,7 +210,7 @@ export function CalendarGrid({
           aria-hidden="true"
           className="fc-calendar-svg block w-full cursor-crosshair"
           onPointerMove={handleMove}
-          onPointerLeave={() => onHover(null)}
+          onPointerLeave={handlePointerLeave}
           onClick={handleClick}
         >
           <CalendarCells region={region} cells={cells} metric={metric} theme={theme} />

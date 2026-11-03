@@ -63,6 +63,7 @@ export function ReviewRunView({ runId }: { runId: string }) {
   }, [get, runId]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void refetch();
   }, [refetch]);
 
@@ -80,7 +81,7 @@ export function ReviewRunView({ runId }: { runId: string }) {
   const decided = audit.at(-1);
   const approveAvailable = run.verification.passed && run.verification.unverified.length === 0;
 
-  async function confirm() {
+  const confirm = useCallback(async () => {
     if (!pending || !run) return;
     const failure = await service.decide(run.id, {
       approved: pending.approved,
@@ -90,7 +91,18 @@ export function ReviewRunView({ runId }: { runId: string }) {
     setPending(null);
     setSaveFailed(failure !== null);
     await refetch();
-  }
+  }, [pending, run, service, refetch]);
+
+  const handleRequest = useCallback(
+    (approved: boolean, reason: string, note: string) => setPending({ approved, reason, note }),
+    [],
+  );
+
+  const handlePendingClose = useCallback(() => setPending(null), []);
+
+  const handleConfirm = useCallback(() => {
+    void confirm();
+  }, [confirm]);
 
   return (
     <div className="tablet:px-5 tablet:py-6 mx-auto flex w-full max-w-400 flex-col gap-3 px-3 py-4 xl:h-[calc(100dvh-3.25rem)] xl:py-4">
@@ -156,7 +168,7 @@ export function ReviewRunView({ runId }: { runId: string }) {
           <ReviewDecision
             decided={decided}
             approveAvailable={approveAvailable}
-            onRequest={(approved, reason, note) => setPending({ approved, reason, note })}
+            onRequest={handleRequest}
           />
         </div>
       </div>
@@ -167,8 +179,8 @@ export function ReviewRunView({ runId }: { runId: string }) {
           approved={pending.approved}
           reason={pending.reason}
           note={pending.note}
-          onClose={() => setPending(null)}
-          onConfirm={() => void confirm()}
+          onClose={handlePendingClose}
+          onConfirm={handleConfirm}
         />
       )}
     </div>

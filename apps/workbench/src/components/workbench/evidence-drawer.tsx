@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import Image from 'next/image';
 import { useLocale, useTranslations } from 'next-intl';
 import { Icon, ICON } from '@/components/ui/icon';
@@ -66,6 +66,13 @@ export function EvidenceDrawer({
     };
   }, [open, onClose]);
 
+  const handleBackdropClick = useCallback(
+    (event: React.MouseEvent<HTMLDivElement>) => {
+      if (event.target === event.currentTarget) onClose();
+    },
+    [onClose],
+  );
+
   if (!open) return null;
 
   return (
@@ -74,9 +81,7 @@ export function EvidenceDrawer({
       aria-modal="true"
       aria-labelledby="evidence-title"
       className="bg-scrim fixed inset-0 z-50 flex justify-end"
-      onClick={(event) => {
-        if (event.target === event.currentTarget) onClose();
-      }}
+      onClick={handleBackdropClick}
     >
       <div className="border-line bg-panel flex h-dvh max-h-dvh w-full max-w-[580px] flex-col overflow-hidden border-y-0 border-r-0">
         <header className="border-line flex items-center gap-2 border-b px-3 py-2.5">

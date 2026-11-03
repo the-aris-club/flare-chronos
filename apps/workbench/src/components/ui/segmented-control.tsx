@@ -1,5 +1,7 @@
 'use client';
 
+import { useCallback, type MouseEvent } from 'react';
+
 type SegmentedOption<T extends string> = {
   value: T;
   label: string;
@@ -19,6 +21,14 @@ export function SegmentedControl<T extends string>({
   options,
   onChange,
 }: SegmentedControlProps<T>) {
+  const handleChange = useCallback(
+    (event: MouseEvent<HTMLButtonElement>) => {
+      const next = event.currentTarget.dataset.value as T | undefined;
+      if (next) onChange(next);
+    },
+    [onChange],
+  );
+
   return (
     <div
       role="group"
@@ -29,7 +39,8 @@ export function SegmentedControl<T extends string>({
         <button
           key={option.value}
           type="button"
-          onClick={() => onChange(option.value)}
+          data-value={option.value}
+          onClick={handleChange}
           aria-pressed={value === option.value}
           title={option.title}
           className={`text-meta h-6 rounded-sm px-2 font-mono font-semibold transition-colors ${

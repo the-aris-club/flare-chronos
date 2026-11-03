@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import {
   CartesianGrid,
@@ -21,6 +21,10 @@ import { SensorTracks } from './sensor-tracks';
 import type { AnnualSeries } from '@/lib/workbench/types';
 
 type Mode = 'both' | 'raw' | 'harmonized';
+
+const chartMargin = { top: 16, right: 18, bottom: 4, left: 2 } as const;
+const tickStyle = { fill: 'var(--text-subtle)', fontSize: 10 };
+const axisLineStyle = { stroke: 'var(--line)' };
 
 type ChartRow = {
   year: number;
@@ -90,6 +94,56 @@ export function ComparatorPane({
 
   const measured = useMemo(() => rows.filter((row) => row.measured), [rows]);
 
+  const modeOptions = useMemo<ReadonlyArray<{ value: Mode; label: string }>>(
+    () => [
+      { value: 'both', label: t('both') },
+      { value: 'raw', label: t('raw') },
+      { value: 'harmonized', label: t('harmonized') },
+    ],
+    [t],
+  );
+
+  const yearTicks = useMemo(
+    () =>
+      series.years.filter(
+        (year, index) => index === 0 || index === series.years.length - 1 || year % 5 === 0,
+      ),
+    [series.years],
+  );
+
+  const formatTick = useCallback((value: number) => formatCompact(value, locale), [locale]);
+
+  const nino2010Label = useMemo(
+    () =>
+      showNinoLabels
+        ? {
+            value: t('elnino', { year: 2010 }),
+            fill: 'var(--text-subtle)',
+            fontSize: 9,
+            position: 'insideTopLeft' as const,
+          }
+        : undefined,
+    [showNinoLabels, t],
+  );
+
+  const nino2016Label = useMemo(
+    () =>
+      showNinoLabels
+        ? {
+            value: t('elnino', { year: 2016 }),
+            fill: 'var(--text-subtle)',
+            fontSize: 9,
+            position: 'insideTopRight' as const,
+          }
+        : undefined,
+    [showNinoLabels, t],
+  );
+
+  const tooltipContent = useMemo(
+    () => <ChartTooltip locale={locale} rawLabel={t('raw')} harmonizedLabel={t('harmonized')} />,
+    [locale, t],
+  );
+
   return (
     <section
       data-tour="cmp"
@@ -105,11 +159,7 @@ export function ComparatorPane({
           <SegmentedControl
             label={t('mode')}
             value={mode}
-            options={[
-              { value: 'both', label: t('both') },
-              { value: 'raw', label: t('raw') },
-              { value: 'harmonized', label: t('harmonized') },
-            ]}
+            options={modeOptions}
             onChange={setMode}
           />
         </div>
@@ -118,22 +168,19 @@ export function ComparatorPane({
       <div className="min-h-0 flex-1 px-2 pt-2">
         {visible && (
           <ResponsiveContainer width="100%" height="100%">
-            <ComposedChart data={rows} margin={{ top: 16, right: 18, bottom: 4, left: 2 }}>
+            <ComposedChart data={rows} margin={chartMargin}>
               <CartesianGrid vertical={false} stroke="var(--line)" />
               <XAxis
                 dataKey="year"
-                ticks={series.years.filter(
-                  (year, index) =>
-                    index === 0 || index === series.years.length - 1 || year % 5 === 0,
-                )}
-                tick={{ fill: 'var(--text-subtle)', fontSize: 10 }}
+                ticks={yearTicks}
+                tick={tickStyle}
                 tickLine={false}
-                axisLine={{ stroke: 'var(--line)' }}
+                axisLine={axisLineStyle}
               />
               <YAxis
                 width={54}
-                tickFormatter={(value: number) => formatCompact(value, locale)}
-                tick={{ fill: 'var(--text-subtle)', fontSize: 10 }}
+                tickFormatter={formatTick}
+                tick={tickStyle}
                 tickLine={false}
                 axisLine={false}
               />
@@ -141,31 +188,13 @@ export function ComparatorPane({
                 x={2010}
                 stroke="var(--line-strong)"
                 strokeDasharray="3 3"
-                label={
-                  showNinoLabels
-                    ? {
-                        value: t('elnino', { year: 2010 }),
-                        fill: 'var(--text-subtle)',
-                        fontSize: 9,
-                        position: 'insideTopLeft' as const,
-                      }
-                    : undefined
-                }
+                label={nino2010Label}
               />
               <ReferenceLine
                 x={2016}
                 stroke="var(--line-strong)"
                 strokeDasharray="3 3"
-                label={
-                  showNinoLabels
-                    ? {
-                        value: t('elnino', { year: 2016 }),
-                        fill: 'var(--text-subtle)',
-                        fontSize: 9,
-                        position: 'insideTopRight' as const,
-                      }
-                    : undefined
-                }
+                label={nino2016Label}
               />
               {mode !== 'harmonized' && (
                 <Line
@@ -201,16 +230,7 @@ export function ComparatorPane({
                     strokeWidth={1}
                   />
                 ))}
-              <Tooltip
-                content={
-                  <ChartTooltip
-                    locale={locale}
-                    rawLabel={t('raw')}
-                    harmonizedLabel={t('harmonized')}
-                  />
-                }
-                cursor={false}
-              />
+              <Tooltip content={tooltipContent} cursor={false} />
             </ComposedChart>
           </ResponsiveContainer>
         )}

@@ -69,6 +69,7 @@ export async function* streamService(
   const reader = response.body.getReader();
   try {
     for (;;) {
+      // eslint-disable-next-line eslint/no-await-in-loop
       const { done, value } = await reader.read();
       if (done) return null;
       yield* parse(decoder.decode(value, { stream: true }));

@@ -1,6 +1,6 @@
 'use client';
 
-import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import { useCallback, forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import type { RegionId } from '@/lib/calendar/types';
 import { GLOBE_DATA } from '@/lib/globe/data';
@@ -8,6 +8,14 @@ import { saveGlobeMorph } from '@/lib/globe/morph';
 import { GlobeScene } from '@/lib/globe/scene';
 import type { BootStep, GlobeHandle } from '@/lib/globe/types';
 import { GlobeFallback } from './globe-fallback';
+
+const GLOBE_PATHS = {
+  land: GLOBE_DATA.land,
+  borders: GLOBE_DATA.borders,
+  graticule: GLOBE_DATA.graticule,
+  mekong: GLOBE_DATA.regions.mekong.coverage,
+  amazon: GLOBE_DATA.regions.amazon.coverage,
+};
 
 export type GlobeLabel = {
   id: RegionId;
@@ -36,6 +44,13 @@ export const GlobeCanvas = forwardRef<GlobeHandle, GlobeCanvasProps>(
     const labelRefs = useRef<Partial<Record<RegionId, HTMLDivElement | null>>>({});
     const propsRef = useRef(props);
     const [failed, setFailed] = useState(false);
+
+    const setLabelRef = useCallback(
+      (id: RegionId) => (element: HTMLDivElement | null) => {
+        labelRefs.current[id] = element;
+      },
+      [],
+    );
 
     useEffect(() => {
       if (!canvasRef.current) return;
@@ -113,9 +128,7 @@ export const GlobeCanvas = forwardRef<GlobeHandle, GlobeCanvasProps>(
           props.labels.map((label) => (
             <div
               key={`${label.id}-${locale}`}
-              ref={(element) => {
-                labelRefs.current[label.id] = element;
-              }}
+              ref={setLabelRef(label.id)}
               aria-hidden="true"
               className="fc-globe-label"
             >
@@ -143,19 +156,7 @@ export const GlobeCanvas = forwardRef<GlobeHandle, GlobeCanvasProps>(
               )}
             </div>
           ))}
-
-        {failed && (
-          <GlobeFallback
-            label={t('fallback')}
-            paths={{
-              land: GLOBE_DATA.land,
-              borders: GLOBE_DATA.borders,
-              graticule: GLOBE_DATA.graticule,
-              mekong: GLOBE_DATA.regions.mekong.coverage,
-              amazon: GLOBE_DATA.regions.amazon.coverage,
-            }}
-          />
-        )}
+        {failed && <GlobeFallback label={t('fallback')} paths={GLOBE_PATHS} />}
       </div>
     );
   },

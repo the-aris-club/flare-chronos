@@ -1,5 +1,6 @@
 'use client';
 
+import { useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { Icon, ICON } from '@/components/ui/icon';
 import type { MapLayers } from '@/lib/workbench/types';
@@ -27,6 +28,19 @@ export function MapControls({ layers, onLayer, grid, onGrid }: MapControlsProps)
     hex: t('hexes'),
   };
 
+  const handleGrid = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>) => {
+      onGrid(Number(event.currentTarget.value));
+    },
+    [onGrid],
+  );
+  const handleLayer = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>) => {
+      onLayer(event.currentTarget.value as keyof MapLayers);
+    },
+    [onLayer],
+  );
+
   return (
     <div className="ml-auto flex flex-wrap items-center gap-1.5">
       <div
@@ -43,7 +57,8 @@ export function MapControls({ layers, onLayer, grid, onGrid }: MapControlsProps)
             type="button"
             aria-pressed={grid === resolution}
             aria-label={t('resLabel', { resolution })}
-            onClick={() => onGrid(resolution)}
+            value={resolution}
+            onClick={handleGrid}
             className={`text-micro h-6 min-w-6 rounded-sm px-1.5 font-mono font-semibold ${
               grid === resolution ? 'bg-seg text-ink' : 'text-ink-subtle hover:text-ink'
             }`}
@@ -63,7 +78,8 @@ export function MapControls({ layers, onLayer, grid, onGrid }: MapControlsProps)
             key={layer}
             type="button"
             aria-pressed={layers[layer]}
-            onClick={() => onLayer(layer)}
+            value={layer}
+            onClick={handleLayer}
             className={`text-meta h-6 rounded-sm px-2 font-medium transition-colors ${
               layers[layer] ? 'bg-seg text-ink' : 'text-ink-subtle hover:text-ink'
             }`}
@@ -85,12 +101,15 @@ export function MapZoom({
 }) {
   const t = useTranslations('Map');
 
+  const handleZoomIn = useCallback(() => onZoom(2), [onZoom]);
+  const handleZoomOut = useCallback(() => onZoom(0.5), [onZoom]);
+
   return (
     <div className="border-line-strong bg-panel absolute top-2 right-2 flex flex-col overflow-hidden rounded-md border">
       <button
         type="button"
         aria-label={t('zoomIn')}
-        onClick={() => onZoom(2)}
+        onClick={handleZoomIn}
         className="text-ink-muted hover:bg-chip hover:text-ink inline-flex size-7 items-center justify-center"
       >
         <Icon icon={ICON.plus} size="sm" />
@@ -98,7 +117,7 @@ export function MapZoom({
       <button
         type="button"
         aria-label={t('zoomOut')}
-        onClick={() => onZoom(0.5)}
+        onClick={handleZoomOut}
         className="border-line text-ink-muted hover:bg-chip hover:text-ink inline-flex size-7 items-center justify-center border-t"
       >
         <Icon icon={ICON.minus} size="sm" />

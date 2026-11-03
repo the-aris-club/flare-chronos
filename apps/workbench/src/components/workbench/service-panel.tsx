@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useService } from '@/components/service/service-provider';
 import { Chip, type ChipTone } from '@/components/ui/chip';
@@ -36,14 +36,22 @@ export function ConnectPanel() {
   const [empty, setEmpty] = useState(false);
   const checking = service.connection === 'checking';
 
-  function submit() {
+  const submit = useCallback(() => {
     if (!token.trim()) {
       setEmpty(true);
       return;
     }
     setEmpty(false);
     void service.connect(token);
-  }
+  }, [token, service]);
+
+  const handleChange = useCallback(
+    (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+      setToken(event.target.value);
+      if (empty) setEmpty(false);
+    },
+    [empty],
+  );
 
   return (
     <div className="border-line bg-panel flex flex-col gap-2.5 rounded-lg border p-3.5">
@@ -57,10 +65,7 @@ export function ConnectPanel() {
           name="token"
           autoComplete="off"
           value={token}
-          onChange={(event) => {
-            setToken(event.target.value);
-            if (empty) setEmpty(false);
-          }}
+          onChange={handleChange}
           rows={3}
           spellCheck={false}
           className="border-line-strong bg-raised text-meta text-ink placeholder:text-ink-subtle resize-none rounded-md border px-2.5 py-2 font-mono"

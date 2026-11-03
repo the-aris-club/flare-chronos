@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import Link from 'next/link';
 import { useService } from '@/components/service/service-provider';
 import { useTranslations } from 'next-intl';
@@ -52,6 +52,29 @@ export function AppHeader({
       ? 'border-line text-ink-subtle'
       : 'border-ok/45 text-ok';
 
+  const handleRegionChange = useCallback(
+    (event: React.ChangeEvent<HTMLSelectElement>) => onRegion(event.target.value as RegionId),
+    [onRegion],
+  );
+  const toggleMenu = useCallback(() => setMenuOpen((value) => !value), []);
+  const closeMenu = useCallback(() => setMenuOpen(false), []);
+  const handleServiceMenu = useCallback(() => {
+    setMenuOpen(false);
+    onService();
+  }, [onService]);
+  const handleTourMenu = useCallback(() => {
+    setMenuOpen(false);
+    onTour();
+  }, [onTour]);
+  const handleEvidenceMenu = useCallback(() => {
+    setMenuOpen(false);
+    onEvidence();
+  }, [onEvidence]);
+  const handleBriefingMenu = useCallback(() => {
+    setMenuOpen(false);
+    onBriefing();
+  }, [onBriefing]);
+
   return (
     <HeaderBar>
       <BrandMark />
@@ -65,7 +88,7 @@ export function AppHeader({
           name="region"
           autoComplete="off"
           value={region}
-          onChange={(event) => onRegion(event.target.value as RegionId)}
+          onChange={handleRegionChange}
           className="border-line-strong bg-raised text-body text-ink tablet:max-w-56 max-tablet:max-w-none max-tablet:flex-1 h-8 max-w-44 appearance-none truncate rounded-md border py-0 pr-7 pl-2.5 font-medium"
         >
           <option value="mekong">{t('regions.mekongLong')}</option>
@@ -172,7 +195,7 @@ export function AppHeader({
         <div className="relative xl:hidden">
           <button
             type="button"
-            onClick={() => setMenuOpen((value) => !value)}
+            onClick={toggleMenu}
             aria-label={t('menu')}
             aria-expanded={menuOpen}
             className={buttonClass}
@@ -183,47 +206,35 @@ export function AppHeader({
             <div className="border-line bg-panel absolute top-full right-0 z-50 mt-1 flex w-44 flex-col rounded-md border p-1">
               <button
                 type="button"
-                onClick={() => {
-                  setMenuOpen(false);
-                  onService();
-                }}
+                onClick={handleServiceMenu}
                 className="text-body text-ink hover:bg-chip rounded-sm px-2 py-1.5 text-left"
               >
                 {serviceLabel}
               </button>
               <button
                 type="button"
-                onClick={() => {
-                  setMenuOpen(false);
-                  onTour();
-                }}
+                onClick={handleTourMenu}
                 className="text-body text-ink hover:bg-chip rounded-sm px-2 py-1.5 text-left"
               >
                 {t('walkthrough')}
               </button>
               <button
                 type="button"
-                onClick={() => {
-                  setMenuOpen(false);
-                  onEvidence();
-                }}
+                onClick={handleEvidenceMenu}
                 className="text-body text-ink hover:bg-chip rounded-sm px-2 py-1.5 text-left"
               >
                 {t('evidence')}
               </button>
               <button
                 type="button"
-                onClick={() => {
-                  setMenuOpen(false);
-                  onBriefing();
-                }}
+                onClick={handleBriefingMenu}
                 className="text-body text-ink hover:bg-chip rounded-sm px-2 py-1.5 text-left"
               >
                 {t('briefing')}
               </button>
               <Link
                 href="/review"
-                onClick={() => setMenuOpen(false)}
+                onClick={closeMenu}
                 className="text-body text-ink hover:bg-chip flex items-center justify-between rounded-sm px-2 py-1.5 text-left"
               >
                 {review('review')}
@@ -235,7 +246,7 @@ export function AppHeader({
               </Link>
               <Link
                 href="/"
-                onClick={() => setMenuOpen(false)}
+                onClick={closeMenu}
                 className="text-body text-ink hover:bg-chip rounded-sm px-2 py-1.5 text-left"
               >
                 {t('globe')}

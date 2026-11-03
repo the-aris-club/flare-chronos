@@ -1,5 +1,6 @@
 'use client';
 
+import { useCallback } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { Icon, ICON } from '@/components/ui/icon';
 import type { Epoch, MapFilters } from '@/lib/workbench/types';
@@ -29,6 +30,13 @@ export function PhysicsFilters({
   const episodes = epoch?.episodes ?? 0;
   const off = useFiltersOff(filters);
 
+  const handleFilter = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>) => {
+      onFilter(event.currentTarget.value as keyof MapFilters);
+    },
+    [onFilter],
+  );
+
   return (
     <section role="group" aria-label={t('title')} className="flex flex-col gap-1.5">
       <h3 className="text-label text-ink-subtle font-mono tracking-widest uppercase">
@@ -40,7 +48,8 @@ export function PhysicsFilters({
             key={key}
             type="button"
             aria-pressed={filters[key]}
-            onClick={() => onFilter(key)}
+            value={key}
+            onClick={handleFilter}
             className={`flex items-center gap-2 rounded-md border px-2 py-1 text-left transition-colors ${
               filters[key]
                 ? 'border-line-strong text-ink-muted'

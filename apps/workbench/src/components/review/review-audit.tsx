@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useService } from '@/components/service/service-provider';
 import { Icon, ICON } from '@/components/ui/icon';
@@ -14,6 +14,8 @@ function csvCell(value: string): string {
 }
 
 type Row = AuditRow & { useCase: string };
+
+const DECISION_OPTIONS = ['approve', 'reject'];
 
 export function ReviewAudit() {
   const t = useTranslations('Review');
@@ -48,9 +50,13 @@ export function ReviewAudit() {
     };
   }, [get, runs]);
 
-  const reviewers = [...new Set(all.map((row) => row.principal))];
-  const dates = [...new Set(all.map((row) => row.decidedAt.slice(0, 10)))].sort().reverse();
-  const cases = [...new Set(all.map((row) => row.useCase))];
+  const reviewers = useMemo(() => [...new Set(all.map((row) => row.principal))], [all]);
+  const dates = useMemo(
+    () => [...new Set(all.map((row) => row.decidedAt.slice(0, 10)))].sort().reverse(),
+    [all],
+  );
+  const cases = useMemo(() => [...new Set(all.map((row) => row.useCase))], [all]);
+  const decisionLabels = useMemo(() => ({ approve: t('approved'), reject: t('rejected') }), [t]);
 
   const rows = useMemo(
     () =>
@@ -64,7 +70,7 @@ export function ReviewAudit() {
     [all, reviewer, decision, date, useCase],
   );
 
-  function download(name: string, content: string, type: string) {
+  const download = useCallback((name: string, content: string, type: string) => {
     const blob = new Blob([content], { type });
     const url = URL.createObjectURL(blob);
     const anchor = document.createElement('a');
@@ -72,9 +78,9 @@ export function ReviewAudit() {
     anchor.download = name;
     anchor.click();
     URL.revokeObjectURL(url);
-  }
+  }, []);
 
-  function exportCsv() {
+  const exportCsv = useCallback(() => {
     const header = ['utc_time', 'run', 'reviewer', 'decision', 'reason_code', 'note', 'audit_id'];
     const body = rows.map((row) =>
       [
@@ -90,9 +96,9 @@ export function ReviewAudit() {
         .join(','),
     );
     download('flare-chronos-audit.csv', [header.join(','), ...body].join('\n'), 'text/csv');
-  }
+  }, [rows, download]);
 
-  function exportJson() {
+  const exportJson = useCallback(() => {
     const data = rows.map((row) => ({
       utc_time: row.decidedAt,
       run: row.runId,
@@ -103,7 +109,7 @@ export function ReviewAudit() {
       audit_id: row.id,
     }));
     download('flare-chronos-audit.json', JSON.stringify(data, null, 2), 'application/json');
-  }
+  }, [rows, download]);
 
   return (
     <div className="tablet:px-5 tablet:py-6 mx-auto flex w-full max-w-400 flex-col gap-4 px-3 py-4">
@@ -144,8 +150,8 @@ export function ReviewAudit() {
           label={t('decision')}
           value={decision}
           onChange={setDecision}
-          options={['approve', 'reject']}
-          labels={{ approve: t('approved'), reject: t('rejected') }}
+          options={DECISION_OPTIONS}
+          labels={decisionLabels}
           all={t('all')}
         />
         <FilterSelect

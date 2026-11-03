@@ -26,13 +26,13 @@ from ai_service.api import AuthConfig, create_app
 from ai_service.harness import FlareChronosDualSystemHarness
 from ai_service.store import RunStore
 
-SECRET = "test-secret-with-at-least-thirty-two-bytes"
+TEST_SIGNING_KEY = "test-secret-with-at-least-thirty-two-bytes"
 SIGN_OFF_QUERY = "/api/v1/analysis/stream?use_case_id=UC-S1.4&query=UC-S1.4+flash+alert+for+amazon+2026"
 
 
 def token(sub: str, roles: tuple[str, ...] = ()) -> dict[str, str]:
     claims = {"sub": sub, "roles": list(roles), "exp": int(time.time()) + 3600}
-    encoded = jwt.encode(claims, SECRET, algorithm="HS256")
+    encoded = jwt.encode(claims, TEST_SIGNING_KEY, algorithm="HS256")
     return {"Authorization": f"Bearer {encoded}"}
 
 
@@ -46,7 +46,7 @@ class ApiCase(unittest.TestCase):
         self.app = create_app(
             harness=FlareChronosDualSystemHarness(mode="deterministic"),
             store=self.store,
-            auth=AuthConfig(key=SECRET, algorithms=("HS256",)),
+            auth=AuthConfig(key=TEST_SIGNING_KEY, algorithms=("HS256",)),
             run_timeout_s=self.run_timeout_s,
         )
         self.client = TestClient(self.app)
@@ -88,7 +88,7 @@ class TestAuthentication(ApiCase):
         self.assertEqual(response.status_code, 401)
 
     def test_a_token_without_an_expiry_is_refused(self) -> None:
-        forever = jwt.encode({"sub": "ana"}, SECRET, algorithm="HS256")
+        forever = jwt.encode({"sub": "ana"}, TEST_SIGNING_KEY, algorithm="HS256")
         response = self.client.get(
             "/api/v1/analysis/use-cases", headers={"Authorization": f"Bearer {forever}"}
         )
@@ -96,7 +96,9 @@ class TestAuthentication(ApiCase):
 
     def test_a_token_without_a_subject_is_refused(self) -> None:
         bare = jwt.encode(
-            {"roles": [], "exp": int(time.time()) + 3600}, SECRET, algorithm="HS256"
+            {"roles": [], "exp": int(time.time()) + 3600},
+            TEST_SIGNING_KEY,
+            algorithm="HS256",
         )
         response = self.client.get(
             "/api/v1/analysis/use-cases", headers={"Authorization": f"Bearer {bare}"}
@@ -230,7 +232,7 @@ class TestProductionLifespan(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             app = create_app(
                 store=RunStore(Path(tmp) / "service.sqlite"),
-                auth=AuthConfig(key=SECRET, algorithms=("HS256",)),
+                auth=AuthConfig(key=TEST_SIGNING_KEY, algorithms=("HS256",)),
                 checkpoint_path=Path(tmp) / "checkpoints.sqlite",
             )
             with TestClient(app) as client:
@@ -254,7 +256,7 @@ class TestDemoBinding(unittest.TestCase):
         with self.assertRaises(SystemExit):
             check_bind("0.0.0.0", AuthConfig(disabled=True))  # noqa: S104
         check_bind("127.0.0.1", AuthConfig(disabled=True))
-        check_bind("0.0.0.0", AuthConfig(key=SECRET))  # noqa: S104
+        check_bind("0.0.0.0", AuthConfig(key=TEST_SIGNING_KEY))  # noqa: S104
 
 
 class TestRestartSafety(unittest.TestCase):

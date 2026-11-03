@@ -3,6 +3,8 @@
 import { ThemeProvider as NextThemesProvider, useTheme as useNextTheme } from 'next-themes';
 import type { Theme } from '@/lib/theme';
 
+const THEMES = ['dark', 'light'];
+
 export function ThemeProvider({
   initialTheme,
   children,
@@ -16,7 +18,7 @@ export function ThemeProvider({
       defaultTheme={initialTheme}
       enableSystem={false}
       disableTransitionOnChange
-      themes={['dark', 'light']}
+      themes={THEMES}
       storageKey="fc-theme"
     >
       {children}

@@ -1,5 +1,6 @@
 'use client';
 
+import { useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { Icon, ICON } from '@/components/ui/icon';
 import type { RegionId } from '@/lib/calendar/types';
@@ -32,14 +33,18 @@ export function RegionCard({
   const t = useTranslations('Globe');
   const years = Array.from({ length: total }, (_, index) => yearStart + index);
 
+  const handleSelect = useCallback(() => onSelect(region.id), [onSelect, region.id]);
+  const handleEnter = useCallback(() => onHover(region.id), [onHover, region.id]);
+  const handleLeave = useCallback(() => onHover(null), [onHover]);
+
   return (
     <button
       type="button"
-      onClick={() => onSelect(region.id)}
-      onMouseEnter={() => onHover(region.id)}
-      onMouseLeave={() => onHover(null)}
-      onFocus={() => onHover(region.id)}
-      onBlur={() => onHover(null)}
+      onClick={handleSelect}
+      onMouseEnter={handleEnter}
+      onMouseLeave={handleLeave}
+      onFocus={handleEnter}
+      onBlur={handleLeave}
       className={`grid grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-1 rounded-lg border px-3 py-2.5 text-left backdrop-blur-sm transition-colors ${
         highlighted ? 'border-amber bg-raised' : 'border-line-strong bg-panel/60 hover:bg-raised'
       }`}

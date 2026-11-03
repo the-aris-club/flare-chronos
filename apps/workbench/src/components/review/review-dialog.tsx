@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, type MouseEvent } from 'react';
 import { useTranslations } from 'next-intl';
 import { Icon, ICON } from '@/components/ui/icon';
 
@@ -24,6 +24,13 @@ export function ReviewDialog({
   const panel = useRef<HTMLDivElement>(null);
   const t = useTranslations('Review');
 
+  const handleBackdropClick = useCallback(
+    (event: MouseEvent<HTMLDivElement>) => {
+      if (event.target === event.currentTarget) onClose();
+    },
+    [onClose],
+  );
+
   useEffect(() => {
     const previous = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
@@ -43,9 +50,7 @@ export function ReviewDialog({
     <div
       className="bg-scrim fixed inset-0 z-50 flex items-center justify-center p-3"
       role="presentation"
-      onClick={(event) => {
-        if (event.target === event.currentTarget) onClose();
-      }}
+      onClick={handleBackdropClick}
     >
       <div
         ref={panel}

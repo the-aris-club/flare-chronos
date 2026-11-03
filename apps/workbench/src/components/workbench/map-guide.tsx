@@ -1,6 +1,6 @@
 'use client';
 
-import { useId, useState } from 'react';
+import { useCallback, useId, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Icon, ICON } from '@/components/ui/icon';
 import type { Epoch, MapFilters, MapPhysics } from '@/lib/workbench/types';
@@ -41,6 +41,86 @@ function Heading({ children }: { children: React.ReactNode }) {
 
 const DIAMOND = 'M6,0.8L11.2,5L6,9.2L0.8,5Z';
 
+const MARK_0 = (
+  <svg width={9} height={6}>
+    <ellipse cx={4.5} cy={3} rx={4} ry={2.4} fill="var(--amber)" fillOpacity={0.9} />
+  </svg>
+);
+const MARK_1 = (
+  <svg width={8} height={8}>
+    <circle cx={4} cy={4} r={3.5} fill="var(--raw)" />
+  </svg>
+);
+const MARK_2 = (
+  <svg width={14} height={8}>
+    <rect
+      x={0.5}
+      y={0.5}
+      width={13}
+      height={7}
+      fill="var(--amber)"
+      fillOpacity={0.08}
+      stroke="var(--amber)"
+    />
+  </svg>
+);
+const MARK_3 = (
+  <svg width={14} height={8}>
+    <rect
+      x={0.5}
+      y={0.5}
+      width={13}
+      height={7}
+      fill="none"
+      stroke="var(--cyan)"
+      strokeDasharray="4 2"
+    />
+  </svg>
+);
+const MARK_4 = (
+  <svg width={14} height={8}>
+    <rect
+      x={0.5}
+      y={0.5}
+      width={13}
+      height={7}
+      fill="none"
+      stroke="var(--map-border)"
+      strokeDasharray="3 2"
+    />
+    <circle cx={7} cy={4} r={1.4} fill="#fff" stroke="#3a4458" />
+  </svg>
+);
+const MARK_5 = <span className="fc-hex-ramp block h-2 w-4 rounded-xs" />;
+const MARK_6 = (
+  <svg width={12} height={10}>
+    <path d={DIAMOND} fill="var(--purple)" stroke="var(--map-ocean)" strokeWidth={1.1} />
+  </svg>
+);
+const MARK_7 = (
+  <svg width={12} height={10}>
+    <path d={DIAMOND} fill="none" stroke="var(--purple)" strokeWidth={1.2} />
+  </svg>
+);
+const MARK_8 = (
+  <svg width={10} height={10}>
+    <path d="M1,1L9,9M9,1L1,9" stroke="var(--grey)" strokeWidth={1} strokeDasharray="1.5 1" />
+  </svg>
+);
+const MARK_9 = (
+  <svg width={14} height={8}>
+    <rect
+      x={0.5}
+      y={0.5}
+      width={13}
+      height={7}
+      fill="none"
+      stroke="var(--grey)"
+      strokeDasharray="2 2"
+    />
+  </svg>
+);
+
 /**
  * One collapsible frame for everything that explains the map: the symbols, the Static & SAA
  * layer with the symbols it adds, and the true-scale footprint lens. Closed by default so
@@ -64,6 +144,8 @@ export function MapGuide({
   const filtersOff = useFiltersOff(filters).length;
   const panel = useId();
 
+  const handleToggle = useCallback(() => setOpen((value) => !value), []);
+
   return (
     <div className="tablet:bottom-9 absolute bottom-12 left-2 flex max-h-[calc(100%-4.5rem)] w-[min(19rem,calc(100%-1rem))] flex-col">
       {open && (
@@ -76,87 +158,13 @@ export function MapGuide({
           <section className="border-line flex flex-col gap-1.5 border-t pt-3">
             <Heading>{t('symbols')}</Heading>
             <ul className="flex flex-col gap-1.5">
-              <Item
-                mark={
-                  <svg width={9} height={6}>
-                    <ellipse
-                      cx={4.5}
-                      cy={3}
-                      rx={4}
-                      ry={2.4}
-                      fill="var(--amber)"
-                      fillOpacity={0.9}
-                    />
-                  </svg>
-                }
-              >
-                {t('modis')}
-              </Item>
-              <Item
-                mark={
-                  <svg width={8} height={8}>
-                    <circle cx={4} cy={4} r={3.5} fill="var(--raw)" />
-                  </svg>
-                }
-              >
-                {t('viirs')}
-              </Item>
-              <Item
-                mark={
-                  <svg width={14} height={8}>
-                    <rect
-                      x={0.5}
-                      y={0.5}
-                      width={13}
-                      height={7}
-                      fill="var(--amber)"
-                      fillOpacity={0.08}
-                      stroke="var(--amber)"
-                    />
-                  </svg>
-                }
-              >
-                {t('coverage')}
-              </Item>
-              <Item
-                mark={
-                  <svg width={14} height={8}>
-                    <rect
-                      x={0.5}
-                      y={0.5}
-                      width={13}
-                      height={7}
-                      fill="none"
-                      stroke="var(--cyan)"
-                      strokeDasharray="4 2"
-                    />
-                  </svg>
-                }
-              >
-                {t('queryBox')}
-              </Item>
-              {islands && (
-                <Item
-                  mark={
-                    <svg width={14} height={8}>
-                      <rect
-                        x={0.5}
-                        y={0.5}
-                        width={13}
-                        height={7}
-                        fill="none"
-                        stroke="var(--map-border)"
-                        strokeDasharray="3 2"
-                      />
-                      <circle cx={7} cy={4} r={1.4} fill="#fff" stroke="#3a4458" />
-                    </svg>
-                  }
-                >
-                  {t('islands')}
-                </Item>
-              )}
+              <Item mark={MARK_0}>{t('modis')}</Item>
+              <Item mark={MARK_1}>{t('viirs')}</Item>
+              <Item mark={MARK_2}>{t('coverage')}</Item>
+              <Item mark={MARK_3}>{t('queryBox')}</Item>
+              {islands && <Item mark={MARK_4}>{t('islands')}</Item>}
               {hex && (
-                <Item mark={<span className="fc-hex-ramp block h-2 w-4 rounded-xs" />}>
+                <Item mark={MARK_5}>
                   {t('hexes')} · {t('hexShown', { grid, resolution })}
                 </Item>
               )}
@@ -182,58 +190,10 @@ export function MapGuide({
               </button>
             </div>
             <ul className={`flex flex-col gap-1.5 ${overlay ? '' : 'opacity-50'}`}>
-              <Item
-                mark={
-                  <svg width={12} height={10}>
-                    <path
-                      d={DIAMOND}
-                      fill="var(--purple)"
-                      stroke="var(--map-ocean)"
-                      strokeWidth={1.1}
-                    />
-                  </svg>
-                }
-              >
-                {t('staticSource')}
-              </Item>
-              <Item
-                mark={
-                  <svg width={12} height={10}>
-                    <path d={DIAMOND} fill="none" stroke="var(--purple)" strokeWidth={1.2} />
-                  </svg>
-                }
-              >
-                {t('excludedStatic')}
-              </Item>
-              <Item
-                mark={
-                  <svg width={10} height={10}>
-                    <path
-                      d="M1,1L9,9M9,1L1,9"
-                      stroke="var(--grey)"
-                      strokeWidth={1}
-                      strokeDasharray="1.5 1"
-                    />
-                  </svg>
-                }
-              >
-                {t('excludedNoise')}
-              </Item>
-              <Item
-                mark={
-                  <svg width={14} height={8}>
-                    <rect
-                      x={0.5}
-                      y={0.5}
-                      width={13}
-                      height={7}
-                      fill="none"
-                      stroke="var(--grey)"
-                      strokeDasharray="2 2"
-                    />
-                  </svg>
-                }
-              >
+              <Item mark={MARK_6}>{t('staticSource')}</Item>
+              <Item mark={MARK_7}>{t('excludedStatic')}</Item>
+              <Item mark={MARK_8}>{t('excludedNoise')}</Item>
+              <Item mark={MARK_9}>
                 {t('saaZone')}
                 {saa ? '' : ` · ${t('na')}`}
               </Item>
@@ -248,7 +208,7 @@ export function MapGuide({
         type="button"
         aria-expanded={open}
         aria-controls={open ? panel : undefined}
-        onClick={() => setOpen((value) => !value)}
+        onClick={handleToggle}
         className="border-line-strong bg-panel/95 text-meta text-ink-muted hover:text-ink inline-flex h-8 items-center gap-1.5 self-start rounded-md border px-2.5 font-medium"
       >
         <Icon icon={ICON.filter} size="sm" />

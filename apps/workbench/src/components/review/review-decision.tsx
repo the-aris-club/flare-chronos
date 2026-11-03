@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useState, type ChangeEvent } from 'react';
 import { useTranslations } from 'next-intl';
 import { useService } from '@/components/service/service-provider';
 import { REASON_CODES } from '@/lib/review/reasons';
@@ -22,18 +22,36 @@ export function ReviewDecision({ decided, approveAvailable, onRequest }: ReviewD
   const [note, setNote] = useState('');
   const [error, setError] = useState<string | null>(null);
 
-  function request(approved: boolean) {
-    if (!reason) {
-      setError(t('errReason'));
-      return;
-    }
-    if (reason === 'other' && !note.trim()) {
-      setError(t('errNote'));
-      return;
-    }
-    setError(null);
-    onRequest(approved, reason, note.trim());
-  }
+  const request = useCallback(
+    (approved: boolean) => {
+      if (!reason) {
+        setError(t('errReason'));
+        return;
+      }
+      if (reason === 'other' && !note.trim()) {
+        setError(t('errNote'));
+        return;
+      }
+      setError(null);
+      onRequest(approved, reason, note.trim());
+    },
+    [reason, note, t, onRequest],
+  );
+
+  const handleReasonChange = useCallback(
+    (event: ChangeEvent<HTMLSelectElement>) => {
+      setReason(event.target.value);
+      if (error) setError(null);
+    },
+    [error],
+  );
+
+  const handleNoteChange = useCallback((event: ChangeEvent<HTMLTextAreaElement>) => {
+    setNote(event.target.value);
+  }, []);
+
+  const handleApprove = useCallback(() => request(true), [request]);
+  const handleReject = useCallback(() => request(false), [request]);
 
   if (decided) {
     return (
@@ -90,10 +108,7 @@ export function ReviewDecision({ decided, approveAvailable, onRequest }: ReviewD
           id="decision-reason"
           name="decision-reason"
           value={reason}
-          onChange={(event) => {
-            setReason(event.target.value);
-            if (error) setError(null);
-          }}
+          onChange={handleReasonChange}
           className="border-line-strong bg-raised text-meta text-ink h-8 rounded-md border px-2"
         >
           <option value="">{t('chooseReason')}</option>
@@ -110,7 +125,7 @@ export function ReviewDecision({ decided, approveAvailable, onRequest }: ReviewD
           id="decision-note"
           name="decision-note"
           value={note}
-          onChange={(event) => setNote(event.target.value)}
+          onChange={handleNoteChange}
           rows={2}
           className="border-line-strong bg-raised text-meta text-ink resize-none rounded-md border px-2 py-1.5"
         />
@@ -123,7 +138,7 @@ export function ReviewDecision({ decided, approveAvailable, onRequest }: ReviewD
       <div className="grid grid-cols-2 gap-2">
         <button
           type="button"
-          onClick={() => request(true)}
+          onClick={handleApprove}
           disabled={!approveAvailable}
           className="border-ok text-ok hover:bg-chip text-meta inline-flex h-8 items-center justify-center gap-1 rounded-md border font-semibold disabled:opacity-40"
         >
@@ -131,7 +146,7 @@ export function ReviewDecision({ decided, approveAvailable, onRequest }: ReviewD
         </button>
         <button
           type="button"
-          onClick={() => request(false)}
+          onClick={handleReject}
           className="border-bad text-bad hover:bg-chip text-meta inline-flex h-8 items-center justify-center gap-1 rounded-md border font-semibold"
         >
           {t('reject')}

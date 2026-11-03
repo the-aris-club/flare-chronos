@@ -7,6 +7,12 @@ import { loadWorkbench } from '@/lib/workbench/series';
 type WorkbenchParams = Promise<{ zone: string }>;
 type WorkbenchSearchParams = Promise<{ epoch?: string; tour?: string }>;
 
+const loadingFallback = (
+  <div className="bg-canvas text-ink flex h-dvh items-center justify-center">
+    Loading workbench…
+  </div>
+);
+
 export default async function WorkbenchZonePage({
   params,
   searchParams,
@@ -24,13 +30,7 @@ export default async function WorkbenchZonePage({
   const fallback = epochs.find((epoch) => epoch.year === 2024)?.year ?? epochs[0]?.year ?? 2001;
 
   return (
-    <Suspense
-      fallback={
-        <div className="bg-canvas text-ink flex h-dvh items-center justify-center">
-          Loading workbench…
-        </div>
-      }
-    >
+    <Suspense fallback={loadingFallback}>
       <WorkbenchShell
         key={zone}
         dataset={dataset}

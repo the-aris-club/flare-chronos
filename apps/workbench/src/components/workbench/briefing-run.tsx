@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { Icon, ICON } from '@/components/ui/icon';
 import { Markdown } from '@/components/ui/markdown';
@@ -32,6 +33,8 @@ export function BriefingRun({
   const checked = verification?.checked_numbers_count ?? 0;
   const briefing = run.signOff?.briefing ?? run.briefing;
 
+  const handlePresetClick = useCallback((preset: Preset) => () => onStart(preset), [onStart]);
+
   return (
     <div className="flex flex-col gap-3">
       <PrincipalRow />
@@ -46,7 +49,7 @@ export function BriefingRun({
               key={preset.useCase}
               type="button"
               disabled={busy}
-              onClick={() => onStart(preset)}
+              onClick={handlePresetClick(preset)}
               className="bg-ink text-canvas text-meta h-8 rounded-md px-3 font-semibold disabled:opacity-40"
             >
               {t(preset.key)}

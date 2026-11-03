@@ -194,7 +194,8 @@ class TestFlareChronosDualSystemHarness(unittest.TestCase):
         # The fallback profile resolves through the same precedence rules.
         fallback_profile = resolve_fallback_profile(cfg, "system1_reflexive")
         self.assertIsNotNone(fallback_profile)
-        assert fallback_profile is not None
+        if fallback_profile is None:
+            raise AssertionError("fallback_profile is None")
         self.assertEqual(fallback_profile.protocol, "native_chat")
         self.assertTrue(fallback_profile.model_id)
 

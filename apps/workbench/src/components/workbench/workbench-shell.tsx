@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useIsDesktop, useIsTablet } from '@/lib/use-media';
@@ -26,6 +26,8 @@ import { TourOverlay } from './tour';
 type Tab = 'map' | 'trend' | 'cal' | 'brief';
 
 const TABS: Tab[] = ['map', 'trend', 'cal', 'brief'];
+
+const DEFAULT_PEAK = { value: null, pentad: null };
 
 export function WorkbenchShell({
   dataset,
@@ -63,28 +65,31 @@ export function WorkbenchShell({
   const series = workbench.series[region];
   const epochs = workbench.epochs[region];
   const epoch = epochs.find((item) => item.year === year) ?? epochs[0];
-  const peak = workbench.sfai[region][year] ?? { value: null, pentad: null };
+  const peak = workbench.sfai[region][year] ?? DEFAULT_PEAK;
   const regionLabel = t(region);
   const briefingPressed = briefState === 'open' || (briefState === 'auto' && isDesktop);
 
-  function changeRegion(next: RegionId) {
-    const nextEpochs = workbench.epochs[next];
-    const nextYear =
-      nextEpochs.find((item) => item.year === year)?.year ??
-      nextEpochs.find((item) => item.year === 2024)?.year ??
-      nextEpochs[0]?.year ??
-      2001;
-    setRegion(next);
-    setYear(nextYear);
+  const changeRegion = useCallback(
+    (next: RegionId) => {
+      const nextEpochs = workbench.epochs[next];
+      const nextYear =
+        nextEpochs.find((item) => item.year === year)?.year ??
+        nextEpochs.find((item) => item.year === 2024)?.year ??
+        nextEpochs[0]?.year ??
+        2001;
+      setRegion(next);
+      setYear(nextYear);
 
-    const query = new URLSearchParams(searchParams.toString());
-    query.delete('region');
-    query.set('epoch', String(nextYear));
-    if (!tourOpen) query.delete('tour');
-    router.push(`/workbench/${next}?${query.toString()}`);
-  }
+      const query = new URLSearchParams(searchParams.toString());
+      query.delete('region');
+      query.set('epoch', String(nextYear));
+      if (!tourOpen) query.delete('tour');
+      router.push(`/workbench/${next}?${query.toString()}`);
+    },
+    [workbench.epochs, year, searchParams, tourOpen, router],
+  );
 
-  function toggleBrief() {
+  const toggleBrief = useCallback(() => {
     if (briefState === 'open') {
       setBriefState('closed');
       if (tab === 'brief') setTab('map');
@@ -95,16 +100,33 @@ export function WorkbenchShell({
       return;
     }
     setBriefState(isDesktop ? 'closed' : 'open');
-  }
+  }, [briefState, tab, isDesktop]);
 
-  function chooseTab(next: Tab) {
-    setTab(next);
-    if (next === 'brief') {
-      setBriefState('open');
-    } else if (briefState === 'open') {
-      setBriefState('closed');
-    }
-  }
+  const chooseTab = useCallback(
+    (next: Tab) => {
+      setTab(next);
+      if (next === 'brief') {
+        setBriefState('open');
+      } else if (briefState === 'open') {
+        setBriefState('closed');
+      }
+    },
+    [briefState],
+  );
+
+  const handleTour = useCallback(() => setTourOpen(true), []);
+  const handleEvidence = useCallback(() => setEvidenceOpen(true), []);
+  const handleService = useCallback(() => setBriefState('open'), []);
+  const handleFilter = useCallback(
+    (key: keyof MapFilters) => setFilters((current) => ({ ...current, [key]: !current[key] })),
+    [],
+  );
+  const handleCloseEvidence = useCallback(() => setEvidenceOpen(false), []);
+  const handleCloseTour = useCallback(() => setTourOpen(false), []);
+  const handleTabClick = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>) => chooseTab(event.currentTarget.value as Tab),
+    [chooseTab],
+  );
 
   return (
     <div className="bg-canvas relative flex h-dvh flex-col overflow-hidden">
@@ -113,10 +135,10 @@ export function WorkbenchShell({
         period={dataset.period}
         briefingOpen={briefingPressed}
         onRegion={changeRegion}
-        onTour={() => setTourOpen(true)}
-        onEvidence={() => setEvidenceOpen(true)}
+        onTour={handleTour}
+        onEvidence={handleEvidence}
         onBriefing={toggleBrief}
-        onService={() => setBriefState('open')}
+        onService={handleService}
       />
 
       <div className="flex min-h-0 flex-1">
@@ -138,7 +160,7 @@ export function WorkbenchShell({
                 physics={workbench.physics}
                 year={year}
                 filters={filters}
-                onFilter={(key) => setFilters((current) => ({ ...current, [key]: !current[key] }))}
+                onFilter={handleFilter}
                 onYear={setYear}
               />
             </div>
@@ -174,7 +196,7 @@ export function WorkbenchShell({
               <EvidenceQuickLook
                 physics={workbench.physics}
                 calibration={workbench.calibration}
-                onOpen={() => setEvidenceOpen(true)}
+                onOpen={handleEvidence}
               />
             </div>
 
@@ -213,7 +235,8 @@ export function WorkbenchShell({
             key={item}
             type="button"
             aria-pressed={tab === item}
-            onClick={() => chooseTab(item)}
+            value={item}
+            onClick={handleTabClick}
             className={`text-meta relative flex flex-1 flex-col items-center justify-center gap-0.5 font-medium ${
               tab === item ? 'text-ink' : 'text-ink-subtle'
             }`}
@@ -231,7 +254,7 @@ export function WorkbenchShell({
 
       <EvidenceDrawer
         open={evidenceOpen}
-        onClose={() => setEvidenceOpen(false)}
+        onClose={handleCloseEvidence}
         series={series}
         epochs={epochs}
         physics={workbench.physics}
@@ -239,10 +262,7 @@ export function WorkbenchShell({
         calendar={calendar}
       />
       {tourOpen && (
-        <TourOverlay
-          onClose={() => setTourOpen(false)}
-          figures={tourFigures(dataset, workbench, region)}
-        />
+        <TourOverlay onClose={handleCloseTour} figures={tourFigures(dataset, workbench, region)} />
       )}
     </div>
   );

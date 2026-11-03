@@ -5,16 +5,9 @@ import { loadCalendar } from '@/lib/calendar/load';
 import type { RegionId } from '@/lib/calendar/types';
 import { loadWorkbench } from '@/lib/workbench/series';
 
-export async function generateMetadata() {
-  const t = await getTranslations('Meta');
+const fallback = <div className="bg-canvas h-dvh" />;
 
-  return { title: t('homeTitle') };
-}
-
-export default async function Home() {
-  const dataset = await loadCalendar();
-  const workbench = await loadWorkbench(dataset);
-
+function buildGrowth(workbench: Awaited<ReturnType<typeof loadWorkbench>>) {
   function growth(region: RegionId): number {
     const series = workbench.series[region];
     const start = series.years.indexOf(2005);
@@ -25,7 +18,11 @@ export default async function Home() {
     return first > 0 ? Math.round(last / first) : 0;
   }
 
-  const regions = (['mekong', 'amazon'] as const).map((id) => {
+  return { mekong: growth('mekong'), amazon: growth('amazon') };
+}
+
+function buildRegions(workbench: Awaited<ReturnType<typeof loadWorkbench>>) {
+  return (['mekong', 'amazon'] as const).map((id) => {
     const epochs = workbench.epochs[id];
 
     return {
@@ -34,14 +31,28 @@ export default async function Home() {
       lastEpoch: epochs.at(-1)?.year ?? 2024,
     };
   });
+}
+
+export async function generateMetadata() {
+  const t = await getTranslations('Meta');
+
+  return { title: t('homeTitle') };
+}
+
+export default async function Home() {
+  const dataset = await loadCalendar();
+  const workbench = await loadWorkbench(dataset);
+
+  const growthData = buildGrowth(workbench);
+  const regions = buildRegions(workbench);
 
   return (
-    <Suspense fallback={<div className="bg-canvas h-dvh" />}>
+    <Suspense fallback={fallback}>
       <GlobeLanding
         period={dataset.period}
         yearStart={dataset.period.start}
         total={dataset.period.end - dataset.period.start + 1}
-        growth={{ mekong: growth('mekong'), amazon: growth('amazon') }}
+        growth={growthData}
         regions={regions}
       />
     </Suspense>
