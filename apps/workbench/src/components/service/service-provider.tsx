@@ -75,6 +75,12 @@ export function ServiceProvider({ children }: { children: React.ReactNode }) {
       const result = await callService(fetch, value, '/api/v1/analysis/use-cases');
       if (!result.ok) {
         if (result.reason === 'unauthorized') document.cookie = CLEAR_TOKEN_COOKIE;
+        // An empty token against an auth-required service is not a "rejected
+        // token" — it just means nothing was provided yet. Stay neutral.
+        if (result.reason === 'unauthorized' && !value) {
+          setConnection('none');
+          return;
+        }
         setConnection(result.reason === 'unauthorized' ? 'rejected' : 'unavailable');
         return;
       }
