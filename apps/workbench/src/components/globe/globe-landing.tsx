@@ -9,7 +9,12 @@ import { formatQueryBox } from '@/lib/workbench/query-box';
 import { REGION_DEFS } from '@/lib/workbench/regions';
 import { BOOT_STEPS, type BootStep, type GlobeHandle } from '@/lib/globe/types';
 import { BootOverlay } from './boot-overlay';
-import { GlobeCanvas, type GlobeLabel } from './globe-canvas';
+import dynamic from 'next/dynamic';
+import type { GlobeLabel } from './globe-canvas';
+const GlobeCanvas = dynamic(() => import('./globe-canvas').then((m) => m.GlobeCanvas), {
+  ssr: false,
+  loading: () => <div className="bg-canvas absolute inset-0" />,
+});
 import { LandingHeader } from './landing-header';
 import { LandingPanel } from './landing-panel';
 

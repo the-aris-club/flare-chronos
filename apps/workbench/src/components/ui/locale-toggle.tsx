@@ -1,6 +1,6 @@
 'use client';
 
-import { useTransition } from 'react';
+import { useCallback, useTransition } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { writeCookie } from '@/lib/browser';
@@ -12,12 +12,15 @@ export function LocaleToggle() {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
 
-  function choose(next: Locale) {
-    if (next === locale) return;
+  const choose = useCallback(
+    (next: Locale) => {
+      if (next === locale) return;
 
-    writeCookie(LOCALE_COOKIE, next);
-    startTransition(() => router.refresh());
-  }
+      writeCookie(LOCALE_COOKIE, next);
+      startTransition(() => router.refresh());
+    },
+    [locale, router, startTransition],
+  );
 
   return (
     <div
@@ -32,7 +35,7 @@ export function LocaleToggle() {
           onClick={() => choose(option)}
           aria-pressed={locale === option}
           aria-label={`${t(`lang.${option}`)} (${option.toUpperCase()})`}
-          disabled={pending && locale !== option}
+          disabled={pending}
           className={`text-meta h-6 rounded-sm px-2 font-mono font-semibold uppercase transition-colors ${
             locale === option ? 'bg-seg text-ink' : 'text-ink-subtle hover:text-ink'
           }`}

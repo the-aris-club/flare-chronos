@@ -12,7 +12,10 @@ import { AppHeader } from './app-header';
 import { BriefingRail, type RailState } from './briefing-rail';
 import { BurningCalendar } from './burning-calendar';
 import { ClockPane } from './clock-pane';
-import { ComparatorPane } from './comparator-pane';
+import dynamic from 'next/dynamic';
+const ComparatorPane = dynamic(() => import('./comparator-pane').then((m) => m.ComparatorPane), {
+  loading: () => <div className="h-64 animate-pulse rounded-md bg-chip" />,
+});
 import { EvidenceDrawer } from './evidence-drawer';
 import { EvidenceQuickLook } from './evidence-quick-look';
 import { FilterBar } from './filter-bar';

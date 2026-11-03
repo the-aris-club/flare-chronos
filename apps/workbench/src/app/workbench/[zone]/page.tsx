@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
 import { WorkbenchShell } from '@/components/workbench/workbench-shell';
 import { loadCalendar } from '@/lib/calendar/load';
@@ -23,13 +24,15 @@ export default async function WorkbenchZonePage({
   const fallback = epochs.find((epoch) => epoch.year === 2024)?.year ?? epochs[0]?.year ?? 2001;
 
   return (
-    <WorkbenchShell
-      key={zone}
-      dataset={dataset}
-      workbench={workbench}
-      initialRegion={zone}
-      initialYear={valid ? requested : fallback}
-      initialTour={query.tour === '1'}
-    />
+    <Suspense fallback={<div className="bg-canvas text-ink flex h-dvh items-center justify-center">Loading workbench…</div>}>
+      <WorkbenchShell
+        key={zone}
+        dataset={dataset}
+        workbench={workbench}
+        initialRegion={zone}
+        initialYear={valid ? requested : fallback}
+        initialTour={query.tour === '1'}
+      />
+    </Suspense>
   );
 }
