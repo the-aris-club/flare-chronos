@@ -3,7 +3,7 @@ import { ReviewShell } from '@/components/review/review-shell';
 
 export async function generateMetadata() {
   const t = await getTranslations('Meta');
-  return { title: t('reviewTitle') };
+  return { title: t('reviewTitle'), robots: { index: false, follow: false } };
 }
 
 export default function ReviewLayout({ children }: { children: React.ReactNode }) {

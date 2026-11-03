@@ -1,0 +1,39 @@
+# Flare Chronos
+
+> Cross-sensor harmonization of satellite active-fire records (MODIS + VIIRS) for the Mekong & Vietnam and Amazon regions, 2000–2026. Removes artificial trends caused by adding sensors so a change in the series means a change in fire, not a change in instrumentation.
+
+Flare Chronos is an interactive workbench and evidence set for the 2026 NASA Space Apps Challenge. It reconstructs each detection's scan-angle footprint, screens by solar zenith and the South Atlantic Anomaly, de-duplicates coincident overpasses, allocates fractionally to Uber H3 cells, aligns VIIRS fire radiative power to a MODIS-equivalent reference via quantile mapping, and scores anomalies with SFAI.
+
+## Pages
+
+- [Home (Region Globe)](https://flare-chronos.resonance.io.vn/): rotating 3D Earth with the two measured regions and the real 2005→2024 growth headline.
+- [About / Methodology](https://flare-chronos.resonance.io.vn/about): problem, method, five scientific figures, data sources, credits, license.
+- [FAQ](https://flare-chronos.resonance.io.vn/faq): frequently asked questions about raw vs harmonized counts, SFAI, sensors, data use.
+- [Workbench](https://flare-chronos.resonance.io.vn/workbench/mekong): interactive analysis workspace (map, calendar, comparator, phenology clock, briefing rail). Not indexed.
+- [Review](https://flare-chronos.resonance.io.vn/review): reviewer queue and audit trail. Auth-gated, not indexed.
+
+## Key facts
+
+- Sensors: MODIS (Terra, Aqua); VIIRS (Suomi-NPP, NOAA-20, NOAA-21).
+- Period: 2000–2026, 26 years × 73 five-day pentads.
+- Regions: Mekong & Vietnam; Amazon fire arc.
+- Anomaly index: SFAI (Standardized Fire Anomaly Index); alert ≥ +2.2σ, crisis ≥ +2.5σ.
+- H3 grid: Resolution 7 (~5.16 km²) for regional phenology, Resolution 8 (~0.74 km²) for tactical analysis.
+- Measured epochs: a single 5-day window per year; other pentads are modelled from the seasonal envelope and are never scored.
+- Data: NASA FIRMS active-fire detections; Natural Earth (public domain); NASA Blue Marble.
+
+## Evidence figures
+
+1. Scan-angle footprint physics — MODIS/VIIRS footprint growth with scan angle.
+2. Overpass de-duplication & SZA — coincident overpasses, solar zenith screening.
+3. Cross-sensor FRP quantile mapping — VIIRS FRP aligned to MODIS-equivalent reference.
+4. Regime-shift elimination — raw detections rise as sensors are added; harmonized series removes step changes.
+5. Harmonized burning calendar — 26 years × 73 pentads with observed, modelled and severe-anomaly cells.
+
+## Reproducibility
+
+Every figure is read from `data/processed/empirical_results.json`. Reproduce with `uv run python -m benchmark_cli.run_experiments`.
+
+## Contact
+
+Project: Flare Chronos. Repository: flare-chronos.
