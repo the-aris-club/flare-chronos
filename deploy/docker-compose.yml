@@ -23,8 +23,6 @@ services:
     restart: unless-stopped
     ports:
       - "5900:5900"
-    environment:
-      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:5901}
     depends_on:
       api:
         condition: service_healthy
