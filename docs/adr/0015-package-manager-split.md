@@ -1,5 +1,5 @@
 ---
-status: accepted
+status: superseded by ADR-0017
 ---
 
 # Package Manager Split: Bun for Workbench, pnpm for Release Automation

@@ -502,7 +502,7 @@ A slice is done only when all of these pass on the merged tree:
 
 | ID | Decision | Why it blocks |
 |---|---|---|
-| D1 | Workspace shape: standalone Bun app or pnpm workspace with packages? | The scaffold exists; the package split is open |
+| D1 | Workspace shape: standalone Bun app or Bun workspace with packages? | The scaffold exists; the package split is open |
 | D2 | URL shape and locale strategy | `?screen=` cannot survive; `next-intl` needs a locale decision |
 | D3 | Map and globe technology | Iframes and unpkg imports cannot ship |
 | D4 | Chart library for Fig. 1–4 | `recharts` baseline vs hand-written SVG |

@@ -38,7 +38,7 @@ jobs:
             workbench:
               - "apps/workbench/**"
               - "package.json"
-              - "pnpm-lock.yaml"
+              - "bun.lock"
 
   check-docs:
     needs: changes

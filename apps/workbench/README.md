@@ -115,7 +115,7 @@ AI_SERVICE_TOKEN=<token> uv run python scripts/seed_runs.py
 
 Paste the token into the briefing rail or the Review page. It is also stored in an `fc_token` cookie (SameSite=Strict, expiring with the token), so a
 reload reconnects; Disconnect clears it. Tokens for the dev team and the examiner come from
-`AI_SERVICE_JWT_KEY=<key> pnpm credentials` (`fc-dev-…`, `fc-examiner-…` in `.credentials`). `NEXT_PUBLIC_AI_SERVICE_URL` overrides the service address.
+`AI_SERVICE_JWT_KEY=<key> bun credentials` (`fc-dev-…`, `fc-examiner-…` in `.credentials`). `NEXT_PUBLIC_AI_SERVICE_URL` overrides the service address.
 
 Replace `public/globe/earth.jpg` only with a public-domain NASA Blue Marble
 frame at the same 2:1 aspect. The globe falls back to a flat vector map when

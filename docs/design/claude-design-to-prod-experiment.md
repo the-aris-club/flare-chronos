@@ -76,7 +76,7 @@ Do this once, before either arm starts. Commit it. Both arms branch from this co
 ### 4.1 Workspace
 
 ```
-pnpm-workspace.yaml          # apps/workbench, packages/ui, packages/i18n
+package.json#workspaces      # apps/workbench, packages/ui, packages/i18n
 .oxfmtrc.json                # from skills configs
 .oxlintrc.json               # from skills configs
 DESIGN.md                    # stub: tokens, icons, breakpoints, term table
@@ -85,7 +85,7 @@ packages/ui/                 # tokens.css, icon.tsx, primitives
 packages/i18n/               # messages/en.json, messages/vi.json
 ```
 
-`pnpm-workspace.yaml` must list the three packages explicitly. Do not glob `apps/*`; the Python apps have no `package.json`. Root `package.json` must expose `format`, `format:check`, and `lint` scripts, because the gate commands call them.
+The root `package.json` `workspaces` entry must list the three packages explicitly. Do not glob `apps/*`; the Python apps have no `package.json`. Root `package.json` must expose `format`, `format:check`, and `lint` scripts, because the gate commands call them.
 
 ### 4.2 `apps/workbench` minimum
 
@@ -236,8 +236,8 @@ Run in this order. `bun fmt` first, always.
 |---|---|---|
 | Format | `bun fmt --check` | Zero changes |
 | Lint | `bun lint --no-script --max-warnings=0 --allow-unsupported` | Zero findings |
-| Types | `pnpm --filter @flare/workbench exec tsc --noEmit` | Zero errors |
-| Build | `pnpm --filter @flare/workbench build` | Exit 0 |
+| Types | `bun run --cwd apps/workbench typecheck` | Zero errors |
+| Build | `bun run --cwd apps/workbench build` | Exit 0 |
 | Tokens (experiment) | `rg -n -e '#[0-9a-fA-F]{3,8}\b' -e '\[[0-9.]+px\]' apps/workbench/src packages/ui/src` | Zero hits outside token files, SVG attributes, and chart-series maps |
 | Icons (experiment) | `rg -n '[‹←→↓↻⊘⌃▶▸▾◆◐✓✕❙]' apps/workbench/src` | Zero hits in JSX text. Arrows inside sentence strings are allowed |
 | Inline styles | `rg -n 'style=\{\{' apps/workbench/src` | Zero hits |
@@ -376,8 +376,8 @@ Method:
 Gates, in this order:
 bun fmt --check
 bun lint --no-script --max-warnings=0 --allow-unsupported
-pnpm --filter @flare/workbench exec tsc --noEmit
-pnpm --filter @flare/workbench build
+bun run --cwd apps/workbench typecheck
+bun run --cwd apps/workbench build
 grep gates for raw hex, [Npx], inline styles, and Unicode glyphs
 Playwright: console errors, a11y, keyboard, locales
 Data swap to fixtures/real-calendar-mekong.json

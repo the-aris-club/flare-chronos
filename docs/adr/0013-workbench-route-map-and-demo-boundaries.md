@@ -14,7 +14,7 @@ status: accepted
 - Static-source flags use the FIRMS `type` 1–3 subset. The core's 12-month persistent-cell registry cannot be built from the archive's same-season 5-day slices, so the map does not claim that broader registry.
 - The design's archipelago reference markers (Hoàng Sa, Trường Sa) are not ported. They are reference-only design marks, not a measurement layer.
 - Static review fixtures remain for the queue and run detail. Decisions and audit rows persist through the app-local `/api/review/decisions` route. The five remaining `TODO(api)` markers name the run list/detail, briefing connect, briefing run and run detail route.
-- Root release automation uses pnpm because `.github/workflows/release.yml` and `auto-bump-version.yml` are configured for it. The Workbench app and its gates use Bun. This is an explicit split, not drift to be "fixed" without changing CI.
+- Root release automation and the Workbench app both use Bun (`bun@1.4.4`, root and app lockfiles). ADR-0017 replaced the earlier pnpm split.
 
 ## Consequences
 

@@ -1,6 +1,6 @@
 // Runs after `changeset version` inside the Version Packages PR:
 // stamps the new version + date into the exported Markdown headers, rebuilds
-// are handled by `pnpm run doc:version`, and propagates the version to every
+// are handled by `bun run doc:version`, and propagates the version to every
 // package.json / pyproject.toml in the monorepo.
 import { readFileSync, writeFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";

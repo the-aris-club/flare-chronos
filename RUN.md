@@ -495,9 +495,8 @@ Line counts: 114 TS/TSX files under `apps/workbench/src`, 11,122 lines, plus
 - There are five `TODO(api)` markers: review run list/detail, briefing connect,
   briefing run and the review run route. Decisions and audit rows now persist
   through `/api/review/decisions`.
-- The root release automation still uses pnpm because the CI workflows are
-  configured for it; the Workbench app and its gates use Bun. Do not unify them
-  without changing `release.yml` and `auto-bump-version.yml`. See ADR-0013, ADR-0014 and ADR-0015.
+- Everything runs on Bun: the root release automation and the Workbench share
+  `bun@1.4.4`, one `bun.lock` per package (root and `apps/workbench`). See ADR-0017.
 - The Burning Activity Calendar's 26x73 shape is the artifact contract, not a
   user-selected period; `ROWS`/`PENTADS` document that fixed shape.
 

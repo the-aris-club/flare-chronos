@@ -26,19 +26,13 @@ jobs:
         with:
           python-version: "3.13"
           enable-cache: true
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+      - uses: oven-sh/setup-bun@v2
         with:
-          node-version: 24
-      - name: Set up pnpm (version from the packageManager field)
-        uses: pnpm/setup@a0881977cd8ea73b1ed212236c99ca10dcc80cf4 # v3.1.1
-        with:
-          cache: true
-          cache-dependency-path: pnpm-lock.yaml
-          install: false
+          bun-version: latest
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: bun install --frozen-lockfile
       - name: Bump version (package.json + CHANGELOG.md + exports/*.md + PDFs)
-        run: pnpm run doc:version
+        run: bun run doc:version
       - name: Refresh uv lockfile
         run: uv lock
       - name: Commit and push the version bump

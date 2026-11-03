@@ -4,7 +4,7 @@ Tokens look like ``fc-dev-<jwt>`` and ``fc-examiner-<jwt>``. Both roles may deci
 sign-off requests (ADR-0016); the prefix only says whose token it is. Run with the key
 the service was started with:
 
-    AI_SERVICE_JWT_KEY=... pnpm credentials
+    AI_SERVICE_JWT_KEY=... bun credentials
 """
 
 from __future__ import annotations
