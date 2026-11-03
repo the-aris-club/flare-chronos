@@ -24,7 +24,8 @@ theme is the same instrument read on paper — not an inversion, a re-ink.
 - No gradients as decoration, no glassmorphism beyond the sticky header, the
   landing sheet and the briefing rail. The Region Globe is the one atmospheric
   surface: a radial field behind the 3D Earth, a translucent sheet on small
-  screens, and a star field. It is imagery, not chrome.
+  screens, and a sky (NASA SVS Deep Star Map, decorative, credited in the footer,
+  dimmed behind the landing copy, dark theme only). It is imagery, not chrome.
 - Motion is feedback only: 120–180 ms colour/opacity transitions; no entrance
   animations; respect `prefers-reduced-motion`. The landing globe is the one
   continuous motion, and it stops for reduced motion.
