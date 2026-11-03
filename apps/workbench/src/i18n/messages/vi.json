@@ -687,104 +687,104 @@
     "text": "Điểm nóng thô {from}→{to}: {raw}% · xu hướng đã chuẩn hóa {trend}%/năm · khoảng cách KS {ksBefore} → {ksAfter} · {measured}/{total} năm quan trắc thực"
   },
   "About": {
-    "title": "About Flare Chronos",
-    "subtitle": "Cross-sensor harmonization of satellite active-fire records",
-    "intro": "Flare Chronos harmonizes 26 years of NASA FIRMS active-fire detections (MODIS on Terra/Aqua, VIIRS on Suomi-NPP, NOAA-20 and NOAA-21) for the Mekong & Vietnam and Amazon regions. It removes the artificial trends that appear when new sensors join the record, so that a change in the series means a change in fire, not a change in instrumentation.",
-    "problemTitle": "The problem",
-    "problem": "Raw detections rose several-fold in both regions between the 2005 and 2024 Measured Epochs. The fires did not. Each new sensor (Suomi-NPP in 2012, NOAA-20 in 2019, NOAA-21 in 2024) adds detections because its pixels are smaller and its swath is wider, not because more area burned.",
-    "methodTitle": "How harmonization works",
+    "title": "Về Flare Chronos",
+    "subtitle": "Đồng bộ hoá đa cảm biến cho bản ghi cháy chủ động từ vệ tinh",
+    "intro": "Flare Chronos đồng bộ hoá 26 năm dữ liệu cháy chủ động từ NASA FIRMS (MODIS trên Terra/Aqua, VIIRS trên Suomi-NPP, NOAA-20 và NOAA-21) cho khu vực Mekong & Việt Nam và Amazon. Ứng dụng xoá bỏ các xu hướng nhân tạo xuất hiện khi có cảm biến mới tham gia vào bản ghi, để một thay đổi trong chuỗi số liệu nghĩa là thay đổi về cháy, chứ không phải thay đổi về thiết bị.",
+    "problemTitle": "Vấn đề",
+    "problem": "Số lượng phát hiện thô tăng gấp nhiều lần ở cả hai khu vực giữa các Epochs Đo lường năm 2005 và 2024. Cháy thì không. Mỗi cảm biến mới (Suomi-NPP năm 2012, NOAA-20 năm 2019, NOAA-21 năm 2024) thêm phát hiện vì điểm ảnh nhỏ hơn và dải quét rộng hơn, chứ không phải vì diện tích cháy lớn hơn.",
+    "methodTitle": "Cách đồng bộ hoá hoạt động",
     "method": [
-      "Reconstruct each detection's elliptical footprint from spherical scan geometry (scan x track), including MODIS bow-tie distortion and the VIIRS 3-zone aggregation (3:1 / 2:1 / 1:1).",
-      "Screen by solar zenith angle (SZA < 85 deg) and the South Atlantic Anomaly (SAA) night-noise region.",
-      "Remove static heat sources (industrial, gas flares) and de-duplicate coincident overpasses within 60 minutes.",
-      "Allocate each footprint fractionally across Uber H3 cells (Resolution 7 for regional phenology, Resolution 8 for tactical analysis).",
-      "Align VIIRS fire radiative power to a MODIS-equivalent reference with quantile mapping, preserving the distribution tail.",
-      "Score anomalies with SFAI (Standardized Fire Anomaly Index) on observed cells only; modelled cells are never scored."
+      "Tái tạo footprint hình elip của từng phát hiện từ hình học quét cầu (scan × track), bao gồm biến dạng bow-tie của MODIS và gom cụm 3 vùng của VIIRS (3:1 / 2:1 / 1:1).",
+      "Sàng lọc theo góc thiên đỉnh Mặt Trời (SZA < 85°) và vùng dị thường Nam Đại Tây Dương (SAA) gây nhiễu ban đêm.",
+      "Loại bỏ nguồn nhiệt tĩnh (công nghiệp, đuốc khí) và khử trùng lặp các lần quét trùng trong 60 phút.",
+      "Phân bổ từng footprint theo tỷ lệ lên các ô Uber H3 (Resolution 7 cho phenology khu vực, Resolution 8 cho phân tích chiến thuật).",
+      "Căn chỉnh công suất bức xạ cháy (FRP) của VIIRS về chuẩn tương đương MODIS bằng quantile mapping, giữ nguyên phần đuôi phân bố.",
+      "Chấm điểm dị thường bằng SFAI (Chỉ số Dị thường Cháy Chuẩn hoá) chỉ trên các ô được đo; các ô mô hình hoá không bao giờ được chấm."
     ],
-    "evidenceTitle": "Evidence",
-    "evidenceIntro": "Five scientific figures support the harmonization. Each is reproducible from data/processed/empirical_results.json.",
+    "evidenceTitle": "Bằng chứng",
+    "evidenceIntro": "Năm hình khoa học hỗ trợ cho việc đồng bộ hoá. Mỗi hình có thể tái tạo từ data/processed/empirical_results.json.",
     "figures": [
       {
-        "title": "Fig. 1 - Scan-angle footprint physics",
-        "caption": "MODIS and VIIRS footprint growth with scan angle, and the area ratio that drives harmonization."
+        "title": "Fig. 1 - Vật lý footprint theo góc quét",
+        "caption": "Sự tăng trưởng footprint của MODIS và VIIRS theo góc quét, và tỷ lệ diện tích dẫn dắt đồng bộ hoá."
       },
       {
-        "title": "Fig. 2 - Overpass de-duplication & SZA",
-        "caption": "Coincident overpasses, solar zenith screening and the de-duplication that removes double counting."
+        "title": "Fig. 2 - Khử trùng lặp quét & SZA",
+        "caption": "Các lần quét trùng, sàng lọc góc thiên đỉnh Mặt Trời và khử trùng lặp xoá đếm kép."
       },
       {
-        "title": "Fig. 3 - Cross-sensor FRP quantile mapping",
-        "caption": "Quantile mapping aligns VIIRS FRP to the MODIS-equivalent reference without flattening the tail."
+        "title": "Fig. 3 - Quantile mapping FRP đa cảm biến",
+        "caption": "Quantile mapping căn chỉnh FRP của VIIRS về chuẩn tương đương MODIS mà không làm phẳng phần đuôi."
       },
       {
-        "title": "Fig. 4 - Regime-shift elimination",
-        "caption": "Raw detections rise as sensors are added; the harmonized series removes the step changes."
+        "title": "Fig. 4 - Loại bỏ dịch chuyển chế độ",
+        "caption": "Số phát hiện thô tăng khi thêm cảm biến; chuỗi đồng bộ hoá xoá các bước nhảy."
       },
       {
-        "title": "Fig. 5 - Harmonized burning calendar",
-        "caption": "The 26-year by 73-pentad calendar with observed, modelled and severe-anomaly cells."
+        "title": "Fig. 5 - Lịch cháy đồng bộ hoá",
+        "caption": "Lịch 26 năm × 73 pentad với các ô được đo, mô hình hoá và dị thường nghiêm trọng."
       }
     ],
-    "sourcesTitle": "Data sources",
+    "sourcesTitle": "Nguồn dữ liệu",
     "sources": [
-      "NASA FIRMS active-fire detections (MODIS and VIIRS).",
-      "Natural Earth borders, rivers, lakes and shaded relief (public domain).",
-      "NASA Blue Marble Earth imagery.",
-      "Empirical results in data/processed/empirical_results.json and the burning calendar in data/processed/burning_calendar.json."
+      "Dữ liệu cháy chủ động NASA FIRMS (MODIS và VIIRS).",
+      "Ranh giới, sông, hồ và bóng relief Natural Earth (public domain).",
+      "Ảnh Trái Đất NASA Blue Marble.",
+      "Kết quả thực nghiệm trong data/processed/empirical_results.json và lịch cháy trong data/processed/burning_calendar.json."
     ],
-    "creditsTitle": "Credits",
-    "credits": "Built for the 2026 NASA Space Apps Challenge. Authors: Flare Chronos Team, The Aris Club Team, Lê Thành Trung (lethanhtrung.trungle@gmail.com). Harmonization core in packages/harmonization-core; workbench in apps/workbench.",
-    "licenseTitle": "License",
-    "license": "See the repository LICENSE. Data are derived from public NASA and Natural Earth products.",
-    "cta": "Explore the workbench"
+    "creditsTitle": "Ghi nhận",
+    "credits": "Xây dựng cho NASA Space Apps Challenge 2026. Tác giả: Flare Chronos Team, The Aris Club Team, Lê Thành Trung (lethanhtrung.trungle@gmail.com). Lõi đồng bộ hoá trong packages/harmonization-core; workbench trong apps/workbench.",
+    "licenseTitle": "Giấy phép",
+    "license": "Xem LICENSE của kho mã. Dữ liệu xuất phát từ các sản phẩm công khai của NASA và Natural Earth.",
+    "cta": "Khám phá không gian phân tích"
   },
   "Faq": {
-    "title": "Frequently asked questions · Flare Chronos",
-    "subtitle": "Flare Chronos — cross-sensor harmonization of satellite active fire",
+    "title": "Câu hỏi thường gặp · Flare Chronos",
+    "subtitle": "Flare Chronos — đồng bộ hoá đa cảm biến cho cháy chủ động từ vệ tinh",
     "items": [
       {
-        "q": "What is Flare Chronos?",
-        "a": "An interactive workbench for cross-sensor harmonization of satellite active-fire records. It turns fragmented MODIS and VIIRS detections into one comparable series for the Mekong & Vietnam and Amazon regions, 2000-2026."
+        "q": "Flare Chronos là gì?",
+        "a": "Một không gian phân tích cho đồng bộ hoá đa cảm biến của bản ghi cháy chủ động từ vệ tinh. Ứng dụng biến các phát hiện MODIS và VIIRS rời rạc thành một chuỗi có thể so sánh cho khu vực Mekong & Việt Nam và Amazon, 2000–2026."
       },
       {
-        "q": "Why do raw fire counts rise while harmonized counts stay flat?",
-        "a": "New sensors add detections because their pixels are smaller and their swaths are wider. Raw counts track instrumentation. Harmonization removes that sensor step so the series tracks fire, not the sensor."
+        "q": "Vì sao số cháy thô tăng còn số đồng bộ hoá thì phẳng?",
+        "a": "Cảm biến mới thêm phát hiện vì điểm ảnh nhỏ hơn và dải quét rộng hơn. Số thô theo thiết bị. Đồng bộ hoá xoá bước nhảy theo cảm biến để chuỗi theo dõi cháy, không phải thiết bị."
       },
       {
-        "q": "What is SFAI?",
-        "a": "The Standardized Fire Anomaly Index: a z-score of burning activity against the region's seasonal baseline, computed only on observed (measured) calendar cells. +2.2 sigma is an alert, +2.5 sigma a crisis."
+        "q": "SFAI là gì?",
+        "a": "Chỉ số Dị thường Cháy Chuẩn hoá: z-score của hoạt động cháy so với nền mùa vụ của khu vực, chỉ tính trên các ô lịch được đo. +2.2σ là cảnh báo, +2.5σ là khủng hoảng."
       },
       {
-        "q": "What are measured and modelled calendar cells?",
-        "a": "Measured cells come from a real 5-day observation window. Modelled cells are filled from the region's seasonal envelope and are dimmed, hatched, and never scored by SFAI."
+        "q": "Ô được đo và ô mô hình hoá là gì?",
+        "a": "Ô được đo đến từ cửa sổ quan sát 5 ngày thực sự. Ô mô hình hoá được điền từ bao mùa vụ của khu vực, bị làm mờ, kẻ sọc và không bao giờ được chấm SFAI."
       },
       {
-        "q": "Which sensors are used?",
-        "a": "MODIS on Terra and Aqua, and VIIRS on Suomi-NPP, NOAA-20 and NOAA-21."
+        "q": "Những cảm biến nào được dùng?",
+        "a": "MODIS trên Terra và Aqua, và VIIRS trên Suomi-NPP, NOAA-20 và NOAA-21."
       },
       {
-        "q": "What is a fire episode?",
-        "a": "A de-duplicated fire event produced by grouping coincident detections within 60 minutes and 0.5 degrees, after physics filters (SZA, SAA, static sources)."
+        "q": "Episode cháy là gì?",
+        "a": "Một sự kiện cháy đã khử trùng lặp, tạo ra bằng cách nhóm các phát hiện trùng trong 60 phút và 0.5°, sau các bộ lọc vật lý (SZA, SAA, nguồn tĩnh)."
       },
       {
-        "q": "How is the scan-angle footprint computed?",
-        "a": "Each detection's elliptical footprint (scan x track) is reconstructed from spherical scan geometry, including MODIS bow-tie distortion and VIIRS 3-zone aggregation, then allocated fractionally to H3 cells."
+        "q": "Footprint theo góc quét được tính thế nào?",
+        "a": "Footprint hình elip của từng phát hiện (scan × track) được tái tạo từ hình học quét cầu, bao gồm biến dạng bow-tie của MODIS và gom cụm 3 vùng của VIIRS, sau đó phân bổ theo tỷ lệ lên các ô H3."
       },
       {
-        "q": "What is the South Atlantic Anomaly (SAA) filter?",
-        "a": "A screen that removes spurious nighttime middle-infrared spikes caused by trapped high-energy protons in the geomagnetic depression region."
+        "q": "Bộ lọc SAA là gì?",
+        "a": "Bộ sàng lọc xoá các xung giả ban đêm trong vùng hồng ngoại giữa do proton năng lượng cao bị giữ lại trong vùng dị thường từ trường."
       },
       {
-        "q": "Can I use the data?",
-        "a": "Data are derived from public NASA FIRMS and Natural Earth products. See the repository LICENSE for terms."
+        "q": "Tôi có thể dùng dữ liệu không?",
+        "a": "Dữ liệu xuất phát từ các sản phẩm công khai NASA FIRMS và Natural Earth. Xem LICENSE của kho mã để biết điều khoản."
       },
       {
-        "q": "How do I connect the analysis service?",
-        "a": "Paste a bearer token into the Workbench briefing rail or Review page. Map, charts and calendar work without it."
+        "q": "Làm sao kết nối dịch vụ phân tích?",
+        "a": "Dán bearer token vào rail briefing của Workbench hoặc trang Review. Bản đồ, biểu đồ và lịch hoạt động không cần token."
       },
       {
-        "q": "Is the Workbench free to use?",
-        "a": "Yes. The workbench runs on public data and is available at flare-chronos.resonance.io.vn."
+        "q": "Workbench có miễn phí không?",
+        "a": "Có. Workbench chạy trên dữ liệu công khai tại flare-chronos.resonance.io.vn."
       }
     ]
   }
