@@ -74,7 +74,11 @@
       "page": "Đang tải giao diện",
       "photo": "Đang tải ảnh vệ tinh",
       "borders": "Đang tải ranh giới quốc gia",
-      "ready": "Sẵn sàng"
+      "ready": "Sẵn sàng",
+      "map": "Đang tải lớp bản đồ",
+      "data": "Đang tải dữ liệu phân tích",
+      "review": "Đang tải hàng đợi xét duyệt",
+      "service": "Đang kết nối dịch vụ"
     },
     "openHint": "Nhấp để mở không gian phân tích"
   },
