@@ -1011,7 +1011,7 @@ def tool_uc5_3_transboundary_fire_propagation_forensics() -> dict[str, Any]:
     e2024 = mek_epochs.get(2024, {})
     return {
         "use_case_id": "UC-5.3",
-        "corridor_bbox": "100.0,11.0,109.5,23.5",
+        "corridor_bbox": "100.0,8.5,109.5,23.5",
         "h3_res7_cell_area_km2": 5.161,
         "h3_res8_cell_area_km2": 0.737,
         "el_nino_2016_raw_detections": int(e2016.get("total_raw_detections", 43342)),

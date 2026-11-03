@@ -16,7 +16,7 @@ import pandas as pd
 import requests
 
 # Canonical Case Study Bounding Boxes (west,south,east,north)
-BBOX_MEKONG = "100.0,11.0,109.5,23.5"  # Vietnam, Laos, Cambodia, E. Thailand
+BBOX_MEKONG = "100.0,8.5,109.5,23.5"  # Vietnam incl. the Mekong Delta, Laos, Cambodia, E. Thailand
 BBOX_AMAZON = "-62.0,-14.0,-50.0,-4.0"  # Southern Amazon Arc of Deforestation (Mato Grosso / Para)
 
 FIRMS_API_BASE = "https://firms.modaps.eosdis.nasa.gov/api"

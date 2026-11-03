@@ -66,7 +66,9 @@ function fail(message: string): never {
 function growthPct(raw: number[], start: number, end: number): number {
   const first = raw[start];
   const last = raw[end];
-  if (!first) return 0;
+  if (!first || first <= 0 || last === undefined) {
+    fail('raw growth needs a positive measured baseline');
+  }
   return (last / first - 1) * 100;
 }
 
@@ -199,7 +201,7 @@ export const loadWorkbench = cache(async (calendar: CalendarDataset): Promise<Wo
       measured,
       rawGrowthPct: growthPct(raw, start, end),
       growthWindow: GROWTH_WINDOW,
-      trendPct: trendPct(shift.years.slice(0, end + 1), harmonized.slice(0, end + 1)),
+      trendPct: trendPct(shift.years.slice(start, end + 1), harmonized.slice(start, end + 1)),
     };
     epochs[region] = regionEpochs;
     sfai[region] = sfaiPeaks(calendar, region);

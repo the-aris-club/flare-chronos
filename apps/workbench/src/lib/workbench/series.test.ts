@@ -41,4 +41,27 @@ describe('workbench series', () => {
     expect(published.ciHighMw).toBe(holdout.rmse_gain_ci95_mw[1]);
     expect(published.trainLastYear).toBe(holdout.train_last_year);
   });
+
+  test('the harmonized trend is fitted over the same window as the raw growth', () => {
+    for (const region of ['mekong', 'amazon'] as const) {
+      const shift = results.regime_shift_series[region];
+      const [from, to] = workbench.series[region].growthWindow;
+      const years = shift.years.filter((year) => year >= from && year <= to);
+      const values = years.map(
+        (year) =>
+          (shift.modis_reference_counts_by_year as Record<string, number>)[String(year)] ?? 0,
+      );
+      const n = years.length;
+      const meanX = years.reduce((a, b) => a + b, 0) / n;
+      const meanY = values.reduce((a, b) => a + b, 0) / n;
+      let num = 0;
+      let den = 0;
+      years.forEach((year, i) => {
+        num += (year - meanX) * ((values[i] ?? 0) - meanY);
+        den += (year - meanX) ** 2;
+      });
+
+      expect(workbench.series[region].trendPct).toBeCloseTo((num / den / meanY) * 100, 6);
+    }
+  });
 });

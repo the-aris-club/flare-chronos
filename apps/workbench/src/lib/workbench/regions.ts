@@ -23,7 +23,7 @@ export type RegionDef = {
 export const REGION_DEFS = {
   mekong: {
     bbox: [97, 5.4, 110, 23.6],
-    queryBox: [100, 11, 109.5, 23.5],
+    queryBox: [100, 8.5, 109.5, 23.5],
     anchor: [105.8, 16.0],
     focus: ['704', '418', '116', '764'],
     staticSources: [

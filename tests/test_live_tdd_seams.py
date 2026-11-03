@@ -142,7 +142,7 @@ class TestLiveDualSystemSeamsTDD(unittest.TestCase):
         }
         # Independent known-good literals for UC-1.1 (Mekong 2005 vs 2024 from empirical_results.json)
         self.assertIn(1424.2, ledger_vals)
-        self.assertIn(1324.2, ledger_vals)
+        self.assertIn(1311.2, ledger_vals)
         self.assertIn(94.2, ledger_vals)
         self.assertIn(-5.8, ledger_vals)
         self.assertGreaterEqual(len(out_uc11["reasoning_trace"]), 2)

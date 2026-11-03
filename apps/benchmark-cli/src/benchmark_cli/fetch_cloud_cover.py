@@ -26,7 +26,7 @@ OUT = ROOT / "data" / "cloud" / "era5_cloud_cover.json"
 API = "https://archive-api.open-meteo.com/v1/archive"
 # min lon, min lat, max lon, max lat; mirrors firms_ingestion.BBOX_*
 BBOX = {
-    "mekong": (100.0, 11.0, 109.5, 23.5),
+    "mekong": (100.0, 8.5, 109.5, 23.5),
     "amazon": (-62.0, -14.0, -50.0, -4.0),
 }
 OVERPASS_LOCAL_HOURS = (1.5, 13.5)

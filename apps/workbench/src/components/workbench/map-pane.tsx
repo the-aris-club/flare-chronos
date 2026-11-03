@@ -191,9 +191,6 @@ export function MapPane({
         <MapZoom onZoom={zoom} onReset={() => setView(MAP_VIEW)} />
 
         {layers.lens && <FootprintLens physics={physics} />}
-        <span className="text-micro text-ink-subtle max-tablet:hidden pointer-events-none absolute bottom-1 left-1/2 -translate-x-1/2 font-mono whitespace-nowrap opacity-80">
-          {t('borderCredit')}
-        </span>
         {pxPerKm > 0 && <MapScale pxPerKm={pxPerKm} />}
         <MapLegend
           layers={layers}

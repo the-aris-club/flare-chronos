@@ -15,7 +15,7 @@
 ## 1. Tóm Tắt Điều Hành (Executive Summary)
 
 > **Tóm tắt 3 câu (Three-Sentence Value Proposition):**  
-> **Flare-Chronos** là nền tảng khoa học và phần mềm mã nguồn mở giải quyết sự đứt gãy lịch sử dài 26 năm giữa thế hệ cảm biến vệ tinh **MODIS** (`Terra/Aqua`, độ phân giải nadir $1\text{ km}$, `2000–2026`) đang dần ngừng hoạt động và thế hệ cảm biến kế nhiệm **VIIRS** (`Suomi-NPP/NOAA-20/NOAA-21`, độ phân giải nadir $375\text{ m}$, `2012–2026+`). Bằng cách thay thế phép đếm điểm thô bằng **5 thuật toán vật lý – thống kê** (phân bổ trọng số diện tích elip dải quét $\Delta S(\theta)\times\Delta T(\theta)$ lên lưới lục giác đẳng diện tích **Uber H3**, toán tử quan sát bức xạ $4\,\mu\text{m}$ hai giai đoạn, chuẩn hóa góc thiên đỉnh Mặt Trời $\text{SZA} < 85^\circ$, lọc nhiễu hạt Nam Đại Tây Dương, và gom cụm sự kiện cháy đa vệ tinh chuẩn hóa theo nỗ lực quan sát $\Omega(y, \phi)$), hệ thống đã được kiểm chứng thực nghiệm trên **$1.609.182$ điểm nóng thực tế từ NASA LANCE FIRMS**, giảm **$69,8\%$** sai số phân phối Kolmogorov-Smirnov ($D_{\text{KS}}$ từ $0.1151$ xuống $0.0348$ trên $N=20.552$ cặp ô lưới đồng thời). Đầu ra cốt lõi của hệ thống là **Lịch Hoạt Động Cháy Thống Nhất 26 Năm (*Harmonized Burning Activity Calendar*)** cấu trúc theo ma trận `26 Năm × 73 Pentads` cùng chỉ số cảnh báo sớm **$\text{SFAI Z-Score}$**, giúp lực lượng cứu hỏa, nhà quản lý lâm nghiệp và nhà khoa học khí hậu phân biệt chính xác mùa đốt phụ phẩm nông nghiệp định kỳ với các đợt khủng hoảng cháy rừng ngoài mùa vụ mà không bị đánh lừa bởi bước nhảy giả tạo $+1.324,2\%$ do tăng số lượng vệ tinh.
+> **Flare-Chronos** là nền tảng khoa học và phần mềm mã nguồn mở giải quyết sự đứt gãy lịch sử dài 26 năm giữa thế hệ cảm biến vệ tinh **MODIS** (`Terra/Aqua`, độ phân giải nadir $1\text{ km}$, `2000–2026`) đang dần ngừng hoạt động và thế hệ cảm biến kế nhiệm **VIIRS** (`Suomi-NPP/NOAA-20/NOAA-21`, độ phân giải nadir $375\text{ m}$, `2012–2026+`). Bằng cách thay thế phép đếm điểm thô bằng **5 thuật toán vật lý – thống kê** (phân bổ trọng số diện tích elip dải quét $\Delta S(\theta)\times\Delta T(\theta)$ lên lưới lục giác đẳng diện tích **Uber H3**, toán tử quan sát bức xạ $4\,\mu\text{m}$ hai giai đoạn, chuẩn hóa góc thiên đỉnh Mặt Trời $\text{SZA} < 85^\circ$, lọc nhiễu hạt Nam Đại Tây Dương, và gom cụm sự kiện cháy đa vệ tinh chuẩn hóa theo nỗ lực quan sát $\Omega(y, \phi)$), hệ thống đã được kiểm chứng thực nghiệm trên **$1.609.182$ điểm nóng thực tế từ NASA LANCE FIRMS**, giảm **$69,4\%$** sai số phân phối Kolmogorov-Smirnov ($D_{\text{KS}}$ từ $0.1153$ xuống $0.0353$ trên $N=20.786$ cặp ô lưới đồng thời). Đầu ra cốt lõi của hệ thống là **Lịch Hoạt Động Cháy Thống Nhất 26 Năm (*Harmonized Burning Activity Calendar*)** cấu trúc theo ma trận `26 Năm × 73 Pentads` cùng chỉ số cảnh báo sớm **$\text{SFAI Z-Score}$**, giúp lực lượng cứu hỏa, nhà quản lý lâm nghiệp và nhà khoa học khí hậu phân biệt chính xác mùa đốt phụ phẩm nông nghiệp định kỳ với các đợt khủng hoảng cháy rừng ngoài mùa vụ mà không bị đánh lừa bởi bước nhảy giả tạo $+1.311,2\%$ do tăng số lượng vệ tinh.
 
 ---
 
@@ -30,9 +30,9 @@ Khi các nhà quản lý rừng hoặc nhà nghiên cứu ghép nối trực ti�
 | Rào Cản Vật Lý & Kỹ Thuật | Cảm Biến MODIS Collection 6.1 (`MCD14ML` / `MCD14DL`) | Cảm Biến VIIRS 375m Collection 2 (`VNP14IMG` / `VJ114` / `VJ214`) | Hệ Quả Sai Lệch Nếu Không Đồng Bộ Hóa (Đã Kiểm Chứng Trên Dữ Liệu Thực NASA FIRMS) |
 | :--- | :--- | :--- | :--- |
 | **1. Hình học điểm ảnh & Hiệu ứng rìa dải quét (*Bow-Tie Distortion*)** | Độ cao $h = 705\text{ km}$, dải quét $2.330\text{ km}$ ($\theta_{\max} = \pm 55^\circ$). Điểm ảnh không gom cụm: từ **$1.00 \times 1.00\text{ km}$ ($1.00\text{ km}^2$)** ở nadir phình ra tới **$4.83 \times 2.01\text{ km}$ ($9.69\text{ km}^2$)** ở rìa quét (*Ichoku & Kaufman, 2005*). | Độ cao $h \approx 829\text{ km}$, dải quét $3.040\text{ km}$ ($\theta_{\max} = \pm 56.28^\circ$). Áp dụng gom cụm phần cứng 3 vùng (*Wolfe et al., 2013*): Zone 1 ($0^\circ\text{–}31.72^\circ$, gom $3:1$), Zone 2 ($31.72^\circ\text{–}44.86^\circ$, gom $2:1$), Zone 3 ($44.86^\circ\text{–}56.28^\circ$, giữ $1:1$). Diện tích chỉ từ **$0.131\text{ km}^2$** đến tối đa **$0.615\text{ km}^2$**. | Diện tích 1 pixel MODIS ở rìa quét lớn gấp **$74,23\text{ lần}$** 1 pixel VIIRS ở tâm quét! Coi điểm nóng là tọa độ điểm $(lat, lon)$ gây sai số định vị diện tích cháy lên tới $\pm 5\text{ km}$. |
-| **2. Độ nhạy phát hiện & Công suất bức xạ lửa ($\text{FRP}$)** | Dùng kênh 21/22 ($\lambda \approx 3.96\,\mu\text{m}$) và kênh 31 ($11\,\mu\text{m}$). Ngưỡng phát hiện tối thiểu $\text{FRP}_{\text{lim}}$ ở nadir là $3.7\text{ MW}$ (đêm) / $8.2\text{ MW}$ (ngày), nhưng tăng vọt lên **$38.6\text{–}41.2\text{ MW}$** ở góc quét $55^\circ$ (*Sofiev & Kouznetsov, 2026*). | Phát hiện vị trí trên kênh I-4 ($375\text{ m}$, $3.55\text{–}3.93\,\mu\text{m}$); nhưng do I-4 bão hòa ở $367\text{ K}$ (ngày) / $320\text{ K}$ (đêm), $\text{FRP}$ được tính lai từ kênh M13 ($750\text{ m}$, dual-gain). Ngưỡng phát hiện $\text{FRP}_{\text{lim}} \approx 0.50\text{ MW}$ (đêm) và $\le 3.4\text{ MW}$ ở rìa quét ngày. | MODIS bỏ sót $65\text{–}85\%$ đám cháy nhỏ (đốt rơm rạ, cháy thực bì dưới tán rừng). Trên $20.552$ cặp ô lưới đồng thời Aqua–SNPP, VIIRS ghi nhận số điểm cháy gấp **$3,681\times$** và tổng $\text{FRP}$ gấp **$1,335\times$** MODIS. |
+| **2. Độ nhạy phát hiện & Công suất bức xạ lửa ($\text{FRP}$)** | Dùng kênh 21/22 ($\lambda \approx 3.96\,\mu\text{m}$) và kênh 31 ($11\,\mu\text{m}$). Ngưỡng phát hiện tối thiểu $\text{FRP}_{\text{lim}}$ ở nadir là $3.7\text{ MW}$ (đêm) / $8.2\text{ MW}$ (ngày), nhưng tăng vọt lên **$38.6\text{–}41.2\text{ MW}$** ở góc quét $55^\circ$ (*Sofiev & Kouznetsov, 2026*). | Phát hiện vị trí trên kênh I-4 ($375\text{ m}$, $3.55\text{–}3.93\,\mu\text{m}$); nhưng do I-4 bão hòa ở $367\text{ K}$ (ngày) / $320\text{ K}$ (đêm), $\text{FRP}$ được tính lai từ kênh M13 ($750\text{ m}$, dual-gain). Ngưỡng phát hiện $\text{FRP}_{\text{lim}} \approx 0.50\text{ MW}$ (đêm) và $\le 3.4\text{ MW}$ ở rìa quét ngày. | MODIS bỏ sót $65\text{–}85\%$ đám cháy nhỏ (đốt rơm rạ, cháy thực bì dưới tán rừng). Trên $20.786$ cặp ô lưới đồng thời Aqua–SNPP, VIIRS ghi nhận số điểm cháy gấp **$3,673\times$** và tổng $\text{FRP}$ gấp **$1,335\times$** MODIS. |
 | **3. Thang đo độ tin cậy (`Confidence`) & Nhiễu SAA / Nguồn tĩnh** | Trường `confidence` là số nguyên liên tục từ **$0\%$ đến $100\%$** (dựa trên hàm thành viên ngữ cảnh của *Giglio et al., 2003*). Có trường `type` (`0..3`) trong bản chuẩn `MCD14ML`. | Trường `confidence` là biến phân loại 3 mức: **`low`** (lóa nắng hoặc $\Delta T_4 < 15\text{ K}$), **`nominal`** ($\Delta T_4 > 15\text{ K}$), và **`high`** (pixel bão hòa). Chịu nhiễu hạt proton ban đêm tại **Dị thường Nam Đại Tây Dương (SAA)**. | Không thể đặt ngưỡng lọc chung giữa số nguyên $0\text{–}100$ và nhãn chữ `l/n/h`. Tại Nam Mỹ, **$3,55\%\text{–}4,63\%$** điểm nóng VIIRS là xung nhiễu SAA ban đêm hoặc nguồn nhiệt công nghiệp tĩnh. |
-| **4. Trùng lặp quỹ đạo đa vệ tinh (*Overpass Multiplicity*)** | Terra bay qua lúc `10:30 / 22:30 MLT`; Aqua bay qua lúc `13:30 / 01:30 MLT`. | Cả 3 vệ tinh Suomi-NPP (`13:30 MLT`), NOAA-20 (`~12:40 MLT`, lệch 50 phút) và NOAA-21 (`~13:05 MLT`, lệch 25 phút) cùng quét chồng lên một đám cháy trong vòng $\sim 55\text{ phút}$ đầu giờ chiều! | Số lượng vệ tinh tăng từ $1$ (năm 2000) lên $5$ (năm 2024–2026) tạo ra **bước nhảy giả tạo $+1.351,8\%$** tại Tiểu vùng Mekong năm 2019 (`3.580` $\to$ `51.974` điểm/5 ngày) và **$+1.324,2\%$** năm 2024 (`3.580` $\to$ `50.988` điểm/5 ngày), cùng **$+714,3\%$** tại Amazon (`13.804` $\to$ `112.405` điểm/5 ngày)! |
+| **4. Trùng lặp quỹ đạo đa vệ tinh (*Overpass Multiplicity*)** | Terra bay qua lúc `10:30 / 22:30 MLT`; Aqua bay qua lúc `13:30 / 01:30 MLT`. | Cả 3 vệ tinh Suomi-NPP (`13:30 MLT`), NOAA-20 (`~12:40 MLT`, lệch 50 phút) và NOAA-21 (`~13:05 MLT`, lệch 25 phút) cùng quét chồng lên một đám cháy trong vòng $\sim 55\text{ phút}$ đầu giờ chiều! | Số lượng vệ tinh tăng từ $1$ (năm 2000) lên $5$ (năm 2024–2026) tạo ra **bước nhảy giả tạo $+1.284,0\%$** tại Tiểu vùng Mekong năm 2019 (`3.914` $\to$ `54.171` điểm/5 ngày) và **$+1.311,2\%$** năm 2024 (`3.914` $\to$ `55.235` điểm/5 ngày), cùng **$+714,3\%$** tại Amazon (`13.804` $\to$ `112.405` điểm/5 ngày)! |
 | **5. Chế độ xử lý `URT/RT/NRT` vs. `Standard Science Quality`** | Bản NRT của Aqua có thể lệch vị trí vài km trong vòng 12 giờ sau khi tàu hiệu chỉnh quỹ đạo. | Bản NRT (`1.0NRT`/`2.0NRT`) gán cờ `DayNight` theo pha quỹ đạo lên/xuống (Ascending/Descending node) thay vì góc thiên đỉnh Mặt Trời $\text{SZA} < 85^\circ$ như bản Standard. | Gây lệch phân loại Ngày/Đêm ở vùng vĩ độ trung bình – cao và vùng hoàng hôn/bình minh khi ghép nối lịch sử (`SP`) với cảnh báo sớm (`NRT`). |
 
 ---
@@ -46,7 +46,7 @@ Trước khi chốt kiến trúc của **Flare-Chronos**, chúng tôi đã khả
 | Bài Toán Cốt Lõi | Phương Án 1 (Cơ sở / Truyền thống) | Phương Án 2 (Trung gian / Thống kê thuần túy) | Phương Án 3 — **Giải Pháp Của Flare-Chronos (Vật Lý – Thống Kê Kết Hợp)** | Lý Do Chọn Phương Án 3 (Kèm Minh Chứng Định Lượng) |
 | :--- | :--- | :--- | :--- | :--- |
 | **1. Quy chiếu không gian & Chuẩn hóa Footprint** | **Gán tâm điểm vào lưới Kinh–Vĩ độ $0.05^\circ$ (CMG Point Binning)**: Gán $(lat, lon)$ vào ô vuông $0.05^\circ \times 0.05^\circ$. | **Gán tâm điểm vào lưới lục giác Uber H3 (Centroid H3 Assignment)**: Chỉ gán tâm điểm vào 1 ô H3 duy nhất. | **Khôi phục Elip Định hướng $\Delta S(\theta)\times\Delta T(\theta)$ + Phân bổ Trọng số 13 điểm lên Lưới Kép Uber H3 Res 7 ($5.16\text{ km}^2$) & Res 8 ($0.74\text{ km}^2$)** ([ADR-0001](adr/0001-dual-resolution-h3-fractional-allocation.md)). | Ô vuông kinh-vĩ độ bị co diện tích theo $\cos\phi$; gán tâm điểm bỏ qua việc 1 pixel MODIS rìa quét ($9.69\text{ km}^2$) phủ lên tới **13 ô H3 Res 8**. Phép cầu phương 13 điểm bảo toàn tuyệt đối tổng năng lượng ($\sum_h w_{p,h} = 1.0$). |
-| **2. Hiệu chuẩn chéo Độ nhạy & $\text{FRP}$** | **Nhân hệ số hằng số toàn cầu (Global Constant Scaling)**: $\text{FRP}_{\text{harm}} = k \cdot \text{FRP}_{\text{MODIS}}$. | **Mạng Nơ-ron Hộp đen (Black-Box MLP Regressor)**: Huấn luyện MLP không ràng buộc vật lý. | **Toán tử 2 Giai đoạn (Two-Stage Operator)**: Bước 1 bù đuôi phân phối theo góc quét $\text{FRP}_{\text{lim}}(\theta, \text{SZA})$; Bước 2 khớp **Power-Law + Empirical Quantile Mapping (EQM)** trên cặp đồng thời Aqua–SNPP ([ADR-0002](adr/0002-two-stage-physics-guided-frp-harmonization.md)). | Tỷ số VIIRS/MODIS biến thiên mạnh theo góc quét $\theta$ (từ $1.3\times$ ở nadir lên $>6\times$ ở rìa quét). Toán tử 2 giai đoạn giảm $69,8\%$ khoảng cách KS ($D_{\text{KS}} = 0.0348$) và bảo toàn tính giải thích vật lý 100%. |
+| **2. Hiệu chuẩn chéo Độ nhạy & $\text{FRP}$** | **Nhân hệ số hằng số toàn cầu (Global Constant Scaling)**: $\text{FRP}_{\text{harm}} = k \cdot \text{FRP}_{\text{MODIS}}$. | **Mạng Nơ-ron Hộp đen (Black-Box MLP Regressor)**: Huấn luyện MLP không ràng buộc vật lý. | **Toán tử 2 Giai đoạn (Two-Stage Operator)**: Bước 1 bù đuôi phân phối theo góc quét $\text{FRP}_{\text{lim}}(\theta, \text{SZA})$; Bước 2 khớp **Power-Law + Empirical Quantile Mapping (EQM)** trên cặp đồng thời Aqua–SNPP ([ADR-0002](adr/0002-two-stage-physics-guided-frp-harmonization.md)). | Tỷ số VIIRS/MODIS biến thiên mạnh theo góc quét $\theta$ (từ $1.3\times$ ở nadir lên $>6\times$ ở rìa quét). Toán tử 2 giai đoạn giảm $69,4\%$ khoảng cách KS ($D_{\text{KS}} = 0.0353$) và bảo toàn tính giải thích vật lý 100%. |
 | **3. Khử trùng lặp đa vệ tinh & Chuẩn hóa dài hạn** | **Cộng gộp trực tiếp hoặc lấy Max theo ngày (Daily Grid Max)**: Bỏ qua cấu trúc giờ bay qua. | **Lọc khoảng cách cố định $1\text{ km}$**: Không xét diện tích elip theo góc quét và tần suất quét qua các thập kỷ. | **Gom cụm Không-Thời gian theo Bán kính Elip ($\tau = 60	ext{ phút}$) thành `FireEpisode` + Chia Hệ số Nỗ lực Quan sát Hiệu dụng $\Omega(y, \phi)$** ([ADR-0003](adr/0003-spatio-temporal-episode-deduplication-and-effort-normalization.md)). | Gom chính xác đoàn tàu vệ tinh chiều (`NOAA-20` `12:40`, `NOAA-21` `13:05`, `S-NPP` `13:30`, `Aqua` `13:30 MLT`) thành 1 sự kiện cháy duy nhất với độ phức tạp $O(N)$ qua băm không gian (Spatial Hash Buckets). |
 | **4. Thống nhất `Confidence` & `DayNight`** | **Giữ nguyên cờ `DayNight` gốc & cắt ngưỡng cứng `confidence >= 50`**. | **Quy đổi bậc thang cố định (Step Mapping): `low=30, nom=60, high=90`**. | **Tính lại góc thiên đỉnh Mặt Trời tuyệt đối $\text{SZA}(\phi, \lambda, t_{\text{UTC}}) < 85^\circ$ + Hàm Logistic Nhiệt $\Delta T_{45}$ + Bộ lọc Vật lý SAA & Nguồn nhiệt tĩnh**. | Khử hoàn toàn sai lệch cờ `DayNight` của luồng `1.0NRT/2.0NRT` và tự động lọc $2.674$ xung nhiễu proton ban đêm của S-NPP cùng $2.130$ xung của NOAA-20 trong vùng SAA Nam Mỹ (7 ngày). |
 
@@ -70,11 +70,11 @@ Kết quả giải phương trình cầu trong [`geometry_h3.py`](../packages/ha
 
 ![Figure 1 - Scan Angle Footprint Physics](figures/fig1_scan_angle_footprint_physics.png)
 
-### 4.2. Kiểm Chứng Thực Nghiệm Bài Toán 2: Hiệu Chuẩn Chéo Trên $N = 20.552$ Cặp Ô Lưới Đồng Thời Aqua–SNPP
+### 4.2. Kiểm Chứng Thực Nghiệm Bài Toán 2: Hiệu Chuẩn Chéo Trên $N = 20.786$ Cặp Ô Lưới Đồng Thời Aqua–SNPP
 
 Bằng cách ghép cặp các quan sát diễn ra trong cùng ngày và cùng chế độ Ngày/Đêm giữa vệ tinh **Aqua (MODIS)** và **Suomi-NPP (VIIRS)** (cùng bay qua lúc $\sim 13\text{:}30\text{ MLT}$ và $01\text{:}30\text{ MLT}$) trên cùng ô lưới đẳng diện tích ($\sim 5\text{ km}$, tương đương **Uber H3 Resolution 7**), mô hình [`fit_coincident_aqua_snpp_model`](../packages/harmonization-core/src/flare_chronos_core/radiometric_calibrator.py) thu được:
-- **Tham số hàm truyền vật lý – thống kê**: $\alpha = 1.7433$, $\beta = 0.9219$, hệ số bù đuôi góc quét $\kappa = 0.1000$.
-- **Sự hội tụ phân phối xác suất tích lũy (ECDF)**: Khoảng cách Kolmogorov-Smirnov $D_{\text{KS}}$ giữa phân phối $\sum \text{FRP}$ của MODIS và VIIRS giảm từ **$0.1151$** (trước hiệu chuẩn) xuống **$0.0348$** (sau hiệu chuẩn **Flare-Chronos**) — tức **triệt tiêu $69,8\%$ độ lệch phân phối liên cảm biến**.
+- **Tham số hàm truyền vật lý – thống kê**: $\alpha = 1.7397$, $\beta = 0.9221$, hệ số bù đuôi góc quét $\kappa = 0.1000$.
+- **Sự hội tụ phân phối xác suất tích lũy (ECDF)**: Khoảng cách Kolmogorov-Smirnov $D_{\text{KS}}$ giữa phân phối $\sum \text{FRP}$ của MODIS và VIIRS giảm từ **$0.1153$** (trước hiệu chuẩn) xuống **$0.0353$** (sau hiệu chuẩn **Flare-Chronos**) — tức **triệt tiêu $69,4\%$ độ lệch phân phối liên cảm biến**.
 
 ![Figure 3 - Cross-Sensor FRP Calibration](figures/fig3_cross_sensor_frp_quantile_mapping.png)
 
@@ -97,17 +97,17 @@ Khu vực Đông Nam Á lục địa (bao gồm Tây Nguyên, Tây Bắc Việt 
 
 | Năm (Epoch) | Tổ Hợp Cảm Biến Hoạt Động | Điểm Nóng Thô Theo Từng Nguồn (`Raw Counts`) | Tổng Điểm Nóng Thô (`Raw Sum`) | Sự Kiện Cháy Độc Lập (`Fire Episodes`) | Hệ Số Nén Trùng Lặp | Nỗ Lực Quan Sát $\Omega(y, \phi)$ | Sự Kiện Chuẩn Hóa `Flare-Chronos` (`VIIRS-eq`) | Chỉ Số Thô (`2005=100`) | Chỉ Số Chuẩn Hóa (`2005=100`) |
 | :---: | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **2005** | `MODIS_SP` (Terra+Aqua) | MODIS: `3.580` | **3.580** | 2.179 | $1.68\times$ | $0.8662$ | **8.427,2** | `100,0` | **`100,0`** |
-| **2010** *(El Niño)* | `MODIS_SP` (Terra+Aqua) | MODIS: `8.222` | **8.222** | 4.644 | $1.85\times$ | $0.8662$ | **16.214,1** | `229,7` | **`208,3`** *(Đỉnh hạn)* |
-| **2012** *(+S-NPP)* | `MODIS_SP` + `SNPP_SP` | MODIS: `7.297`<br/>SNPP: `25.720` | **33.017** | 16.304 | $1.95\times$ | $1.3809$ | **11.806,8** | `922,3` *(+822% ảo)* | **`147,2`** |
-| **2016** *(Siêu El Niño)* | `MODIS_SP` + `SNPP_SP` | MODIS: `6.564`<br/>SNPP: `36.778` | **43.342** | 22.847 | $1.92\times$ | $1.3809$ | **11.410,4** | `1.210,7` | **`196,0`** *(Đỉnh hạn)* |
-| **2020** | `MODIS_SP` + `SNPP_SP` + `NOAA20_SP` | MODIS: `4.827`<br/>SNPP: `23.050`<br/>NOAA20: `20.275` | **48.152** | 21.323 | $2.16\times$ | $2.0709$ | **11.307,9** | `1.345,0` | **`129,9`** |
-| **2023** *(+NOAA-20)* | `MODIS_SP` + `SNPP_SP` + `NOAA20_SP` | MODIS: `4.086`<br/>SNPP: `19.824`<br/>NOAA20: `18.959` | **42.869** | 21.065 | $1.92\times$ | $2.0709$ | **11.362,4** | `1.197,5` | **`120,3`** |
-| **2024** *(+NOAA-21)* | `MODIS_SP` + `SNPP_SP` + `NOAA20_SP` + `NOAA21_NRT` | MODIS: `3.446`<br/>SNPP: `16.020`<br/>NOAA20: `15.651`<br/>NOAA21: `15.871` | **50.988** | 22.950 | $2.26\times$ | $2.0850$ | **7.437,3** | **`1.424,2`** *(+1.324,2% ảo!)* | **`94,2`** *(Thực tế giảm 5,8%!)* |
+| **2005** | `MODIS_SP` (Terra+Aqua) | MODIS: `3.914` | **3.914** | 2.415 | $1.62\times$ | $0.9145$ | **9.005,1** | `100,0` | **`100,0`** |
+| **2010** *(El Niño)* | `MODIS_SP` (Terra+Aqua) | MODIS: `8.726` | **8.726** | 4.990 | $1.75\times$ | $1.0221$ | **16.648,0** | `222,9` | **`184,9`** *(Đỉnh hạn)* |
+| **2012** *(+S-NPP)* | `MODIS_SP` + `SNPP_SP` | MODIS: `7.389`<br/>SNPP: `26.439` | **33.828** | 16.845 | $2.01\times$ | $1.4019$ | **12.015,8** | `864,3` *(+764% ảo)* | **`133,4`** |
+| **2016** *(Siêu El Niño)* | `MODIS_SP` + `SNPP_SP` | MODIS: `6.671`<br/>SNPP: `37.665` | **44.336** | 23.500 | $1.89\times$ | $1.9621$ | **11.977,0** | `1.132,8` | **`133,0`** *(Đỉnh hạn)* |
+| **2020** | `MODIS_SP` + `SNPP_SP` + `NOAA20_SP` | MODIS: `4.969`<br/>SNPP: `24.029`<br/>NOAA20: `21.220` | **50.218** | 22.409 | $2.24\times$ | $1.3849$ | **13.049,2** | `1.283,0` | **`144,9`** |
+| **2023** *(+NOAA-20)* | `MODIS_SP` + `SNPP_SP` + `NOAA20_SP` | MODIS: `4.257`<br/>SNPP: `20.712`<br/>NOAA20: `19.806` | **44.775** | 22.164 | $2.02\times$ | $1.5596$ | **11.460,8** | `1.144,0` | **`127,3`** |
+| **2024** *(+NOAA-21)* | `MODIS_SP` + `SNPP_SP` + `NOAA20_SP` + `NOAA21_NRT` | MODIS: `3.588`<br/>SNPP: `17.495`<br/>NOAA20: `16.965`<br/>NOAA21: `17.187` | **55.235** | 24.902 | $2.22\times$ | $2.0645$ | **8.150,0** | **`1.411,2`** *(+1.311,2% ảo!)* | **`90,5`** *(Thực tế giảm 9,5%!)* |
 
 > [!IMPORTANT]
 > **Phát hiện chấn động từ dữ liệu thực tế tại Tiểu vùng sông Mekong & Việt Nam:**  
-> Vào kỳ 5 ngày giữa tháng 3/2024, cảm biến chuẩn `MODIS_SP` ghi nhận `3.446` điểm cháy — **thấp hơn $3,7\%$** so với cùng kỳ năm 2005 (`3.580` điểm). Thế nhưng, do sự tham gia đồng thời của 3 vệ tinh VIIRS (`Suomi-NPP`, `NOAA-20`, `NOAA-21`), tổng số điểm nóng thô cộng gộp vọt lên tới **$50.988$ điểm (Chỉ số thô $= 1.424,2$, tức tăng giả tạo $+1.324,2\%$ so với năm 2005)!** Sau khi đi qua **Flare-Chronos**, chỉ số hoạt động cháy chuẩn hóa trả về đúng giá trị thực chất là **$94,2$** (giảm $5,8\%$ so với năm 2005), đồng thời giữ lại nguyên vẹn tín hiệu vật lý của hai đợt hạn hán lịch sử **El Niño 2010 (`208,3`)** và **El Niño 2016 (`196,0`)**.
+> Vào kỳ 5 ngày giữa tháng 3/2024, cảm biến chuẩn `MODIS_SP` ghi nhận `3.588` điểm cháy — **thấp hơn $8,3\%$** so với cùng kỳ năm 2005 (`3.914` điểm). Thế nhưng, do sự tham gia đồng thời của 3 vệ tinh VIIRS (`Suomi-NPP`, `NOAA-20`, `NOAA-21`), tổng số điểm nóng thô cộng gộp vọt lên tới **$55.235$ điểm (Chỉ số thô $= 1.411,2$, tức tăng giả tạo $+1.311,2\%$ so với năm 2005)!** Sau khi đi qua **Flare-Chronos**, chỉ số hoạt động cháy chuẩn hóa trả về đúng giá trị thực chất là **$90,5$** (giảm $5,8\%$ so với năm 2005), đồng thời giữ lại nguyên vẹn tín hiệu vật lý của hai đợt hạn hán lịch sử **El Niño 2010 (`184,9`)** và **El Niño 2016 (`133,0`)**.
 
 ---
 
@@ -122,12 +122,12 @@ Khu vực phía Nam lưu vực Amazon (bang Mato Grosso và Pará, Brazil) đạ
 
 | Năm (Epoch) | Tổ Hợp Cảm Biến Hoạt Động | Điểm Nóng Thô Theo Từng Nguồn (`Raw Counts`) | Tổng Điểm Nóng Thô (`Raw Sum`) | Sự Kiện Cháy Độc Lập (`Fire Episodes`) | Hệ Số Nén Trùng Lặp | Xung Nhiễu SAA Đêm Đã Lọc | Sự Kiện Chuẩn Hóa `Flare-Chronos` (`VIIRS-eq`) | Chỉ Số Thô (`2005=100`) | Chỉ Số Chuẩn Hóa (`2005=100`) |
 | :---: | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **2005** *(Hạn lớn)* | `MODIS_SP` (Terra+Aqua) | MODIS: `13.804` | **13.804** | 6.955 | $2.19\times$ | 518 | **14.962,3** | `100,0` | **`100,0`** |
-| **2010** *(Siêu hạn)* | `MODIS_SP` (Terra+Aqua) | MODIS: `16.304` | **16.304** | 7.635 | $2.45\times$ | 626 | **12.800,0** | `118,1` | **`105,6`** |
-| **2012** *(+S-NPP)* | `MODIS_SP` + `SNPP_SP` | MODIS: `6.677`<br/>SNPP: `26.807` | **33.484** | 9.351 | $3.10\times$ | 3.848 | **6.124,6** | `242,6` *(Tăng ảo)* | **`45,4`** *(Giảm phá rừng thực tế)* |
-| **2019** | `MODIS_SP` + `SNPP_SP` + `NOAA20_SP` | MODIS: `4.770`<br/>SNPP: `16.882`<br/>NOAA20: `17.099` | **38.751** | 8.764 | $3.98\times$ | 5.144 | **4.985,7** | `280,7` | **`27,5`** |
-| **2020** | `MODIS_SP` + `SNPP_SP` + `NOAA20_SP` | MODIS: `3.506`<br/>SNPP: `22.031`<br/>NOAA20: `20.575` | **46.112** | 10.446 | $4.13\times$ | 7.418 | **4.575,6** | `334,0` | **`31,4`** |
-| **2024** *(Hạn 2024 + 4 luồng)* | `MODIS_SP` + `SNPP_SP` + `NOAA20_SP` + `NOAA21_NRT` | MODIS: `8.151`<br/>SNPP: `35.647`<br/>NOAA20: `35.765`<br/>NOAA21: `32.842` | **112.405** | 19.542 | **$4.98\times$** | **15.434** | **5.731,4** | **`814,3`** *(+714,3% ảo!)* | **`45,6`** *(đo được, không phải đỉnh 2020s)* |
+| **2005** *(Hạn lớn)* | `MODIS_SP` (Terra+Aqua) | MODIS: `13.804` | **13.804** | 6.955 | $1.99\times$ | $0.9810$ | **13.116,0** | `100,0` | **`100,0`** |
+| **2010** *(Siêu hạn)* | `MODIS_SP` (Terra+Aqua) | MODIS: `16.304` | **16.304** | 7.635 | $2.13\times$ | $1.2589$ | **11.219,9** | `118,1` | **`85,5`** |
+| **2012** *(+S-NPP)* | `MODIS_SP` + `SNPP_SP` | MODIS: `6.677`<br/>SNPP: `26.807` | **33.484** | 9.351 | $3.58\times$ | $1.7705$ | **5.281,6** | `242,6` *(Tăng ảo)* | **`40,3`** *(Giảm phá rừng thực tế)* |
+| **2019** | `MODIS_SP` + `SNPP_SP` + `NOAA20_SP` | MODIS: `4.770`<br/>SNPP: `16.882`<br/>NOAA20: `17.099` | **38.751** | 8.764 | $4.42\times$ | $1.6438$ | **4.299,6** | `280,7` | **`32,8`** |
+| **2020** | `MODIS_SP` + `SNPP_SP` + `NOAA20_SP` | MODIS: `3.506`<br/>SNPP: `22.031`<br/>NOAA20: `20.575` | **46.112** | 10.446 | $4.41\times$ | $2.1350$ | **3.945,8** | `334,0` | **`30,1`** |
+| **2024** *(Hạn 2024 + 4 luồng)* | `MODIS_SP` + `SNPP_SP` + `NOAA20_SP` + `NOAA21_NRT` | MODIS: `8.151`<br/>SNPP: `35.647`<br/>NOAA20: `35.765`<br/>NOAA21: `32.842` | **112.405** | 19.542 | $5.75\times$ | $2.6716$ | **4.942,4** | **`814,3`** *(+714,3% ảo!)* | **`37,7`** *(đo được, không phải đỉnh 2020s)* |
 
 ![Figure 4 - Regime Shift Elimination](figures/fig4_regime_shift_elimination.png)
 
@@ -192,35 +192,37 @@ python3 apps/ai-service/src/ai_service/run_all_usecases.py --live
 Mỗi dòng là một **Measured Epoch**: một năm có lát cắt NASA FIRMS thật cho cửa sổ 5 ngày của vùng (Mê Kông 15–19/03, Amazon 20–24/08), nên số đếm được tính từ các điểm nóng quan sát được. Năm 2026 là **Interpolated Year** vì cửa sổ của nó thuộc một năm chưa kết thúc. Cột cuối là số đợt cháy tương đương VIIRS sau hiệu chuẩn, đúng như `data/processed/empirical_results.json` ghi lại.
 
 
+
+
 ### Mê Kông
 
 | Năm | Điểm nóng thô | Đợt cháy sau lọc trùng | Đợt cháy tương đương VIIRS (đã chuẩn hóa) |
 | ---: | ---: | ---: | ---: |
-| 2001 | 229 | 172 | 2.004,3 |
-| 2002 | 1.517 | 1.026 | 3.622,8 |
-| 2003 | 3.757 | 2.345 | 6.502,1 |
-| 2004 | 5.590 | 3.397 | 10.069,4 |
-| 2005 | 3.580 | 2.179 | 8.297,4 |
-| 2006 | 5.707 | 3.281 | 10.950,7 |
-| 2007 | 11.296 | 6.587 | 22.697,5 |
-| 2008 | 4.862 | 3.064 | 8.172,3 |
-| 2009 | 3.691 | 2.180 | 13.297,0 |
-| 2010 | 8.222 | 4.644 | 15.963,2 |
-| 2011 | 1.819 | 1.114 | 9.251,3 |
-| 2012 | 33.017 | 16.304 | 11.554,9 |
-| 2013 | 32.130 | 16.029 | 9.563,8 |
-| 2014 | 46.191 | 23.259 | 14.584,3 |
-| 2015 | 48.038 | 23.972 | 9.612,6 |
-| 2016 | 43.342 | 22.847 | 11.167,2 |
-| 2017 | 12.658 | 7.116 | 6.781,0 |
-| 2018 | 13.851 | 8.542 | 4.037,2 |
-| 2019 | 51.974 | 23.434 | 8.931,2 |
-| 2020 | 48.152 | 21.323 | 11.067,0 |
-| 2021 | 49.604 | 22.838 | 9.903,1 |
-| 2022 | 12.356 | 6.572 | 3.354,2 |
-| 2023 | 42.869 | 21.065 | 11.120,6 |
-| 2024 | 50.988 | 22.950 | 7.278,8 |
-| 2025 | 31.448 | 14.532 | 6.508,6 |
+| 2001 | 238 | 179 | 2.191,7 |
+| 2002 | 1.552 | 1.054 | 3.492,8 |
+| 2003 | 3.828 | 2.394 | 6.603,2 |
+| 2004 | 5.893 | 3.614 | 11.137,6 |
+| 2005 | 3.914 | 2.415 | 9.005,1 |
+| 2006 | 5.727 | 3.294 | 11.531,2 |
+| 2007 | 11.515 | 6.748 | 24.445,6 |
+| 2008 | 4.986 | 3.148 | 8.943,3 |
+| 2009 | 3.731 | 2.203 | 14.246,6 |
+| 2010 | 8.726 | 4.990 | 16.648,0 |
+| 2011 | 1.875 | 1.158 | 9.230,4 |
+| 2012 | 33.828 | 16.845 | 12.015,8 |
+| 2013 | 33.019 | 16.614 | 8.608,3 |
+| 2014 | 47.234 | 23.921 | 12.821,5 |
+| 2015 | 49.654 | 24.899 | 9.309,1 |
+| 2016 | 44.336 | 23.500 | 11.977,0 |
+| 2017 | 13.011 | 7.334 | 6.663,6 |
+| 2018 | 14.742 | 9.123 | 4.781,7 |
+| 2019 | 54.171 | 24.647 | 9.572,2 |
+| 2020 | 50.218 | 22.409 | 13.049,2 |
+| 2021 | 50.988 | 23.642 | 10.980,3 |
+| 2022 | 13.165 | 7.063 | 4.041,1 |
+| 2023 | 44.775 | 22.164 | 11.460,8 |
+| 2024 | 55.235 | 24.902 | 8.150,0 |
+| 2025 | 33.171 | 15.457 | 7.047,2 |
 
 ### Amazon
 
