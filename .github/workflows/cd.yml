@@ -94,5 +94,11 @@ jobs:
               sleep 2
             done
             python3 -c "import urllib.request; print(urllib.request.urlopen('http://127.0.0.1:5901/health').read().decode())"
-            curl -fsS http://127.0.0.1:5900 >/dev/null
+            for i in $(seq 1 30); do
+              if curl -fsS -o /dev/null http://127.0.0.1:5900/; then
+                break
+              fi
+              sleep 2
+            done
+            curl -fsS -o /dev/null http://127.0.0.1:5900/
             echo "Deploy ${TAG} complete."
