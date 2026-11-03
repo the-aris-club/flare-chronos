@@ -14,9 +14,10 @@ const NINO_YEAR = 2016;
 
 function point(pentad: number, radius: number) {
   const angle = -Math.PI / 2 + ((pentad - 1) / 73) * Math.PI * 2;
+  // Round so server and client render the same attribute text (hydration-safe).
   return {
-    x: CENTER + radius * Math.cos(angle),
-    y: CENTER + radius * Math.sin(angle),
+    x: Math.round((CENTER + radius * Math.cos(angle)) * 100) / 100,
+    y: Math.round((CENTER + radius * Math.sin(angle)) * 100) / 100,
   };
 }
 

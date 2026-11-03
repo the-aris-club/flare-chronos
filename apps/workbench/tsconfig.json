@@ -30,5 +30,10 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules", "src/i18n/messages.test.ts", "src/lib/workbench/format.test.ts"]
+  "exclude": [
+    "node_modules",
+    "src/i18n/messages.test.ts",
+    "src/lib/workbench/format.test.ts",
+    "src/data/fixtures/review-facts.test.ts"
+  ]
 }

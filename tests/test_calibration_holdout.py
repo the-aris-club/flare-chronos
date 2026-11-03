@@ -75,7 +75,7 @@ class TestHoldoutHonesty(unittest.TestCase):
 
 
 class TestPublishedHoldout(unittest.TestCase):
-    def test_the_published_calibration_gain_is_positive_on_held_out_years(self) -> None:
+    def test_the_published_held_out_gain_is_positive_but_not_significant(self) -> None:
         import json
         from pathlib import Path
 
@@ -87,5 +87,11 @@ class TestPublishedHoldout(unittest.TestCase):
         )
         holdout = results["coincident_calibration"]["holdout"]
         self.assertGreater(holdout["n_test"], 1000)
-        self.assertGreater(holdout["rmse_gain_ci95_mw"][0], 0.0)
         self.assertLess(holdout["harmonized_rmse_mw"], holdout["raw_rmse_mw"])
+        # With 20,552 pairs the held-out gain is 0.7 MW and its 95% interval spans
+        # zero: the documents say so, so this test pins the interval's shape rather
+        # than demanding a significance the data does not show.
+        low, high = holdout["rmse_gain_ci95_mw"]
+        self.assertLess(low, high)
+        self.assertLess(low, 0.0)
+        self.assertGreater(high, 0.0)

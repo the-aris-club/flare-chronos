@@ -75,6 +75,26 @@ class TestCalendarProvenance(unittest.TestCase):
             states, {CELL_OBSERVED, CELL_MODELLED_IN_MEASURED_YEAR, CELL_INTERPOLATED}
         )
 
+    def test_measured_years_match_the_raw_archive_and_exclude_the_current_year(
+        self,
+    ) -> None:
+        from benchmark_cli.epoch_plan import build_epoch_plan
+
+        for region, series in RESULTS["regime_shift_series"].items():
+            plan_years = [
+                int(date[:4])
+                for date, _ in build_epoch_plan(region, ROOT / "data" / "raw", 2026)
+            ]
+            with self.subTest(region=region):
+                self.assertEqual(sorted(series["measured_years"]), plan_years)
+                self.assertEqual(series["interpolated_years"], [2026])
+
+    def test_no_cell_of_the_current_year_is_observed(self) -> None:
+        for region, cal in CALENDAR.items():
+            row = cal["years"].index(2026)
+            with self.subTest(region=region):
+                self.assertNotIn(CELL_OBSERVED, cal["cell_provenance_matrix"][row])
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -118,7 +118,7 @@ The operational severity band of a Standardized Fire Anomaly Index value, assign
 _Avoid_: Risk level, alert level, severity score, crisis threshold
 
 **Measured Epoch**:
-A year for which the archive holds a real NASA FIRMS slice set — the harmonized count for that year is computed from observed detections. Eleven of the twenty-six Mekong years and nine of the twenty-six Amazon years are Measured Epochs.
+A year for which the archive holds a real NASA FIRMS slice set — the harmonized count for that year is computed from observed detections. Ten of the twenty-six Mekong years and eight of the twenty-six Amazon years are Measured Epochs. The current year is never a Measured Epoch: its 5-day window belongs to a year still in progress, so it is an Interpolated Year until the year closes.
 _Avoid_: Real year, hard data, ground truth, anchor year
 
 **Interpolated Year**:

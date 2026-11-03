@@ -53,6 +53,7 @@ from flare_chronos_core import (
     viirs_dimensions_from_scan_angle,
 )
 
+from benchmark_cli.epoch_plan import build_epoch_plan
 from benchmark_cli.figure_renderer import (
     SFAI_HIGHLIGHT_Z,
     render_fig1_scan_angle_physics,
@@ -74,6 +75,9 @@ from benchmark_cli.sensitivity import (
 HOLDOUT_TRAIN_LAST_YEAR = 2019
 
 RAW_DIR = ROOT / "data" / "raw"
+#: The year still in progress: its window is never a Measured Epoch. Bump it
+#: when the year closes and its slices are archived.
+CURRENT_YEAR = 2026
 PROC_DIR = ROOT / "data" / "processed"
 FIG_DIR = ROOT / "docs" / "figures"
 
@@ -921,48 +925,8 @@ def main() -> None:
     print(
         "[Step 3/5] Running Multi-Satellite Overpass Deduplication across Real NASA FIRMS Epochs..."
     )
-    mekong_plan = [
-        ("2005-03-15", ["MODIS_SP"]),
-        ("2007-03-15", ["MODIS_SP"]),
-        ("2010-03-15", ["MODIS_SP"]),
-        ("2012-03-15", ["MODIS_SP", "VIIRS_SNPP_SP"]),
-        ("2016-03-15", ["MODIS_SP", "VIIRS_SNPP_SP"]),
-        ("2019-03-15", ["MODIS_SP", "VIIRS_SNPP_SP", "VIIRS_NOAA20_SP"]),
-        ("2020-03-15", ["MODIS_SP", "VIIRS_SNPP_SP", "VIIRS_NOAA20_SP"]),
-        ("2023-03-15", ["MODIS_SP", "VIIRS_SNPP_SP", "VIIRS_NOAA20_SP"]),
-        (
-            "2024-03-15",
-            ["MODIS_SP", "VIIRS_SNPP_SP", "VIIRS_NOAA20_SP", "VIIRS_NOAA21_NRT"],
-        ),
-        (
-            "2025-03-15",
-            ["MODIS_SP", "VIIRS_SNPP_SP", "VIIRS_NOAA20_SP", "VIIRS_NOAA21_NRT"],
-        ),
-        (
-            "2026-03-15",
-            ["MODIS_SP", "VIIRS_SNPP_SP", "VIIRS_NOAA20_SP", "VIIRS_NOAA21_NRT"],
-        ),
-    ]
-    amazon_plan = [
-        ("2005-08-20", ["MODIS_SP"]),
-        ("2007-08-20", ["MODIS_SP"]),
-        ("2010-08-20", ["MODIS_SP"]),
-        ("2012-08-20", ["MODIS_SP", "VIIRS_SNPP_SP"]),
-        ("2019-08-20", ["MODIS_SP", "VIIRS_SNPP_SP", "VIIRS_NOAA20_SP"]),
-        ("2020-08-20", ["MODIS_SP", "VIIRS_SNPP_SP", "VIIRS_NOAA20_SP"]),
-        (
-            "2024-08-20",
-            ["MODIS_SP", "VIIRS_SNPP_SP", "VIIRS_NOAA20_SP", "VIIRS_NOAA21_NRT"],
-        ),
-        (
-            "2025-08-20",
-            ["MODIS_SP", "VIIRS_SNPP_SP", "VIIRS_NOAA20_SP", "VIIRS_NOAA21_NRT"],
-        ),
-        (
-            "2026-08-20",
-            ["MODIS_NRT", "VIIRS_SNPP_NRT", "VIIRS_NOAA20_NRT", "VIIRS_NOAA21_NRT"],
-        ),
-    ]
+    mekong_plan = build_epoch_plan("mekong", RAW_DIR, CURRENT_YEAR)
+    amazon_plan = build_epoch_plan("amazon", RAW_DIR, CURRENT_YEAR)
 
     mekong_static = load_static_source_registry("mekong")
     amazon_static = load_static_source_registry("amazon")
