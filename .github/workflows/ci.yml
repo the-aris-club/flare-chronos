@@ -6,8 +6,43 @@ on:
   pull_request:
     branches: [main]
 
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      docs: ${{ steps.filter.outputs.docs }}
+      python: ${{ steps.filter.outputs.python }}
+      workbench: ${{ steps.filter.outputs.workbench }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3.0.2
+        id: filter
+        with:
+          filters: |
+            docs:
+              - "docs/**"
+              - "*.md"
+              - "scripts/check-docs.py"
+            python:
+              - "pyproject.toml"
+              - "uv.lock"
+              - "packages/**"
+              - "src/**"
+              - "apps/ai-service/**"
+              - "apps/benchmark-cli/**"
+              - "tests/**"
+            workbench:
+              - "apps/workbench/**"
+              - "package.json"
+              - "pnpm-lock.yaml"
+
   check-docs:
+    needs: changes
+    if: needs.changes.outputs.docs == 'true' || needs.changes.outputs.python == 'true'
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -23,73 +58,104 @@ jobs:
         run: python3 scripts/check-docs.py --base "$BASE_SHA" --require-tools
 
   test:
+    needs: changes
+    if: needs.changes.outputs.python == 'true'
     runs-on: ubuntu-latest
     strategy:
       matrix:
         python-version: ["3.11", "3.12", "3.13"]
     steps:
       - uses: actions/checkout@v4
-
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-
       - name: Install uv
         uses: astral-sh/setup-uv@v5
-
+        with:
+          enable-cache: true
       - name: Sync dependencies
         run: uv sync --group dev
-
       - name: Check formatting (ruff)
         run: uv run ruff format --check .
-
       - name: Lint (ruff)
         run: uv run ruff check .
-
       - name: Run tests
         run: uv run python -m pytest
 
   typecheck:
+    needs: changes
+    if: needs.changes.outputs.python == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-
       - name: Install uv
         uses: astral-sh/setup-uv@v5
-
+        with:
+          enable-cache: true
       - name: Sync dependencies
         run: uv sync --group dev
-
       - name: Type check (pyright)
         run: uv run pyright
 
-  workbench:
+  api:
+    needs: changes
+    if: needs.changes.outputs.python == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - name: Sync dependencies
+        run: uv sync --group dev
+      - name: Run API tests
+        run: uv run python -m pytest tests/test_ai_service_api.py tests/test_ai_service_review.py tests/test_ai_service_harness.py tests/test_ai_service_tool_numbers.py
+      - name: Check OpenAPI contract drift
+        run: |
+          uv run python -m ai_service.api
+          git diff --exit-code docs/openapi/ai-service.json
 
+  workbench:
+    needs: changes
+    if: needs.changes.outputs.workbench == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
         with:
-          bun-version: canary
-
+          bun-version: latest
+          cache: true
       - name: Install dependencies
         working-directory: apps/workbench
         run: bun install --frozen-lockfile
-
+      - name: Cache Next.js build
+        uses: actions/cache@v4
+        with:
+          path: apps/workbench/.next/cache
+          key: nextjs-${{ runner.os }}-${{ hashFiles('apps/workbench/bun.lock', 'apps/workbench/package.json') }}-${{ github.sha }}
+          restore-keys: |
+            nextjs-${{ runner.os }}-${{ hashFiles('apps/workbench/bun.lock', 'apps/workbench/package.json') }}-
+            nextjs-${{ runner.os }}-
       - name: Type check
         run: bun run typecheck
-
       - name: Lint
         run: bun run lint-workbench
-
       - name: Format check
         run: bun run format:check
-
       - name: Test
         run: bun run test:workbench
+      - name: Build
+        working-directory: apps/workbench
+        run: bun run build
+        env:
+          NEXT_TELEMETRY_DISABLED: "1"

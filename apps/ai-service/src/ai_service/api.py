@@ -190,7 +190,7 @@ def create_app(
     # Local demo (auth disabled, loopback-only) ships a default Workbench origin so
     # the browser can reach the service without extra configuration.
     if not origins and getattr(app.state.auth, "disabled", False):
-        origins = ["http://localhost:3000", "http://127.0.0.1:3000"]
+        origins = ["http://localhost:5900", "http://127.0.0.1:5900"]
     if origins:
         app.add_middleware(
             CORSMiddleware,
@@ -351,6 +351,11 @@ def create_app(
     ) -> dict[str, Any]:
         visible_run(request, principal, run_id)
         return {"audit": audit_rows(request.app.state.store.decisions(run_id))}
+
+    @app.get("/health")
+    def health() -> dict[str, str]:
+        """Liveness probe for containers and load balancers (no auth)."""
+        return {"status": "ok"}
 
     return app
 

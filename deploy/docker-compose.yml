@@ -1,0 +1,33 @@
+# Deployed on the VPS. Images are pulled from GHCR (see .github/workflows/cd.yml).
+# Set TAG to the release tag (e.g. v1.2.3); defaults to latest.
+services:
+  api:
+    image: ghcr.io/the-aris-club/flare-chronos-api:${TAG:-latest}
+    restart: unless-stopped
+    ports:
+      - "5901:5901"
+    volumes:
+      - api-data:/app/data/runtime
+    env_file:
+      - .env
+    environment:
+      - AI_SERVICE_CORS_ORIGINS=${AI_SERVICE_CORS_ORIGINS:-http://localhost:5900}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5901/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  workbench:
+    image: ghcr.io/the-aris-club/flare-chronos-workbench:${TAG:-latest}
+    restart: unless-stopped
+    ports:
+      - "5900:5900"
+    environment:
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:5901}
+    depends_on:
+      api:
+        condition: service_healthy
+
+volumes:
+  api-data:

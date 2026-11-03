@@ -51,7 +51,7 @@ Open `/`. Formatting and linting are repo-root gates: `bun run format`,
 - `public/globe/earth.jpg` — NASA Blue Marble, 2048 × 1024, served locally.
 - `src/components/service/service-provider.tsx` — holds the pasted bearer token (memory plus an `fc_token` cookie)
   and calls `ai-service` directly (`NEXT_PUBLIC_AI_SERVICE_URL`, default
-  `http://127.0.0.1:8765`). Review and the briefing rail read the real service;
+  `http://127.0.0.1:5901`). Review and the briefing rail read the real service;
   there are no fixtures and no fixture mode (ADR-0016).
 
 The loaders check `CALENDAR_DATA_PATH` /
@@ -105,7 +105,7 @@ Review and the briefing rail need a running `ai-service`; the map, charts and Ca
 
 ```bash
 # service (live System 1 / System 2 models read the workspace .env)
-AI_SERVICE_JWT_KEY=<32+ byte secret> AI_SERVICE_CORS_ORIGINS=http://localhost:3000 \
+AI_SERVICE_JWT_KEY=<32+ byte secret> AI_SERVICE_CORS_ORIGINS=http://localhost:5900 \
   uv run python -m ai_service.serve --mode live
 # a token for a reviewer; the approver role may decide sign-offs
 AI_SERVICE_JWT_KEY=<same secret> uv run python scripts/mint_demo_token.py --sub examiner --roles approver

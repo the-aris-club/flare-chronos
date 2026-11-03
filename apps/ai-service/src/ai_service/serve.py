@@ -31,7 +31,7 @@ def main() -> None:
         description="Serve the Flare-Chronos analysis API."
     )
     parser.add_argument("--host", default="127.0.0.1")
-    parser.add_argument("--port", type=int, default=8765)
+    parser.add_argument("--port", type=int, default=5901)
     parser.add_argument(
         "--mode",
         default="deterministic",
