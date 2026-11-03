@@ -187,6 +187,10 @@ def create_app(
     app.state.run_lock = asyncio.Lock()
 
     origins = [o for o in os.environ.get("AI_SERVICE_CORS_ORIGINS", "").split(",") if o]
+    # Local demo (auth disabled, loopback-only) ships a default Workbench origin so
+    # the browser can reach the service without extra configuration.
+    if not origins and getattr(app.state.auth, "disabled", False):
+        origins = ["http://localhost:3000", "http://127.0.0.1:3000"]
     if origins:
         app.add_middleware(
             CORSMiddleware,

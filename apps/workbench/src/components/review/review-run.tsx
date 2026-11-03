@@ -1,13 +1,14 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
+import { useQueryClient } from '@tanstack/react-query';
 import { useService } from '@/components/service/service-provider';
 import { Icon, ICON } from '@/components/ui/icon';
 import { Markdown } from '@/components/ui/markdown';
+import { useReviewRun } from '@/lib/review/hooks';
 import type { FailureReason } from '@/lib/service/client';
-import { parseAudit, parseRun, type AuditRow, type ReviewRun } from '@/lib/review/api';
 import { DecisionChip, StatusChip, utcTime } from './review-bits';
 import { ConfirmDialog } from './confirm-dialog';
 import { ReviewDecision } from './review-decision';
@@ -37,35 +38,26 @@ export function ReviewRunView({ runId }: { runId: string }) {
   const locale = useLocale();
   const labels = useLabels();
   const service = useService();
-  const [run, setRun] = useState<ReviewRun | null>(null);
-  const [audit, setAudit] = useState<AuditRow[]>([]);
-  const [load, setLoad] = useState<Load>('loading');
+  const queryClient = useQueryClient();
+  const { data, error, isLoading } = useReviewRun(runId);
+  const run = data?.run ?? null;
+  const audit = data?.audit ?? [];
   const [pending, setPending] = useState<Pending>(null);
   const [saveFailed, setSaveFailed] = useState(false);
-  const { get } = service;
 
-  const refetch = useCallback(async () => {
-    const [detail, trail] = await Promise.all([
-      get(`/api/v1/review/runs/${runId}`),
-      get(`/api/v1/review/runs/${runId}/audit`),
-    ]);
-    if (!detail.ok) {
-      setLoad(FAILURE_LOAD[detail.reason]);
-      return;
-    }
-    try {
-      setRun(parseRun(detail.data));
-      setAudit(trail.ok ? parseAudit(trail.data) : []);
-      setLoad('ready');
-    } catch {
-      setLoad('failed');
-    }
-  }, [get, runId]);
+  const load: Load = isLoading
+    ? 'loading'
+    : error
+      ? error.message in FAILURE_LOAD
+        ? (error.message as Load)
+        : 'failed'
+      : run
+        ? 'ready'
+        : 'failed';
 
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    void refetch();
-  }, [refetch]);
+  const refetch = useCallback(() => {
+    void queryClient.invalidateQueries({ queryKey: ['review', 'run', runId] });
+  }, [queryClient, runId]);
 
   if (load !== 'ready' || !run) {
     return (

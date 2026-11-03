@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { useService } from '@/components/service/service-provider';
 import { Icon, ICON } from '@/components/ui/icon';
@@ -26,6 +27,7 @@ export function BriefingRail({ region, state, onToggle }: BriefingRailProps) {
   const t = useTranslations('Briefing');
   const review = useTranslations('Review');
   const service = useService();
+  const queryClient = useQueryClient();
   const [run, setRun] = useState<RunView>(IDLE_RUN);
   const connected = service.connection === 'connected';
 
@@ -48,9 +50,9 @@ export function BriefingRail({ region, state, onToggle }: BriefingRailProps) {
       if (next.value) {
         setRun((current) => ({ ...current, phase: 'failed', error: next.value ?? 'unavailable' }));
       }
-      await service.refresh();
+      await queryClient.invalidateQueries({ queryKey: ['review', 'runs'] });
     },
-    [region, service],
+    [region, service, queryClient],
   );
 
   const handleStart = useCallback(

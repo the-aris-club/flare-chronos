@@ -5,6 +5,7 @@ import { cookies } from 'next/headers';
 import { NextIntlClientProvider } from 'next-intl';
 import { getLocale, getMessages, getTranslations } from 'next-intl/server';
 import { GlobeMorph } from '@/components/globe/globe-morph';
+import { QueryProvider } from '@/components/query-provider';
 import { ServiceProvider } from '@/components/service/service-provider';
 import { ThemeProvider } from '@/components/ui/theme-provider';
 import { DEFAULT_THEME, isTheme, THEME_COOKIE } from '@/lib/theme';
@@ -48,8 +49,10 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         <NextIntlClientProvider locale={locale} messages={messages}>
           <ThemeProvider initialTheme={theme}>
             <ServiceProvider>
-              {children}
-              <GlobeMorph />
+              <QueryProvider>
+                {children}
+                <GlobeMorph />
+              </QueryProvider>
             </ServiceProvider>
           </ThemeProvider>
         </NextIntlClientProvider>
