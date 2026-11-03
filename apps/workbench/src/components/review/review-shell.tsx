@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { ReviewGate } from '@/components/review/review-gate';
 import { useService } from '@/components/service/service-provider';
+import { useReviewRuns } from '@/lib/review/hooks';
 import { BrandMark } from '@/components/ui/brand-mark';
 import { HeaderBar } from '@/components/ui/header-bar';
 import { Icon, ICON } from '@/components/ui/icon';
@@ -15,6 +16,8 @@ export function ReviewShell({ children }: { children: React.ReactNode }) {
   const t = useTranslations('Review');
   const pathname = usePathname();
   const store = useService();
+  const { data: reviewRows = [] } = useReviewRuns();
+  const needsDecision = reviewRows.filter((row) => row.status === 'needs').length;
   const name = store.claims?.name ?? store.claims?.sub ?? '';
   const queueActive = pathname === '/review' || pathname.startsWith('/review/runs/');
   const auditActive = pathname.startsWith('/review/audit');
@@ -43,9 +46,9 @@ export function ReviewShell({ children }: { children: React.ReactNode }) {
             }`}
           >
             {t('review')}
-            {store.needsDecision > 0 && (
+            {needsDecision > 0 && (
               <span className="bg-cyan text-canvas text-micro inline-flex h-4 min-w-4 items-center justify-center rounded-full px-1 font-mono font-semibold">
-                {store.needsDecision}
+                {needsDecision}
               </span>
             )}
           </Link>

@@ -1,10 +1,10 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { useService } from '@/components/service/service-provider';
+import { useReviewRuns, useReviewAudit } from '@/lib/review/hooks';
 import { Icon, ICON } from '@/components/ui/icon';
-import { parseAudit, type AuditRow } from '@/lib/review/api';
+
 import { utcTime } from './review-bits';
 import { FilterSelect } from './review-select';
 import { useLabels } from './use-labels';
@@ -13,42 +13,20 @@ function csvCell(value: string): string {
   return `"${value.replaceAll('"', '""')}"`;
 }
 
-type Row = AuditRow & { useCase: string };
-
 const DECISION_OPTIONS = ['approve', 'reject'];
 
 export function ReviewAudit() {
   const t = useTranslations('Review');
   const labels = useLabels();
-  const service = useService();
-  const [all, setAll] = useState<Row[]>([]);
-  const [failed, setFailed] = useState(false);
+  const { data: runs = [] } = useReviewRuns();
+  const { data: allData = [], error: auditError } = useReviewAudit(runs);
   const [reviewer, setReviewer] = useState('all');
   const [decision, setDecision] = useState('all');
   const [date, setDate] = useState('all');
   const [useCase, setUseCase] = useState('all');
-  const { get, rows: runs } = service;
 
-  useEffect(() => {
-    let live = true;
-    const decided = runs.filter((run) => run.status !== 'needs');
-    Promise.all(
-      decided.map(async (run) => {
-        const result = await get(`/api/v1/review/runs/${run.id}/audit`);
-        if (!result.ok) throw new Error(result.reason);
-        return parseAudit(result.data).map((row) => ({ ...row, useCase: run.useCase }));
-      }),
-    )
-      .then((groups) => {
-        if (!live) return;
-        setAll(groups.flat().sort((a, b) => b.decidedAt.localeCompare(a.decidedAt)));
-        setFailed(false);
-      })
-      .catch(() => live && setFailed(true));
-    return () => {
-      live = false;
-    };
-  }, [get, runs]);
+  const all = useMemo(() => allData, [allData]);
+  const failed = auditError !== null && auditError !== undefined;
 
   const reviewers = useMemo(() => [...new Set(all.map((row) => row.principal))], [all]);
   const dates = useMemo(

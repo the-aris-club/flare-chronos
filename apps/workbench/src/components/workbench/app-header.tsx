@@ -3,6 +3,7 @@
 import { useCallback, useState } from 'react';
 import Link from 'next/link';
 import { useService } from '@/components/service/service-provider';
+import { useReviewRuns } from '@/lib/review/hooks';
 import { useTranslations } from 'next-intl';
 import { Icon, ICON } from '@/components/ui/icon';
 import { BrandMark } from '@/components/ui/brand-mark';
@@ -38,6 +39,8 @@ export function AppHeader({
   const t = useTranslations('Header');
   const review = useTranslations('Review');
   const reviewStore = useService();
+  const { data: reviewRows = [] } = useReviewRuns();
+  const needsDecision = reviewRows.filter((row) => row.status === 'needs').length;
   const [menuOpen, setMenuOpen] = useState(false);
   const connected = reviewStore.connection === 'connected';
   const down = reviewStore.connection === 'unavailable';
@@ -166,9 +169,9 @@ export function AppHeader({
         >
           <Icon icon={ICON.review} size="sm" />
           <span>{review('review')}</span>
-          {reviewStore.needsDecision > 0 && (
+          {needsDecision > 0 && (
             <span className="bg-cyan text-canvas text-micro inline-flex h-4 min-w-4 items-center justify-center rounded-full px-1 font-mono font-semibold">
-              {reviewStore.needsDecision}
+              {needsDecision}
             </span>
           )}
         </Link>
@@ -238,9 +241,9 @@ export function AppHeader({
                 className="text-body text-ink hover:bg-chip flex items-center justify-between rounded-sm px-2 py-1.5 text-left"
               >
                 {review('review')}
-                {reviewStore.needsDecision > 0 && (
+                {needsDecision > 0 && (
                   <span className="bg-cyan text-canvas text-micro inline-flex h-4 min-w-4 items-center justify-center rounded-full px-1 font-mono font-semibold">
-                    {reviewStore.needsDecision}
+                    {needsDecision}
                   </span>
                 )}
               </Link>

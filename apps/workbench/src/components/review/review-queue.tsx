@@ -3,9 +3,10 @@
 import { useCallback, useMemo, useState, type ChangeEvent, type MouseEvent } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { useService } from '@/components/service/service-provider';
+
 import { Icon, ICON } from '@/components/ui/icon';
 import type { ReviewStatus } from '@/lib/review/api';
+import { useReviewRuns } from '@/lib/review/hooks';
 import { useLabels } from './use-labels';
 import { StatusChip, utcTime } from './review-bits';
 
@@ -20,7 +21,7 @@ const ICONS = {
 export function ReviewQueue() {
   const t = useTranslations('Review');
   const labels = useLabels();
-  const service = useService();
+  const { data: serviceRows = [], error: rowsError } = useReviewRuns();
   const [tab, setTab] = useState<ReviewStatus>('needs');
   const [query, setQuery] = useState('');
 
@@ -35,18 +36,18 @@ export function ReviewQueue() {
 
   const counts = useMemo(() => {
     const next: Record<ReviewStatus, number> = { needs: 0, published: 0, withheld: 0, failed: 0 };
-    for (const row of service.rows) next[row.status] += 1;
+    for (const row of serviceRows) next[row.status] += 1;
     return next;
-  }, [service.rows]);
+  }, [serviceRows]);
 
   const rows = useMemo(() => {
     const search = query.trim().toLowerCase();
-    return service.rows.filter(
+    return serviceRows.filter(
       (row) =>
         row.status === tab &&
         (!search || [row.id, row.useCase, row.owner].join(' ').toLowerCase().includes(search)),
     );
-  }, [service.rows, tab, query]);
+  }, [serviceRows, tab, query]);
 
   return (
     <div className="tablet:px-5 tablet:py-6 mx-auto flex w-full max-w-400 flex-col gap-4 px-3 py-4">
@@ -55,7 +56,7 @@ export function ReviewQueue() {
         <p className="text-body text-ink-muted max-w-3xl">{t('queueSub')}</p>
       </header>
 
-      {service.rowsFailure && (
+      {rowsError && (
         <p role="alert" className="text-meta text-bad">
           {t('queueFailed')}
         </p>

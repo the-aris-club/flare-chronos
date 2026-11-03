@@ -126,10 +126,12 @@ export function ServiceProvider({ children }: { children: React.ReactNode }) {
   );
 
   // A reload reconnects with the stored token instead of asking for it again.
+  // In the loopback demo (auth disabled) no token is required, so an empty
+  // token connects the demo principal when nothing is stored.
   useEffect(() => {
     const stored = readTokenCookie(document.cookie);
-    if (!stored) return;
-    const id = window.setTimeout(() => void connect(stored), 0);
+    const candidate = stored || '';
+    const id = window.setTimeout(() => void connect(candidate), 0);
     return () => window.clearTimeout(id);
   }, [connect]);
 
