@@ -1,14 +1,15 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { useTheme } from '@/components/ui/theme-provider';
 import type { RegionId } from '@/lib/calendar/types';
 import { formatQueryBox } from '@/lib/workbench/query-box';
 import { REGION_DEFS } from '@/lib/workbench/regions';
-import { BOOT_STEPS, type BootStep, type GlobeHandle } from '@/lib/globe/types';
-import { BootOverlay } from './boot-overlay';
+import { usePageBoot } from '@/lib/use-page-boot';
+import { useLoading } from '@/components/ui/loading-provider';
+import { BOOT_STEPS, type GlobeHandle } from '@/lib/globe/types';
 import dynamic from 'next/dynamic';
 import type { GlobeLabel } from './globe-canvas';
 const GlobeCanvas = dynamic(() => import('./globe-canvas').then((m) => m.GlobeCanvas), {
@@ -42,37 +43,8 @@ export function GlobeLanding({ period, yearStart, total, growth, regions }: Glob
   const [hovered, setHovered] = useState<RegionId | null>(null);
   const [collapsed, setCollapsed] = useState(false);
   const leavingRef = useRef(false);
-  const [booting, setBooting] = useState(true);
-  const [done, setDone] = useState<BootStep[]>([]);
-
-  const mark = useCallback((step: BootStep) => {
-    setDone((current) => (current.includes(step) ? current : [...current, step]));
-  }, []);
-
-  const finishBoot = useCallback(() => setBooting(false), []);
-
-  useEffect(() => {
-    let cancelled = false;
-    const frame = requestAnimationFrame(() =>
-      requestAnimationFrame(() => {
-        if (!cancelled) mark('page');
-      }),
-    );
-
-    document.fonts.ready.then(() => {
-      if (!cancelled) mark('fonts');
-    });
-
-    const fallback = window.setTimeout(() => {
-      if (!cancelled) BOOT_STEPS.forEach(mark);
-    }, 15000);
-
-    return () => {
-      cancelled = true;
-      cancelAnimationFrame(frame);
-      window.clearTimeout(fallback);
-    };
-  }, [mark]);
+  usePageBoot(BOOT_STEPS);
+  const { mark } = useLoading();
 
   const enterNow = useCallback(
     (region: RegionId) => {
@@ -182,8 +154,6 @@ export function GlobeLanding({ period, yearStart, total, growth, regions }: Glob
       <span className="text-micro text-ink-subtle pointer-events-none fixed right-5 bottom-4 z-10 hidden font-mono xl:block">
         {t('credit')}
       </span>
-
-      {booting && <BootOverlay done={done} onDone={finishBoot} />}
     </div>
   );
 }

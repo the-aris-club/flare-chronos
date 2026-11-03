@@ -7,11 +7,7 @@ import { loadWorkbench } from '@/lib/workbench/series';
 type WorkbenchParams = Promise<{ zone: string }>;
 type WorkbenchSearchParams = Promise<{ epoch?: string; tour?: string }>;
 
-const loadingFallback = (
-  <div className="bg-canvas text-ink flex h-dvh items-center justify-center">
-    Loading workbench…
-  </div>
-);
+const loadingFallback = <div className="bg-canvas h-dvh" />;
 
 export default async function WorkbenchZonePage({
   params,

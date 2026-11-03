@@ -190,7 +190,7 @@ def create_app(
     # Local demo (auth disabled, loopback-only) ships a default Workbench origin so
     # the browser can reach the service without extra configuration.
     if not origins and getattr(app.state.auth, "disabled", False):
-        origins = ["http://localhost:3000", "http://127.0.0.1:3000"]
+        origins = ["http://localhost:5900", "http://127.0.0.1:5900"]
     if origins:
         app.add_middleware(
             CORSMiddleware,
@@ -198,6 +198,16 @@ def create_app(
             allow_methods=["GET", "POST"],
             allow_headers=["Authorization", "Content-Type", "Last-Event-ID"],
         )
+
+    # No caching: every retry after a reload must hit the service, not a stale
+    # browser/CDN response (otherwise connect() can read a cached 401/200).
+    @app.middleware("http")
+    async def _no_cache(request: Request, call_next: Any) -> Any:
+        response = await call_next(request)
+        response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+        return response
 
     def recorded(
         store: RunStore, thread_id: str, events: AsyncIterator[HarnessEvent]
@@ -351,6 +361,11 @@ def create_app(
     ) -> dict[str, Any]:
         visible_run(request, principal, run_id)
         return {"audit": audit_rows(request.app.state.store.decisions(run_id))}
+
+    @app.get("/health")
+    def health() -> dict[str, str]:
+        """Liveness probe for containers and load balancers (no auth)."""
+        return {"status": "ok"}
 
     return app
 

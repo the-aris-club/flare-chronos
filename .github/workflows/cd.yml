@@ -1,0 +1,98 @@
+name: CD
+
+on:
+  push:
+    tags: ["v*.*.*"]
+
+concurrency:
+  group: cd-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: api
+            context: .
+            dockerfile: apps/ai-service/Dockerfile
+            image: ghcr.io/the-aris-club/flare-chronos-api
+          - name: workbench
+            context: .
+            dockerfile: apps/workbench/Dockerfile
+            image: ghcr.io/the-aris-club/flare-chronos-workbench
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ matrix.image }}
+          tags: |
+            type=ref,event=tag
+            type=sha,prefix=,format=short
+            type=raw,value=latest
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.dockerfile }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            ${{ matrix.name == 'workbench' && format('NEXT_PUBLIC_AI_SERVICE_URL={0}', vars.NEXT_PUBLIC_AI_SERVICE_URL || '') || '' }}
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+      - name: Copy compose file to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          source: "deploy/docker-compose.yml"
+          target: "/opt/flare-chronos/"
+      - name: Deploy and smoke test
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            set -euo pipefail
+            cd /opt/flare-chronos
+            export TAG="${{ github.ref_name }}"
+            docker compose pull
+            docker compose up -d
+            for i in $(seq 1 30); do
+              if python3 -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5901/health')" 2>/dev/null; then
+                break
+              fi
+              sleep 2
+            done
+            python3 -c "import urllib.request; print(urllib.request.urlopen('http://127.0.0.1:5901/health').read().decode())"
+            curl -fsS http://127.0.0.1:5900 >/dev/null
+            echo "Deploy ${TAG} complete."

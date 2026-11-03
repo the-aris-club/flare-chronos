@@ -3,12 +3,15 @@
 import { useTranslations } from 'next-intl';
 import { BrandMark } from '@/components/ui/brand-mark';
 import { Icon, ICON } from '@/components/ui/icon';
+import { useService } from '@/components/service/service-provider';
 import { LocaleToggle } from '@/components/ui/locale-toggle';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 
 export function LandingHeader({ years }: { years: number }) {
   const t = useTranslations('Globe');
   const header = useTranslations('Header');
+  const service = useService();
+  const connected = service.connection === 'connected';
 
   return (
     <header className="pointer-events-none fixed inset-x-0 top-0 z-30 flex items-center gap-2 px-4 py-3 xl:px-14 xl:py-4">
@@ -18,8 +21,8 @@ export function LandingHeader({ years }: { years: number }) {
 
       <div className="pointer-events-auto ml-auto flex items-center gap-2">
         <span className="border-line bg-panel/70 text-meta text-ink-muted tablet:inline-flex hidden h-8 items-center gap-1.5 rounded-md border px-2.5 backdrop-blur-sm">
-          <Icon icon={ICON.service} size="sm" className="text-amber" />
-          {header('notConnected')}
+          <Icon icon={ICON.service} size="sm" className={connected ? 'text-ok' : 'text-amber'} />
+          {connected ? header('connected') : header('notConnected')}
         </span>
         <LocaleToggle />
         <ThemeToggle />

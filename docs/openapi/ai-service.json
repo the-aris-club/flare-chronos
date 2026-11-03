@@ -386,6 +386,29 @@
         ],
         "summary": "Review Audit"
       }
+    },
+    "/health": {
+      "get": {
+        "description": "Liveness probe for containers and load balancers (no auth).",
+        "operationId": "health_health_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "title": "Response Health Health Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Health"
+      }
     }
   }
 }

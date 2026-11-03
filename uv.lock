@@ -356,6 +356,7 @@ name = "flare-chronos-workspace"
 version = "1.1.0"
 source = { virtual = "." }
 dependencies = [
+    { name = "h3" },
     { name = "langchain-core" },
     { name = "langgraph" },
     { name = "numpy", version = "2.4.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.12'" },
@@ -381,6 +382,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "h3", specifier = ">=4.0.0" },
     { name = "langchain-core", specifier = ">=0.3.0" },
     { name = "langgraph", specifier = ">=1.0.0" },
     { name = "numpy", specifier = ">=2.0.0" },

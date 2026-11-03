@@ -74,7 +74,11 @@
       "page": "Loading interface",
       "photo": "Loading satellite imagery",
       "borders": "Loading country borders",
-      "ready": "Ready"
+      "ready": "Ready",
+      "map": "Loading map layers",
+      "data": "Loading analysis data",
+      "review": "Loading review queue",
+      "service": "Connecting to service"
     },
     "openHint": "Click to open the workbench"
   },

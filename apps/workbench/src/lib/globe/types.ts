@@ -15,7 +15,15 @@ export type GlobeData = {
   regions: Record<RegionId, GlobeRegion>;
 };
 
-export type BootStep = 'fonts' | 'page' | 'photo' | 'borders';
+export type BootStep =
+  | 'fonts'
+  | 'page'
+  | 'photo'
+  | 'borders'
+  | 'map'
+  | 'data'
+  | 'review'
+  | 'service';
 
 export const BOOT_STEPS: BootStep[] = ['fonts', 'page', 'photo', 'borders'];
 

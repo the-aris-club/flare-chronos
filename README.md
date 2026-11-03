@@ -112,7 +112,7 @@ NASA FIRMS (MODIS / VIIRS / NRT) ──► firms-ingestion (rate-limited, cached
 The harness is the product; the API streams a run as it happens.
 
 ```bash
-AI_SERVICE_AUTH=disabled uv run python -m ai_service.serve   # http://127.0.0.1:8765
+AI_SERVICE_AUTH=disabled uv run python -m ai_service.serve   # http://127.0.0.1:5901
 ```
 
 `AI_SERVICE_AUTH=disabled` is the local demo only: every caller becomes the
@@ -310,11 +310,17 @@ All three are wired into pre-commit and CI.
 
 ## CI / CD
 
-GitHub Actions workflow (`.github/workflows/ci.yml`):
+Continuous Integration (`.github/workflows/ci.yml`), path-filtered and cancelled on new pushes:
 
-- Matrix: Python 3.11 / 3.12 / 3.13 on Ubuntu
-- Steps: `uv sync --group dev` → `ruff format --check` → `ruff check` → `pytest`
-- Separate `typecheck` job running `pyright`
+- `check-docs` — entry format, fragment presence, PDF/MD version match.
+- `test` — Python 3.11 / 3.12 / 3.13: `uv sync` → `ruff format --check` → `ruff check` → `pytest`.
+- `typecheck` — `pyright`.
+- `api` — API tests + OpenAPI contract drift check (`docs/openapi/ai-service.json`).
+- `workbench` — Bun: typecheck → lint → format check → test → `next build`.
+
+Continuous Deployment (`.github/workflows/cd.yml`) runs on a `v*.*.*` tag: builds and pushes
+`flare-chronos-api` and `flare-chronos-workbench` to GHCR, then SSH-deploys to the VPS and
+smoke-tests `/health` and `/`. See [`docs/CD.md`](docs/CD.md).
 
 Branches are auto-deleted after merge.
 

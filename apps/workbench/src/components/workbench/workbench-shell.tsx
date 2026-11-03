@@ -4,7 +4,9 @@ import { useCallback, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useIsDesktop, useIsTablet } from '@/lib/use-media';
+import { usePageBoot } from '@/lib/use-page-boot';
 import type { CalendarDataset, RegionId } from '@/lib/calendar/types';
+import type { BootStep } from '@/lib/globe/types';
 import type { MapFilters, WorkbenchData } from '@/lib/workbench/types';
 import { MAP_DATA } from '@/lib/workbench/map-data';
 import { AppHeader } from './app-header';
@@ -29,6 +31,8 @@ const TABS: Tab[] = ['map', 'trend', 'cal', 'brief'];
 
 const DEFAULT_PEAK = { value: null, pentad: null };
 
+const WORKBENCH_BOOT: BootStep[] = ['fonts', 'page', 'map', 'data'];
+
 export function WorkbenchShell({
   dataset,
   workbench,
@@ -51,6 +55,7 @@ export function WorkbenchShell({
   const [tab, setTab] = useState<Tab>('map');
   const isDesktop = useIsDesktop();
   const isTablet = useIsTablet();
+  usePageBoot(WORKBENCH_BOOT);
   const [briefState, setBriefState] = useState<RailState>('auto');
   const [filters, setFilters] = useState<MapFilters>({
     sza: true,

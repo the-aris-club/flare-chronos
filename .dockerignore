@@ -1,0 +1,10 @@
+node_modules
+.venv
+.next
+__pycache__
+*.pyc
+.git
+# keep all data for the workbench build (test files reference it)
+tests
+docs
+exports

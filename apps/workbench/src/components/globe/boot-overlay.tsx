@@ -6,21 +6,29 @@ import { BrandGlyph } from '@/components/ui/brand-mark';
 import { BOOT_STEPS, type BootStep } from '@/lib/globe/types';
 
 type BootOverlayProps = {
+  steps?: BootStep[];
   done: BootStep[];
   onDone: () => void;
 };
 
-export function BootOverlay({ done, onDone }: BootOverlayProps) {
+export function BootOverlay({ steps = BOOT_STEPS, done, onDone }: BootOverlayProps) {
   const t = useTranslations('Globe');
   const [fading, setFading] = useState(false);
   const mounted = useRef(0);
-  const complete = BOOT_STEPS.every((step) => done.includes(step));
-  const count = BOOT_STEPS.filter((step) => done.includes(step)).length;
-  const next = BOOT_STEPS.find((step) => !done.includes(step));
+  const complete = steps.length > 0 && steps.every((step) => done.includes(step));
+  const count = steps.filter((step) => done.includes(step)).length;
+  const next = steps.find((step) => !done.includes(step));
 
   useEffect(() => {
     mounted.current = performance.now();
   }, []);
+
+  // A fresh boot sequence must show the overlay again, even if the previous one
+  // had already started fading out.
+  useEffect(() => {
+    // eslint-disable-next-line react/set-state-in-effect
+    if (!complete) setFading(false);
+  }, [complete]);
 
   useEffect(() => {
     if (!complete || mounted.current === 0) return;
@@ -70,7 +78,7 @@ export function BootOverlay({ done, onDone }: BootOverlayProps) {
               {next ? t(`boot.${next}`) : t('boot.ready')}
             </span>
             <span className="text-ink-muted">
-              {count}/{BOOT_STEPS.length}
+              {count}/{steps.length}
             </span>
           </div>
         </div>

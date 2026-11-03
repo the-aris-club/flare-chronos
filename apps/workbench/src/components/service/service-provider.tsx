@@ -48,6 +48,8 @@ export function ServiceProvider({ children }: { children: React.ReactNode }) {
   const [rows, setRows] = useState<ReviewRow[]>([]);
   const [rowsFailure, setRowsFailure] = useState<ServiceValue['rowsFailure']>(null);
   const tokenRef = useRef('');
+  const retryCountRef = useRef(0);
+  const retryTimerRef = useRef<number | null>(null);
 
   const get = useCallback((path: string) => callService(fetch, tokenRef.current, path), []);
 
@@ -73,9 +75,16 @@ export function ServiceProvider({ children }: { children: React.ReactNode }) {
       const result = await callService(fetch, value, '/api/v1/analysis/use-cases');
       if (!result.ok) {
         if (result.reason === 'unauthorized') document.cookie = CLEAR_TOKEN_COOKIE;
+        // An empty token against an auth-required service is not a "rejected
+        // token" — it just means nothing was provided yet. Stay neutral.
+        if (result.reason === 'unauthorized' && !value) {
+          setConnection('none');
+          return;
+        }
         setConnection(result.reason === 'unauthorized' ? 'rejected' : 'unavailable');
         return;
       }
+      retryCountRef.current = 0;
       tokenRef.current = value;
       document.cookie = saveTokenCookie(
         value,
@@ -134,6 +143,32 @@ export function ServiceProvider({ children }: { children: React.ReactNode }) {
     const id = window.setTimeout(() => void connect(candidate), 0);
     return () => window.clearTimeout(id);
   }, [connect]);
+
+  // Auto-retry when the service is unavailable (network blip / cold start).
+  // Uses exponential backoff capped at 30s; stops once connected or rejected.
+  useEffect(() => {
+    if (connection !== 'unavailable') {
+      if (retryTimerRef.current) {
+        window.clearTimeout(retryTimerRef.current);
+        retryTimerRef.current = null;
+      }
+      return;
+    }
+    const candidate = tokenRef.current || readTokenCookie(document.cookie) || '';
+    const attempt = retryCountRef.current + 1;
+    retryCountRef.current = attempt;
+    const delay = Math.min(30000, 2000 * 2 ** (attempt - 1));
+    retryTimerRef.current = window.setTimeout(() => {
+      retryTimerRef.current = null;
+      void connect(candidate);
+    }, delay);
+    return () => {
+      if (retryTimerRef.current) {
+        window.clearTimeout(retryTimerRef.current);
+        retryTimerRef.current = null;
+      }
+    };
+  }, [connection, connect]);
 
   // Rows go stale while a reviewer reads; keep the queue current without a manual reload.
   useEffect(() => {

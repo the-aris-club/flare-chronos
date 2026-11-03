@@ -8,14 +8,19 @@ import { useService } from '@/components/service/service-provider';
 import { useReviewRuns } from '@/lib/review/hooks';
 import { BrandMark } from '@/components/ui/brand-mark';
 import { HeaderBar } from '@/components/ui/header-bar';
+import { usePageBoot } from '@/lib/use-page-boot';
+import type { BootStep } from '@/lib/globe/types';
 import { Icon, ICON } from '@/components/ui/icon';
 import { LocaleToggle } from '@/components/ui/locale-toggle';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
+
+const REVIEW_BOOT: BootStep[] = ['fonts', 'page', 'review', 'data'];
 
 export function ReviewShell({ children }: { children: React.ReactNode }) {
   const t = useTranslations('Review');
   const pathname = usePathname();
   const store = useService();
+  usePageBoot(REVIEW_BOOT);
   const { data: reviewRows = [] } = useReviewRuns();
   const needsDecision = reviewRows.filter((row) => row.status === 'needs').length;
   const name = store.claims?.name ?? store.claims?.sub ?? '';
