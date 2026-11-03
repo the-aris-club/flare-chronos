@@ -23,6 +23,13 @@ export function BootOverlay({ steps = BOOT_STEPS, done, onDone }: BootOverlayPro
     mounted.current = performance.now();
   }, []);
 
+  // A fresh boot sequence must show the overlay again, even if the previous one
+  // had already started fading out.
+  useEffect(() => {
+    // eslint-disable-next-line react/set-state-in-effect
+    if (!complete) setFading(false);
+  }, [complete]);
+
   useEffect(() => {
     if (!complete || mounted.current === 0) return;
 

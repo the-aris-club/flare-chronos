@@ -9,7 +9,7 @@ import { formatQueryBox } from '@/lib/workbench/query-box';
 import { REGION_DEFS } from '@/lib/workbench/regions';
 import { usePageBoot } from '@/lib/use-page-boot';
 import { useLoading } from '@/components/ui/loading-provider';
-import { type GlobeHandle } from '@/lib/globe/types';
+import { BOOT_STEPS, type GlobeHandle } from '@/lib/globe/types';
 import dynamic from 'next/dynamic';
 import type { GlobeLabel } from './globe-canvas';
 const GlobeCanvas = dynamic(() => import('./globe-canvas').then((m) => m.GlobeCanvas), {
@@ -43,7 +43,7 @@ export function GlobeLanding({ period, yearStart, total, growth, regions }: Glob
   const [hovered, setHovered] = useState<RegionId | null>(null);
   const [collapsed, setCollapsed] = useState(false);
   const leavingRef = useRef(false);
-  usePageBoot(['fonts', 'page', 'photo', 'borders']);
+  usePageBoot(BOOT_STEPS);
   const { mark } = useLoading();
 
   const enterNow = useCallback(

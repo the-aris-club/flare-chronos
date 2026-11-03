@@ -1,7 +1,13 @@
 'use client';
 
-import { createContext, useContext, useEffect, useMemo, useRef, useState, useCallback } from 'react';
-import { usePathname } from 'next/navigation';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { BootOverlay } from '@/components/globe/boot-overlay';
 import type { BootStep } from '@/lib/globe/types';
 
@@ -23,14 +29,14 @@ export function useLoading(): LoadingApi {
 }
 
 const DEFAULT_STEPS: BootStep[] = ['fonts', 'page'];
+const HARD_CAP_MS = 15000;
 
 export function LoadingProvider({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
-  const [visible, setVisible] = useState(true);
+  const [visible, setVisible] = useState(false);
   const [steps, setSteps] = useState<BootStep[]>(DEFAULT_STEPS);
   const [done, setDone] = useState<BootStep[]>([]);
-  const startedAt = useRef<number>(0);
   const fallbackTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const stepsRef = useRef<BootStep[]>(DEFAULT_STEPS);
 
   const clearFallback = useCallback(() => {
     if (fallbackTimer.current) {
@@ -39,49 +45,28 @@ export function LoadingProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  const start = useCallback(
-    (nextSteps?: BootStep[]) => {
+  const begin = useCallback(
+    (nextSteps: BootStep[]) => {
       clearFallback();
-      if (nextSteps) setSteps(nextSteps);
+      stepsRef.current = nextSteps;
+      setSteps(nextSteps);
       setDone([]);
-      startedAt.current = performance.now();
       setVisible(true);
-      fallbackTimer.current = setTimeout(() => {
-        setSteps((current) => {
-          setDone(current);
-          return current;
-        });
-      }, 15000);
+      fallbackTimer.current = setTimeout(() => setDone(nextSteps), HARD_CAP_MS);
     },
     [clearFallback],
   );
 
-  const register = useCallback(
-    (nextSteps: BootStep[]) => {
-      clearFallback();
-      setSteps(nextSteps);
-      setDone([]);
-      setVisible(true);
-      startedAt.current = performance.now();
-      fallbackTimer.current = setTimeout(() => {
-        setSteps((current) => {
-          setDone(current);
-          return current;
-        });
-      }, 15000);
-    },
-    [clearFallback],
+  const register = useCallback((nextSteps: BootStep[]) => begin(nextSteps), [begin]);
+
+  const start = useCallback(
+    (nextSteps?: BootStep[]) => begin(nextSteps ?? stepsRef.current),
+    [begin],
   );
 
   const mark = useCallback((step: BootStep) => {
     setDone((prev) => (prev.includes(step) ? prev : [...prev, step]));
   }, []);
-
-  useEffect(() => {
-    // eslint-disable-next-line react/set-state-in-effect
-    start();
-    // eslint-disable-next-line react/exhaustive-effect-dependencies
-  }, [pathname, start]);
 
   const handleDone = useCallback(() => {
     clearFallback();
