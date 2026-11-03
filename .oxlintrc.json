@@ -91,8 +91,7 @@
     },
     {
       "files": [
-        "apps/workbench/src/components/workbench/workbench-map.tsx",
-        "apps/workbench/src/lib/globe/scene.ts"
+        "apps/workbench/src/components/workbench/workbench-map.tsx"
       ],
       "rules": {
         "max-lines": "off"
