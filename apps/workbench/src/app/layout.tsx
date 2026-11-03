@@ -26,12 +26,39 @@ const mono = IBM_Plex_Mono({
   display: 'swap',
 });
 
+const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL ?? 'https://flare-chronos.resonance.io.vn';
+
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('Meta');
+  const title = t('title');
+  const description = t('description');
 
   return {
-    title: t('title'),
-    description: t('description'),
+    metadataBase: new URL(SITE_URL),
+    title,
+    description,
+    openGraph: {
+      type: 'website',
+      siteName: 'FlareChronos',
+      title: t('homeTitle'),
+      description,
+      url: '/',
+      images: [
+        {
+          url: '/og.png',
+          width: 1200,
+          height: 630,
+          alt: t('homeTitle'),
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: t('homeTitle'),
+      description,
+      images: ['/og.png'],
+    },
   };
 }
 
