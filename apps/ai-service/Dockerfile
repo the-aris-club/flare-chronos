@@ -20,8 +20,7 @@ FROM python:3.12-slim AS runtime
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    PATH="/app/.venv/bin:$PATH" \
-    PYTHONPATH="/app/packages/harmonization-core/src:/app/packages/firms-ingestion/src:/app/apps/ai-service/src:/app/src"
+    PATH="/app/.venv/bin:$PATH"
 
 WORKDIR /app
 

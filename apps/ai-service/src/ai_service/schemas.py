@@ -11,6 +11,10 @@ from langchain_core.messages import BaseMessage
 from langgraph.graph.message import add_messages
 from pydantic import BaseModel, Field
 
+# Fact keys that are derived rounding/fragment variants of a primary fact.
+# Shared by the verifier and the Review projection so the two never drift.
+DERIVED_FACT_KEY = re.compile(r"(_round\d+|_str\[\d+\])$")
+
 CITATION_PATTERN = re.compile(r"\{+([A-Za-z0-9_.\[\]-]+)\}+")
 
 
@@ -154,6 +158,10 @@ class SpatioTemporalQueryEntity(BaseModel):
     urgency_level: str = Field(
         default="nominal",
         description="Urgency classification ('nominal', 'elevated', 'flash_crisis').",
+    )
+    force_escalation: bool = Field(
+        default=False,
+        description="Whether the request explicitly asks for System 1 -> System 2 escalation.",
     )
 
 

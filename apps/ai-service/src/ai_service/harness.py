@@ -149,6 +149,7 @@ class FlareChronosDualSystemHarness:
         self.s1_profile = s1_profile
         self.s2_profile = s2_profile
         self.cognition = self.config.get("cognition", {}) or {}
+        self.requires_sign_off = set(self.cognition.get("requires_sign_off", []) or [])
 
         if mode == "live":
             self.system1_model: HarnessChatModel = build_live_system1_chat_model(
@@ -250,6 +251,7 @@ class FlareChronosDualSystemHarness:
             h3_resolution=8 if tier == StakeholderTier.FIELD_RANGER else 7,
             stakeholder_tier=tier,
             urgency_level=urgency,
+            force_escalation="escalate_if_conflict" in lower_q,
         )
 
     def _refine_entity(
@@ -403,7 +405,11 @@ class FlareChronosDualSystemHarness:
             entity.region,
             entity.stakeholder_tier.value,
         )
-        if self.enable_cache and entity.urgency_level != "flash_crisis":
+        if (
+            self.enable_cache
+            and entity.urgency_level != "flash_crisis"
+            and entity.use_case_id.value not in self.requires_sign_off
+        ):
             cached = self.pattern_cache.get(cache_key)
             if cached is not None:
                 return {
@@ -629,8 +635,8 @@ class FlareChronosDualSystemHarness:
 
     def _escalation_gate_node(self, state: HarnessState) -> dict[str, Any]:
         """Node 5: Dynamic System 1 -> System 2 Escalation Gate on Physical Conflict."""
-        user_query = state.get("user_query", "").upper()
-        if "ESCALATE_IF_CONFLICT" not in user_query:
+        entity = state.get("extracted_entity") or {}
+        if not bool(entity.get("force_escalation", False)):
             return {}
 
         messages = state.get("messages", [])
@@ -763,7 +769,9 @@ class FlareChronosDualSystemHarness:
     ) -> Literal["system2_agent_node", "sign_off_gate_node"]:
         report = state.get("verification_report", {})
         max_repairs = int(
-            self.config.get("verification_gate", {}).get("max_repair_attempts", 2)
+            (self.config.get("deterministic_tool_gate", {}) or {}).get(
+                "max_self_correction_retries", 2
+            )
         )
         if (
             not report.get("passed", True)
@@ -776,8 +784,7 @@ class FlareChronosDualSystemHarness:
         """Node 7: Human sign-off for use cases that authorize an operational action."""
         entity = state.get("extracted_entity") or {}
         use_case_value = str(entity.get("use_case_id", ""))
-        required = set(self.cognition.get("requires_sign_off", []) or [])
-        if not self.enable_sign_off or use_case_value not in required:
+        if not self.enable_sign_off or use_case_value not in self.requires_sign_off:
             return {}
 
         request = {
@@ -917,7 +924,7 @@ class FlareChronosDualSystemHarness:
             },
         }
 
-        if self.enable_cache:
+        if self.enable_cache and uc_val not in self.requires_sign_off:
             cache_key = VerifiedPatternCache.make_key(
                 uc_val,
                 target_year,

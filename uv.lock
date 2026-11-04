@@ -307,6 +307,7 @@ version = "1.1.0"
 source = { editable = "apps/ai-service" }
 dependencies = [
     { name = "fastapi" },
+    { name = "flare-chronos-core" },
     { name = "langchain-core" },
     { name = "langgraph" },
     { name = "langgraph-checkpoint-sqlite" },
@@ -322,6 +323,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "fastapi", specifier = ">=0.115" },
+    { name = "flare-chronos-core", editable = "packages/harmonization-core" },
     { name = "langchain-core", specifier = ">=0.3.0" },
     { name = "langgraph", specifier = ">=1.0.0" },
     { name = "langgraph-checkpoint-sqlite", specifier = ">=3.1.2" },

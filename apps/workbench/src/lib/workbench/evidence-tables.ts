@@ -1,5 +1,6 @@
 import { formatSigma } from '@/lib/calendar/format';
 import type { CalendarRegionData } from '@/lib/calendar/types';
+import { ALERT_SIGMA, CRISIS_SIGMA } from '@/lib/calendar/constants';
 import { formatCount, formatDecimal } from '@/lib/workbench/format';
 import type { AnnualSeries, Calibration, Epoch, MapPhysics } from '@/lib/workbench/types';
 
@@ -130,8 +131,8 @@ export function buildEvidenceTables({
           String(year),
           String(observed),
           metric(peak),
-          String(scores.filter((value) => value !== null && value >= 2.2).length),
-          String(scores.filter((value) => value !== null && value >= 2.5).length),
+          String(scores.filter((value) => value !== null && value >= ALERT_SIGMA).length),
+          String(scores.filter((value) => value !== null && value >= CRISIS_SIGMA).length),
         ];
       }),
     },

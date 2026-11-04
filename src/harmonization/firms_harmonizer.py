@@ -7,17 +7,7 @@ to the monorepo package `packages/harmonization-core` (`flare_chronos_core`).
 
 from __future__ import annotations
 
-import sys
-from pathlib import Path
-
 import pandas as pd
-
-# Ensure monorepo core package is on sys.path when invoked directly
-_ROOT = Path(__file__).resolve().parents[2]
-_CORE_SRC = _ROOT / "packages" / "harmonization-core" / "src"
-if str(_CORE_SRC) not in sys.path:
-    sys.path.insert(0, str(_CORE_SRC))
-
 from flare_chronos_core import *  # re-export core domain + physics API for compat facade
 
 

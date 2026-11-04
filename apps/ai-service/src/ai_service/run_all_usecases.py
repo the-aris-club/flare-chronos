@@ -7,19 +7,11 @@ Saves the complete execution trace, verified facts counts, and symbiosis benchma
 from __future__ import annotations
 
 import json
-import sys
 import time
 from pathlib import Path
 from typing import Any
 
-# Ensure workspace packages are importable
 REPO_ROOT = Path(__file__).resolve().parents[4]
-for pkg_src in (
-    REPO_ROOT / "apps" / "ai-service" / "src",
-    REPO_ROOT / "packages" / "harmonization-core" / "src",
-):
-    if str(pkg_src) not in sys.path:
-        sys.path.insert(0, str(pkg_src))
 
 from ai_service.harness import FlareChronosDualSystemHarness
 from ai_service.schemas import UseCaseId

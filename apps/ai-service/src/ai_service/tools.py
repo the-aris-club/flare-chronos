@@ -10,7 +10,6 @@ from __future__ import annotations
 
 import json
 import math
-import sys
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -20,8 +19,6 @@ from langchain_core.tools import BaseTool, tool
 from ai_service.schemas import UseCaseId
 
 ROOT = Path(__file__).resolve().parents[4]
-if str(ROOT / "packages" / "harmonization-core" / "src") not in sys.path:
-    sys.path.insert(0, str(ROOT / "packages" / "harmonization-core" / "src"))
 
 from flare_chronos_core import (
     FIRE_EPISODE_WINDOW_MINUTES,
