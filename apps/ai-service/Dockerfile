@@ -14,7 +14,7 @@ COPY packages ./packages
 COPY apps/ai-service ./apps/ai-service
 COPY src ./src
 
-RUN uv sync --frozen --group dev
+RUN uv sync --frozen --package flare-chronos-ai-service --group dev
 
 FROM python:3.12-slim AS runtime
 
