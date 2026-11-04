@@ -195,7 +195,12 @@ def create_app(
     # Local demo (auth disabled, loopback-only) ships a default Workbench origin so
     # the browser can reach the service without extra configuration.
     if not origins and getattr(app.state.auth, "disabled", False):
-        origins = ["http://localhost:5900", "http://127.0.0.1:5900"]
+        origins = [
+            "http://localhost:3000",
+            "http://127.0.0.1:3000",
+            "http://localhost:5900",
+            "http://127.0.0.1:5900",
+        ]
     if origins:
         app.add_middleware(
             CORSMiddleware,
