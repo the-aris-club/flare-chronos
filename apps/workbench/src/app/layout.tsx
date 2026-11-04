@@ -122,7 +122,11 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
                 description:
                   'Cross-sensor harmonization of satellite active-fire records (MODIS + VIIRS) for the Mekong and Amazon regions.',
                 author: [
-                  { '@type': 'Person', name: 'Lê Thành Trung', email: 'lethanhtrung.trungle@gmail.com' },
+                  {
+                    '@type': 'Person',
+                    name: 'Lê Thành Trung',
+                    email: 'lethanhtrung.trungle@gmail.com',
+                  },
                   { '@type': 'Organization', name: 'Flare Chronos Team' },
                   { '@type': 'Organization', name: 'The Aris Club Team' },
                 ],

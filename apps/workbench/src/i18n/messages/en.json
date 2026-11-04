@@ -128,20 +128,7 @@
     },
     "error": "The calendar could not be loaded.",
     "retry": "Try again",
-    "months": [
-      "Jan",
-      "Feb",
-      "Mar",
-      "Apr",
-      "May",
-      "Jun",
-      "Jul",
-      "Aug",
-      "Sep",
-      "Oct",
-      "Nov",
-      "Dec"
-    ],
+    "months": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
     "provenance": "{observed} of {total} cells are observed windows ({pct}%). The rest are modelled from the region's seasonal envelope: dimmed, hatched, and never scored."
   },
   "Map": {
@@ -228,20 +215,7 @@
   "Clock": {
     "title": "Phenology clock",
     "subtitle": "HFD · 5-day pentads · {region}",
-    "months": [
-      "J",
-      "F",
-      "M",
-      "A",
-      "M",
-      "J",
-      "J",
-      "A",
-      "S",
-      "O",
-      "N",
-      "D"
-    ],
+    "months": ["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"],
     "iqr": "IQR 2001–2025 (25 yrs)",
     "elnino": "El Niño 2016",
     "selected": "Selected {year}",

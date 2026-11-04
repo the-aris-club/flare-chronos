@@ -35,7 +35,7 @@ export default async function AboutPage() {
     <main className="mx-auto max-w-3xl px-6 py-12">
       <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
       <h1 className="text-3xl font-semibold">{t('title')}</h1>
-      <p className="mt-2 text-lg text-muted">{t('subtitle')}</p>
+      <p className="text-muted mt-2 text-lg">{t('subtitle')}</p>
       <p className="mt-6 leading-relaxed">{t('intro')}</p>
 
       <h2 className="mt-10 text-2xl font-semibold">{t('problemTitle')}</h2>
@@ -44,7 +44,9 @@ export default async function AboutPage() {
       <h2 className="mt-10 text-2xl font-semibold">{t('methodTitle')}</h2>
       <ul className="mt-4 list-disc space-y-2 pl-6">
         {method.map((m) => (
-          <li key={m} className="leading-relaxed">{m}</li>
+          <li key={m} className="leading-relaxed">
+            {m}
+          </li>
         ))}
       </ul>
 
@@ -62,7 +64,9 @@ export default async function AboutPage() {
       <h2 className="mt-10 text-2xl font-semibold">{t('sourcesTitle')}</h2>
       <ul className="mt-4 list-disc space-y-2 pl-6">
         {sources.map((s) => (
-          <li key={s} className="leading-relaxed">{s}</li>
+          <li key={s} className="leading-relaxed">
+            {s}
+          </li>
         ))}
       </ul>
 
@@ -73,7 +77,9 @@ export default async function AboutPage() {
       <p className="mt-4 leading-relaxed">{t('license')}</p>
 
       <div className="mt-10">
-        <Link href="/" className="underline">{t('cta')}</Link>
+        <Link href="/" className="underline">
+          {t('cta')}
+        </Link>
       </div>
     </main>
   );
