@@ -265,7 +265,7 @@ def create_app(
     def stream(
         request: Request,
         principal: Annotated[Principal, Depends(authenticate)],
-        query: Annotated[str, Query(min_length=1, max_length=4000)] = "",
+        query: Annotated[str, Query(max_length=4000)] = "",
         use_case_id: Annotated[
             str | None, Query(max_length=64, pattern=r"^[A-Za-z0-9._-]+$")
         ] = None,
