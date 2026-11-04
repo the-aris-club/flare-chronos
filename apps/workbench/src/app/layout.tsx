@@ -30,19 +30,55 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://flare-chronos.reso
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('Meta');
-  const title = t('title');
   const description = t('description');
 
   return {
     metadataBase: new URL(SITE_URL),
-    title,
+    title: t('title'),
     description,
+    applicationName: 'Flare Chronos',
+    keywords: [
+      'satellite active fire',
+      'MODIS',
+      'VIIRS',
+      'NASA FIRMS',
+      'cross-sensor harmonization',
+      'burning activity calendar',
+      'SFAI',
+      'fire radiative power',
+      'Mekong',
+      'Amazon',
+      'H3',
+      'phenology',
+    ],
+    authors: [
+      { name: 'Flare Chronos Team' },
+      { name: 'The Aris Club Team' },
+      { name: 'Lê Thành Trung', url: 'mailto:lethanhtrung.trungle@gmail.com' },
+    ],
+    creator: 'Flare Chronos Team',
+    publisher: 'Flare Chronos Team',
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+        'max-video-preview': -1,
+      },
+    },
+    alternates: {
+      canonical: '/',
+    },
     openGraph: {
       type: 'website',
       siteName: 'FlareChronos',
       title: t('homeTitle'),
       description,
       url: '/',
+      locale: 'en_US',
       images: [
         {
           url: '/og.png',
@@ -58,6 +94,10 @@ export async function generateMetadata(): Promise<Metadata> {
       description,
       images: ['/og.png'],
     },
+    icons: {
+      icon: '/icon.png',
+      apple: '/icon.png',
+    },
   };
 }
 
@@ -70,6 +110,40 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   return (
     <html lang={locale} data-theme={theme} suppressHydrationWarning>
       <body className={`${sans.variable} ${mono.variable} bg-canvas text-ink`}>
+        <script type="application/ld+json">
+          {JSON.stringify({
+            '@context': 'https://schema.org',
+            '@graph': [
+              {
+                '@type': 'Organization',
+                name: 'Flare Chronos',
+                url: SITE_URL,
+                logo: `${SITE_URL}/logo.png`,
+                description:
+                  'Cross-sensor harmonization of satellite active-fire records (MODIS + VIIRS) for the Mekong and Amazon regions.',
+                author: [
+                  {
+                    '@type': 'Person',
+                    name: 'Lê Thành Trung',
+                    email: 'lethanhtrung.trungle@gmail.com',
+                  },
+                  { '@type': 'Organization', name: 'Flare Chronos Team' },
+                  { '@type': 'Organization', name: 'The Aris Club Team' },
+                ],
+              },
+              {
+                '@type': 'WebApplication',
+                name: 'Flare Chronos Workbench',
+                url: SITE_URL,
+                applicationCategory: 'ScientificApplication',
+                operatingSystem: 'Web',
+                description:
+                  'Interactive workbench for cross-sensor harmonization of NASA FIRMS active-fire detections across 26 years and 73 five-day pentads.',
+                offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+              },
+            ],
+          })}
+        </script>
         <Script id="theme-cookie-sync" strategy="beforeInteractive">
           {`(function(){try{var m=document.cookie.match(/(?:^|; )fc-theme=([^;]+)/);var v=m?decodeURIComponent(m[1]):null;if(v==='dark'||v==='light')localStorage.setItem('fc-theme',v);}catch(e){}})();`}
         </Script>

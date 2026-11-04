@@ -9,6 +9,13 @@ type WorkbenchSearchParams = Promise<{ epoch?: string; tour?: string }>;
 
 const loadingFallback = <div className="bg-canvas h-dvh" />;
 
+export async function generateMetadata() {
+  return {
+    title: 'Workbench',
+    robots: { index: false, follow: false },
+  };
+}
+
 export default async function WorkbenchZonePage({
   params,
   searchParams,

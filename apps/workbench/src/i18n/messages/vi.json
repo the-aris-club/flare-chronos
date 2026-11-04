@@ -40,7 +40,9 @@
     "serviceShortUp": "T0",
     "serviceShortDegraded": "T1",
     "serviceShortDown": "T3",
-    "serviceShortNotConnected": "Kết nối"
+    "serviceShortNotConnected": "Kết nối",
+    "about": "About",
+    "faq": "FAQ"
   },
   "Globe": {
     "subtitle": "Lịch hoạt động cháy đã chuẩn hóa {years} năm",
@@ -683,5 +685,107 @@
   "Conclusion": {
     "label": "Kết quả",
     "text": "Điểm nóng thô {from}→{to}: {raw}% · xu hướng đã chuẩn hóa {trend}%/năm · khoảng cách KS {ksBefore} → {ksAfter} · {measured}/{total} năm quan trắc thực"
+  },
+  "About": {
+    "title": "Về Flare Chronos",
+    "subtitle": "Đồng bộ hoá đa cảm biến cho bản ghi cháy chủ động từ vệ tinh",
+    "intro": "Flare Chronos đồng bộ hoá 26 năm dữ liệu cháy chủ động từ NASA FIRMS (MODIS trên Terra/Aqua, VIIRS trên Suomi-NPP, NOAA-20 và NOAA-21) cho khu vực Mekong & Việt Nam và Amazon. Ứng dụng xoá bỏ các xu hướng nhân tạo xuất hiện khi có cảm biến mới tham gia vào bản ghi, để một thay đổi trong chuỗi số liệu nghĩa là thay đổi về cháy, chứ không phải thay đổi về thiết bị.",
+    "problemTitle": "Vấn đề",
+    "problem": "Số lượng phát hiện thô tăng gấp nhiều lần ở cả hai khu vực giữa các Epochs Đo lường năm 2005 và 2024. Cháy thì không. Mỗi cảm biến mới (Suomi-NPP năm 2012, NOAA-20 năm 2019, NOAA-21 năm 2024) thêm phát hiện vì điểm ảnh nhỏ hơn và dải quét rộng hơn, chứ không phải vì diện tích cháy lớn hơn.",
+    "methodTitle": "Cách đồng bộ hoá hoạt động",
+    "method": [
+      "Tái tạo footprint hình elip của từng phát hiện từ hình học quét cầu (scan × track), bao gồm biến dạng bow-tie của MODIS và gom cụm 3 vùng của VIIRS (3:1 / 2:1 / 1:1).",
+      "Sàng lọc theo góc thiên đỉnh Mặt Trời (SZA < 85°) và vùng dị thường Nam Đại Tây Dương (SAA) gây nhiễu ban đêm.",
+      "Loại bỏ nguồn nhiệt tĩnh (công nghiệp, đuốc khí) và khử trùng lặp các lần quét trùng trong 60 phút.",
+      "Phân bổ từng footprint theo tỷ lệ lên các ô Uber H3 (Resolution 7 cho phenology khu vực, Resolution 8 cho phân tích chiến thuật).",
+      "Căn chỉnh công suất bức xạ cháy (FRP) của VIIRS về chuẩn tương đương MODIS bằng quantile mapping, giữ nguyên phần đuôi phân bố.",
+      "Chấm điểm dị thường bằng SFAI (Chỉ số Dị thường Cháy Chuẩn hoá) chỉ trên các ô được đo; các ô mô hình hoá không bao giờ được chấm."
+    ],
+    "evidenceTitle": "Bằng chứng",
+    "evidenceIntro": "Năm hình khoa học hỗ trợ cho việc đồng bộ hoá. Mỗi hình có thể tái tạo từ data/processed/empirical_results.json.",
+    "figures": [
+      {
+        "title": "Fig. 1 - Vật lý footprint theo góc quét",
+        "caption": "Sự tăng trưởng footprint của MODIS và VIIRS theo góc quét, và tỷ lệ diện tích dẫn dắt đồng bộ hoá."
+      },
+      {
+        "title": "Fig. 2 - Khử trùng lặp quét & SZA",
+        "caption": "Các lần quét trùng, sàng lọc góc thiên đỉnh Mặt Trời và khử trùng lặp xoá đếm kép."
+      },
+      {
+        "title": "Fig. 3 - Quantile mapping FRP đa cảm biến",
+        "caption": "Quantile mapping căn chỉnh FRP của VIIRS về chuẩn tương đương MODIS mà không làm phẳng phần đuôi."
+      },
+      {
+        "title": "Fig. 4 - Loại bỏ dịch chuyển chế độ",
+        "caption": "Số phát hiện thô tăng khi thêm cảm biến; chuỗi đồng bộ hoá xoá các bước nhảy."
+      },
+      {
+        "title": "Fig. 5 - Lịch cháy đồng bộ hoá",
+        "caption": "Lịch 26 năm × 73 pentad với các ô được đo, mô hình hoá và dị thường nghiêm trọng."
+      }
+    ],
+    "sourcesTitle": "Nguồn dữ liệu",
+    "sources": [
+      "Dữ liệu cháy chủ động NASA FIRMS (MODIS và VIIRS).",
+      "Ranh giới, sông, hồ và bóng relief Natural Earth (public domain).",
+      "Ảnh Trái Đất NASA Blue Marble.",
+      "Kết quả thực nghiệm trong data/processed/empirical_results.json và lịch cháy trong data/processed/burning_calendar.json."
+    ],
+    "creditsTitle": "Ghi nhận",
+    "credits": "Xây dựng cho NASA Space Apps Challenge 2026. Tác giả: Flare Chronos Team, The Aris Club Team, Lê Thành Trung (lethanhtrung.trungle@gmail.com). Lõi đồng bộ hoá trong packages/harmonization-core; workbench trong apps/workbench.",
+    "licenseTitle": "Giấy phép",
+    "license": "Xem LICENSE của kho mã. Dữ liệu xuất phát từ các sản phẩm công khai của NASA và Natural Earth.",
+    "cta": "Khám phá không gian phân tích"
+  },
+  "Faq": {
+    "title": "Câu hỏi thường gặp · Flare Chronos",
+    "subtitle": "Flare Chronos — đồng bộ hoá đa cảm biến cho cháy chủ động từ vệ tinh",
+    "items": [
+      {
+        "q": "Flare Chronos là gì?",
+        "a": "Một không gian phân tích cho đồng bộ hoá đa cảm biến của bản ghi cháy chủ động từ vệ tinh. Ứng dụng biến các phát hiện MODIS và VIIRS rời rạc thành một chuỗi có thể so sánh cho khu vực Mekong & Việt Nam và Amazon, 2000–2026."
+      },
+      {
+        "q": "Vì sao số cháy thô tăng còn số đồng bộ hoá thì phẳng?",
+        "a": "Cảm biến mới thêm phát hiện vì điểm ảnh nhỏ hơn và dải quét rộng hơn. Số thô theo thiết bị. Đồng bộ hoá xoá bước nhảy theo cảm biến để chuỗi theo dõi cháy, không phải thiết bị."
+      },
+      {
+        "q": "SFAI là gì?",
+        "a": "Chỉ số Dị thường Cháy Chuẩn hoá: z-score của hoạt động cháy so với nền mùa vụ của khu vực, chỉ tính trên các ô lịch được đo. +2.2σ là cảnh báo, +2.5σ là khủng hoảng."
+      },
+      {
+        "q": "Ô được đo và ô mô hình hoá là gì?",
+        "a": "Ô được đo đến từ cửa sổ quan sát 5 ngày thực sự. Ô mô hình hoá được điền từ bao mùa vụ của khu vực, bị làm mờ, kẻ sọc và không bao giờ được chấm SFAI."
+      },
+      {
+        "q": "Những cảm biến nào được dùng?",
+        "a": "MODIS trên Terra và Aqua, và VIIRS trên Suomi-NPP, NOAA-20 và NOAA-21."
+      },
+      {
+        "q": "Episode cháy là gì?",
+        "a": "Một sự kiện cháy đã khử trùng lặp, tạo ra bằng cách nhóm các phát hiện trùng trong 60 phút và 0.5°, sau các bộ lọc vật lý (SZA, SAA, nguồn tĩnh)."
+      },
+      {
+        "q": "Footprint theo góc quét được tính thế nào?",
+        "a": "Footprint hình elip của từng phát hiện (scan × track) được tái tạo từ hình học quét cầu, bao gồm biến dạng bow-tie của MODIS và gom cụm 3 vùng của VIIRS, sau đó phân bổ theo tỷ lệ lên các ô H3."
+      },
+      {
+        "q": "Bộ lọc SAA là gì?",
+        "a": "Bộ sàng lọc xoá các xung giả ban đêm trong vùng hồng ngoại giữa do proton năng lượng cao bị giữ lại trong vùng dị thường từ trường."
+      },
+      {
+        "q": "Tôi có thể dùng dữ liệu không?",
+        "a": "Dữ liệu xuất phát từ các sản phẩm công khai NASA FIRMS và Natural Earth. Xem LICENSE của kho mã để biết điều khoản."
+      },
+      {
+        "q": "Làm sao kết nối dịch vụ phân tích?",
+        "a": "Dán bearer token vào rail briefing của Workbench hoặc trang Review. Bản đồ, biểu đồ và lịch hoạt động không cần token."
+      },
+      {
+        "q": "Workbench có miễn phí không?",
+        "a": "Có. Workbench chạy trên dữ liệu công khai tại flare-chronos.resonance.io.vn."
+      }
+    ]
   }
 }
