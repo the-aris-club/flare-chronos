@@ -3,6 +3,7 @@
 import { useLocale, useTranslations } from 'next-intl';
 import { formatSigma } from '@/lib/calendar/format';
 import { pentadDates } from '@/lib/calendar/pentad';
+import { ALERT_SIGMA, CRISIS_SIGMA } from '@/lib/calendar/constants';
 import { formatCount } from '@/lib/workbench/format';
 import type { AnnualSeries, Epoch, MapFilters, SfaiPeak } from '@/lib/workbench/types';
 import type { MapCounts } from '@/lib/workbench/map-data';
@@ -39,8 +40,8 @@ export function KpiStrip({ series, epoch, year, peak, filters, counts }: KpiStri
   const sensors = epoch?.sensors ?? 0;
   const score = peak.value;
   const dates = peak.pentad ? pentadDates(peak.pentad, locale) : null;
-  const alert = score !== null && score >= 2.2;
-  const crisis = score !== null && score >= 2.5;
+  const alert = score !== null && score >= ALERT_SIGMA;
+  const crisis = score !== null && score >= CRISIS_SIGMA;
   const filtersOff = Object.values(filters).filter((value) => !value).length;
   const added = counts
     ? (filters.sza ? 0 : counts.sza) +

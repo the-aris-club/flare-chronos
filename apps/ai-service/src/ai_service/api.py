@@ -124,7 +124,10 @@ def authenticate(
 
 
 def _frames(
-    events: AsyncIterator[HarnessEvent], budget_s: float
+    events: AsyncIterator[HarnessEvent],
+    budget_s: float,
+    store: RunStore | None = None,
+    thread_id: str | None = None,
 ) -> AsyncIterator[bytes]:
     async def run() -> AsyncIterator[bytes]:
         n = 0
@@ -138,6 +141,8 @@ def _frames(
                 "run_failed",
                 {"error": f"run exceeded its time budget of {budget_s:g}s"},
             )
+            if store is not None and thread_id is not None:
+                store.append_event(thread_id, failed.type, failed.data)
             yield f"id: {n + 1}\n".encode() + failed.to_sse()
 
     return run()
@@ -226,7 +231,12 @@ def create_app(
 
         async def locked() -> AsyncIterator[bytes]:
             async with request.app.state.run_lock:
-                async for frame in _frames(events, request.app.state.run_timeout_s):
+                async for frame in _frames(
+                    events,
+                    request.app.state.run_timeout_s,
+                    request.app.state.store,
+                    thread_id,
+                ):
                     yield frame
 
         return StreamingResponse(
