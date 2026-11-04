@@ -118,6 +118,7 @@ Both benchmark artifacts are committed under `data/processed/` and verified by `
 | **Total Token Consumption (`15` UCs)** | `0` tokens | `31,910` prompt + `2,473` completion = **`34,383` tokens** | Grounded synthesis only in System 2 |
 
 > [!NOTE]
+> **Phiên bản:** `v1.1.1` — cập nhật 04/11/2026
 > **Transparency on Classifier Telemetry in `ai_harness_results_live.json`:**  
 > During the live benchmark run, the optional local `SystemOneChatModel` tunnel (`http://127.0.0.1:11434/v1/systemone`) was intentionally offline. As designed, all `15` runs automatically recorded `triage_fallback: "SystemOneChatModel_unavailable"` and fell back to the secondary `OpenAIStructuredClassifierModel` (`gemini-3-flash-preview`), achieving **`15/15` accurate Use Case assignments** while stamping `triage_confidence_source: "self_reported"` so downstream reviewers know the confidence came from the chat fallback rather than token logprobs.
 
