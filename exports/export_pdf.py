@@ -218,13 +218,13 @@ GREEK_AND_SYMBOLS: list[tuple[str, str]] = [
     (r"\\qquad(?![a-zA-Z])", " &nbsp;&nbsp;&nbsp;&nbsp; "),
     (r"\\max(?![a-zA-Z])", "max"),
     (r"\\min(?![a-zA-Z])", "min"),
-    (r"\\ln(?![a-zA-Z])", "ln"),
-    (r"\\exp(?![a-zA-Z])", "exp"),
-    (r"\\sin(?![a-zA-Z])", "sin"),
-    (r"\\cos(?![a-zA-Z])", "cos"),
-    (r"\\arcsin(?![a-zA-Z])", "arcsin"),
-    (r"\\arccos(?![a-zA-Z])", "arccos"),
-    (r"\\tanh(?![a-zA-Z])", "tanh"),
+    (r"\\ln(?![a-zA-Z])", "ln "),
+    (r"\\exp(?![a-zA-Z])", "exp "),
+    (r"\\sin(?![a-zA-Z])", "sin "),
+    (r"\\cos(?![a-zA-Z])", "cos "),
+    (r"\\arcsin(?![a-zA-Z])", "arcsin "),
+    (r"\\arccos(?![a-zA-Z])", "arccos "),
+    (r"\\tanh(?![a-zA-Z])", "tanh "),
     (r"\\bmod(?![a-zA-Z])", " mod "),
 ]
 
@@ -268,11 +268,17 @@ def _convert_latex_expr_to_html(expr: str) -> str:
         s = re.sub(r"\\sqrt\{([^{}]+)\}", r"√(\1)", s)
         s = re.sub(
             r"\\frac\{([^{}]+)\}\{([^{}]+)\}",
-            r"<span class='math-frac'>(\1) / (\2)</span>",
+            r"<span class='frac'><span class='num'>\1</span><span class='den'>\2</span></span>",
             s,
         )
 
     s = s.replace(r"\%", "%").replace("{", "").replace("}", "")
+    s = re.sub(r"Δ\s+([A-Z])", r"Δ\1", s)
+    s = re.sub(r"\b(cos|sin|ln|exp|tanh|arcsin|arccos)\s+<sup>", r"\1<sup>", s)
+    s = re.sub(r"\(\s+", "(", s)
+    s = re.sub(r"\s+\)", ")", s)
+    # Italicize single Latin variables; function names and acronyms stay upright.
+    s = re.sub(r"(?<![A-Za-z<])([A-Za-z])(?![A-Za-z>])", r"<i>\1</i>", s)
     return s
 
 
@@ -1027,10 +1033,26 @@ figcaption {
     font-family: Georgia, serif;
 }
 
-.math-frac {
+.frac {
     display: inline-block;
-    padding: 0 1px;
+    vertical-align: middle;
+    text-align: center;
+    margin: 0 2px;
 }
+
+.frac .num {
+    display: block;
+    padding: 0 2px;
+    border-bottom: 0.5pt solid #111111;
+    line-height: 1.1;
+}
+
+.frac .den {
+    display: block;
+    padding: 0 2px;
+    line-height: 1.1;
+}
+
 """
 
 

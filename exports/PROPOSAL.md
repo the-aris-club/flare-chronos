@@ -66,13 +66,13 @@ The engine computes the exact solar zenith angle from the UTC timestamp and the 
 
 ### 4.2 Stage 2: Footprint inversion and H3 allocation
 
-For a scanner at altitude h, with Earth radius R_e and Earth-central half-angle s, the ground footprint at scan angle θ is:
+For a scanner at altitude $h$, with Earth radius $R_e$ and Earth-central half-angle $s$, the ground footprint at scan angle $\theta$ is:
 
 $$\Delta S(\theta) = r \cdot s \left( \cos\theta - \sqrt{(R_e/r)^2 - \sin^2\theta} \right) \cdot \frac{R_e}{r} \cdot \frac{1}{\sqrt{(R_e/r)^2 - \sin^2\theta}}$$
 
 $$\Delta T(\theta) = r \cdot s \left( \cos\theta - \sqrt{(R_e/r)^2 - \sin^2\theta} \right)$$
 
-where r = R_e + h. MODIS uses h = 705 km and VIIRS uses h = 829 km. VIIRS applies its hardware aggregation factor across the three scan zones. Each elliptical footprint is rotated by the orbital track azimuth and projected onto H3 Resolution 7 (5.161 km²) and Resolution 8 (0.737 km²) cells with 13-point quadrature. The weights sum to 1.0000, so the allocation conserves radiative energy.
+where $r = R_e + h$. MODIS uses $h = 705$ km and VIIRS uses $h = 829$ km. VIIRS applies its hardware aggregation factor across the three scan zones. Each elliptical footprint is rotated by the orbital track azimuth and projected onto H3 Resolution 7 (5.161 km²) and Resolution 8 (0.737 km²) cells with 13-point quadrature. The weights sum to 1.0000, so the allocation conserves radiative energy.
 
 ### 4.3 Stage 3: Two-stage FRP calibration
 
