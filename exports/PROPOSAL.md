@@ -167,6 +167,7 @@ $$\widehat{\text{FRP}}_{\text{VIIRS-eq}}(p) = \alpha(\text{regime}) \cdot \left(
 Mainland Southeast Asia (spanning the Mekong Delta, Central Highlands, Northwest Vietnam, Laos, Cambodia, and Eastern Thailand) combines seasonal agricultural crop-residue burning (small, short-lived fires with $\text{FRP} < 15\text{ MW}$) and severe dipterocarp forest wildfires during **El Niño** drought years (`2007`, `2010`, `2016`, `2023–2024`).
 
 > **Note on Measured Epochs and Interpolated Years ([ADR-0009](../docs/adr/0009-measured-epochs-and-interpolated-years.md), [ADR-0010](../docs/adr/0010-sfai-baseline-from-measured-epochs-only.md)):**  
+> **Phiên bản:** `v1.1.1` — cập nhật 04/11/2026
 > The 26-year Burning Activity Calendar (`2001–2026`) comprises **25 Measured Epochs (`2001–2025`)**—where harmonized episode counts are computed directly from observed NASA FIRMS CSV slices—and **1 Interpolated Year (`2026`)**, whose in-progress annual scale is modelled from the observed MODIS count and the regional seasonal envelope. Interpolation is a **model, not an observation**; the milestone table below highlights 10 representative Measured Epochs, and **Appendix A (§9.1) publishes all 25 Measured Epochs (`2001–2025`) verbatim**.
 
 | Epoch Year | Active Sensor Constellation | Raw Detections by Sensor (`Raw Counts`) | Raw Total (`Raw Sum`) | Deduplicated `FireEpisodes` | Overpass Compression | Observation Effort $\Omega(y, \phi)$ | Harmonized `FLARE-CHRONOS` (`VIIRS-eq`) | Raw Index (`2005=100`) | Harmonized Index (`2005=100`) |

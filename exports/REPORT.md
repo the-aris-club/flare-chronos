@@ -157,6 +157,7 @@ flare-chronos/
 ### 6.1. Summary of Empirical Validation Metrics
 
 > **Note on Measured Epochs and Interpolated Years ([ADR-0009](../docs/adr/0009-measured-epochs-and-interpolated-years.md), [ADR-0010](../docs/adr/0010-sfai-baseline-from-measured-epochs-only.md)):**  
+> **Phiên bản:** `v1.1.1` — cập nhật 04/11/2026
 > Both the Mekong (`2001–2026`) and Amazon (`2001–2026`) 26-year calendars consist of **25 Measured Epochs (`2001–2025`)** computed from real NASA FIRMS slices and **1 Interpolated Year (`2026`)** modelled from the in-progress MODIS count and regional seasonal envelope. Only Observed Cells in Measured Epochs (`n = 25` years) feed the SFAI baseline or receive an Anomaly Tier.
 
 | Study Region / Benchmark | Key Empirical Finding from `data/processed/empirical_results.json` |
