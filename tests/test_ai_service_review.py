@@ -171,7 +171,7 @@ class TestReviewRunDetail(ApiCase):
             f"/api/v1/review/runs/{thread}/audit",
         ):
             self.assertEqual(
-                self.client.get(path, headers=token("bob")).status_code, 403
+                self.client.get(path, headers=token("bob")).status_code, 404
             )
         self.assertEqual(
             self.client.get(

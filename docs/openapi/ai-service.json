@@ -173,6 +173,8 @@
             "required": false,
             "schema": {
               "default": "",
+              "maxLength": 4000,
+              "minLength": 1,
               "title": "Query",
               "type": "string"
             }
@@ -184,6 +186,8 @@
             "schema": {
               "anyOf": [
                 {
+                  "maxLength": 64,
+                  "pattern": "^[A-Za-z0-9._-]+$",
                   "type": "string"
                 },
                 {
@@ -200,6 +204,8 @@
             "schema": {
               "anyOf": [
                 {
+                  "maxLength": 128,
+                  "pattern": "^[A-Za-z0-9._-]+$",
                   "type": "string"
                 },
                 {

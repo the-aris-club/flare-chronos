@@ -911,7 +911,9 @@ def tool_harmonize_real_firms_csv_slice(
     """Load an actual NASA FIRMS CSV slice from data/raw/ and execute full 5-stage physical harmonization and episode clustering."""
     import pandas as pd
 
-    csv_path = RAW_DIR / slice_filename
+    csv_path = (RAW_DIR / Path(slice_filename).name).resolve()
+    if RAW_DIR.resolve() not in csv_path.parents or not csv_path.is_file():
+        raise ValueError("slice_filename must name a CSV inside data/raw/")
     df = pd.read_csv(csv_path)
     total_rows = len(df)
     sub_df = df.head(int(sample_limit)) if sample_limit > 0 else df

@@ -111,7 +111,9 @@ class FIRMSClient:
         self, spec: FIRMSQuerySpec, force_refresh: bool = False
     ) -> pd.DataFrame:
         """Fetch active fire Thermal Detections for a bounding box and date window."""
-        cache_file = self.cache_dir / spec.cache_filename
+        cache_file = (self.cache_dir / Path(spec.cache_filename).name).resolve()
+        if self.cache_dir.resolve() not in cache_file.parents:
+            raise ValueError("cache filename escapes cache_dir")
         if cache_file.exists() and not force_refresh:
             content = cache_file.read_text(encoding="utf-8").strip()
             if not content or "Invalid" in content[:60] or "Error" in content[:60]:
@@ -172,5 +174,6 @@ class FIRMSClient:
                 time.sleep(pause_between_specs_sec)
             except Exception as exc:  # noqa: BLE001
                 summary[spec.cache_filename] = -1
-                print(f"[WARN] Failed {spec.cache_filename}: {exc}")
+                safe_msg = str(exc).replace(self.map_key, "***")
+                print(f"[WARN] Failed {spec.cache_filename}: {safe_msg}")
         return summary
