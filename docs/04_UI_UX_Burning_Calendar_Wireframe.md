@@ -20,7 +20,17 @@ Giao diện **Flare-Chronos Workbench** giải quyết triệt để hai ảo gi
 
 ---
 
-## 2. Bố Cục Wireframe Tổng Thể (Full-Screen Workbench)
+## 2. Giao Diện Thực Thi & Bố Cục Wireframe Tổng Thể (Implemented Workbench & Full-Screen Wireframe)
+
+### 2.1. Ảnh Chụp Giao Diện Thực Tế (`apps/workbench`) & Biểu Đồ Chuẩn Hóa Thực Nghiệm
+
+![Flare-Chronos Interactive 3D Region Globe & Workbench Preview](../apps/workbench/public/og.png)
+
+| Ma Trận Lịch Hoạt Động Cháy 26 Năm (`26 Năm × 73 Pentads`) | Triệt Tiêu Bước Nhảy Giả Tạo Đa Cảm Biến (`2001–2026`) |
+| :---: | :---: |
+| ![Figure 5 - Harmonized Burning Activity Calendar](figures/fig5_harmonized_burning_calendar.png) | ![Figure 4 - Regime Shift Elimination](figures/fig4_regime_shift_elimination.png) |
+
+### 2.2. Sơ Đồ Bố Cục 4 Khung Nhìn Đồng Bộ (Four-Pane Analytical Wireframe)
 
 ```text
 +----------------------------------------------------------------------------------------------------------------------+
@@ -60,7 +70,7 @@ Giao diện **Flare-Chronos Workbench** giải quyết triệt để hai ảo gi
 | 2026  | ░░░░░░░░░░░░ | ░░▒▒▓▓██████ | ▓▓████████▓▓ | ▒▒▓▓▒▒░░░░░░ | ░░░░░░░░░░░░░░░░ | ░░░░░░░░░░░░░░░░ | [NRT LIVE] |
 +----------------------------------------------------------------------------------------------------------------------+
 | [ĐỐI CHỨNG CHUỖI THỜI GIAN 2000-2026: RAW UNHARMONIZED SUM (Đường Đỏ Đất - Nhảy bậc ảo) vs. FLARE-CHRONOS (Xanh Lá)] |
-|   Index ^                                                                             .--- Raw Unharmonized (+1324%) |
+|   Index ^                                                                           .--- Raw Unharmonized (+1311.2%) |
 |   1200  |                                                                   .--------'                               |
 |    400  |                                         .------------------------'                                         |
 |    100  |================*================*=======*========*========*========*========*=== Flare-Chronos Physical    |
@@ -71,9 +81,9 @@ Giao diện **Flare-Chronos Workbench** giải quyết triệt để hai ảo gi
 
 ---
 
-## 3. Đặc Tả Chi Tiết 4 Thành Phần Giao Diện Tương Tác
+## 3. Đặc Tả Chi Tiết 4 Thành Phần Giao Diện Tương Tác (`apps/workbench`)
 
-### 3.1. Bản Đồ Không Gian WebGL Đa Độ Phân Giải (`Footprint & Iso-Area Hex Map`)
+### 3.1. Bản Đồ Không Gian Đa Độ Phân Giải (`Three.js 3D Globe + d3-geo Equal-Area SVG + H3 Hex Map`)
 * **Lớp Đa giác Elip Dải quét Thực tế (`Instantaneous Footprint Layer`)**:
   - Thay vì vẽ điểm tròn vô hướng, mỗi `ThermalDetection` được kết xuất thành một hình elip định hướng với trục lớn $\Delta S(\theta)$, trục nhỏ $\Delta T(\theta)$ và xoay theo góc phương vị quỹ đạo $\alpha_{\text{track}}(\phi, i)$.
   - Người dùng quan sát trực tiếp hiện tượng một elip MODIS ở rìa dải quét ($\Delta S = 4.83\text{ km}, \Delta T = 2.01\text{ km}$) bao trùm lên $6\text{–}12$ điểm nóng VIIRS `375 m` bên trong cùng một đám cháy rừng tại cùng thời điểm bay qua `13:30 MLT`.
@@ -104,7 +114,7 @@ Giao diện **Flare-Chronos Workbench** giải quyết triệt để hai ảo gi
 ### 3.4. Thanh Đối Chứng Khử Bước Nhảy Giả Tạo (`Before/After Harmonization Comparator`)
 * Hiển thị song song trên cùng một khung biểu đồ:
   - **Đường Đỏ Cam (Raw Unharmonized Sum)**: Tổng điểm nóng thô khi cộng gộp MODIS + S-NPP + NOAA-20 + NOAA-21 (bị nhảy bậc giả tạo năm 2012, 2020, 2024).
-  - **Đường Xanh Ngọc (Flare-Chronos Harmonized Series)**: Đường xu thế vật lý sau khi qua bộ hiệu chuẩn hình học H3, toán tử quan sát góc quét, khử trùng lặp quỹ đạo 95 phút và chuẩn hóa nỗ lực quan sát $\Omega(y, \phi)$.
+  - **Đường Xanh Ngọc (Flare-Chronos Harmonized Series)**: Đường xu thế vật lý sau khi qua bộ hiệu chuẩn hình học H3, toán tử quan sát góc quét, khử trùng lặp quỹ đạo 60 phút và chuẩn hóa nỗ lực quan sát $\Omega(y, \phi)$.
 
 ### 3.5. Bảng Báo Cáo Có Căn Cứ & Cổng Phê Duyệt (`Grounded Briefing & Human Sign-off Panel`)
 * Bảng báo cáo là **thành phần thứ năm**, nối trực tiếp với luồng sự kiện của tầng nhận thức (`GET /api/v1/analysis/stream`). Bảng có **ba trạng thái**, không phải một dòng thời gian đã hoàn tất:

@@ -50,8 +50,12 @@ ENTRY_RE = re.compile(
     rf"^(?:[0-9a-f]{{7,40}}: )?\d{{2}}/\d{{2}}/\d{{4}} — \S+ — ({ACTIONS}): .+$"
 )
 FRAGMENT_RE = re.compile(rf"^\d{{2}}/\d{{2}}/\d{{4}} — \S+ — ({ACTIONS}): .+$")
-MD_VERSION_RE = re.compile(r"\*\*Phiên bản:\*\*[^\n]*?(\d+\.\d+\.\d+)")
-PDF_VERSION_RE = re.compile(r"Phiên bản[^\n]{0,80}?(\d+\.\d+\.\d+)")
+MD_VERSION_RE = re.compile(
+    r"\*\*(?:Phiên bản|(?:Document )?Version):\*\*[^\n]*?(\d+\.\d+\.\d+)"
+)
+PDF_VERSION_RE = re.compile(
+    r"(?:Phiên bản|(?:Document )?Version)[^\n]{0,80}?(\d+\.\d+\.\d+)"
+)
 
 failures: list[str] = []
 warnings: list[str] = []

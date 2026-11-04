@@ -118,15 +118,15 @@ The operational severity band of a Standardized Fire Anomaly Index value, assign
 _Avoid_: Risk level, alert level, severity score, crisis threshold
 
 **Measured Epoch**:
-A year for which the archive holds a real NASA FIRMS slice set — the harmonized count for that year is computed from observed detections. Ten of the twenty-six Mekong years and eight of the twenty-six Amazon years are Measured Epochs. The current year is never a Measured Epoch: its 5-day window belongs to a year still in progress, so it is an Interpolated Year until the year closes.
+A year for which the archive holds a real NASA FIRMS slice set — the harmonized count for that year is computed from observed detections. Twenty-five of the twenty-six Mekong years (`2001–2025`) and twenty-five of the twenty-six Amazon years (`2001–2025`) are Measured Epochs (`n = 25` SFAI baseline). The current year (`2026`) is never a Measured Epoch: its 5-day window belongs to a year still in progress, so it is an Interpolated Year until the year closes.
 _Avoid_: Real year, hard data, ground truth, anchor year
 
 **Interpolated Year**:
-A year with no archived slice set, whose annual scale is modelled from the observed MODIS-only count and the region's empirical seasonal envelope. The interpolation is deterministic but it is a model, not an observation, and published documents mark these years as such.
+A year with no closed annual archive slice set (`2026`), whose annual scale is modelled from the observed MODIS-only count and the region's empirical seasonal envelope. The interpolation is deterministic but it is a model, not an observation, and published documents mark these years as such.
 _Avoid_: Estimated year, synthetic year, filled year, projection
 
 **Observed Cell**:
-A cell of the Burning Activity Calendar whose value comes from a Measured Epoch's own FIRMS window — the pentad that holds the 5-day slice, in a measured year. Every other cell is modelled, either inside a measured year or in an Interpolated Year. Only Observed Cells carry a Standardized Fire Anomaly Index, an Anomaly Tier or a Severe Anomaly Outline.
+A cell of the Burning Activity Calendar whose value comes from a Measured Epoch's own FIRMS window — the pentad that holds the 5-day slice, in a measured year (`Pentad 15` for Mekong, `Pentad 47` for Amazon). Every other cell is modelled, either inside a measured year or in an Interpolated Year. Only Observed Cells carry a Standardized Fire Anomaly Index, an Anomaly Tier or a Severe Anomaly Outline.
 _Avoid_: Real cell, measured pentad, hard cell
 
 **Severe Anomaly Outline**:
@@ -144,7 +144,7 @@ A hand-authored visual — motion graphic, 3D scene, title card or map animation
 _Avoid_: Figure, chart, data viz, screenshot, mock-up
 
 **Workbench**:
-The Flare-Chronos interactive analysis surface — the Deck.gl / MapLibre application specified in `docs/04_UI_UX_Burning_Calendar_Wireframe.md` that renders the harmonization engine's output on demand rather than pre-rendering it. It has a single mode: it reads the exported harmonization data and the live analysis service, and never shows replayed or placeholder results. Specified but not yet implemented.
+The Flare-Chronos interactive analysis surface (`apps/workbench`) — a Next.js 16 + React 19 application that renders the harmonization engine's output on a Three.js 3D Region Globe, a pre-projected `d3-geo` equal-area SVG map (`1000×730` with `1–64×` pan/zoom and H3 screen-space hexagonal binning), the Burning Activity Calendar (`26 years × 73 Pentads`), the methodology surface (`/methodology`), the live AI briefing rail, the human-in-the-loop review surface (`/review`), and the cognitive benchmark matrix (`/benchmark`). It has a single mode: it reads the exported harmonization data and the live `apps/ai-service` FastAPI backend (`:5901`), and never shows replayed or placeholder results.
 _Avoid_: Dashboard, UI, app, interactive demo, live visualization, preview site
 
 **Demo Walkthrough**:
