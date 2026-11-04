@@ -1,5 +1,8 @@
 name: CI
 
+# Every job uses a standard GitHub-hosted runner (`ubuntu-latest`).
+# No self-hosted labels or runner groups are requested.
+
 on:
   push:
     branches: [main]
@@ -43,7 +46,7 @@ jobs:
   check-docs:
     needs: changes
     if: needs.changes.outputs.docs == 'true' || needs.changes.outputs.python == 'true'
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:

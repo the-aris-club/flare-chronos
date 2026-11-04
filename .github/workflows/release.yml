@@ -57,5 +57,5 @@ jobs:
           echo '${{ steps.changesets.outputs.published-packages }}' \
             | jq -r '.[] | "v\(.version)"' \
             | while read -r tag; do
-                gh release upload "$tag" exports/PROPOSAL.pdf exports/PROPOSAL.md exports/REPORT.pdf exports/REPORT.md exports/MODEL_FLOW.pdf exports/MODEL_FLOW.md --clobber
+                gh release upload "$tag" exports/PROPOSAL.pdf exports/PROPOSAL.md exports/REPORT.pdf exports/REPORT.md --clobber
               done

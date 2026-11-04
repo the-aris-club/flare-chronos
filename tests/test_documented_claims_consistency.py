@@ -44,7 +44,6 @@ CLAIM_DOCS = (
     "docs/05_Pitch_Deck_and_Video_Script.md",
     "exports/PROPOSAL.md",
     "exports/REPORT.md",
-    "exports/MODEL_FLOW.md",
     "GLOSSARY.md",
     "apps/ai-service/GLOSSARY.md",
     "DESIGN.md",
@@ -62,7 +61,7 @@ CALIBRATION_DOCS = (
 # Generated artifacts that embed the same claims in hardcoded strings. The PDF
 # is built from these, so a stale literal here ships a stale PDF even when
 # every markdown file agrees with the artifact.
-CLAIM_SOURCES = ("exports/export_pdf.py",)
+CLAIM_SOURCES: tuple[str, ...] = ()
 
 
 def vi(value: float, decimals: int = 1) -> str:
@@ -697,8 +696,8 @@ class DocumentedClaimsConsistencyTest(unittest.TestCase):
             self.assertIn(required_section, proposal)
 
         # Ensure export_pdf.py has the dedicated LANGGRAPH_FLOW_SVG so REPORT.pdf
-        # and MODEL_FLOW.pdf do not duplicate the satellite architecture diagram.
-        exporter = self.sources["exports/export_pdf.py"]
+        # does not duplicate the satellite architecture diagram.
+        exporter = (ROOT / "exports/export_pdf.py").read_text(encoding="utf-8")
         self.assertIn("LANGGRAPH_FLOW_SVG", exporter)
         self.assertNotIn(" docs/logo.svg", proposal)
         self.assertNotIn("../docs/logo.svg", proposal)
@@ -727,7 +726,6 @@ class DocumentedClaimsConsistencyTest(unittest.TestCase):
         for doc in (
             "exports/PROPOSAL.md",
             "exports/REPORT.md",
-            "exports/MODEL_FLOW.md",
         ):
             text = self.docs[doc]
             # No multiline subgraph label breaks

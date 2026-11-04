@@ -16,7 +16,6 @@ const date = [
 const mdFiles = [
   "exports/PROPOSAL.md",
   "exports/REPORT.md",
-  "exports/MODEL_FLOW.md",
 ];
 for (const mdPath of mdFiles) {
   try {

@@ -6,7 +6,7 @@
   "description": "Flare-Chronos — changelog and release automation for the exported proposal documents",
   "packageManager": "bun@1.4.4",
   "scripts": {
-    "doc:version": "changeset version && bun scripts/apply-version.mjs && uv run python exports/export_pdf.py && uv run python exports/export_pdf.py -i exports/MODEL_FLOW.md -o exports/MODEL_FLOW.pdf",
+    "doc:version": "changeset version && bun scripts/apply-version.mjs && uv run python exports/export_pdf.py",
     "release": "changeset publish",
     "credentials": "uv run python scripts/mint_credentials.py",
     "check-docs": "python3 scripts/check-docs.py --scan",

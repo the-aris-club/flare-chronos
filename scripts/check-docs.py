@@ -37,12 +37,10 @@ CHANGESET_DIR = ROOT / ".changeset"
 TRACKED = {
     "exports/PROPOSAL.md",
     "exports/REPORT.md",
-    "exports/MODEL_FLOW.md",
 }
 VERSIONED_DOCS = [
     ("exports/PROPOSAL.md", "exports/PROPOSAL.pdf"),
     ("exports/REPORT.md", "exports/REPORT.pdf"),
-    ("exports/MODEL_FLOW.md", "exports/MODEL_FLOW.pdf"),
 ]
 
 ACTIONS = "thay thế|thêm|sửa|xoá|cập nhật"
