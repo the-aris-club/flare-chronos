@@ -5,7 +5,7 @@ services:
     image: ghcr.io/the-aris-club/flare-chronos-api:${TAG:-latest}
     restart: unless-stopped
     ports:
-      - "5901:5901"
+      - "127.0.0.1:5901:5901"
     volumes:
       - api-data:/app/data/runtime
     env_file:
@@ -22,7 +22,7 @@ services:
     image: ghcr.io/the-aris-club/flare-chronos-workbench:${TAG:-latest}
     restart: unless-stopped
     ports:
-      - "5900:5900"
+      - "127.0.0.1:5900:5900"
     depends_on:
       api:
         condition: service_healthy

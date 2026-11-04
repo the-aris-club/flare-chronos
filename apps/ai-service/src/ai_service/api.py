@@ -28,7 +28,7 @@ from typing import Annotated, Any, Literal
 from uuid import uuid4
 
 import jwt
-from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi import Depends, FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -265,16 +265,20 @@ def create_app(
     def stream(
         request: Request,
         principal: Annotated[Principal, Depends(authenticate)],
-        query: str = "",
-        use_case_id: str | None = None,
-        thread_id: str | None = None,
+        query: Annotated[str, Query(min_length=1, max_length=4000)] = "",
+        use_case_id: Annotated[
+            str | None, Query(max_length=64, pattern=r"^[A-Za-z0-9._-]+$")
+        ] = None,
+        thread_id: Annotated[
+            str | None, Query(max_length=128, pattern=r"^[A-Za-z0-9._-]+$")
+        ] = None,
     ) -> StreamingResponse:
         query = query.strip()
         if not query:
             raise HTTPException(400, "query is required")
         thread = thread_id or f"run-{uuid4().hex}"
         if not request.app.state.store.claim(thread, principal.sub):
-            raise HTTPException(403, "this thread belongs to another principal")
+            raise HTTPException(404, "no such run")
         return stream_response(
             request,
             request.app.state.harness.astream_use_case(
@@ -307,7 +311,7 @@ def create_app(
         if owner is None:
             raise HTTPException(404, "no such run")
         if principal.sub != owner and APPROVER_ROLE not in principal.roles:
-            raise HTTPException(403, "only the run's owner or an approver may decide")
+            raise HTTPException(404, "no such run")
         pending = await request.app.state.harness.apending_requests(body.thread_id)
         if not any(p.get("kind") == "sign_off" for p in pending):
             raise HTTPException(409, "this run has no sign-off request waiting")
@@ -344,10 +348,10 @@ def create_app(
     def visible_run(request: Request, principal: Principal, run_id: str) -> str:
         """The run's owner, or 404 / 403 when it is missing or not the caller's."""
         owner = request.app.state.store.owner_of(run_id)
-        if owner is None:
+        if owner is None or (
+            principal.sub != owner and APPROVER_ROLE not in principal.roles
+        ):
             raise HTTPException(404, "no such run")
-        if principal.sub != owner and APPROVER_ROLE not in principal.roles:
-            raise HTTPException(403, "only the run's owner or an approver may read it")
         return owner
 
     @app.get("/api/v1/review/runs/{run_id}")

@@ -133,7 +133,7 @@ class TestStream(ApiCase):
         response = self.client.get(
             SIGN_OFF_QUERY + "&thread_id=shared-thread", headers=token("bo")
         )
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 404)
 
     def test_a_run_that_overruns_its_budget_fails_cleanly(self) -> None:
         async def never(*_a, **_k):
@@ -172,7 +172,7 @@ class TestSignOff(ApiCase):
 
     def test_someone_who_is_not_the_owner_cannot_approve(self) -> None:
         thread = self.start_signoff_run("ana")
-        self.assertEqual(self.resume("bo", thread).status_code, 403)
+        self.assertEqual(self.resume("bo", thread).status_code, 404)
 
     def test_an_assigned_approver_can_release_someone_elses_run(self) -> None:
         thread = self.start_signoff_run("ana")

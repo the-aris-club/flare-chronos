@@ -1177,7 +1177,7 @@ def build_pdf(
         _resolve_binary("pandoc"),
         str(temp_md),
         "-f",
-        "markdown+gfm_auto_identifiers+fenced_divs+pipe_tables+backtick_code_blocks+raw_html-tex_math_dollars",
+        "markdown+gfm_auto_identifiers+fenced_divs+pipe_tables+backtick_code_blocks-tex_math_dollars",
         "-t",
         "html5",
         "--syntax-highlighting=pygments",
