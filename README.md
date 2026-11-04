@@ -16,7 +16,6 @@
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="License" /></a>
   <a href="exports/PROPOSAL.pdf"><img src="https://img.shields.io/badge/PDF-PROPOSAL-ea580c" alt="Proposal PDF" /></a>
   <a href="exports/REPORT.pdf"><img src="https://img.shields.io/badge/PDF-REPORT-1d4ed8" alt="Report PDF" /></a>
-  <a href="exports/MODEL_FLOW.pdf"><img src="https://img.shields.io/badge/PDF-MODEL_FLOW-4c6ef5" alt="Model Flow Report PDF" /></a>
 </p>
 
 <p align="center">
@@ -102,8 +101,8 @@ See [`docs/00_Project_Name_and_Acronym.md`](docs/00_Project_Name_and_Acronym.md)
 - **Spatio-temporal deduplication**: multi-satellite overpass clustering into Fire Episodes (τ = 60 min).
 - **Effort normalization**: Ω(year, latitude) prevents constellation-expansion artificial trends.
 - **Burning Activity Calendar**: 26 Years × 73 Pentads matrix of HFD / HRF / SFAI with robust seasonal Z-scores.
-- **Dual-System Cognitive AI Harness (`apps/ai-service`)**: LangGraph orchestration pairing a **System 1 decision model** (assigns the analysis, the region and the urgency with calibrated probabilities) with a **System 2 native chat endpoint** (deliberative reasoning) across **15 Use Cases** and **18 deterministic `@tool` functions**. The Reflexive Layer runs a chain — decision model, then chat model, then deterministic extraction — so a run never depends on one service being up ([MODEL_FLOW](exports/MODEL_FLOW.md)). The model chooses its own tool calls; the harness only decides which tools each tier may reach. Every briefing is a **Grounded Narrative**: the model authors the interpretation while the harness injects every quantity from the `VerifiedFactsLedger`, checked by a `NumericGroundingVerifier`. Briefings that authorize a field action pause for a **human sign-off** before they are released. Each layer is bound through an **Endpoint Profile** (protocol, endpoint, model, API key, request options) resolved from explicit configuration only — never from the host's agent tooling configuration ([ADR-0006](docs/adr/0006-explicit-endpoint-profiles-and-grounded-narrative-assembly.md), [ADR-0008](docs/adr/0008-model-driven-tool-selection-sign-off-and-event-stream.md)).
-- **Deep-module monorepo**: pure core (zero I/O) behind a clean seam; ingestion adapter; benchmark CLI; dual-system AI service (`:5901`); interactive Next.js 16 Workbench (`:5900`); English PDF exports (`exports/PROPOSAL.pdf`, `exports/REPORT.pdf` & `exports/MODEL_FLOW.pdf`).
+- **Dual-System Cognitive AI Harness (`apps/ai-service`)**: LangGraph orchestration pairing a **System 1 decision model** (assigns the analysis, the region and the urgency with calibrated probabilities) with a **System 2 native chat endpoint** (deliberative reasoning) across **15 Use Cases** and **18 deterministic `@tool` functions**. The Reflexive Layer runs a chain — decision model, then chat model, then deterministic extraction — so a run never depends on one service being up ([REPORT](exports/REPORT.md)). The model chooses its own tool calls; the harness only decides which tools each tier may reach. Every briefing is a **Grounded Narrative**: the model authors the interpretation while the harness injects every quantity from the `VerifiedFactsLedger`, checked by a `NumericGroundingVerifier`. Briefings that authorize a field action pause for a **human sign-off** before they are released. Each layer is bound through an **Endpoint Profile** (protocol, endpoint, model, API key, request options) resolved from explicit configuration only — never from the host's agent tooling configuration ([ADR-0006](docs/adr/0006-explicit-endpoint-profiles-and-grounded-narrative-assembly.md), [ADR-0008](docs/adr/0008-model-driven-tool-selection-sign-off-and-event-stream.md)).
+- **Deep-module monorepo**: pure core (zero I/O) behind a clean seam; ingestion adapter; benchmark CLI; dual-system AI service (`:5901`); interactive Next.js 16 Workbench (`:5900`); English PDF exports (`exports/PROPOSAL.pdf` & `exports/REPORT.pdf`).
 
 ---
 
@@ -179,10 +178,9 @@ flare-chronos/
 ├── exports/
 │   ├── PROPOSAL.md / PROPOSAL.pdf     # Official Technical Proposal (English A4 PDF)
 │   ├── REPORT.md / REPORT.pdf         # Codebase Architecture & Empirical Report (English A4 PDF)
-│   ├── MODEL_FLOW.md / MODEL_FLOW.pdf # Dual-System Cognitive Model Flow Report (English A4 PDF)
 │   └── export_pdf.py                  # Vector SVG + WeasyPrint A4 PDF compiler
 ├── src/harmonization/                 # [Compat Seam] facade for auto-grading
-├── tests/                             # 182 offline unit/invariant/harness tests + 6 live TDD seam tests (22 files)
+├── tests/                             # 186 offline unit/invariant/harness tests + 6 live TDD seam tests (23 files)
 ├── docs/                              # Proposal, specs, ADRs (0001-0017), figures & logo
 │   └── media/SOURCES.md               # Editorial deliverable index & naming convention
 └── .github/workflows/ci.yml           # CI
