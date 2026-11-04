@@ -9,7 +9,7 @@ Physics-guided harmonization of MODIS and VIIRS hot spots and a 26-year burning 
 
 Challenge: Harmonization of MODIS and VIIRS Hot Spots (NASA Earth Science Division / LANCE FIRMS)
 
-**Document Version:** 1.1.1 · English · MIT License
+**Document Version:** 2.0.0 · English · MIT License
 
 Repository: https://github.com/the-aris-club/flare-chronos
 :::

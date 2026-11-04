@@ -1,6 +1,6 @@
 [project]
 name = "benchmark-cli"
-version = "1.1.2"
+version = "2.0.0"
 description = "Empirical verification, progressive NASA FIRMS data fetcher, and publication figure generator for Flare-Chronos"
 authors = [{name = "Xiro The Dev", email = "lethanhtrung.trungle@gmail.com"}]
 requires-python = ">=3.11"

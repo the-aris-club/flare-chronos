@@ -20,11 +20,17 @@ const mdFiles = [
 for (const mdPath of mdFiles) {
   try {
     let md = readFileSync(mdPath, "utf8");
-    const versionLine = `> **Phiên bản:** \`v${version}\` — cập nhật ${date}`;
-    if (/^> \*\*Phiên bản:\*\*.*$/m.test(md)) {
-      md = md.replace(/^> \*\*Phiên bản:\*\*.*$/m, versionLine);
+    const mdVersionRe =
+      /(\*\*(?:Phiên bản|(?:Document )?Version):\*\*[^\n]*?)(\d+\.\d+\.\d+)/;
+    if (mdVersionRe.test(md)) {
+      md = md.replace(mdVersionRe, `$1${version}`);
     } else {
-      md = md.replace(/^(> .*\n)/m, `$1${versionLine}\n`);
+      const versionLine = `> **Phiên bản:** \`v${version}\` — cập nhật ${date}`;
+      if (/^> \*\*Phiên bản:\*\*.*$/m.test(md)) {
+        md = md.replace(/^> \*\*Phiên bản:\*\*.*$/m, versionLine);
+      } else {
+        md = md.replace(/^(> .*\n)/m, `$1${versionLine}\n`);
+      }
     }
     writeFileSync(mdPath, md);
     console.log(`apply-version: v${version} stamped into ${mdPath} (${date})`);

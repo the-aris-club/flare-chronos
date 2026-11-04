@@ -1,5 +1,13 @@
 # flare-chronos
 
+## 2.0.0
+
+### Major Changes
+
+- 05/11/2026 — exports/MODEL_FLOW.md — xoá: merged model flow into REPORT.md, single compact report
+  05/11/2026 — exports/REPORT.md — thay thế: compact report with the merged model flow and balanced table columns
+  05/11/2026 — exports/PROPOSAL.md — cập nhật: compact English submission draft with balanced table columns
+
 ## 1.1.2
 
 ### Patch Changes
