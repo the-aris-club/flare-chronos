@@ -385,21 +385,19 @@ row must match this table exactly across catalogs, tests, and e2e specs.
 - Landing entry opens the last measured epoch (2025). The Workbench deep link is
   `/workbench/<id>?epoch=<year>`; `tour=1` opens the walkthrough. The Globe
   header button returns to `/`.
-- The Review fixture runs (`RUN-0411`, `RUN-0412`, `RUN-0413`) carry the design's
-  facts, brief templates, tool calls, decisions and audit ids. They are sample
-  records, not production data; every boundary that becomes HTTP carries
-  `TODO(api)`. The queue, run, dialogs and audit read the same store, so a
-  decision moves the run from Needs decision to Published or Withheld and adds an
-  audit row for the session.
-- The Workbench briefing rail is a local service simulator over the same run
-  fixture: Up / Degraded / Down, a token handshake (none, rejected, resolving,
-  resolved, connected), a run stream (idle, running, paused, done), number chips
-  that verify one by one, a rewritten figure, a degraded banner and a retry path.
-  The Workbench never records the decision; the paused run hands off to Review.
-  Returning with a decision marks the run published or withheld.
-- The service chip in the header mirrors the simulator state. The rail footer
-  carries the "Demo · simulate service" control and Reset run; it is present at
-  every breakpoint, including the mobile briefing overlay.
+- Per [ADR-0016](./docs/adr/0016-workbench-wired-to-ai-service-review-from-run-events.md),
+  the local briefing simulator, static review fixtures (`RUN-0411`, `RUN-0412`,
+  `RUN-0413`), and all `TODO(api)` markers were removed. Both the Workbench
+  briefing rail and `/review` connect live to `apps/ai-service` (`:5901`):
+  `POST /api/v1/analysis/token` issues a short-lived HS256 JWT, `GET /api/v1/analysis/stream`
+  streams SSE events (`run_started`, `node_completed`, `sign_off_required`,
+  `run_paused`, `run_completed`), `GET /api/v1/runs` and `GET /api/v1/runs/{run_id}`
+  project persisted SQLite `RunStore` rows into the review queue, and
+  `POST /api/v1/runs/{run_id}/resume` records the identity-bound sign-off decision.
+- The Workbench briefing rail reflects live service state (Connected, Paused for
+  sign-off, Completed, or Unreachable with retry), verifies numeric citation chips
+  against tool payloads, and hands paused System 2 sign-off runs (`UC-S1.4`,
+  `UC-S2.6`, `UC-S2.9`, `UC-S2.10`) to `/review`.
 - The evidence drawer carries a source line and a data table per published
   figure. The walkthrough uses a spotlight on the target
   pane, a progress bar and a figure callout. The globe label shows a tick strip
@@ -408,6 +406,5 @@ row must match this table exactly across catalogs, tests, and e2e specs.
   sessionStorage and shrinks it into the map pane on the Workbench. The overlay
   uses the clicked region as its object position, so the transition reads as one
   continuous globe-to-map move. The return trip is still a route change.
-- The live analysis stream, review endpoints and audit endpoint are not wired;
-  the five remaining `TODO(api)` markers are the replacement checklist; decisions
-and audit rows persist through `/api/review/decisions`.
+- App-local review notes and audit metadata additionally persist through
+  `/api/review/decisions` alongside the `ai-service` append-only SQLite `audit` table.

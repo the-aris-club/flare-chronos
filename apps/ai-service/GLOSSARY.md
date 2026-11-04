@@ -11,7 +11,7 @@ The tier that reports. It assigns the analysis a request needs, classifies inten
 _Avoid_: Fast chatbot, simple prompt, router-only agent
 
 **Analysis Assignment**:
-The Reflexive Layer's answer to "which of the twenty analyses does this request need". The assignment decides the cognitive tier, the tool surface, the cache key and the report title. The System 2 Deliberative Layer still chooses the tool, so a wrong assignment shows up as a wrong title rather than a wrong calculation.
+The Reflexive Layer's answer to "which of the fifteen analyses does this request need". The assignment decides the cognitive tier, the tool surface, the cache key and the report title. The System 2 Deliberative Layer still chooses the tool, so a wrong assignment shows up as a wrong title rather than a wrong calculation.
 _Avoid_: Routing, intent label, model selection
 
 **Triage Confidence**:

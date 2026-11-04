@@ -93,9 +93,9 @@ flowchart TB
         CAL_ENGINE["Burning Activity Calendar Engine<br/>Ma trận 26 Năm × 73 Pentads: HFD, HRF & Chỉ số dị thường SFAI Z-Score"]
     end
 
-    subgraph PRESENTATION["5. Giao Diện Tương Tác & Cảnh Báo Sớm (WebGL + REST API)"]
-        FASTAPI["FastAPI Harmonization Service<br/>/api/v1/harmonize-aoi & /api/v1/calendar"]
-        DECKGL["MapLibre GL + Deck.gl Footprint Layer<br/>Hiển thị Elip ΔS×ΔT, Lưới H3 Res 7/8 & Lịch Nhiệt 26 Năm"]
+    subgraph PRESENTATION["5. Giao Diện Tương Tác & Cảnh Báo Sớm (Next.js 16 + FastAPI)"]
+        FASTAPI["FastAPI Harmonization & Analysis Service (:5901)<br/>/api/v1/analysis/stream & /api/v1/runs"]
+        DECKGL["Next.js 16 Workbench (:5900)<br/>Three.js 3D Globe, d3-geo Equal-Area SVG, H3 Res 7/8 & Lịch Nhiệt 26 Năm"]
     end
 
     subgraph COGNITION["6. Tầng Nhận Thức Kép (apps/ai-service — LangGraph)"]
@@ -126,9 +126,9 @@ Tầng nhận thức không tính toán vật lý — lõi đồng bộ hóa đ�
 
 | Thành phần | Trách nhiệm | Bất biến |
 | :--- | :--- | :--- |
-| **Tầng phản xạ** | Gán phân tích (`1` trong `20`), định vùng, đánh giá khẩn cấp | Trả lời bằng xác suất **hiệu chuẩn**; chạy chuỗi *decision model → chat model → trích xuất tất định*; mỗi lần lùi bậc được ghi lại |
+| **Tầng phản xạ** | Gán phân tích (`1` trong `15` Use Cases: `5` System 1 + `10` System 2), định vùng, đánh giá khẩn cấp | Trả lời bằng xác suất **hiệu chuẩn**; chạy chuỗi *decision model → chat model → trích xuất tất định*; mỗi lần lùi bậc được ghi lại |
 | **Tầng báo cáo** | Tra cứu `1` bước, thẻ dữ kiện, cảnh báo khẩn | **Không** gọi mô hình · **không** chạm Domain Diagnostic Tool · **không** viết diễn giải |
-| **Tầng suy luận** | Chọn tool, suy luận nhiều bước, viết diễn giải | Bề mặt `23` tool tất định (trong tổng `24` hàm `@tool`; máy đọc CSV thô cố ý nằm ngoài registry để mô hình không chạm dữ liệu thô); mọi định lượng phải đến từ tool và được ghi vào `VerifiedFactsLedger` |
+| **Tầng suy luận** | Chọn tool, suy luận nhiều bước, viết diễn giải | Bề mặt `18` tool tất định gắn cho mô hình (`9` Atomic + `9` Domain Diagnostic, trong tổng `19` hàm `@tool`; máy đọc CSV thô cố ý nằm ngoài registry để mô hình không chạm dữ liệu thô); mọi định lượng phải đến từ tool và được ghi vào `VerifiedFactsLedger` |
 | **Cổng công cụ tất định** | Đối chiếu từng con số trong bản thảo với sổ cái trước khi phát hành | Số không có nguồn ⇒ trả về mô hình viết lại; hết ngân sách ⇒ rơi về bộ sinh tất định |
 | **Cổng phê duyệt con người** | Run dừng chờ quyết định cho báo cáo có hành động hiện trường | Bị từ chối ⇒ **không phát hành** báo cáo nào; quyết định luôn được ghi lại |
 

@@ -19,11 +19,16 @@
   <a href="exports/MODEL_FLOW.pdf"><img src="https://img.shields.io/badge/PDF-MODEL_FLOW-4c6ef5" alt="Model Flow Report PDF" /></a>
 </p>
 
+<p align="center">
+  <img src="apps/workbench/public/og.png" alt="Flare-Chronos Interactive 3D Region Globe &amp; 26-Year Harmonized Burning Activity Calendar Workbench" width="100%" />
+</p>
+
 ---
 
 ## Table of Contents
 
 - [Overview](#overview)
+- [Empirical Benchmark & Visual Results](#empirical-benchmark--visual-results)
 - [Name & Acronym Meaning](#name--acronym-meaning)
 - [Features](#features)
 - [Architecture](#architecture)
@@ -56,6 +61,26 @@ Flare-Chronos resolves this by:
 
 ---
 
+## Empirical Benchmark & Visual Results
+
+All five scientific benchmark charts below are deterministically rendered by `uv run python -m benchmark_cli.run_experiments` from **1,609,182 real NASA FIRMS detections across 134 cached CSV slices** (`data/processed/empirical_results.json` and `data/processed/burning_calendar.json`):
+
+### 1. Eliminating the Artificial `+1,311.2%` Multi-Sensor Step Jump & Building the 26-Year Calendar
+
+| Figure 4 — Multi-Sensor Regime Shift Elimination (`2001–2026`) | Figure 5 — 26-Year Harmonized Burning Activity Calendar (`26 × 73 Pentads`) |
+| :---: | :---: |
+| ![Figure 4 - Regime Shift Elimination](docs/figures/fig4_regime_shift_elimination.png) | ![Figure 5 - Harmonized Burning Activity Calendar](docs/figures/fig5_harmonized_burning_calendar.png) |
+| Removes the artificial **+1,311.2%** step-jump in the Mekong (`2024` raw index `1,411.2` → harmonized **`90.5`**, `-9.5%` vs. `2005 = 100.0`) and **+714.3%** in the Amazon (`814.3` → **`37.7`**) while preserving real El Niño drought peaks. | Continuous `2001–2026` matrix (`25` Measured Epochs `2001–2025` + `1` Interpolated Year `2026`) with SFAI severe anomaly outlines on observed cells (`Mekong 2007: +3.7σ`, `Amazon 2002: +3.8σ`). |
+
+### 2. Scan-Angle Footprint Physics, Overpass Deduplication & Co-Incident FRP Calibration
+
+| Figure 1 — Spherical Scan-Angle Footprint Physics (`74.23×`) | Figure 2 — Multi-Satellite Overpass Deduplication & Effort $\Omega(y, \phi)$ | Figure 3 — Two-Stage FRP Cross-Calibration ($N = 20,786$ Pairs) |
+| :---: | :---: | :---: |
+| ![Figure 1 - Scan Angle Footprint Physics](docs/figures/fig1_scan_angle_footprint_physics.png) | ![Figure 2 - Overpass Deduplication](docs/figures/fig2_overpass_deduplication_sza.png) | ![Figure 3 - Cross-Sensor FRP Calibration](docs/figures/fig3_cross_sensor_frp_quantile_mapping.png) |
+| MODIS edge footprint (`9.69 km²`) is **74.23×** larger than VIIRS nadir (`0.1305 km²`); empirical FIRMS mean **2.17 km²** vs. **0.22 km²** (**9.86×**). | Deduplicates afternoon constellation overpasses ($\tau = 60\text{ min}$), compressing Amazon `2024` detections **5.75×** (`112,405 → 19,542` episodes). | Reduces Kolmogorov-Smirnov distance $D_{\text{KS}}$ by **69.4%** (`0.1153 → 0.0353`) and raises log-FRP $R^2$ from `0.7839` to `0.8048`. |
+
+---
+
 ## Name & Acronym Meaning
 
 - **FLARE** — evokes the image of a flame (ngọn lửa): the fire signal the system detects, harmonizes, and tracks.
@@ -78,13 +103,13 @@ See [`docs/00_Project_Name_and_Acronym.md`](docs/00_Project_Name_and_Acronym.md)
 - **Effort normalization**: Ω(year, latitude) prevents constellation-expansion artificial trends.
 - **Burning Activity Calendar**: 26 Years × 73 Pentads matrix of HFD / HRF / SFAI with robust seasonal Z-scores.
 - **Dual-System Cognitive AI Harness (`apps/ai-service`)**: LangGraph orchestration pairing a **System 1 decision model** (assigns the analysis, the region and the urgency with calibrated probabilities) with a **System 2 native chat endpoint** (deliberative reasoning) across **15 Use Cases** and **18 deterministic `@tool` functions**. The Reflexive Layer runs a chain — decision model, then chat model, then deterministic extraction — so a run never depends on one service being up ([MODEL_FLOW](exports/MODEL_FLOW.md)). The model chooses its own tool calls; the harness only decides which tools each tier may reach. Every briefing is a **Grounded Narrative**: the model authors the interpretation while the harness injects every quantity from the `VerifiedFactsLedger`, checked by a `NumericGroundingVerifier`. Briefings that authorize a field action pause for a **human sign-off** before they are released. Each layer is bound through an **Endpoint Profile** (protocol, endpoint, model, API key, request options) resolved from explicit configuration only — never from the host's agent tooling configuration ([ADR-0006](docs/adr/0006-explicit-endpoint-profiles-and-grounded-narrative-assembly.md), [ADR-0008](docs/adr/0008-model-driven-tool-selection-sign-off-and-event-stream.md)).
-- **Deep-module monorepo**: pure core (zero I/O) behind a clean seam; ingestion adapter; benchmark CLI; dual-system AI service; PDF exports (`exports/PROPOSAL.pdf` & `exports/REPORT.pdf`).
+- **Deep-module monorepo**: pure core (zero I/O) behind a clean seam; ingestion adapter; benchmark CLI; dual-system AI service (`:5901`); interactive Next.js 16 Workbench (`:5900`); English PDF exports (`exports/PROPOSAL.pdf`, `exports/REPORT.pdf` & `exports/MODEL_FLOW.pdf`).
 
 ---
 
 ## Architecture
 
-See [`docs/03_System_Architecture_and_Data_Pipeline.md`](docs/03_System_Architecture_and_Data_Pipeline.md) and [`exports/REPORT.md`](exports/REPORT.md) for the full end-to-end pipeline, DuckDB/H3 schema, Dual-System LangGraph Harness, and REST API specification.
+See [`docs/03_System_Architecture_and_Data_Pipeline.md`](docs/03_System_Architecture_and_Data_Pipeline.md) and [`exports/REPORT.md`](exports/REPORT.md) for the full end-to-end pipeline, H3 spatial grid, Dual-System LangGraph Harness, interactive Workbench, and REST/SSE API specification.
 
 High-level flow:
 
@@ -99,10 +124,10 @@ NASA FIRMS (MODIS / VIIRS / NRT) ──► firms-ingestion (rate-limited, cached
                                             │
                                             ▼
                      ai-service (LangGraph System 1 ↔ System 2)
-        19 deterministic @tools → VerifiedFactsLedger → NumericGroundingVerifier
+        18 registered @tools → VerifiedFactsLedger → NumericGroundingVerifier
                                             │
                                             ▼
-                              DuckDB / Parquet cube + REST API + Deck.gl UI
+             apps/workbench (Next.js 16 + Three.js 3D Globe + d3-geo SVG + H3)
 ```
 
 ---
@@ -141,6 +166,7 @@ The two endpoints the architecture document specifies are implemented here:
 ```
 flare-chronos/
 ├── GLOSSARY.md / GLOSSARY-MAP.md      # Domain ubiquitous language (multi-context)
+├── DESIGN.md                          # Workbench visual design system, tokens & EN/VI vocabulary
 ├── AGENTS.md                          # Agent skills config
 ├── pyproject.toml                     # uv workspace root
 ├── packages/
@@ -148,15 +174,16 @@ flare-chronos/
 │   └── firms-ingestion/               # [Adapter Seam] NASA LANCE FIRMS client + cache
 ├── apps/
 │   ├── benchmark-cli/                 # [Application] data fetch, experiments, figures
-│   └── ai-service/                    # [Cognitive Layer] LangGraph System 1 + System 2 (15 UCs, 19 @tools) + event-stream server
+│   ├── ai-service/                    # [Cognitive Layer] LangGraph System 1 + System 2 (15 UCs, 18 registered @tools) + FastAPI server (:5901)
+│   └── workbench/                     # [Web Surface] Next.js 16 + Three.js 3D Globe + d3-geo SVG + H3 + Review Workbench (:5900)
 ├── exports/
-│   ├── PROPOSAL.md / PROPOSAL.pdf     # Official Technical Proposal (Vietnamese A4 PDF)
-│   ├── REPORT.md / REPORT.pdf         # Codebase Architecture & Empirical Report (A4 PDF)
-│   ├── MODEL_FLOW.md / MODEL_FLOW.pdf # Báo cáo riêng về mô hình luồng hai thế hệ
+│   ├── PROPOSAL.md / PROPOSAL.pdf     # Official Technical Proposal (English A4 PDF)
+│   ├── REPORT.md / REPORT.pdf         # Codebase Architecture & Empirical Report (English A4 PDF)
+│   ├── MODEL_FLOW.md / MODEL_FLOW.pdf # Dual-System Cognitive Model Flow Report (English A4 PDF)
 │   └── export_pdf.py                  # Vector SVG + WeasyPrint A4 PDF compiler
 ├── src/harmonization/                 # [Compat Seam] facade for auto-grading
-├── tests/                             # 67 offline unit/invariant/harness tests + 6 live TDD seam tests
-├── docs/                              # Proposal, specs, ADRs (0001-0009), figures & logo
+├── tests/                             # 182 offline unit/invariant/harness tests + 6 live TDD seam tests (22 files)
+├── docs/                              # Proposal, specs, ADRs (0001-0017), figures & logo
 │   └── media/SOURCES.md               # Editorial deliverable index & naming convention
 └── .github/workflows/ci.yml           # CI
 ```
@@ -241,9 +268,13 @@ The raw CSVs are committed so anyone can analyze the archive after a plain `git 
 
 ## Testing
 
+The test suite comprises **182 offline pytest tests + 6 live pytest tests (188 total across 22 test files in `tests/`)**, plus Workbench Bun unit tests:
+
 - `tests/test_harmonization_suite.py` — 7 tests covering the 5 core scientific equations.
 - `tests/test_core_coverage.py` — 7 additional tests for previously untested public seams.
-- `tests/test_ai_service_harness.py` — 22 tests verifying the Dual-System (System 1 + System 2) LangGraph harness, the Atomic / Domain Diagnostic tool tiers, Endpoint Profile resolution, citation grounding, human sign-off, the SSE event stream, and the absence of any ambient agent-tooling read.
+- `tests/test_ai_service_harness.py` — 37 tests verifying the Dual-System (System 1 + System 2) LangGraph harness, the 15 Use Cases (`5` System 1 + `10` System 2), the 18 registered Atomic / Domain Diagnostic `@tool` functions, Endpoint Profile resolution, citation grounding, human sign-off, and the SSE event stream.
+- `tests/test_ai_service_api.py` — 25 tests verifying the FastAPI ASGI server, JWT authentication, identity-bound sign-off, append-only SQLite `RunStore` audit trail, and SSE streaming.
+- `tests/test_documented_claims_consistency.py` — cross-document and empirical artifact consistency guardrails.
 - `tests/test_live_tdd_seams.py` — 6 live TDD vertical slice tests (marked `live`) verifying the native-chat adapters, the reasoning trace, the symbiosis escalation, the human sign-off gate and the analysis assignment of a free-form request against a real hosted model, real NASA FIRMS CSV harmonization, and live telemetry.
 
 Run with:
@@ -329,7 +360,7 @@ Branches are auto-deleted after merge.
 ## Domain Glossary & ADRs
 
 - [`GLOSSARY.md`](GLOSSARY.md) / [`GLOSSARY-MAP.md`](GLOSSARY-MAP.md) — ubiquitous language (multi-context).
-- [`docs/adr/`](docs/adr/) — Architecture Decision Records (0001–0008).
+- [`docs/adr/`](docs/adr/) — Architecture Decision Records (0001–0017).
 - [`docs/agents/`](docs/agents/) — agent skills config (issue tracker, triage labels, domain docs).
 - [`docs/media/SOURCES.md`](docs/media/SOURCES.md) — editorial deliverable index, naming convention, and the rules that keep the pitch honest about the data.
 

@@ -42,7 +42,7 @@ $$\Delta T_{\text{MODIS}}(\theta) = r \cdot s \left( \cos\theta - \sqrt{(R_e / r
 * Tại **Nadir ($\theta = 0^\circ$)**: $\Delta S(0^\circ) = 1.000\text{ km}$, $\Delta T(0^\circ) = 1.000\text{ km} \implies A_{\text{MODIS}}(0^\circ) = 1.000\text{ km}^2$.
 * Tại **Rìa dải quét ($\theta = 55^\circ$)**: $\Delta S(55^\circ) = 4.830\text{ km}$, $\Delta T(55^\circ) = 2.006\text{ km} \implies A_{\text{MODIS}}(55^\circ) = 9.688\text{ km}^2$ (**phình gấp $9.69\text{ lần}$**).
 
-Từ trường `scan` ($\Delta S$) trong tệp CSV của NASA FIRMS, hàm [`invert_modis_scan_angle`](../packages/harmonization-core/src/flare_chronos_core/geometry_h3.py) giải phương trình ngược $\Delta S(\theta) = \text{scan}$ bằng phương pháp chia đôi khoảng (*Bisection*) với45 vòng lặp đạt độ chính xác $< 10^{-9}\text{ rad}$.
+Từ trường `scan` ($\Delta S$) trong tệp CSV của NASA FIRMS, hàm [`invert_modis_scan_angle`](../packages/harmonization-core/src/flare_chronos_core/geometry_h3.py) giải phương trình ngược $\Delta S(\theta) = \text{scan}$ bằng phương pháp chia đôi khoảng (*Bisection*) với 45 vòng lặp đạt độ chính xác $< 10^{-9}\text{ rad}$.
 
 ### 2.2. Phương Trình Gom Cụm 3 Phân Vùng Trên Tàu Của VIIRS 375m (`3.040 km` Swath)
 
@@ -53,7 +53,7 @@ $$N_{\text{agg}}(\theta) = \begin{cases} 3 & \text{nếu } 0^\circ \le |\theta| 
 Với bước góc detector gốc $s_{\text{native}, S} = 0.0001458\text{ rad}$ và $s_{\text{native}, T} = 0.0004340\text{ rad}$:
 * Tại **Nadir ($\theta = 0^\circ$, Zone 1)**: $\Delta S \approx 0.363\text{ km}, \Delta T \approx 0.360\text{ km} \implies A_{\text{VIIRS}}(0^\circ) = 0.1305\text{ km}^2$.
 * Tại **Ranh giới chuyển vùng ($\theta = 31.72^\circ$ và $44.86^\circ$)**: Bước nhảy giảm hệ số gom cụm từ $3 \to 2$ và $2 \to 1$ kéo kích thước ngang $\Delta S$ thu nhỏ trở lại, giữ cho diện tích điểm ảnh tại rìa quét cực đại ($\theta = 56.28^\circ$) chỉ ở mức **$0.615\text{ km}^2$** ($0.778 \times 0.791\text{ km}$).
-* **Tỷ số chênh lệch diện tích cực đại**: Một pixel MODIS ở rìa dải quét ($9.688\text{ km}^2$) lớn gấp **$74.23\text{ lần}$** diện tích một pixel VIIRS ở nadir ($0.1305\text{ km}^2$)! Trên tập dữ liệu thực tế NASA FIRMS tại Tiểu vùng Mekong và Amazon, diện tích trung bình của MODIS là $2.155\text{ km}^2$ (phân vị thứ 95 là $5.270\text{ km}^2$), trong khi VIIRS chỉ là $0.221\text{ km}^2$ (phân vị thứ 95 là $0.426\text{ km}^2$).
+* **Tỷ số chênh lệch diện tích cực đại**: Một pixel MODIS ở rìa dải quét ($9.688\text{ km}^2$) lớn gấp **$74.23\text{ lần}$** diện tích một pixel VIIRS ở nadir ($0.1305\text{ km}^2$)! Trên tập dữ liệu thực tế NASA FIRMS tại Tiểu vùng Mekong và Amazon, diện tích trung bình của MODIS là $2.17\text{ km}^2$ (phân vị thứ 95 là $5.27\text{ km}^2$), trong khi VIIRS chỉ là $0.22\text{ km}^2$ (phân vị thứ 95 là $0.42\text{ km}^2$).
 
 ![Scan Angle Footprint Physics](figures/fig1_scan_angle_footprint_physics.png)
 
@@ -196,7 +196,7 @@ Trên mỗi vùng quan tâm có diện tích $A_{\text{AOI}}$ ($\text{km}^2$), t
 
 1. **Giglio, L., Schroeder, W., & Justice, C. O. (2016).** *The collection 6 MODIS active fire detection algorithm and fire products.* Remote Sensing of Environment, 178, 31–41.
 2. **Schroeder, W., Oliva, P., Giglio, L., & Csiszar, I. A. (2014).** *The New VIIRS 375 m active fire detection data product: Algorithm description and initial assessment.* Remote Sensing of Environment, 143, 85–96.
-3. **Wooster, M. J., Roberts, G., Perry, G. L. W., & Kaufman, Y. J. (2005).** *Retrieval of biomass combustion rates and totals from fire radiative power (FRP) observations: FRP derivation and calibration relationships betweenuet MODIS and BIRD experimental satellite datasets.* Journal of Geophysical Research: Atmospheres, 110(D24).
+3. **Wooster, M. J., Roberts, G., Perry, G. L. W., & Kaufman, Y. J. (2005).** *Retrieval of biomass combustion rates and totals from fire radiative power (FRP) observations: FRP derivation and calibration relationships between MODIS and BIRD experimental satellite datasets.* Journal of Geophysical Research: Atmospheres, 110(D24).
 4. **Ichoku, C., & Kaufman, Y. J. (2005).** *A method to derive smoke emission rates from MODIS fire radiative energy measurements.* IEEE Transactions on Geoscience and Remote Sensing, 43(11), 2636–2649.
 5. **Wolfe, R. E., Lin, G., Nishihama, M., Tewari, K. P., Tilton, J. C., & Isaacman, A. R. (2013).** *Suomi NPP VIIRS prelaunch and on-orbit geometric calibration and characterization.* Journal of Geophysical Research: Atmospheres, 118(20), 11508–11521.
 6. **Freeborn, P. H., Wooster, M. J., Roy, D. P., & Cochrane, M. A. (2014).** *Quantification of MODIS fire radiative power (FRP) measurement uncertainty for use in satellite-based active fire characterization and biomass burning estimation.* Geophysical Research Letters, 41(6), 1988–1994.

@@ -22,10 +22,16 @@ from __future__ import annotations
 
 import json
 import re
+import sys
 import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from scripts.canonical_facts import SUPERSEDED_DOCUMENT_CLAIMS, load_canonical_facts
+
 RESULTS_JSON = ROOT / "data" / "processed" / "empirical_results.json"
 MANIFEST_JSON = ROOT / "data" / "raw" / "fetch_manifest.json"
 
@@ -34,9 +40,15 @@ CLAIM_DOCS = (
     "docs/01_NASA_SpaceApps_Proposal.md",
     "docs/02_Cross_Sensor_Harmonization_Spec.md",
     "docs/03_System_Architecture_and_Data_Pipeline.md",
+    "docs/04_UI_UX_Burning_Calendar_Wireframe.md",
     "docs/05_Pitch_Deck_and_Video_Script.md",
     "exports/PROPOSAL.md",
     "exports/REPORT.md",
+    "exports/MODEL_FLOW.md",
+    "GLOSSARY.md",
+    "apps/ai-service/GLOSSARY.md",
+    "DESIGN.md",
+    "README.md",
 )
 
 # Metrics published by the calibration / benchmark pipeline.
@@ -192,7 +204,7 @@ class DocumentedClaimsConsistencyTest(unittest.TestCase):
                 doc,
                 "total FIRMS record count",
                 forms,
-                r"bản ghi|records|record count|điểm nóng",
+                r"bản ghi|records|record count|điểm nóng|detections",
             )
         for source in CLAIM_SOURCES:
             self.assertTrue(
@@ -256,7 +268,8 @@ class DocumentedClaimsConsistencyTest(unittest.TestCase):
             row = next(
                 line
                 for line in self.docs[doc].splitlines()
-                if "Hệ số xác định" in line and "R^2" in line
+                if ("Hệ số xác định" in line or "Coefficient of Determination" in line)
+                and "R^2" in line
             )
             with self.subTest(doc=doc):
                 self.assertTrue(
@@ -366,7 +379,7 @@ class DocumentedClaimsConsistencyTest(unittest.TestCase):
                     self.sources[source],
                     f"{source}: inflated record count ({form!r}) is still embedded.",
                 )
-        inflated_slices = re.compile(rf"(?<!\d){slices + 4}(?!\d)")
+        inflated_slices = re.compile(rf"(?<![\d.,]){slices + 4}(?![\d.,])")
         for doc in ("docs/01_NASA_SpaceApps_Proposal.md", "exports/PROPOSAL.md"):
             self.assertIsNone(
                 inflated_slices.search(self.docs[doc]),
@@ -396,7 +409,7 @@ class DocumentedClaimsConsistencyTest(unittest.TestCase):
                 doc,
                 "2024 multi-sensor step jump",
                 (vi(jump_2024, 1), en(jump_2024, 1)),
-                r"bước nhảy|step jump|ảo",
+                r"bước nhảy|step[- ]jump|artificial|ảo",
             )
             self._assert_none_present(
                 doc,
@@ -625,14 +638,119 @@ class DocumentedClaimsConsistencyTest(unittest.TestCase):
                 year = epoch["year"]
                 harm = epoch["harmonized_viirs_eq_episodes"]
                 with self.subTest(region=region, year=year):
-                    self.assertIn(
-                        vi(harm, 1),
-                        published,
+                    self.assertTrue(
+                        any(form in published for form in either(harm, 1)),
                         msg=(
                             f"{region} {year}: harmonized {harm} is not "
                             "published as the artifact records it."
                         ),
                     )
+
+    def test_canonical_facts_registry_and_no_superseded_claims(self) -> None:
+        """Centralized SSOT registry agrees with artifacts and forbids stale claims."""
+        facts = load_canonical_facts()
+        self.assertEqual(facts.total_firms_records, 1_609_182)
+        self.assertEqual(facts.cached_csv_slices, 134)
+        self.assertEqual(facts.coincident_pairs, 20_786)
+        self.assertAlmostEqual(facts.raw_r2, 0.7839, places=4)
+        self.assertAlmostEqual(facts.harm_r2, 0.8048, places=4)
+        self.assertAlmostEqual(facts.viirs_to_modis_count_ratio, 3.673, places=3)
+        self.assertAlmostEqual(facts.viirs_to_modis_frp_ratio, 1.335, places=3)
+        self.assertEqual(facts.mekong_measured_epochs, 25)
+        self.assertEqual(facts.mekong_interpolated_years, 1)
+        self.assertEqual(facts.amazon_measured_epochs, 25)
+        self.assertEqual(facts.amazon_interpolated_years, 1)
+        self.assertEqual(facts.total_use_cases, 15)
+        self.assertEqual(facts.system1_use_cases, 5)
+        self.assertEqual(facts.system2_use_cases, 10)
+        self.assertEqual(facts.registered_model_tools, 18)
+        self.assertEqual(facts.atomic_tools, 9)
+        self.assertEqual(facts.diagnostic_tools, 9)
+        self.assertEqual(facts.total_tool_functions, 19)
+        self.assertAlmostEqual(facts.mekong_2024_step_jump_pct, 1311.2, places=1)
+        self.assertAlmostEqual(facts.mekong_2024_harm_index, 90.5, places=1)
+        self.assertAlmostEqual(facts.mekong_2024_reduction_vs_2005_pct, 9.5, places=1)
+        self.assertAlmostEqual(facts.amazon_2024_compression_ratio, 5.75, places=2)
+        self.assertAlmostEqual(facts.amazon_2024_harm_index, 37.7, places=1)
+
+        for doc in CLAIM_DOCS:
+            for label, forms in SUPERSEDED_DOCUMENT_CLAIMS.items():
+                self._assert_none_present(doc, label, forms)
+
+    def test_exports_are_english_and_include_nasa_submission_fields(self) -> None:
+        """All exports/*.md are in English and PROPOSAL.md has official NASA form fields."""
+        proposal = self.docs["exports/PROPOSAL.md"]
+        for required_section in (
+            "Official NASA Space Apps Submission Form Packet",
+            "High-Level Project Summary — What did you develop?",
+            "High-Level Project Summary — How does it address the challenge?",
+            "High-Level Project Summary — Why is it important?",
+            "Space Agency Data & Resources Used",
+            "Third-Party Materials & Open-Source Licenses",
+            "Use of Artificial Intelligence Disclosure",
+            "1. Impact",
+            "2. Creativity",
+            "3. Validity",
+            "4. Relevance",
+            "5. Presentation",
+        ):
+            self.assertIn(required_section, proposal)
+
+        # Ensure export_pdf.py has the dedicated LANGGRAPH_FLOW_SVG so REPORT.pdf
+        # and MODEL_FLOW.pdf do not duplicate the satellite architecture diagram.
+        exporter = self.sources["exports/export_pdf.py"]
+        self.assertIn("LANGGRAPH_FLOW_SVG", exporter)
+        self.assertNotIn(" docs/logo.svg", proposal)
+        self.assertNotIn("../docs/logo.svg", proposal)
+        self.assertNotIn("../docs/logo.svg", self.docs["exports/REPORT.md"])
+
+        # Preview screenshot (og.png) and benchmark figures are embedded across README & docs
+        readme = self.docs["README.md"]
+        self.assertIn("apps/workbench/public/og.png", readme)
+        for fig in (
+            "docs/figures/fig1_scan_angle_footprint_physics.png",
+            "docs/figures/fig2_overpass_deduplication_sza.png",
+            "docs/figures/fig3_cross_sensor_frp_quantile_mapping.png",
+            "docs/figures/fig4_regime_shift_elimination.png",
+            "docs/figures/fig5_harmonized_burning_calendar.png",
+        ):
+            self.assertIn(fig, readme)
+        self.assertIn("../apps/workbench/public/og.png", proposal)
+        self.assertIn("../apps/workbench/public/og.png", self.docs["exports/REPORT.md"])
+        self.assertIn(
+            "../apps/workbench/public/og.png",
+            self.docs["docs/04_UI_UX_Burning_Calendar_Wireframe.md"],
+        )
+
+    def test_export_markdown_tables_and_mermaid_syntax_are_valid(self) -> None:
+        """Every pipe table in exports/*.md has consistent column counts and valid Mermaid subgraphs."""
+        for doc in (
+            "exports/PROPOSAL.md",
+            "exports/REPORT.md",
+            "exports/MODEL_FLOW.md",
+        ):
+            text = self.docs[doc]
+            # No multiline subgraph label breaks
+            self.assertIsNone(
+                re.search(r'subgraph\s+\w+\["[^"\]]*\n', text),
+                f"{doc}: broken newline inside Mermaid subgraph header.",
+            )
+            lines = text.splitlines()
+            expected_cols: int | None = None
+            for idx, line in enumerate(lines, start=1):
+                stripped = line.strip()
+                if stripped.startswith("|") and stripped.endswith("|"):
+                    cols = len(stripped.split("|")) - 2
+                    if expected_cols is None:
+                        expected_cols = cols
+                    else:
+                        self.assertEqual(
+                            cols,
+                            expected_cols,
+                            f"{doc}:{idx}: table row has {cols} columns, expected {expected_cols}.",
+                        )
+                else:
+                    expected_cols = None
 
 
 if __name__ == "__main__":

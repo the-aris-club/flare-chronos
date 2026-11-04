@@ -164,10 +164,9 @@ def create_app(
             return
         from langgraph.checkpoint.sqlite.aio import AsyncSqliteSaver
 
-        DEFAULT_CHECKPOINT_PATH.parent.mkdir(parents=True, exist_ok=True)
-        async with AsyncSqliteSaver.from_conn_string(
-            str(DEFAULT_CHECKPOINT_PATH)
-        ) as saver:
+        ckpt = checkpoint_path or DEFAULT_CHECKPOINT_PATH
+        ckpt.parent.mkdir(parents=True, exist_ok=True)
+        async with AsyncSqliteSaver.from_conn_string(str(ckpt)) as saver:
             app.state.harness = FlareChronosDualSystemHarness(
                 mode=mode,  # type: ignore[arg-type]
                 enable_cache=True,

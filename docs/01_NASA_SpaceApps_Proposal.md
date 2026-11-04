@@ -65,7 +65,7 @@ Kết quả giải phương trình cầu trong [`geometry_h3.py`](../packages/ha
 | **Kích thước tại Nadir ($\theta = 0^\circ$)** | $1.000 \times 1.000\text{ km}$ ($1.0000\text{ km}^2$) | $0.363 \times 0.360\text{ km}$ ($0.1305\text{ km}^2$) | **$7,66\times$** |
 | **Kích thước tại Rìa dải quét ($\theta_{\max}$)** | $4.830 \times 2.006\text{ km}$ (**$9.6875\text{ km}^2$** tại $55^\circ$) | $0.778 \times 0.791\text{ km}$ (**$0.6154\text{ km}^2$** tại $56.28^\circ$) | **$15,74\times$** |
 | **Tỷ số Rìa MODIS / Tâm VIIRS** | $9.6875\text{ km}^2$ | $0.1305\text{ km}^2$ | **$74,23\times$** |
-| **Diện tích trung bình thực tế trên FIRMS** | **$2.155\text{ km}^2$** (Phân vị P95: **$5.270\text{ km}^2$**) | **$0.221\text{ km}^2$** (Phân vị P95: **$0.426\text{ km}^2$**) | **$9,75\times$** (Trung bình thực tế) |
+| **Diện tích trung bình thực tế trên FIRMS** | **$2.17\text{ km}^2$** (Phân vị P95: **$5.27\text{ km}^2$**) | **$0.22\text{ km}^2$** (Phân vị P95: **$0.42\text{ km}^2$**) | **$9,86\times$** (Trung bình thực tế) |
 | **Ngưỡng phát hiện $\text{FRP}_{\text{lim}}$ ban ngày** | $8.20\text{ MW}$ (Nadir) $\to$ **$41.20\text{ MW}$** (Rìa $55^\circ$) | $1.15\text{ MW}$ (Nadir) $\to$ **$3.40\text{ MW}$** (Rìa $56.3^\circ$) | **$12,12\times$** nhạy hơn ở rìa quét |
 
 ![Figure 1 - Scan Angle Footprint Physics](figures/fig1_scan_angle_footprint_physics.png)
@@ -86,13 +86,13 @@ Bằng cách ghép cặp các quan sát diễn ra trong cùng ngày và cùng ch
 
 ## 5. Hai Nghiên Cứu Điển Hình Thực Tiễn (Empirical Case Studies)
 
-### 5.1. Case Study 1: Tiểu Vùng Sông Mekong & Việt Nam (`BBOX: 100.0°E–109.5°E, 11.0°N–23.5°N`)
+### 5.1. Case Study 1: Tiểu Vùng Sông Mekong & Việt Nam (`BBOX: 100.0°E–109.5°E, 8.5°N–23.5°N`)
 
-Khu vực Đông Nam Á lục địa (bao gồm Tây Nguyên, Tây Bắc Việt Nam, Lào, Campuchia và miền Đông Thái Lan) có đặc trưng pha trộn giữa **đốt phụ phẩm nông nghiệp / làm nương rẫy theo mùa** (các đám cháy nhỏ, cường độ thấp $\text{FRP} < 15\text{ MW}$) và **cháy rừng khộp / rừng lá rộng thường xanh** trong các năm hạn hán **El Niño** (`2010`, `2016`, `2023–2024`).
+Khu vực Đông Nam Á lục địa (bao gồm Đồng bằng sông Cửu Long, Tây Nguyên, Tây Bắc Việt Nam, Lào, Campuchia và miền Đông Thái Lan) có đặc trưng pha trộn giữa **đốt phụ phẩm nông nghiệp / làm nương rẫy theo mùa** (các đám cháy nhỏ, cường độ thấp $\text{FRP} < 15\text{ MW}$) và **cháy rừng khộp / rừng lá rộng thường xanh** trong các năm hạn hán **El Niño** (`2010`, `2016`, `2023–2024`).
 
 #### Bảng Số Liệu Thực Tế NASA FIRMS (Cửa Sổ 5 Ngày Cao Điểm Giữa Tháng 3: `15/03 – 19/03`)
 
-> **Ghi chú về năm đo và năm nội suy:** Lịch 26 năm bao gồm **11 năm có lát cắt thực tế (Measured Epoch)** — nơi số điểm được chuẩn hóa trực tiếp từ dữ liệu NASA FIRMS quan sát được — và **15 năm nội suy (Interpolated Year)**, với thang năm được mô hình hóa từ số điểm MODIS quan sát được và đường bao mùa thực nghiệm của vùng. Nội suy là **mô hình, không phải quan sát**; các bảng dưới đây chỉ liệt kê năm có lát cắt thực tế.
+> **Ghi chú về năm đo và năm nội suy:** Lịch 26 năm bao gồm **25 năm có lát cắt thực tế (Measured Epoch, `2001–2025`)** — nơi số điểm được chuẩn hóa trực tiếp từ dữ liệu NASA FIRMS quan sát được — và **1 năm nội suy (Interpolated Year, `2026`)**, với thang năm được mô hình hóa từ số điểm MODIS quan sát được và đường bao mùa thực nghiệm của vùng. Nội suy là **mô hình, không phải quan sát**; bảng dưới đây trình bày các kỳ mốc tiêu biểu (toàn bộ 25 kỳ quan trắc thực xem tại Phụ lục A).
 
 
 | Năm (Epoch) | Tổ Hợp Cảm Biến Hoạt Động | Điểm Nóng Thô Theo Từng Nguồn (`Raw Counts`) | Tổng Điểm Nóng Thô (`Raw Sum`) | Sự Kiện Cháy Độc Lập (`Fire Episodes`) | Hệ Số Nén Trùng Lặp | Nỗ Lực Quan Sát $\Omega(y, \phi)$ | Sự Kiện Chuẩn Hóa `Flare-Chronos` (`VIIRS-eq`) | Chỉ Số Thô (`2005=100`) | Chỉ Số Chuẩn Hóa (`2005=100`) |
@@ -107,7 +107,7 @@ Khu vực Đông Nam Á lục địa (bao gồm Tây Nguyên, Tây Bắc Việt 
 
 > [!IMPORTANT]
 > **Phát hiện chấn động từ dữ liệu thực tế tại Tiểu vùng sông Mekong & Việt Nam:**  
-> Vào kỳ 5 ngày giữa tháng 3/2024, cảm biến chuẩn `MODIS_SP` ghi nhận `3.588` điểm cháy — **thấp hơn $8,3\%$** so với cùng kỳ năm 2005 (`3.914` điểm). Thế nhưng, do sự tham gia đồng thời của 3 vệ tinh VIIRS (`Suomi-NPP`, `NOAA-20`, `NOAA-21`), tổng số điểm nóng thô cộng gộp vọt lên tới **$55.235$ điểm (Chỉ số thô $= 1.411,2$, tức tăng giả tạo $+1.311,2\%$ so với năm 2005)!** Sau khi đi qua **Flare-Chronos**, chỉ số hoạt động cháy chuẩn hóa trả về đúng giá trị thực chất là **$90,5$** (giảm $5,8\%$ so với năm 2005), đồng thời giữ lại nguyên vẹn tín hiệu vật lý của hai đợt hạn hán lịch sử **El Niño 2010 (`184,9`)** và **El Niño 2016 (`133,0`)**.
+> Vào kỳ 5 ngày giữa tháng 3/2024, cảm biến chuẩn `MODIS_SP` ghi nhận `3.588` điểm cháy — **thấp hơn $8,3\%$** so với cùng kỳ năm 2005 (`3.914` điểm). Thế nhưng, do sự tham gia đồng thời của 3 vệ tinh VIIRS (`Suomi-NPP`, `NOAA-20`, `NOAA-21`), tổng số điểm nóng thô cộng gộp vọt lên tới **$55.235$ điểm (Chỉ số thô $= 1.411,2$, tức tăng giả tạo $+1.311,2\%$ so với năm 2005)!** Sau khi đi qua **Flare-Chronos**, chỉ số hoạt động cháy chuẩn hóa trả về đúng giá trị thực chất là **$90,5$** (giảm $9,5\%$ so với năm 2005), đồng thời giữ lại nguyên vẹn tín hiệu vật lý của hai đợt hạn hán lịch sử **El Niño 2010 (`184,9`)** và **El Niño 2016 (`133,0`)**.
 
 ---
 
@@ -117,7 +117,7 @@ Khu vực phía Nam lưu vực Amazon (bang Mato Grosso và Pará, Brazil) đạ
 
 #### Bảng Số Liệu Thực Tế NASA FIRMS (Cửa Sổ 5 Ngày Cao Điểm Cuối Tháng 8: `20/08 – 24/08`)
 
-> **Ghi chú về năm đo và năm nội suy:** Lịch 26 năm bao gồm **9 năm có lát cắt thực tế (Measured Epoch)** — nơi số điểm được chuẩn hóa trực tiếp từ dữ liệu NASA FIRMS quan sát được — và **17 năm nội suy (Interpolated Year)**, với thang năm được mô hình hóa từ số điểm MODIS quan sát được và đường bao mùa thực nghiệm của vùng. Nội suy là **mô hình, không phải quan sát**; các bảng dưới đây chỉ liệt kê năm có lát cắt thực tế.
+> **Ghi chú về năm đo và năm nội suy:** Lịch 26 năm bao gồm **25 năm có lát cắt thực tế (Measured Epoch, `2001–2025`)** — nơi số điểm được chuẩn hóa trực tiếp từ dữ liệu NASA FIRMS quan sát được — và **1 năm nội suy (Interpolated Year, `2026`)**, với thang năm được mô hình hóa từ số điểm MODIS quan sát được và đường bao mùa thực nghiệm của vùng. Nội suy là **mô hình, không phải quan sát**; bảng dưới đây trình bày các kỳ mốc tiêu biểu (toàn bộ 25 kỳ quan trắc thực xem tại Phụ lục A).
 
 
 | Năm (Epoch) | Tổ Hợp Cảm Biến Hoạt Động | Điểm Nóng Thô Theo Từng Nguồn (`Raw Counts`) | Tổng Điểm Nóng Thô (`Raw Sum`) | Sự Kiện Cháy Độc Lập (`Fire Episodes`) | Hệ Số Nén Trùng Lặp | Xung Nhiễu SAA Đêm Đã Lọc | Sự Kiện Chuẩn Hóa `Flare-Chronos` (`VIIRS-eq`) | Chỉ Số Thô (`2005=100`) | Chỉ Số Chuẩn Hóa (`2005=100`) |
@@ -147,7 +147,7 @@ Khu vực phía Nam lưu vực Amazon (bang Mato Grosso và Pará, Brazil) đạ
 4. **Tầng nhận thức kép trả lời và kiểm chứng câu hỏi vận hành** (`apps/ai-service`):
    - **Tầng phản xạ** dùng **mô hình quyết định** để gán phân tích, định vùng và đánh giá mức khẩn cấp bằng **xác suất hiệu chuẩn**; mô hình này phục vụ **cục bộ** trên node suy luận của dự án nên **không tốn credit đám mây**, và có **chuỗi dự phòng** (decision → chat → trích xuất tất định) để một run không phụ thuộc dịch vụ nào còn sống.
    - **Tầng báo cáo** tra cứu một bước bằng công cụ tất định, **không gọi mô hình** và **không** chạm công cụ chẩn đoán chuyên môn — thẻ dữ kiện và cảnh báo khẩn trả về trong vài mili giây.
-   - **Tầng suy luận** để mô hình **tự chọn** công cụ trong bề mặt `23` công cụ tất định và tự viết diễn giải theo ngôn ngữ của từng đối tượng.
+   - **Tầng suy luận** để mô hình **tự chọn** công cụ trong bề mặt `18` công cụ tất định gắn cho mô hình (`9` Atomic + `9` Domain Diagnostic, trên tổng số `19` hàm `@tool`) và tự viết diễn giải theo ngôn ngữ của từng đối tượng.
    - **Cổng kiểm chứng định lượng**: mọi con số trong bản thảo báo cáo được đối chiếu với **sổ cái số liệu đã xác thực**; số không có nguồn thì báo cáo bị trả về để viết lại, không bao giờ xuất bản.
    - **Cổng phê duyệt của con người**: mọi báo cáo có hành động hiện trường **dừng run** chờ quyết định; bị từ chối thì **không phát hành** báo cáo nào, còn quyết định luôn được ghi lại.
 
@@ -166,21 +166,21 @@ Khu vực phía Nam lưu vực Amazon (bang Mato Grosso và Pará, Brazil) đạ
 Toàn bộ mã nguồn, dữ liệu thực tế NASA FIRMS và bộ kiểm thử của **Flare-Chronos** có thể chạy kiểm chứng ngay lập tức bằng các lệnh chuẩn dưới đây:
 
 ```bash
-# 1. Chạy bộ kiểm thử đơn vị & bất biến vật lý (7/7 bài kiểm thử toán học)
-python3 -m unittest discover -s tests -p "test_*.py" -v
+# 1. Chạy bộ kiểm thử đơn vị & bất biến vật lý (182 bài kiểm thử ngoại tuyến trên 22 file test)
+uv run python -m pytest -q
 
 # 2. Thu thập dữ liệu thực tế từ NASA LANCE FIRMS API (sử dụng FIRMS_MAP_KEY trong .env)
-python3 apps/benchmark-cli/src/benchmark_cli/fetch_real_firms.py
+uv run python -m benchmark_cli.fetch_real_firms
 
-# 3. Thực thi toàn bộ pipeline đồng bộ hóa trên 1.609.182 bản ghi thực tế & xuất 5 biểu đồ khoa học
-python3 apps/benchmark-cli/src/benchmark_cli/run_experiments.py
+# 3. Thực thi toàn bộ pipeline đồng bộ hóa trên 451.488 bản ghi cửa sổ chuẩn & xuất 5 biểu đồ khoa học
+uv run python -m benchmark_cli.run_experiments
 
-# 4. Kiểm chứng tầng nhận thức kép: 67 bài kiểm thử ngoại tuyến (không gọi mô hình) + 6 bài trên mô hình thật
-python3 -m pytest -q
-python3 -m pytest -m live -q
+# 4. Kiểm chứng tầng nhận thức kép: 182 bài kiểm thử ngoại tuyến (không gọi mô hình) + 6 bài trên mô hình thật
+uv run python -m pytest -q
+uv run python -m pytest -m live -q
 
 # 5. Chạy toàn bộ 15 Use Case trên mô hình thật và ghi đo lường từng Use Case
-python3 apps/ai-service/src/ai_service/run_all_usecases.py --live
+uv run python apps/ai-service/src/ai_service/run_all_usecases.py --live
 ```
 
 > **Lưu ý về hạ tầng:** tầng phản xạ ưu tiên **mô hình quyết định** phục vụ cục bộ. Khi endpoint đó không sẵn sàng, chuỗi phân loại tự lùi về mô hình chat rồi tới trích xuất tất định, và mỗi lần lùi bậc được ghi lại trong telemetry — nên bộ kiểm thử ngoại tuyến **luôn** chạy được, còn bộ kiểm thử trên mô hình thật cần khoá API của nhà cung cấp.

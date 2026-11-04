@@ -1,5 +1,9 @@
 # Region Globe, Workbench and Review
 
+<p align="center">
+  <img src="public/og.png" alt="Flare-Chronos Region Globe &amp; 26-Year Harmonized Burning Activity Calendar Preview" width="100%" />
+</p>
+
 Flare Chronos has three surfaces:
 
 - `/` — the Region Globe landing: a rotating 3D Earth with the two measured
