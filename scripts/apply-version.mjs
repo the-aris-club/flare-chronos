@@ -20,14 +20,13 @@ const mdFiles = [
 for (const mdPath of mdFiles) {
   try {
     let md = readFileSync(mdPath, "utf8");
-    const mdVersionRe =
-      /(\*\*(?:Phiên bản|(?:Document )?Version):\*\*[^\n]*?)(\d+\.\d+\.\d+)/;
+    const mdVersionRe = /(\*\*(?:Document )?Version:\*\*[^\n]*?)(\d+\.\d+\.\d+)/;
     if (mdVersionRe.test(md)) {
       md = md.replace(mdVersionRe, `$1${version}`);
     } else {
-      const versionLine = `> **Phiên bản:** \`v${version}\` — cập nhật ${date}`;
-      if (/^> \*\*Phiên bản:\*\*.*$/m.test(md)) {
-        md = md.replace(/^> \*\*Phiên bản:\*\*.*$/m, versionLine);
+      const versionLine = `> **Version:** \`v${version}\` — updated ${date}`;
+      if (/^> \*\*Version:\*\*.*$/m.test(md)) {
+        md = md.replace(/^> \*\*Version:\*\*.*$/m, versionLine);
       } else {
         md = md.replace(/^(> .*\n)/m, `$1${versionLine}\n`);
       }
