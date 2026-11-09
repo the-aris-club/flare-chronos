@@ -28,7 +28,8 @@ theme is the same instrument read on paper — not an inversion, a re-ink.
   dimmed behind the landing copy, dark theme only). It is imagery, not chrome.
 - Motion is feedback only: 120–180 ms colour/opacity transitions; no entrance
   animations; respect `prefers-reduced-motion`. The landing globe is the one
-  continuous motion, and it stops for reduced motion.
+  continuous ambient motion, and it stops for reduced motion. Loading
+  indicators are feedback; they may repeat. They stop under reduced motion.
 
 ## 2. Token system
 

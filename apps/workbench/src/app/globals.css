@@ -285,38 +285,24 @@
     animation: fcspin 0.8s linear infinite;
   }
 
-  .fc-caret {
-    display: inline-block;
-    width: 6px;
-    height: 12px;
-    margin-left: 2px;
-    vertical-align: -2px;
-    background: var(--text-muted);
-    animation: fcblink 1s steps(1) infinite;
-  }
-
   .fc-morph {
     position: fixed;
+    inset: 0;
     z-index: 90;
-    top: var(--morph-top, 0px);
-    left: var(--morph-left, 0px);
-    width: var(--morph-width, 100vw);
-    height: var(--morph-height, 100dvh);
     overflow: hidden;
-    border-radius: var(--morph-radius, 0);
     pointer-events: none;
     opacity: 1;
+    clip-path: inset(0 0 0 0 round 0);
     transition:
-      top 700ms cubic-bezier(0.2, 0.7, 0.2, 1),
-      left 700ms cubic-bezier(0.2, 0.7, 0.2, 1),
-      width 700ms cubic-bezier(0.2, 0.7, 0.2, 1),
-      height 700ms cubic-bezier(0.2, 0.7, 0.2, 1),
-      border-radius 700ms cubic-bezier(0.2, 0.7, 0.2, 1),
-      opacity 240ms ease 500ms;
+      clip-path 420ms cubic-bezier(0.2, 0.7, 0.2, 1),
+      opacity 150ms ease-out 270ms;
   }
 
   .fc-morph[data-phase='settle'] {
-    --morph-radius: 8px;
+    clip-path: inset(
+      var(--morph-top, 0px) var(--morph-right, 0px) var(--morph-bottom, 0px) var(--morph-left, 0px)
+        round 8px
+    );
     opacity: 0;
   }
 
@@ -325,17 +311,18 @@
     height: 100%;
     object-fit: cover;
     object-position: var(--morph-focus-x, 50%) var(--morph-focus-y, 50%);
+    transform-origin: top left;
+    transform: translate(0, 0) scale(1);
+    transition: transform 420ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+
+  .fc-morph[data-phase='settle'] .fc-morph-image {
+    transform: translate(var(--morph-x, 0px), var(--morph-y, 0px)) scale(var(--morph-scale, 1));
   }
 
   @keyframes fcspin {
     to {
       transform: rotate(360deg);
-    }
-  }
-
-  @keyframes fcblink {
-    50% {
-      opacity: 0;
     }
   }
 }

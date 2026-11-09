@@ -61,7 +61,12 @@ export function MapPane({
     const box = node.getBoundingClientRect();
     const bounds = viewport.getBoundingClientRect();
     if (box.left >= bounds.left && box.right <= bounds.right) return;
-    node.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    node.scrollIntoView({
+      behavior: reduce ? 'auto' : 'smooth',
+      block: 'nearest',
+      inline: 'center',
+    });
   }, []);
 
   const data = MAP_DATA.regions[region];
