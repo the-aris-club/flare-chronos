@@ -35,7 +35,7 @@ export function BootOverlay({ steps = BOOT_STEPS, done, onDone }: BootOverlayPro
 
     const wait = Math.max(0, 900 - (performance.now() - mounted.current));
     const fade = window.setTimeout(() => setFading(true), wait);
-    const finish = window.setTimeout(onDone, wait + 560);
+    const finish = window.setTimeout(onDone, wait + 200);
 
     return () => {
       window.clearTimeout(fade);
@@ -48,7 +48,7 @@ export function BootOverlay({ steps = BOOT_STEPS, done, onDone }: BootOverlayPro
       role="status"
       aria-live="polite"
       aria-busy={!complete}
-      className={`bg-canvas fixed inset-0 z-50 flex items-center justify-center px-6 transition-opacity duration-500 ${
+      className={`bg-canvas fixed inset-0 z-50 flex items-center justify-center px-6 transition-opacity duration-150 ${
         fading ? 'pointer-events-none opacity-0' : 'opacity-100'
       }`}
     >
@@ -56,7 +56,7 @@ export function BootOverlay({ steps = BOOT_STEPS, done, onDone }: BootOverlayPro
         <div className="flex flex-col items-center gap-3.5">
           <span className="relative block size-18">
             <span className="fc-boot-ring border-line border-t-fire border-r-amber absolute inset-0 rounded-full border" />
-            <span className="fc-boot-glyph absolute inset-0 flex items-center justify-center">
+            <span className="absolute inset-0 flex items-center justify-center">
               <BrandGlyph large />
             </span>
           </span>

@@ -36,7 +36,12 @@ export function TourOverlay({ onClose, figures }: { onClose: () => void; figures
     const root = document.documentElement;
     const previous = root.style.overflow;
     root.style.overflow = 'hidden';
-    target.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'smooth' });
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    target.scrollIntoView({
+      block: 'center',
+      inline: 'nearest',
+      behavior: reduce ? 'auto' : 'smooth',
+    });
 
     const update = () => {
       const rect = target.getBoundingClientRect();
@@ -69,7 +74,7 @@ export function TourOverlay({ onClose, figures }: { onClose: () => void; figures
       <div
         ref={spot}
         aria-hidden="true"
-        className="fc-tour-spot border-cyan pointer-events-none fixed z-40 rounded-md border-2 opacity-0 transition-opacity duration-200"
+        className="fc-tour-spot border-cyan pointer-events-none fixed z-40 rounded-md border-2 opacity-0 transition-opacity duration-150"
       />
       <div
         role="region"

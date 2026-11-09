@@ -67,7 +67,7 @@ export function BriefingRail({ region, state, onToggle }: BriefingRailProps) {
       data-tour="brief"
       aria-label={t('title')}
       data-state={state}
-      className="fc-rail border-line bg-surface group z-30 flex shrink-0 flex-col border-l transition-all duration-200"
+      className="fc-rail border-line bg-surface group z-30 flex shrink-0 flex-col border-l transition-[width,transform] duration-150 ease-out"
     >
       <div className="fc-rail-content flex min-h-0 flex-1 flex-col group-data-[state=closed]:hidden">
         <header className="border-line flex items-center gap-2 border-b px-3 py-2.5">

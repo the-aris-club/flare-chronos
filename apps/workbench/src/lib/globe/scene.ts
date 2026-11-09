@@ -265,7 +265,9 @@ export class GlobeScene {
       this.flight.step(now);
     } else {
       if (this.controls.enabled) this.controls.update();
-      this.earth.group.rotation.y += (this.peekTarget - this.earth.group.rotation.y) * 0.08;
+      this.earth.group.rotation.y = this.reducedMotion
+        ? this.peekTarget
+        : this.earth.group.rotation.y + (this.peekTarget - this.earth.group.rotation.y) * 0.08;
       if (!this.reducedMotion) this.orbits.update(delta);
     }
 
@@ -274,7 +276,9 @@ export class GlobeScene {
     for (const id of REGION_IDS) {
       const target = this.hovered === id ? 0.42 : 0.22;
       const material = this.earth.coverage[id].fill;
-      material.opacity += (target - material.opacity) * 0.18;
+      material.opacity = this.reducedMotion
+        ? target
+        : material.opacity + (target - material.opacity) * 0.18;
     }
 
     if (this.mode === 'idle')

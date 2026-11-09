@@ -42,7 +42,7 @@ export class CameraFlight {
     this.flight = {
       id: region,
       start: performance.now(),
-      duration: this.reducedMotion ? 200 : 1700,
+      duration: this.reducedMotion ? 200 : 1200,
       fromDirection: this.camera.position.clone().normalize(),
       toDirection: new THREE.Vector3(...lonLatToVec(data.anchor[0], data.anchor[1], 1)).normalize(),
       fromDistance: this.camera.position.length(),
