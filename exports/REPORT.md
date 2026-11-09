@@ -228,3 +228,23 @@ The workbench reads the analysis service at port 5901. It never shows replayed o
 The archive is pinned by `data/raw/SHA256SUMS` and `data/raw/fetch_manifest.json`. `tests/test_raw_data_integrity.py` verifies every digest on every run. The empirical runner writes `data/processed/empirical_results.json` and `data/processed/burning_calendar.json`; the figure renderer reads only those two files.
 
 Repository: https://github.com/the-aris-club/flare-chronos
+
+---
+
+## 10. References
+
+This section lists the NASA resources and the published research used in the study. The project repository is the last entry.
+
+1. **NASA Space Apps Challenge (2026).** *Harmonization of MODIS and VIIRS Hot Spots.* [https://www.spaceappschallenge.org/2026/challenges/harmonization-of-modis-and-viirs-hot-spots/](https://www.spaceappschallenge.org/2026/challenges/harmonization-of-modis-and-viirs-hot-spots/)
+2. **NASA Earthdata LANCE FIRMS (2026).** *Active Fire Data Attributes and Processing Modes (URT/RT/NRT vs. Standard Science Quality) for MODIS C6.1 and VIIRS C2.* [https://www.earthdata.nasa.gov/data/tools/firms/faq](https://www.earthdata.nasa.gov/data/tools/firms/faq)
+3. **NASA LANCE FIRMS (2026).** *Area CSV API and Data Availability API.* [https://firms.modaps.eosdis.nasa.gov/api/](https://firms.modaps.eosdis.nasa.gov/api/)
+4. **NASA LANCE FIRMS (2026).** *Active Fire Data archive and download portal: MODIS Collection 6.1 (MCD14ML, MCD14DL) and VIIRS Collection 2 (VNP14IMGML, VNP14IMGTDL_NRT, VJ114IMGML, VJ114IMGTDL_NRT, VJ214IMGTDL_NRT).* [https://firms.modaps.eosdis.nasa.gov/download/](https://firms.modaps.eosdis.nasa.gov/download/)
+5. **Open-Meteo (2026).** *Historical Weather API: ERA5 total cloud cover.* [https://open-meteo.com/en/docs/historical-weather-api](https://open-meteo.com/en/docs/historical-weather-api)
+6. **Giglio, L., Schroeder, W., & Justice, C. O. (2016).** *The collection 6 MODIS active fire detection algorithm and fire products.* Remote Sensing of Environment, 178, 31–41.
+7. **Schroeder, W., Oliva, P., Giglio, L., & Csiszar, I. A. (2014).** *The New VIIRS 375 m active fire detection data product: Algorithm description and initial assessment.* Remote Sensing of Environment, 143, 85–96.
+8. **Wooster, M. J., Roberts, G., Perry, G. L. W., & Kaufman, Y. J. (2005).** *Retrieval of biomass combustion rates and totals from fire radiative power (FRP) observations: FRP derivation and calibration relationships between MODIS and BIRD experimental satellite datasets.* Journal of Geophysical Research: Atmospheres, 110(D24).
+9. **Ichoku, C., & Kaufman, Y. J. (2005).** *A method to derive smoke emission rates from MODIS fire radiative energy measurements.* IEEE Transactions on Geoscience and Remote Sensing, 43(11), 2636–2649.
+10. **Wolfe, R. E., Lin, G., Nishihama, M., Tewari, K. P., Tilton, J. C., & Isaacman, A. R. (2013).** *Suomi NPP VIIRS prelaunch and on-orbit geometric calibration and characterization.* Journal of Geophysical Research: Atmospheres, 118(20), 11508–11521.
+11. **Freeborn, P. H., Wooster, M. J., Roy, D. P., & Cochrane, M. A. (2014).** *Quantification of MODIS fire radiative power (FRP) measurement uncertainty for use in satellite-based active fire characterization and biomass burning estimation.* Geophysical Research Letters, 41(6), 1988–1994.
+12. **Sofiev, M., & Kouznetsov, R. (2026).** *Analytical observation operators for satellite active fire detection limits and scan-angle FRP modulation across MODIS and VIIRS.* Copernicus / EGU Atmospheric Chemistry and Physics Discussions.
+13. **Flare-Chronos Project Repository (2026).** *Fire Long-term Archive Resolution & Cross-sensor Harmonization for Operational Near-real-time Observation System: source code, NASA FIRMS archive, processed results and test suite.* GitHub, the-aris-club/flare-chronos. [https://github.com/the-aris-club/flare-chronos](https://github.com/the-aris-club/flare-chronos). MIT License.
