@@ -1,5 +1,13 @@
 # flare-chronos
 
+## 2.0.1
+
+### Patch Changes
+
+- 5e1452e: 09/11/2026 — exports/REPORT.md — thêm: References section with the NASA challenge, LANCE FIRMS APIs and archive, the ERA5 cloud resource, the published literature and the GitHub repository
+  09/11/2026 — exports/PROPOSAL.md — thêm: References section with the NASA challenge, LANCE FIRMS APIs and archive, the ERA5 cloud resource, the published literature and the GitHub repository
+- 5d240e9: 09/11/2026 — apps/workbench/src — sửa: rút ngắn chuyển động và tôn trọng giảm chuyển động
+
 ## 2.0.0
 
 ### Major Changes
