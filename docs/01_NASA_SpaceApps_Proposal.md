@@ -2,132 +2,132 @@
   <img src="figures/flare-chronos-logo.png" alt="Flare-Chronos Official Logo" width="240" />
 </p>
 
-# 01. Thuyết Minh Dự Án Toàn Diện — NASA Space Apps Challenge 2026
+# 01. Comprehensive Project Proposal — NASA Space Apps Challenge 2026
 
-# 🔥 FLARE-CHRONOS: Hệ Thống Đồng Bộ Hóa Vật Lý Liên Cảm Biến MODIS–VIIRS & Lịch Hoạt Động Cháy Thông Minh 26 Năm (2000–2026+)
+# 🔥 FLARE-CHRONOS: A Physics-Guided MODIS–VIIRS Cross-Sensor Harmonization System and a 26-Year Intelligent Burning Activity Calendar (2000–2026+)
 
-**Thử thách (Challenge):** [Harmonization of MODIS and VIIRS Hot Spots](https://www.spaceappschallenge.org/2026/challenges/harmonization-of-modis-and-viirs-hot-spots/) — *2026 NASA Space Apps Challenge*  
-**Kho mã nguồn & Kiến trúc Monorepo:** [`packages/harmonization-core`](../packages/harmonization-core/src/flare_chronos_core/__init__.py) | [`packages/firms-ingestion`](../packages/firms-ingestion/src/firms_ingestion/firms_client.py) | [`apps/benchmark-cli`](../apps/benchmark-cli/src/benchmark_cli/run_experiments.py) | [`src/harmonization/firms_harmonizer.py`](../src/harmonization/firms_harmonizer.py)  
-**Tài liệu Từ điển Miền & Quyết định Kiến trúc:** [GLOSSARY.md](../GLOSSARY.md) | [ADR-0001](adr/0001-dual-resolution-h3-fractional-allocation.md) | [ADR-0002](adr/0002-two-stage-physics-guided-frp-harmonization.md) | [ADR-0003](adr/0003-spatio-temporal-episode-deduplication-and-effort-normalization.md) | [ADR-0004](adr/0004-monorepo-deep-module-architecture.md)
-
----
-
-## 1. Tóm Tắt Điều Hành (Executive Summary)
-
-> **Tóm tắt 3 câu (Three-Sentence Value Proposition):**  
-> **Flare-Chronos** là nền tảng khoa học và phần mềm mã nguồn mở giải quyết sự đứt gãy lịch sử dài 26 năm giữa thế hệ cảm biến vệ tinh **MODIS** (`Terra/Aqua`, độ phân giải nadir $1\text{ km}$, `2000–2026`) đang dần ngừng hoạt động và thế hệ cảm biến kế nhiệm **VIIRS** (`Suomi-NPP/NOAA-20/NOAA-21`, độ phân giải nadir $375\text{ m}$, `2012–2026+`). Bằng cách thay thế phép đếm điểm thô bằng **5 thuật toán vật lý – thống kê** (phân bổ trọng số diện tích elip dải quét $\Delta S(\theta)\times\Delta T(\theta)$ lên lưới lục giác đẳng diện tích **Uber H3**, toán tử quan sát bức xạ $4\,\mu\text{m}$ hai giai đoạn, chuẩn hóa góc thiên đỉnh Mặt Trời $\text{SZA} < 85^\circ$, lọc nhiễu hạt Nam Đại Tây Dương, và gom cụm sự kiện cháy đa vệ tinh chuẩn hóa theo nỗ lực quan sát $\Omega(y, \phi)$), hệ thống đã được kiểm chứng thực nghiệm trên **$1.609.182$ điểm nóng thực tế từ NASA LANCE FIRMS**, giảm **$69,4\%$** sai số phân phối Kolmogorov-Smirnov ($D_{\text{KS}}$ từ $0.1153$ xuống $0.0353$ trên $N=20.786$ cặp ô lưới đồng thời). Đầu ra cốt lõi của hệ thống là **Lịch Hoạt Động Cháy Thống Nhất 26 Năm (*Harmonized Burning Activity Calendar*)** cấu trúc theo ma trận `26 Năm × 73 Pentads` cùng chỉ số cảnh báo sớm **$\text{SFAI Z-Score}$**, giúp lực lượng cứu hỏa, nhà quản lý lâm nghiệp và nhà khoa học khí hậu phân biệt chính xác mùa đốt phụ phẩm nông nghiệp định kỳ với các đợt khủng hoảng cháy rừng ngoài mùa vụ mà không bị đánh lừa bởi bước nhảy giả tạo $+1.311,2\%$ do tăng số lượng vệ tinh.
+**Challenge:** [Harmonization of MODIS and VIIRS Hot Spots](https://www.spaceappschallenge.org/2026/challenges/harmonization-of-modis-and-viirs-hot-spots/) — *2026 NASA Space Apps Challenge*  
+**Source Code & Monorepo Architecture:** [`packages/harmonization-core`](../packages/harmonization-core/src/flare_chronos_core/__init__.py) | [`packages/firms-ingestion`](../packages/firms-ingestion/src/firms_ingestion/firms_client.py) | [`apps/benchmark-cli`](../apps/benchmark-cli/src/benchmark_cli/run_experiments.py) | [`src/harmonization/firms_harmonizer.py`](../src/harmonization/firms_harmonizer.py)  
+**Domain Glossary & Architecture Decision Records:** [GLOSSARY.md](../GLOSSARY.md) | [ADR-0001](adr/0001-dual-resolution-h3-fractional-allocation.md) | [ADR-0002](adr/0002-two-stage-physics-guided-frp-harmonization.md) | [ADR-0003](adr/0003-spatio-temporal-episode-deduplication-and-effort-normalization.md) | [ADR-0004](adr/0004-monorepo-deep-module-architecture.md)
 
 ---
 
-## 2. Đặt Vấn Đề & 5 Rào Cản Vật Lý Liên Cảm Biến (Problem Statement & Physical Discrepancies)
+## 1. Executive Summary
 
-Trong hơn hai thập kỷ rưỡi qua, hệ thống **NASA FIRMS (Fire Information for Resource Management System)** đã trở thành hạ tầng quan sát điểm nóng cháy toàn cầu quan trọng nhất của nhân loại. Tuy nhiên, vào năm **2026**, cộng đồng khoa học Trái Đất đang đứng trước một cuộc chuyển giao lịch sử:
-- Cặp vệ tinh **Terra** (phóng tháng 12/1999, dữ liệu từ 11/2000) và **Aqua** (phóng tháng 05/2002) mang cảm biến **MODIS** đang ở giai đoạn cuối sứ mệnh sau hơn 24–26 năm hoạt động.
-- Vệ tinh **Suomi-NPP** (phóng cuối năm 2011, dữ liệu VIIRS từ 01/2012) cũng tiến tới giai đoạn kết thúc vòng đời vào khoảng tháng 10/2026, chuyển giao trọng trách quan sát nhiệt cho chùm vệ tinh **JPSS** gồm **NOAA-20 (`J1`, từ 2018/2020)** và **NOAA-21 (`J2`, từ 2023/2024)**.
+> **Three-Sentence Value Proposition:**  
+> **Flare-Chronos** is an open-source scientific platform and software stack that resolves the 26-year historical discontinuity between the **MODIS** satellite sensor generation (`Terra/Aqua`, $1\text{ km}$ nadir resolution, `2000–2026`), which is gradually retiring, and the successor **VIIRS** sensor generation (`Suomi-NPP/NOAA-20/NOAA-21`, $375\text{ m}$ nadir resolution, `2012–2026+`). By replacing raw point counting with **5 physical–statistical algorithms** (scan-swath elliptical area weighting $\Delta S(\theta)\times\Delta T(\theta)$ onto an equal-area **Uber H3** hexagonal grid, a two-stage $4\,\mu\text{m}$ radiative observation operator, solar zenith angle normalization $\text{SZA} < 85^\circ$, South Atlantic Anomaly proton-noise filtering, and multi-satellite fire episode clustering normalized by observation effort $\Omega(y, \phi)$), the system has been empirically validated on **$1.609.182$ real hotspots from NASA LANCE FIRMS**, reducing the Kolmogorov-Smirnov distribution error by **$69,4\%$** ($D_{\text{KS}}$ from $0.1153$ to $0.0353$ over $N=20.786$ co-incident grid-cell pairs). The core output of the system is the **26-Year Harmonized Burning Activity Calendar**, structured as a `26 Years × 73 Pentads` matrix together with the early-warning **$\text{SFAI Z-Score}$** index, which helps fire services, forest managers and climate scientists accurately distinguish recurring agricultural residue burning seasons from out-of-season wildfire crises without being misled by the artificial $+1.311,2\%$ step jump caused by the growing satellite count.
 
-Khi các nhà quản lý rừng hoặc nhà nghiên cứu ghép nối trực tiếp chuỗi dữ liệu **MODIS Collection 6.1** (*Giglio et al., 2016*) và **VIIRS 375m Collection 1/2** (*Schroeder et al., 2014*), họ vấp phải **5 rào cản vật lý và quỹ đạo** làm biến dạng hoàn toàn chuỗi thời gian:
+---
 
-| Rào Cản Vật Lý & Kỹ Thuật | Cảm Biến MODIS Collection 6.1 (`MCD14ML` / `MCD14DL`) | Cảm Biến VIIRS 375m Collection 2 (`VNP14IMG` / `VJ114` / `VJ214`) | Hệ Quả Sai Lệch Nếu Không Đồng Bộ Hóa (Đã Kiểm Chứng Trên Dữ Liệu Thực NASA FIRMS) |
+## 2. Problem Statement & 5 Cross-Sensor Physical Discrepancies
+
+For more than two and a half decades, **NASA FIRMS** (Fire Information for Resource Management System) has become humanity's most important global fire hotspot observation infrastructure. However, in **2026**, the Earth science community faces a historic transition:
+- The **Terra** (launched December 1999, data from November 2000) and **Aqua** (launched May 2002) satellite pair, carrying the **MODIS** sensor, is in the final phase of its mission after more than 24–26 years of operation.
+- The **Suomi-NPP** satellite (launched late 2011, VIIRS data from January 2012) is also approaching the end of its operational life around October 2026, transferring thermal observation responsibility to the **JPSS** constellation comprising **NOAA-20 (`J1`, from 2018/2020)** and **NOAA-21 (`J2`, from 2023/2024)**.
+
+When forest managers or researchers directly concatenate the **MODIS Collection 6.1** (*Giglio et al., 2016*) and **VIIRS 375m Collection 1/2** (*Schroeder et al., 2014*) records, they encounter **5 physical and orbital discrepancies** that completely distort the time series:
+
+| Physical & Technical Discrepancy | MODIS Collection 6.1 Sensor (`MCD14ML` / `MCD14DL`) | VIIRS 375m Collection 2 Sensor (`VNP14IMG` / `VJ114` / `VJ214`) | Consequence of Non-Harmonization (Verified on Real NASA FIRMS Data) |
 | :--- | :--- | :--- | :--- |
-| **1. Hình học điểm ảnh & Hiệu ứng rìa dải quét (*Bow-Tie Distortion*)** | Độ cao $h = 705\text{ km}$, dải quét $2.330\text{ km}$ ($\theta_{\max} = \pm 55^\circ$). Điểm ảnh không gom cụm: từ **$1.00 \times 1.00\text{ km}$ ($1.00\text{ km}^2$)** ở nadir phình ra tới **$4.83 \times 2.01\text{ km}$ ($9.69\text{ km}^2$)** ở rìa quét (*Ichoku & Kaufman, 2005*). | Độ cao $h \approx 829\text{ km}$, dải quét $3.040\text{ km}$ ($\theta_{\max} = \pm 56.28^\circ$). Áp dụng gom cụm phần cứng 3 vùng (*Wolfe et al., 2013*): Zone 1 ($0^\circ\text{–}31.72^\circ$, gom $3:1$), Zone 2 ($31.72^\circ\text{–}44.86^\circ$, gom $2:1$), Zone 3 ($44.86^\circ\text{–}56.28^\circ$, giữ $1:1$). Diện tích chỉ từ **$0.131\text{ km}^2$** đến tối đa **$0.615\text{ km}^2$**. | Diện tích 1 pixel MODIS ở rìa quét lớn gấp **$74,23\text{ lần}$** 1 pixel VIIRS ở tâm quét! Coi điểm nóng là tọa độ điểm $(lat, lon)$ gây sai số định vị diện tích cháy lên tới $\pm 5\text{ km}$. |
-| **2. Độ nhạy phát hiện & Công suất bức xạ lửa ($\text{FRP}$)** | Dùng kênh 21/22 ($\lambda \approx 3.96\,\mu\text{m}$) và kênh 31 ($11\,\mu\text{m}$). Ngưỡng phát hiện tối thiểu $\text{FRP}_{\text{lim}}$ ở nadir là $3.7\text{ MW}$ (đêm) / $8.2\text{ MW}$ (ngày), nhưng tăng vọt lên **$38.6\text{–}41.2\text{ MW}$** ở góc quét $55^\circ$ (*Sofiev & Kouznetsov, 2026*). | Phát hiện vị trí trên kênh I-4 ($375\text{ m}$, $3.55\text{–}3.93\,\mu\text{m}$); nhưng do I-4 bão hòa ở $367\text{ K}$ (ngày) / $320\text{ K}$ (đêm), $\text{FRP}$ được tính lai từ kênh M13 ($750\text{ m}$, dual-gain). Ngưỡng phát hiện $\text{FRP}_{\text{lim}} \approx 0.50\text{ MW}$ (đêm) và $\le 3.4\text{ MW}$ ở rìa quét ngày. | MODIS bỏ sót $65\text{–}85\%$ đám cháy nhỏ (đốt rơm rạ, cháy thực bì dưới tán rừng). Trên $20.786$ cặp ô lưới đồng thời Aqua–SNPP, VIIRS ghi nhận số điểm cháy gấp **$3,673\times$** và tổng $\text{FRP}$ gấp **$1,335\times$** MODIS. |
-| **3. Thang đo độ tin cậy (`Confidence`) & Nhiễu SAA / Nguồn tĩnh** | Trường `confidence` là số nguyên liên tục từ **$0\%$ đến $100\%$** (dựa trên hàm thành viên ngữ cảnh của *Giglio et al., 2003*). Có trường `type` (`0..3`) trong bản chuẩn `MCD14ML`. | Trường `confidence` là biến phân loại 3 mức: **`low`** (lóa nắng hoặc $\Delta T_4 < 15\text{ K}$), **`nominal`** ($\Delta T_4 > 15\text{ K}$), và **`high`** (pixel bão hòa). Chịu nhiễu hạt proton ban đêm tại **Dị thường Nam Đại Tây Dương (SAA)**. | Không thể đặt ngưỡng lọc chung giữa số nguyên $0\text{–}100$ và nhãn chữ `l/n/h`. Tại Nam Mỹ, **$3,55\%\text{–}4,63\%$** điểm nóng VIIRS là xung nhiễu SAA ban đêm hoặc nguồn nhiệt công nghiệp tĩnh. |
-| **4. Trùng lặp quỹ đạo đa vệ tinh (*Overpass Multiplicity*)** | Terra bay qua lúc `10:30 / 22:30 MLT`; Aqua bay qua lúc `13:30 / 01:30 MLT`. | Cả 3 vệ tinh Suomi-NPP (`13:30 MLT`), NOAA-20 (`~12:40 MLT`, lệch 50 phút) và NOAA-21 (`~13:05 MLT`, lệch 25 phút) cùng quét chồng lên một đám cháy trong vòng $\sim 55\text{ phút}$ đầu giờ chiều! | Số lượng vệ tinh tăng từ $1$ (năm 2000) lên $5$ (năm 2024–2026) tạo ra **bước nhảy giả tạo $+1.284,0\%$** tại Tiểu vùng Mekong năm 2019 (`3.914` $\to$ `54.171` điểm/5 ngày) và **$+1.311,2\%$** năm 2024 (`3.914` $\to$ `55.235` điểm/5 ngày), cùng **$+714,3\%$** tại Amazon (`13.804` $\to$ `112.405` điểm/5 ngày)! |
-| **5. Chế độ xử lý `URT/RT/NRT` vs. `Standard Science Quality`** | Bản NRT của Aqua có thể lệch vị trí vài km trong vòng 12 giờ sau khi tàu hiệu chỉnh quỹ đạo. | Bản NRT (`1.0NRT`/`2.0NRT`) gán cờ `DayNight` theo pha quỹ đạo lên/xuống (Ascending/Descending node) thay vì góc thiên đỉnh Mặt Trời $\text{SZA} < 85^\circ$ như bản Standard. | Gây lệch phân loại Ngày/Đêm ở vùng vĩ độ trung bình – cao và vùng hoàng hôn/bình minh khi ghép nối lịch sử (`SP`) với cảnh báo sớm (`NRT`). |
+| **1. Pixel geometry & scan-edge bow-tie distortion (*Bow-Tie Distortion*)** | Altitude $h = 705\text{ km}$, swath $2.330\text{ km}$ ($\theta_{\max} = \pm 55^\circ$). Unaggregated pixel: from **$1.00 \times 1.00\text{ km}$ ($1.00\text{ km}^2$)** at nadir, expanding to **$4.83 \times 2.01\text{ km}$ ($9.69\text{ km}^2$)** at the scan edge (*Ichoku & Kaufman, 2005*). | Altitude $h \approx 829\text{ km}$, swath $3.040\text{ km}$ ($\theta_{\max} = \pm 56.28^\circ$). Hardware 3-zone aggregation applied (*Wolfe et al., 2013*): Zone 1 ($0^\circ\text{–}31.72^\circ$, $3:1$ aggregation), Zone 2 ($31.72^\circ\text{–}44.86^\circ$, $2:1$ aggregation), Zone 3 ($44.86^\circ\text{–}56.28^\circ$, $1:1$ retained). Area ranges only from **$0.131\text{ km}^2$** to a maximum of **$0.615\text{ km}^2$**. | 1 MODIS pixel at the scan edge covers **$74,23\text{ times}$** the area of 1 VIIRS pixel at the center of the swath! Treating a hotspot as a point coordinate $(lat, lon)$ causes burned-area geolocation errors of up to $\pm 5\text{ km}$. |
+| **2. Detection sensitivity & fire radiative power ($\text{FRP}$)** | Uses channels 21/22 ($\lambda \approx 3.96\,\mu\text{m}$) and channel 31 ($11\,\mu\text{m}$). The minimum detectable $\text{FRP}_{\text{lim}}$ at nadir is $3.7\text{ MW}$ (night) / $8.2\text{ MW}$ (day), but rises sharply to **$38.6\text{–}41.2\text{ MW}$** at a $55^\circ$ scan angle (*Sofiev & Kouznetsov, 2026*). | Position detection uses channel I-4 ($375\text{ m}$, $3.55\text{–}3.93\,\mu\text{m}$); however, because I-4 saturates at $367\text{ K}$ (day) / $320\text{ K}$ (night), $\text{FRP}$ is computed by blending channel M13 ($750\text{ m}$, dual-gain). Detection limit $\text{FRP}_{\text{lim}} \approx 0.50\text{ MW}$ (night) and $\le 3.4\text{ MW}$ at the daytime scan edge. | MODIS misses $65\text{–}85\%$ of small fires (straw burning, understory vegetation fires). Across $20.786$ co-incident Aqua–SNPP grid-cell pairs, VIIRS records **$3,673\times$** as many fire pixels and **$1,335\times$** the total $\text{FRP}$ of MODIS. |
+| **3. `Confidence` scale & SAA noise / static sources** | The `confidence` field is a continuous integer from **$0\%$ to $100\%$** (based on the contextual membership function of *Giglio et al., 2003*). There is a `type` field (`0..3`) in the standard `MCD14ML` product. | The `confidence` field is a 3-level categorical variable: **`low`** (sun glint or $\Delta T_4 < 15\text{ K}$), **`nominal`** ($\Delta T_4 > 15\text{ K}$), and **`high`** (saturated pixel). It is affected by nighttime proton particle noise over the **South Atlantic Anomaly (SAA)**. | A common filter threshold cannot be set between the integer $0\text{–}100$ and the text labels `l/n/h`. In South America, **$3,55\%\text{–}4,63\%$** of VIIRS hotspots are nighttime SAA noise spikes or static industrial heat sources. |
+| **4. Multi-satellite overpass multiplicity (*Overpass Multiplicity*)** | Terra overpasses at `10:30 / 22:30 MLT`; Aqua overpasses at `13:30 / 01:30 MLT`. | All 3 satellites — Suomi-NPP (`13:30 MLT`), NOAA-20 (`~12:40 MLT`, 50 minutes offset) and NOAA-21 (`~13:05 MLT`, 25 minutes offset) — sweep over the same fire within $\sim 55\text{ minutes}$ of the early afternoon! | The satellite count grows from $1$ (year 2000) to $5$ (years 2024–2026), creating an **artificial step jump of $+1.284,0\%$** in the Mekong subregion in 2019 (`3.914` $\to$ `54.171` hotspots/5 days) and **$+1.311,2\%$** in 2024 (`3.914` $\to$ `55.235` hotspots/5 days), plus **$+714,3\%$** in the Amazon (`13.804` $\to$ `112.405` hotspots/5 days)! |
+| **5. `URT/RT/NRT` processing modes vs. `Standard Science Quality`** | The Aqua NRT product may be mislocated by several kilometers within 12 hours after the spacecraft orbit adjustment. | The NRT product (`1.0NRT`/`2.0NRT`) assigns the `DayNight` flag by ascending/descending node phase instead of the solar zenith angle $\text{SZA} < 85^\circ$ used by the Standard product. | This causes day/night classification drift in mid-to-high latitudes and in twilight/sunrise zones when concatenating the historical record (`SP`) with early warning (`NRT`). |
 
 ---
 
-## 3. Nghiên Cứu & Phân Tích Lựa Chọn Phương Án Kỹ Thuật (Multi-Option Trade-Off Analysis)
+## 3. Research & Multi-Option Trade-Off Analysis
 
-Trước khi chốt kiến trúc của **Flare-Chronos**, chúng tôi đã khảo sát, mô hình hóa và so sánh định lượng các phương án khả thi cho từng bài toán kỹ thuật:
+Before finalizing the **Flare-Chronos** architecture, we surveyed, modeled and quantitatively compared the feasible options for each engineering problem:
 
-### 3.1. Ma Trận Đánh Giá Các Phương Án (Architectural Trade-Off Matrix)
+### 3.1. Architectural Trade-Off Matrix
 
-| Bài Toán Cốt Lõi | Phương Án 1 (Cơ sở / Truyền thống) | Phương Án 2 (Trung gian / Thống kê thuần túy) | Phương Án 3 — **Giải Pháp Của Flare-Chronos (Vật Lý – Thống Kê Kết Hợp)** | Lý Do Chọn Phương Án 3 (Kèm Minh Chứng Định Lượng) |
+| Core Problem | Option 1 (Baseline / Traditional) | Option 2 (Intermediate / Purely Statistical) | Option 3 — **The Flare-Chronos Solution (Combined Physics–Statistics)** | Rationale for Option 3 (with Quantitative Evidence) |
 | :--- | :--- | :--- | :--- | :--- |
-| **1. Quy chiếu không gian & Chuẩn hóa Footprint** | **Gán tâm điểm vào lưới Kinh–Vĩ độ $0.05^\circ$ (CMG Point Binning)**: Gán $(lat, lon)$ vào ô vuông $0.05^\circ \times 0.05^\circ$. | **Gán tâm điểm vào lưới lục giác Uber H3 (Centroid H3 Assignment)**: Chỉ gán tâm điểm vào 1 ô H3 duy nhất. | **Khôi phục Elip Định hướng $\Delta S(\theta)\times\Delta T(\theta)$ + Phân bổ Trọng số 13 điểm lên Lưới Kép Uber H3 Res 7 ($5.16\text{ km}^2$) & Res 8 ($0.74\text{ km}^2$)** ([ADR-0001](adr/0001-dual-resolution-h3-fractional-allocation.md)). | Ô vuông kinh-vĩ độ bị co diện tích theo $\cos\phi$; gán tâm điểm bỏ qua việc 1 pixel MODIS rìa quét ($9.69\text{ km}^2$) phủ lên tới **13 ô H3 Res 8**. Phép cầu phương 13 điểm bảo toàn tuyệt đối tổng năng lượng ($\sum_h w_{p,h} = 1.0$). |
-| **2. Hiệu chuẩn chéo Độ nhạy & $\text{FRP}$** | **Nhân hệ số hằng số toàn cầu (Global Constant Scaling)**: $\text{FRP}_{\text{harm}} = k \cdot \text{FRP}_{\text{MODIS}}$. | **Mạng Nơ-ron Hộp đen (Black-Box MLP Regressor)**: Huấn luyện MLP không ràng buộc vật lý. | **Toán tử 2 Giai đoạn (Two-Stage Operator)**: Bước 1 bù đuôi phân phối theo góc quét $\text{FRP}_{\text{lim}}(\theta, \text{SZA})$; Bước 2 khớp **Power-Law + Empirical Quantile Mapping (EQM)** trên cặp đồng thời Aqua–SNPP ([ADR-0002](adr/0002-two-stage-physics-guided-frp-harmonization.md)). | Tỷ số VIIRS/MODIS biến thiên mạnh theo góc quét $\theta$ (từ $1.3\times$ ở nadir lên $>6\times$ ở rìa quét). Toán tử 2 giai đoạn giảm $69,4\%$ khoảng cách KS ($D_{\text{KS}} = 0.0353$) và bảo toàn tính giải thích vật lý 100%. |
-| **3. Khử trùng lặp đa vệ tinh & Chuẩn hóa dài hạn** | **Cộng gộp trực tiếp hoặc lấy Max theo ngày (Daily Grid Max)**: Bỏ qua cấu trúc giờ bay qua. | **Lọc khoảng cách cố định $1\text{ km}$**: Không xét diện tích elip theo góc quét và tần suất quét qua các thập kỷ. | **Gom cụm Không-Thời gian theo Bán kính Elip ($\tau = 60	ext{ phút}$) thành `FireEpisode` + Chia Hệ số Nỗ lực Quan sát Hiệu dụng $\Omega(y, \phi)$** ([ADR-0003](adr/0003-spatio-temporal-episode-deduplication-and-effort-normalization.md)). | Gom chính xác đoàn tàu vệ tinh chiều (`NOAA-20` `12:40`, `NOAA-21` `13:05`, `S-NPP` `13:30`, `Aqua` `13:30 MLT`) thành 1 sự kiện cháy duy nhất với độ phức tạp $O(N)$ qua băm không gian (Spatial Hash Buckets). |
-| **4. Thống nhất `Confidence` & `DayNight`** | **Giữ nguyên cờ `DayNight` gốc & cắt ngưỡng cứng `confidence >= 50`**. | **Quy đổi bậc thang cố định (Step Mapping): `low=30, nom=60, high=90`**. | **Tính lại góc thiên đỉnh Mặt Trời tuyệt đối $\text{SZA}(\phi, \lambda, t_{\text{UTC}}) < 85^\circ$ + Hàm Logistic Nhiệt $\Delta T_{45}$ + Bộ lọc Vật lý SAA & Nguồn nhiệt tĩnh**. | Khử hoàn toàn sai lệch cờ `DayNight` của luồng `1.0NRT/2.0NRT` và tự động lọc $2.674$ xung nhiễu proton ban đêm của S-NPP cùng $2.130$ xung của NOAA-20 trong vùng SAA Nam Mỹ (7 ngày). |
+| **1. Spatial reference & footprint normalization** | **Centroid assignment to a $0.05^\circ$ latitude–longitude grid (CMG Point Binning)**: Assign $(lat, lon)$ to a $0.05^\circ \times 0.05^\circ$ square cell. | **Centroid assignment to the Uber H3 hexagonal grid (Centroid H3 Assignment)**: Assign only the centroid to 1 H3 cell. | **Reconstruct the oriented ellipse $\Delta S(\theta)\times\Delta T(\theta)$ + 13-point weighted allocation onto the dual Uber H3 grid, Res 7 ($5.16\text{ km}^2$) & Res 8 ($0.74\text{ km}^2$)** ([ADR-0001](adr/0001-dual-resolution-h3-fractional-allocation.md)). | Latitude–longitude square cells shrink in area by $\cos\phi$; centroid assignment ignores the fact that 1 MODIS scan-edge pixel ($9.69\text{ km}^2$) covers up to **13 H3 Res 8 cells**. The 13-point quadrature conserves total energy exactly ($\sum_h w_{p,h} = 1.0$). |
+| **2. Cross-sensor sensitivity & $\text{FRP}$ calibration** | **Global constant scaling**: $\text{FRP}_{\text{harm}} = k \cdot \text{FRP}_{\text{MODIS}}$. | **Black-box neural network (Black-Box MLP Regressor)**: Train an MLP without physical constraints. | **2-Stage Operator**: Step 1 compensates the distribution tail by scan angle $\text{FRP}_{\text{lim}}(\theta, \text{SZA})$; Step 2 fits **Power-Law + Empirical Quantile Mapping (EQM)** on co-incident Aqua–SNPP pairs ([ADR-0002](adr/0002-two-stage-physics-guided-frp-harmonization.md)). | The VIIRS/MODIS ratio varies strongly with scan angle $\theta$ (from $1.3\times$ at nadir to $>6\times$ at the scan edge). The 2-stage operator reduces the KS distance by $69,4\%$ ($D_{\text{KS}} = 0.0353$) and preserves 100% physical interpretability. |
+| **3. Multi-satellite deduplication & long-term normalization** | **Direct aggregation or daily grid max (Daily Grid Max)**: Ignores overpass time structure. | **Fixed $1\text{ km}$ distance filter**: Does not account for scan-angle ellipse area or decadal overpass frequency. | **Spatio-temporal clustering by ellipse radius ($\tau = 60\text{ minutes}$) into `FireEpisode` + division by the effective observation effort factor $\Omega(y, \phi)$** ([ADR-0003](adr/0003-spatio-temporal-episode-deduplication-and-effort-normalization.md)). | Correctly clusters the afternoon satellite train (`NOAA-20` `12:40`, `NOAA-21` `13:05`, `S-NPP` `13:30`, `Aqua` `13:30 MLT`) into 1 fire episode with $O(N)$ complexity via spatial hash buckets. |
+| **4. Unified `Confidence` & `DayNight`** | **Keep the original `DayNight` flag & hard threshold `confidence >= 50`**. | **Fixed step mapping: `low=30, nom=60, high=90`**. | **Recompute the absolute solar zenith angle $\text{SZA}(\phi, \lambda, t_{\text{UTC}}) < 85^\circ$ + thermal logistic function $\Delta T_{45}$ + physical SAA & static heat source filter**. | Eliminates `DayNight` flag drift in the `1.0NRT/2.0NRT` streams and automatically filters $2.674$ nighttime proton noise spikes from S-NPP and $2.130$ from NOAA-20 in the South American SAA region (7 days). |
 
 ---
 
-## 4. Phương Pháp Khoa Học & Kết Quả Thực Nghiệm Bằng Python Trên $1.609.182$ Điểm Nóng Thực Tế NASA FIRMS
+## 4. Scientific Method & Empirical Results in Python on $1.609.182$ Real NASA FIRMS Hotspots
 
-Sử dụng khóa API thực tế kết nối tới **NASA LANCE FIRMS API** và kho dữ liệu mở của NASA, mô-đun [`fetch_real_firms.py`](../apps/benchmark-cli/src/benchmark_cli/fetch_real_firms.py) và [`run_experiments.py`](../apps/benchmark-cli/src/benchmark_cli/run_experiments.py) đã thu thập và xử lý **$1.609.182$ bản ghi điểm nóng thực tế** qua 134 lát cắt thời gian – cảm biến, phủ trọn 26 năm liên tục (`2001–2026`) cùng 12 tháng chu kỳ mùa vụ.
+Using a real API key connected to the **NASA LANCE FIRMS API** and NASA's open data archive, the [`fetch_real_firms.py`](../apps/benchmark-cli/src/benchmark_cli/fetch_real_firms.py) and [`run_experiments.py`](../apps/benchmark-cli/src/benchmark_cli/run_experiments.py) modules collected and processed **$1.609.182$ real hotspot records** across 134 time–sensor slices, spanning 26 continuous years (`2001–2026`) and 12 months of the seasonal cycle.
 
-### 4.1. Kiểm Chứng Thực Nghiệm Bài Toán 1: Bất Đối Xứng Hình Học Dải Quét ($74,23\times$)
+### 4.1. Empirical Validation of Problem 1: Scan-Swath Geometric Asymmetry ($74,23\times$)
 
-Kết quả giải phương trình cầu trong [`geometry_h3.py`](../packages/harmonization-core/src/flare_chronos_core/geometry_h3.py) đối chiếu trực tiếp với trường `scan` và `track` thực tế từ tệp CSV của NASA FIRMS:
+The results of solving the spherical equations in [`geometry_h3.py`](../packages/harmonization-core/src/flare_chronos_core/geometry_h3.py) were compared directly against the actual `scan` and `track` fields from NASA FIRMS CSV files:
 
-| Thông Số Hình Học Cảm Biến | MODIS Collection 6.1 (`Terra` / `Aqua`) | VIIRS 375m Collection 2 (`S-NPP` / `NOAA-20` / `NOAA-21`) | Tỷ Số Tương Quan (MODIS / VIIRS) |
+| Sensor Geometric Parameter | MODIS Collection 6.1 (`Terra` / `Aqua`) | VIIRS 375m Collection 2 (`S-NPP` / `NOAA-20` / `NOAA-21`) | Ratio (MODIS / VIIRS) |
 | :--- | :---: | :---: | :---: |
-| **Kích thước tại Nadir ($\theta = 0^\circ$)** | $1.000 \times 1.000\text{ km}$ ($1.0000\text{ km}^2$) | $0.363 \times 0.360\text{ km}$ ($0.1305\text{ km}^2$) | **$7,66\times$** |
-| **Kích thước tại Rìa dải quét ($\theta_{\max}$)** | $4.830 \times 2.006\text{ km}$ (**$9.6875\text{ km}^2$** tại $55^\circ$) | $0.778 \times 0.791\text{ km}$ (**$0.6154\text{ km}^2$** tại $56.28^\circ$) | **$15,74\times$** |
-| **Tỷ số Rìa MODIS / Tâm VIIRS** | $9.6875\text{ km}^2$ | $0.1305\text{ km}^2$ | **$74,23\times$** |
-| **Diện tích trung bình thực tế trên FIRMS** | **$2.17\text{ km}^2$** (Phân vị P95: **$5.27\text{ km}^2$**) | **$0.22\text{ km}^2$** (Phân vị P95: **$0.42\text{ km}^2$**) | **$9,86\times$** (Trung bình thực tế) |
-| **Ngưỡng phát hiện $\text{FRP}_{\text{lim}}$ ban ngày** | $8.20\text{ MW}$ (Nadir) $\to$ **$41.20\text{ MW}$** (Rìa $55^\circ$) | $1.15\text{ MW}$ (Nadir) $\to$ **$3.40\text{ MW}$** (Rìa $56.3^\circ$) | **$12,12\times$** nhạy hơn ở rìa quét |
+| **Size at Nadir ($\theta = 0^\circ$)** | $1.000 \times 1.000\text{ km}$ ($1.0000\text{ km}^2$) | $0.363 \times 0.360\text{ km}$ ($0.1305\text{ km}^2$) | **$7,66\times$** |
+| **Size at scan edge ($\theta_{\max}$)** | $4.830 \times 2.006\text{ km}$ (**$9.6875\text{ km}^2$** at $55^\circ$) | $0.778 \times 0.791\text{ km}$ (**$0.6154\text{ km}^2$** at $56.28^\circ$) | **$15,74\times$** |
+| **MODIS edge / VIIRS center ratio** | $9.6875\text{ km}^2$ | $0.1305\text{ km}^2$ | **$74,23\times$** |
+| **Empirical mean area on FIRMS** | **$2.17\text{ km}^2$** (P95 percentile: **$5.27\text{ km}^2$**) | **$0.22\text{ km}^2$** (P95 percentile: **$0.42\text{ km}^2$**) | **$9,86\times$** (empirical mean) |
+| **Daytime $\text{FRP}_{\text{lim}}$ detection limit** | $8.20\text{ MW}$ (Nadir) $\to$ **$41.20\text{ MW}$** (Edge $55^\circ$) | $1.15\text{ MW}$ (Nadir) $\to$ **$3.40\text{ MW}$** (Edge $56.3^\circ$) | **$12,12\times$** more sensitive at the scan edge |
 
 ![Figure 1 - Scan Angle Footprint Physics](figures/fig1_scan_angle_footprint_physics.png)
 
-### 4.2. Kiểm Chứng Thực Nghiệm Bài Toán 2: Hiệu Chuẩn Chéo Trên $N = 20.786$ Cặp Ô Lưới Đồng Thời Aqua–SNPP
+### 4.2. Empirical Validation of Problem 2: Cross-Sensor Calibration on $N = 20.786$ Co-incident Aqua–SNPP Grid-Cell Pairs
 
-Bằng cách ghép cặp các quan sát diễn ra trong cùng ngày và cùng chế độ Ngày/Đêm giữa vệ tinh **Aqua (MODIS)** và **Suomi-NPP (VIIRS)** (cùng bay qua lúc $\sim 13\text{:}30\text{ MLT}$ và $01\text{:}30\text{ MLT}$) trên cùng ô lưới đẳng diện tích ($\sim 5\text{ km}$, tương đương **Uber H3 Resolution 7**), mô hình [`fit_coincident_aqua_snpp_model`](../packages/harmonization-core/src/flare_chronos_core/radiometric_calibrator.py) thu được:
-- **Tham số hàm truyền vật lý – thống kê**: $\alpha = 1.7397$, $\beta = 0.9221$, hệ số bù đuôi góc quét $\kappa = 0.1000$.
-- **Sự hội tụ phân phối xác suất tích lũy (ECDF)**: Khoảng cách Kolmogorov-Smirnov $D_{\text{KS}}$ giữa phân phối $\sum \text{FRP}$ của MODIS và VIIRS giảm từ **$0.1153$** (trước hiệu chuẩn) xuống **$0.0353$** (sau hiệu chuẩn **Flare-Chronos**) — tức **triệt tiêu $69,4\%$ độ lệch phân phối liên cảm biến**.
+By pairing observations from the same day and the same Day/Night regime between the **Aqua (MODIS)** and **Suomi-NPP (VIIRS)** satellites (both overpassing at $\sim 13\text{:}30\text{ MLT}$ and $01\text{:}30\text{ MLT}$) over the same equal-area grid cell ($\sim 5\text{ km}$, equivalent to **Uber H3 Resolution 7**), the [`fit_coincident_aqua_snpp_model`](../packages/harmonization-core/src/flare_chronos_core/radiometric_calibrator.py) model obtained:
+- **Physical–statistical transfer function parameters**: $\alpha = 1.7397$, $\beta = 0.9221$, scan-angle tail correction coefficient $\kappa = 0.1000$.
+- **Convergence of the cumulative probability distribution (ECDF)**: The Kolmogorov-Smirnov distance $D_{\text{KS}}$ between the $\sum \text{FRP}$ distributions of MODIS and VIIRS falls from **$0.1153$** (before calibration) to **$0.0353$** (after **Flare-Chronos** calibration) — that is, **eliminating $69,4\%$ of the cross-sensor distribution bias**.
 
 ![Figure 3 - Cross-Sensor FRP Calibration](figures/fig3_cross_sensor_frp_quantile_mapping.png)
 
-### 4.3. Kiểm Chứng Thực Nghiệm Bài Toán 3, 4, 5: Khử Trùng Lặp Đa Vệ Tinh & Lọc Nhiễu SAA
+### 4.3. Empirical Validation of Problems 3, 4, 5: Multi-Satellite Deduplication & SAA Noise Filtering
 
 ![Figure 2 - Overpass Deduplication and Effort Factor](figures/fig2_overpass_deduplication_sza.png)
 
 ---
 
-## 5. Hai Nghiên Cứu Điển Hình Thực Tiễn (Empirical Case Studies)
+## 5. Two Practical Empirical Case Studies
 
-### 5.1. Case Study 1: Tiểu Vùng Sông Mekong & Việt Nam (`BBOX: 100.0°E–109.5°E, 8.5°N–23.5°N`)
+### 5.1. Case Study 1: Mekong Subregion & Vietnam (`BBOX: 100.0°E–109.5°E, 8.5°N–23.5°N`)
 
-Khu vực Đông Nam Á lục địa (bao gồm Đồng bằng sông Cửu Long, Tây Nguyên, Tây Bắc Việt Nam, Lào, Campuchia và miền Đông Thái Lan) có đặc trưng pha trộn giữa **đốt phụ phẩm nông nghiệp / làm nương rẫy theo mùa** (các đám cháy nhỏ, cường độ thấp $\text{FRP} < 15\text{ MW}$) và **cháy rừng khộp / rừng lá rộng thường xanh** trong các năm hạn hán **El Niño** (`2010`, `2016`, `2023–2024`).
+The continental Southeast Asia region (including the Mekong Delta, the Central Highlands, northwestern Vietnam, Laos, Cambodia and eastern Thailand) is characterized by a mix of **seasonal agricultural residue burning / swidden cultivation** (small, low-intensity fires with $\text{FRP} < 15\text{ MW}$) and **dipterocarp / evergreen broadleaf forest fires** in **El Niño** drought years (`2010`, `2016`, `2023–2024`).
 
-#### Bảng Số Liệu Thực Tế NASA FIRMS (Cửa Sổ 5 Ngày Cao Điểm Giữa Tháng 3: `15/03 – 19/03`)
+#### Real NASA FIRMS Data Table (Peak 5-Day Window in Mid-March: `15/03 – 19/03`)
 
-> **Ghi chú về năm đo và năm nội suy:** Lịch 26 năm bao gồm **25 năm có lát cắt thực tế (Measured Epoch, `2001–2025`)** — nơi số điểm được chuẩn hóa trực tiếp từ dữ liệu NASA FIRMS quan sát được — và **1 năm nội suy (Interpolated Year, `2026`)**, với thang năm được mô hình hóa từ số điểm MODIS quan sát được và đường bao mùa thực nghiệm của vùng. Nội suy là **mô hình, không phải quan sát**; bảng dưới đây trình bày các kỳ mốc tiêu biểu (toàn bộ 25 kỳ quan trắc thực xem tại Phụ lục A).
+> **Note on measured and interpolated years:** The 26-year calendar comprises **25 years with real slices (Measured Epoch, `2001–2025`)** — where counts are normalized directly from observed NASA FIRMS data — and **1 interpolated year (Interpolated Year, `2026`)**, with the year scale modeled from the observed MODIS counts and the region's empirical seasonal envelope. The interpolation is a **model, not an observation**; the table below presents representative benchmark periods (all 25 measured epochs are in Appendix A).
 
 
-| Năm (Epoch) | Tổ Hợp Cảm Biến Hoạt Động | Điểm Nóng Thô Theo Từng Nguồn (`Raw Counts`) | Tổng Điểm Nóng Thô (`Raw Sum`) | Sự Kiện Cháy Độc Lập (`Fire Episodes`) | Hệ Số Nén Trùng Lặp | Nỗ Lực Quan Sát $\Omega(y, \phi)$ | Sự Kiện Chuẩn Hóa `Flare-Chronos` (`VIIRS-eq`) | Chỉ Số Thô (`2005=100`) | Chỉ Số Chuẩn Hóa (`2005=100`) |
+| Year (Epoch) | Active Sensor Combination | Raw Hotspots by Source (`Raw Counts`) | Total Raw Hotspots (`Raw Sum`) | Independent Fire Episodes (`Fire Episodes`) | Deduplication Compression Factor | Observation Effort $\Omega(y, \phi)$ | `Flare-Chronos` Harmonized Episodes (`VIIRS-eq`) | Raw Index (`2005=100`) | Harmonized Index (`2005=100`) |
 | :---: | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **2005** | `MODIS_SP` (Terra+Aqua) | MODIS: `3.914` | **3.914** | 2.415 | $1.62\times$ | $0.9145$ | **9.005,1** | `100,0` | **`100,0`** |
-| **2010** *(El Niño)* | `MODIS_SP` (Terra+Aqua) | MODIS: `8.726` | **8.726** | 4.990 | $1.75\times$ | $1.0221$ | **16.648,0** | `222,9` | **`184,9`** *(Đỉnh hạn)* |
-| **2012** *(+S-NPP)* | `MODIS_SP` + `SNPP_SP` | MODIS: `7.389`<br/>SNPP: `26.439` | **33.828** | 16.845 | $2.01\times$ | $1.4019$ | **12.015,8** | `864,3` *(+764% ảo)* | **`133,4`** |
-| **2016** *(Siêu El Niño)* | `MODIS_SP` + `SNPP_SP` | MODIS: `6.671`<br/>SNPP: `37.665` | **44.336** | 23.500 | $1.89\times$ | $1.9621$ | **11.977,0** | `1.132,8` | **`133,0`** *(Đỉnh hạn)* |
-| **2020** | `MODIS_SP` + `SNPP_SP` + `NOAA20_SP` | MODIS: `4.969`<br/>SNPP: `24.029`<br/>NOAA20: `21.220` | **50.218** | 22.409 | $2.24\times$ | $1.3849$ | **13.049,2** | `1.283,0` | **`144,9`** |
-| **2023** *(+NOAA-20)* | `MODIS_SP` + `SNPP_SP` + `NOAA20_SP` | MODIS: `4.257`<br/>SNPP: `20.712`<br/>NOAA20: `19.806` | **44.775** | 22.164 | $2.02\times$ | $1.5596$ | **11.460,8** | `1.144,0` | **`127,3`** |
-| **2024** *(+NOAA-21)* | `MODIS_SP` + `SNPP_SP` + `NOAA20_SP` + `NOAA21_NRT` | MODIS: `3.588`<br/>SNPP: `17.495`<br/>NOAA20: `16.965`<br/>NOAA21: `17.187` | **55.235** | 24.902 | $2.22\times$ | $2.0645$ | **8.150,0** | **`1.411,2`** *(+1.311,2% ảo!)* | **`90,5`** *(Thực tế giảm 9,5%!)* |
+| **2005** | `MODIS_SP` (Terra+Aqua) | MODIS: `3.914` | **3,914** | 2,415 | $1.62\times$ | $0.9145$ | **9,005.1** | `100,0` | **`100,0`** |
+| **2010** *(El Niño)* | `MODIS_SP` (Terra+Aqua) | MODIS: `8.726` | **8,726** | 4,990 | $1.75\times$ | $1.0221$ | **16,648.0** | `222,9` | **`184,9`** *(Drought peak)* |
+| **2012** *(+S-NPP)* | `MODIS_SP` + `SNPP_SP` | MODIS: `7.389`<br/>SNPP: `26.439` | **33,828** | 16,845 | $2.01\times$ | $1.4019$ | **12,015.8** | `864,3` *(+764% artificial)* | **`133,4`** |
+| **2016** *(Super El Niño)* | `MODIS_SP` + `SNPP_SP` | MODIS: `6.671`<br/>SNPP: `37.665` | **44,336** | 23,500 | $1.89\times$ | $1.9621$ | **11,977.0** | `1.132,8` | **`133,0`** *(Drought peak)* |
+| **2020** | `MODIS_SP` + `SNPP_SP` + `NOAA20_SP` | MODIS: `4.969`<br/>SNPP: `24.029`<br/>NOAA20: `21.220` | **50,218** | 22,409 | $2.24\times$ | $1.3849$ | **13,049.2** | `1.283,0` | **`144,9`** |
+| **2023** *(+NOAA-20)* | `MODIS_SP` + `SNPP_SP` + `NOAA20_SP` | MODIS: `4.257`<br/>SNPP: `20.712`<br/>NOAA20: `19.806` | **44,775** | 22,164 | $2.02\times$ | $1.5596$ | **11,460.8** | `1.144,0` | **`127,3`** |
+| **2024** *(+NOAA-21)* | `MODIS_SP` + `SNPP_SP` + `NOAA20_SP` + `NOAA21_NRT` | MODIS: `3.588`<br/>SNPP: `17.495`<br/>NOAA20: `16.965`<br/>NOAA21: `17.187` | **55,235** | 24,902 | $2.22\times$ | $2.0645$ | **8,150.0** | **`1.411,2`** *(+1,311.2% artificial!)* | **`90,5`** *(actually 9.5% lower!)* |
 
 > [!IMPORTANT]
-> **Phát hiện chấn động từ dữ liệu thực tế tại Tiểu vùng sông Mekong & Việt Nam:**  
-> Vào kỳ 5 ngày giữa tháng 3/2024, cảm biến chuẩn `MODIS_SP` ghi nhận `3.588` điểm cháy — **thấp hơn $8,3\%$** so với cùng kỳ năm 2005 (`3.914` điểm). Thế nhưng, do sự tham gia đồng thời của 3 vệ tinh VIIRS (`Suomi-NPP`, `NOAA-20`, `NOAA-21`), tổng số điểm nóng thô cộng gộp vọt lên tới **$55.235$ điểm (Chỉ số thô $= 1.411,2$, tức tăng giả tạo $+1.311,2\%$ so với năm 2005)!** Sau khi đi qua **Flare-Chronos**, chỉ số hoạt động cháy chuẩn hóa trả về đúng giá trị thực chất là **$90,5$** (giảm $9,5\%$ so với năm 2005), đồng thời giữ lại nguyên vẹn tín hiệu vật lý của hai đợt hạn hán lịch sử **El Niño 2010 (`184,9`)** và **El Niño 2016 (`133,0`)**.
+> **Groundbreaking finding from real data in the Mekong subregion & Vietnam:**  
+> In the 5-day period in mid-March 2024, the `MODIS_SP` reference sensor recorded `3.588` fires — **$8,3\%$ lower** than the same period in 2005 (`3.914` fires). Yet, due to the simultaneous participation of 3 VIIRS satellites (`Suomi-NPP`, `NOAA-20`, `NOAA-21`), the aggregated raw hotspot total soared to **$55.235$ hotspots (Raw index $= 1.411,2$, i.e. an artificial increase of $+1.311,2\%$ relative to 2005)!** After passing through **Flare-Chronos**, the harmonized burning activity index returns the true value of **$90,5$** ($9,5\%$ lower than 2005), while preserving intact the physical signal of two historic drought episodes, **El Niño 2010 (`184,9`)** and **El Niño 2016 (`133,0`)**.
 
 ---
 
-### 5.2. Case Study 2: Vành Đai Cháy Rừng Nhiệt Đới Amazon, Brazil (`BBOX: 62.0°W–50.0°W, 14.0°S–4.0°S`)
+### 5.2. Case Study 2: Amazon Tropical Forest Fire Belt, Brazil (`BBOX: 62.0°W–50.0°W, 14.0°S–4.0°S`)
 
-Khu vực phía Nam lưu vực Amazon (bang Mato Grosso và Pará, Brazil) đại diện cho chế độ cháy giải phóng mặt bằng quy mô lớn và cháy rừng nhiệt đới trong mùa khô Nam bán cầu (tháng 7 – tháng 10), đồng thời nằm ngay trong vùng ảnh hưởng của **Dị thường Từ trường Nam Đại Tây Dương (SAA)**.
+The southern Amazon basin (Mato Grosso and Pará states, Brazil) represents the regime of large-scale land-clearing fires and tropical forest fires during the Southern Hemisphere dry season (July–October), and also lies directly within the influence zone of the **South Atlantic Magnetic Anomaly (SAA)**.
 
-#### Bảng Số Liệu Thực Tế NASA FIRMS (Cửa Sổ 5 Ngày Cao Điểm Cuối Tháng 8: `20/08 – 24/08`)
+#### Real NASA FIRMS Data Table (Peak 5-Day Window in Late August: `20/08 – 24/08`)
 
-> **Ghi chú về năm đo và năm nội suy:** Lịch 26 năm bao gồm **25 năm có lát cắt thực tế (Measured Epoch, `2001–2025`)** — nơi số điểm được chuẩn hóa trực tiếp từ dữ liệu NASA FIRMS quan sát được — và **1 năm nội suy (Interpolated Year, `2026`)**, với thang năm được mô hình hóa từ số điểm MODIS quan sát được và đường bao mùa thực nghiệm của vùng. Nội suy là **mô hình, không phải quan sát**; bảng dưới đây trình bày các kỳ mốc tiêu biểu (toàn bộ 25 kỳ quan trắc thực xem tại Phụ lục A).
+> **Note on measured and interpolated years:** The 26-year calendar comprises **25 years with real slices (Measured Epoch, `2001–2025`)** — where counts are normalized directly from observed NASA FIRMS data — and **1 interpolated year (Interpolated Year, `2026`)**, with the year scale modeled from the observed MODIS counts and the region's empirical seasonal envelope. The interpolation is a **model, not an observation**; the table below presents representative benchmark periods (all 25 measured epochs are in Appendix A).
 
 
-| Năm (Epoch) | Tổ Hợp Cảm Biến Hoạt Động | Điểm Nóng Thô Theo Từng Nguồn (`Raw Counts`) | Tổng Điểm Nóng Thô (`Raw Sum`) | Sự Kiện Cháy Độc Lập (`Fire Episodes`) | Hệ Số Nén Trùng Lặp | Xung Nhiễu SAA Đêm Đã Lọc | Sự Kiện Chuẩn Hóa `Flare-Chronos` (`VIIRS-eq`) | Chỉ Số Thô (`2005=100`) | Chỉ Số Chuẩn Hóa (`2005=100`) |
+| Year (Epoch) | Active Sensor Combination | Raw Hotspots by Source (`Raw Counts`) | Total Raw Hotspots (`Raw Sum`) | Independent Fire Episodes (`Fire Episodes`) | Deduplication Compression Factor | Filtered Nighttime SAA Noise Spikes | `Flare-Chronos` Harmonized Episodes (`VIIRS-eq`) | Raw Index (`2005=100`) | Harmonized Index (`2005=100`) |
 | :---: | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **2005** *(Hạn lớn)* | `MODIS_SP` (Terra+Aqua) | MODIS: `13.804` | **13.804** | 6.955 | $1.99\times$ | $0.9810$ | **13.116,0** | `100,0` | **`100,0`** |
-| **2010** *(Siêu hạn)* | `MODIS_SP` (Terra+Aqua) | MODIS: `16.304` | **16.304** | 7.635 | $2.13\times$ | $1.2589$ | **11.219,9** | `118,1` | **`85,5`** |
-| **2012** *(+S-NPP)* | `MODIS_SP` + `SNPP_SP` | MODIS: `6.677`<br/>SNPP: `26.807` | **33.484** | 9.351 | $3.58\times$ | $1.7705$ | **5.281,6** | `242,6` *(Tăng ảo)* | **`40,3`** *(Giảm phá rừng thực tế)* |
-| **2019** | `MODIS_SP` + `SNPP_SP` + `NOAA20_SP` | MODIS: `4.770`<br/>SNPP: `16.882`<br/>NOAA20: `17.099` | **38.751** | 8.764 | $4.42\times$ | $1.6438$ | **4.299,6** | `280,7` | **`32,8`** |
-| **2020** | `MODIS_SP` + `SNPP_SP` + `NOAA20_SP` | MODIS: `3.506`<br/>SNPP: `22.031`<br/>NOAA20: `20.575` | **46.112** | 10.446 | $4.41\times$ | $2.1350$ | **3.945,8** | `334,0` | **`30,1`** |
-| **2024** *(Hạn 2024 + 4 luồng)* | `MODIS_SP` + `SNPP_SP` + `NOAA20_SP` + `NOAA21_NRT` | MODIS: `8.151`<br/>SNPP: `35.647`<br/>NOAA20: `35.765`<br/>NOAA21: `32.842` | **112.405** | 19.542 | $5.75\times$ | $2.6716$ | **4.942,4** | **`814,3`** *(+714,3% ảo!)* | **`37,7`** *(đo được, không phải đỉnh 2020s)* |
+| **2005** *(Major drought)* | `MODIS_SP` (Terra+Aqua) | MODIS: `13.804` | **13,804** | 6,955 | $1.99\times$ | $0.9810$ | **13,116.0** | `100,0` | **`100,0`** |
+| **2010** *(Super drought)* | `MODIS_SP` (Terra+Aqua) | MODIS: `16.304` | **16,304** | 7,635 | $2.13\times$ | $1.2589$ | **11,219.9** | `118,1` | **`85,5`** |
+| **2012** *(+S-NPP)* | `MODIS_SP` + `SNPP_SP` | MODIS: `6.677`<br/>SNPP: `26.807` | **33,484** | 9,351 | $3.58\times$ | $1.7705$ | **5,281.6** | `242,6` *(artificial increase)* | **`40,3`** *(actual deforestation decline)* |
+| **2019** | `MODIS_SP` + `SNPP_SP` + `NOAA20_SP` | MODIS: `4.770`<br/>SNPP: `16.882`<br/>NOAA20: `17.099` | **38,751** | 8,764 | $4.42\times$ | $1.6438$ | **4,299.6** | `280,7` | **`32,8`** |
+| **2020** | `MODIS_SP` + `SNPP_SP` + `NOAA20_SP` | MODIS: `3.506`<br/>SNPP: `22.031`<br/>NOAA20: `20.575` | **46,112** | 10,446 | $4.41\times$ | $2.1350$ | **3,945.8** | `334,0` | **`30,1`** |
+| **2024** *(2024 drought + 4 streams)* | `MODIS_SP` + `SNPP_SP` + `NOAA20_SP` + `NOAA21_NRT` | MODIS: `8.151`<br/>SNPP: `35.647`<br/>NOAA20: `35.765`<br/>NOAA21: `32.842` | **112,405** | 19,542 | $5.75\times$ | $2.6716$ | **4,942.4** | **`814,3`** *(+714.3% artificial!)* | **`37,7`** *(measured, not the 2020s peak)* |
 
 ![Figure 4 - Regime Shift Elimination](figures/fig4_regime_shift_elimination.png)
 
@@ -135,122 +135,122 @@ Khu vực phía Nam lưu vực Amazon (bang Mato Grosso và Pará, Brazil) đạ
 
 ---
 
-## 6. Quy Trình Vận Hành Thực Tế & Lộ Trình Phát Triển 2027+ (Operational Workflow & Future Roadmap)
+## 6. Operational Workflow & 2027+ Roadmap
 
-### 6.1. Quy Trình Ứng Dụng Cho Lực Lượng Cứu Hỏa & Cơ Quan Quản Lý Rừng
-1. **Khoanh vùng AOI linh hoạt**: Người dùng nhập tọa độ `BBOX`, chọn ranh giới hành chính/vườn quốc gia hoặc chọn danh sách ô lục giác **Uber H3**.
-2. **Đồng bộ hóa tự động thời gian thực + lịch sử**: Engine tự động ghép nối kho lưu trữ `Standard Processing` (`2000–2026`) với luồng cảnh báo sớm `Near-Real-Time / Ultra-Real-Time` (`MODIS_NRT`, `VIIRS_SNPP_NRT`, `VIIRS_NOAA20_NRT`, `VIIRS_NOAA21_NRT`).
-3. **Cảnh báo sớm theo Pentad qua chỉ số $\text{SFAI Z-Score}$**:
-   - Khi $\text{SFAI}_{y,p} \in [-0.5, +1.0)$: Hoạt động đốt sinh khối nằm trong ngưỡng mùa vụ bình thường (*Normal Seasonal Baseline*).
-   - Khi $\text{SFAI}_{y,p} \in [1.75, 2.5)$: Cảnh báo mùa cháy nghiêm trọng (*Severe Fire Period*) — huy động lực lượng tuần tra rừng.
-   - Khi $\text{SFAI}_{y,p} \ge +2.5\sigma$: Kích hoạt **Báo động Khủng hoảng Cháy Ngoài Mùa Vụ (*Out-of-Season Crisis Anomaly*)**.
-4. **Tầng nhận thức kép trả lời và kiểm chứng câu hỏi vận hành** (`apps/ai-service`):
-   - **Tầng phản xạ** dùng **mô hình quyết định** để gán phân tích, định vùng và đánh giá mức khẩn cấp bằng **xác suất hiệu chuẩn**; mô hình này phục vụ **cục bộ** trên node suy luận của dự án nên **không tốn credit đám mây**, và có **chuỗi dự phòng** (decision → chat → trích xuất tất định) để một run không phụ thuộc dịch vụ nào còn sống.
-   - **Tầng báo cáo** tra cứu một bước bằng công cụ tất định, **không gọi mô hình** và **không** chạm công cụ chẩn đoán chuyên môn — thẻ dữ kiện và cảnh báo khẩn trả về trong vài mili giây.
-   - **Tầng suy luận** để mô hình **tự chọn** công cụ trong bề mặt `18` công cụ tất định gắn cho mô hình (`9` Atomic + `9` Domain Diagnostic, trên tổng số `19` hàm `@tool`) và tự viết diễn giải theo ngôn ngữ của từng đối tượng.
-   - **Cổng kiểm chứng định lượng**: mọi con số trong bản thảo báo cáo được đối chiếu với **sổ cái số liệu đã xác thực**; số không có nguồn thì báo cáo bị trả về để viết lại, không bao giờ xuất bản.
-   - **Cổng phê duyệt của con người**: mọi báo cáo có hành động hiện trường **dừng run** chờ quyết định; bị từ chối thì **không phát hành** báo cáo nào, còn quyết định luôn được ghi lại.
+### 6.1. Application Workflow for Fire Services & Forest Management Agencies
+1. **Flexible AOI delineation**: Users enter `BBOX` coordinates, select administrative boundaries / national parks, or choose a list of **Uber H3** hexagonal cells.
+2. **Automatic real-time + historical harmonization**: The engine automatically concatenates the `Standard Processing` archive (`2000–2026`) with the `Near-Real-Time / Ultra-Real-Time` early-warning stream (`MODIS_NRT`, `VIIRS_SNPP_NRT`, `VIIRS_NOAA20_NRT`, `VIIRS_NOAA21_NRT`).
+3. **Pentad-level early warning via the $\text{SFAI Z-Score}$ index**:
+   - When $\text{SFAI}_{y,p} \in [-0.5, +1.0)$: biomass burning activity is within the normal seasonal range (*Normal Seasonal Baseline*).
+   - When $\text{SFAI}_{y,p} \in [1.75, 2.5)$: severe fire season warning (*Severe Fire Period*) — mobilize forest patrol forces.
+   - When $\text{SFAI}_{y,p} \ge +2.5\sigma$: trigger an **Out-of-Season Crisis Anomaly** alert.
+4. **Dual-system cognitive layer answers and verifies operational questions** (`apps/ai-service`):
+   - The **reflexive layer** uses a **decision model** to assign analysis, define zones and assess urgency with **calibrated probabilities**; this model serves **locally** on the project's inference node, so it **costs no cloud credit**, and it has a **fallback chain** (decision → chat → deterministic extraction) so that a run does not depend on any single live service.
+   - The **reporting layer** performs one-step lookup with deterministic tools, **never calls a model** and **does not** touch domain diagnostic tools — fact cards and urgent alerts return in milliseconds.
+   - The **reasoning layer** lets the model **choose** tools from the `18` deterministic tools exposed to it (`9` Atomic + `9` Domain Diagnostic, out of `19` `@tool` functions) and write its own interpretation in the language of each audience.
+   - **Quantitative verification gate**: every number in a report draft is checked against the **verified facts ledger**; a number without provenance sends the report back for rewriting, and it is never published.
+   - **Human approval gate**: any report with field actions **pauses the run** for a decision; if rejected, **no report is released**, and the decision is always recorded.
 
-### 6.2. Lộ Trình Mở Rộng Đa Cảm Biến Giai Đoạn 2027+ (Multi-Sensor Roadmap)
-1. **Tích hợp Vệ tinh Địa tĩnh Thế hệ mới (Geostationary 10-Minute Fire Diurnal Cycle)**:
-   - Mở rộng Toán tử Quan sát Góc quét sang cảm biến **GOES-16/19 ABI** (Châu Mỹ), **Himawari-9 AHI** (Châu Á – Thái Bình Dương / Việt Nam) và **Meteosat Third Generation FCI** (Châu Âu – Châu Phi) để tái tạo đường cong năng lượng cháy từng 10 phút trong ngày.
-2. **Hiệu chuẩn Điểm nóng Siêu phân giải 30m từ Landsat 8/9/Next**:
-   - Sử dụng sản phẩm `LANDSAT_NRT` ($30\text{ m}$) đã có trên NASA FIRMS (xác nhận khả dụng từ `2022-06-20` đến `2026-10-20`) làm chuẩn đối chiếu thực địa cho các đám cháy rơm rạ cực nhỏ ($< 0.1\text{ MW}$).
-3. **Kết hợp Vệ tinh Radar Khẩu độ Tổng hợp Băng tần Kép NISAR (`GCOV` & `GUNW` Fusion)**:
-   - Tích hợp dữ liệu Radar băng tần L ($24\text{ cm}$) và S ($10\text{ cm}$) từ vệ tinh **NISAR** (phát hành dữ liệu từ tháng 7/2026) để xuyên qua lớp khói mù dày đặc của đám cháy rừng, xác thực diện tích rừng bị suy thoái cấu trúc (`Coherence Loss` & `HV Backscatter Drop`) ngay sau khi **Flare-Chronos** phát hiện dị thường nhiệt.
+### 6.2. Multi-Sensor Expansion Roadmap for 2027+
+1. **Integration of Next-Generation Geostationary Satellites (Geostationary 10-Minute Fire Diurnal Cycle)**:
+   - Extend the scan-angle observation operator to the **GOES-16/19 ABI** (Americas), **Himawari-9 AHI** (Asia–Pacific / Vietnam) and **Meteosat Third Generation FCI** (Europe–Africa) sensors to reconstruct the within-day 10-minute fire energy curve.
+2. **30 m super-resolution hotspot calibration from Landsat 8/9/Next**:
+   - Use the `LANDSAT_NRT` product ($30\text{ m}$) already available on NASA FIRMS (availability confirmed from `2022-06-20` to `2026-10-20`) as a ground-reference standard for extremely small straw fires ($< 0.1\text{ MW}$).
+3. **NISAR dual-band synthetic aperture radar satellite fusion (`GCOV` & `GUNW` Fusion)**:
+   - Integrate L-band ($24\text{ cm}$) and S-band ($10\text{ cm}$) radar data from the **NISAR** satellite (data release from July 2026) to penetrate thick smoke haze over forest fires and verify structurally degraded forest area (`Coherence Loss` & `HV Backscatter Drop`) immediately after **Flare-Chronos** detects a thermal anomaly.
 
 ---
 
-## 7. Hướng Dẫn Chạy Kiểm Chứng Toàn Trình Trong Workspace (Reproducibility Guide)
+## 7. Full Workspace Reproducibility Guide
 
-Toàn bộ mã nguồn, dữ liệu thực tế NASA FIRMS và bộ kiểm thử của **Flare-Chronos** có thể chạy kiểm chứng ngay lập tức bằng các lệnh chuẩn dưới đây:
+All source code, real NASA FIRMS data and test suites of **Flare-Chronos** can be reproduced immediately with the standard commands below:
 
 ```bash
-# 1. Chạy bộ kiểm thử đơn vị & bất biến vật lý (182 bài kiểm thử ngoại tuyến trên 22 file test)
+# 1. Run the unit test suite and physics invariants (182 offline tests across 22 test files)
 uv run python -m pytest -q
 
-# 2. Thu thập dữ liệu thực tế từ NASA LANCE FIRMS API (sử dụng FIRMS_MAP_KEY trong .env)
+# 2. Fetch real data from the NASA LANCE FIRMS API (uses FIRMS_MAP_KEY in .env)
 uv run python -m benchmark_cli.fetch_real_firms
 
-# 3. Thực thi toàn bộ pipeline đồng bộ hóa trên 451.488 bản ghi cửa sổ chuẩn & xuất 5 biểu đồ khoa học
+# 3. Run the full harmonization pipeline on 451.488 standard-window records and export 5 scientific figures
 uv run python -m benchmark_cli.run_experiments
 
-# 4. Kiểm chứng tầng nhận thức kép: 182 bài kiểm thử ngoại tuyến (không gọi mô hình) + 6 bài trên mô hình thật
+# 4. Verify the dual-system cognitive layer: 182 offline tests (no model calls) + 6 live-model tests
 uv run python -m pytest -q
 uv run python -m pytest -m live -q
 
-# 5. Chạy toàn bộ 15 Use Case trên mô hình thật và ghi đo lường từng Use Case
+# 5. Run all 15 use cases on the live model and record per-use-case metrics
 uv run python apps/ai-service/src/ai_service/run_all_usecases.py --live
 ```
 
-> **Lưu ý về hạ tầng:** tầng phản xạ ưu tiên **mô hình quyết định** phục vụ cục bộ. Khi endpoint đó không sẵn sàng, chuỗi phân loại tự lùi về mô hình chat rồi tới trích xuất tất định, và mỗi lần lùi bậc được ghi lại trong telemetry — nên bộ kiểm thử ngoại tuyến **luôn** chạy được, còn bộ kiểm thử trên mô hình thật cần khoá API của nhà cung cấp.
+> **Infrastructure note:** the reflexive layer prioritizes the **decision model** served locally. When that endpoint is unavailable, the classification chain automatically falls back to the chat model and then to deterministic extraction, and every fallback step is recorded in telemetry — so the offline test suite **always** runs, while the live-model suite needs the provider's API key.
 
 ---
 
-## Phụ lục A. Bảng Measured Epoch (25 kỳ quan trắc thực mỗi vùng, 2001–2025)
+## Appendix A. Measured Epoch Table (25 Measured Epochs per Region, 2001–2025)
 
-Mỗi dòng là một **Measured Epoch**: một năm có lát cắt NASA FIRMS thật cho cửa sổ 5 ngày của vùng (Mê Kông 15–19/03, Amazon 20–24/08), nên số đếm được tính từ các điểm nóng quan sát được. Năm 2026 là **Interpolated Year** vì cửa sổ của nó thuộc một năm chưa kết thúc. Cột cuối là số đợt cháy tương đương VIIRS sau hiệu chuẩn, đúng như `data/processed/empirical_results.json` ghi lại.
-
-
+Each row is a **Measured Epoch**: a year with a real NASA FIRMS slice for the region's 5-day window (Mekong 15–19/03, Amazon 20–24/08), so counts are computed from observed hotspots. 2026 is the **Interpolated Year** because its window belongs to a year that has not ended. The last column is the VIIRS-equivalent fire episode count after harmonization, exactly as recorded in `data/processed/empirical_results.json`.
 
 
-### Mê Kông
 
-| Năm | Điểm nóng thô | Đợt cháy sau lọc trùng | Đợt cháy tương đương VIIRS (đã chuẩn hóa) |
+
+### Mekong
+
+| Year | Raw hotspots | Fire episodes after deduplication | VIIRS-equivalent fire episodes (harmonized) |
 | ---: | ---: | ---: | ---: |
-| 2001 | 238 | 179 | 2.191,7 |
-| 2002 | 1.552 | 1.054 | 3.492,8 |
-| 2003 | 3.828 | 2.394 | 6.603,2 |
-| 2004 | 5.893 | 3.614 | 11.137,6 |
-| 2005 | 3.914 | 2.415 | 9.005,1 |
-| 2006 | 5.727 | 3.294 | 11.531,2 |
-| 2007 | 11.515 | 6.748 | 24.445,6 |
-| 2008 | 4.986 | 3.148 | 8.943,3 |
-| 2009 | 3.731 | 2.203 | 14.246,6 |
-| 2010 | 8.726 | 4.990 | 16.648,0 |
-| 2011 | 1.875 | 1.158 | 9.230,4 |
-| 2012 | 33.828 | 16.845 | 12.015,8 |
-| 2013 | 33.019 | 16.614 | 8.608,3 |
-| 2014 | 47.234 | 23.921 | 12.821,5 |
-| 2015 | 49.654 | 24.899 | 9.309,1 |
-| 2016 | 44.336 | 23.500 | 11.977,0 |
-| 2017 | 13.011 | 7.334 | 6.663,6 |
-| 2018 | 14.742 | 9.123 | 4.781,7 |
-| 2019 | 54.171 | 24.647 | 9.572,2 |
-| 2020 | 50.218 | 22.409 | 13.049,2 |
-| 2021 | 50.988 | 23.642 | 10.980,3 |
-| 2022 | 13.165 | 7.063 | 4.041,1 |
-| 2023 | 44.775 | 22.164 | 11.460,8 |
-| 2024 | 55.235 | 24.902 | 8.150,0 |
-| 2025 | 33.171 | 15.457 | 7.047,2 |
+| 2001 | 238 | 179 | 2,191.7 |
+| 2002 | 1,552 | 1,054 | 3,492.8 |
+| 2003 | 3,828 | 2,394 | 6,603.2 |
+| 2004 | 5,893 | 3,614 | 11,137.6 |
+| 2005 | 3,914 | 2,415 | 9,005.1 |
+| 2006 | 5,727 | 3,294 | 11,531.2 |
+| 2007 | 11,515 | 6,748 | 24,445.6 |
+| 2008 | 4,986 | 3,148 | 8,943.3 |
+| 2009 | 3,731 | 2,203 | 14,246.6 |
+| 2010 | 8,726 | 4,990 | 16,648.0 |
+| 2011 | 1,875 | 1,158 | 9,230.4 |
+| 2012 | 33,828 | 16,845 | 12,015.8 |
+| 2013 | 33,019 | 16,614 | 8,608.3 |
+| 2014 | 47,234 | 23,921 | 12,821.5 |
+| 2015 | 49,654 | 24,899 | 9,309.1 |
+| 2016 | 44,336 | 23,500 | 11,977.0 |
+| 2017 | 13,011 | 7,334 | 6,663.6 |
+| 2018 | 14,742 | 9,123 | 4,781.7 |
+| 2019 | 54,171 | 24,647 | 9,572.2 |
+| 2020 | 50,218 | 22,409 | 13,049.2 |
+| 2021 | 50,988 | 23,642 | 10,980.3 |
+| 2022 | 13,165 | 7,063 | 4,041.1 |
+| 2023 | 44,775 | 22,164 | 11,460.8 |
+| 2024 | 55,235 | 24,902 | 8,150.0 |
+| 2025 | 33,171 | 15,457 | 7,047.2 |
 
 ### Amazon
 
-| Năm | Điểm nóng thô | Đợt cháy sau lọc trùng | Đợt cháy tương đương VIIRS (đã chuẩn hóa) |
+| Year | Raw hotspots | Fire episodes after deduplication | VIIRS-equivalent fire episodes (harmonized) |
 | ---: | ---: | ---: | ---: |
-| 2001 | 3.364 | 1.800 | 8.586,9 |
-| 2002 | 15.280 | 7.573 | 19.453,0 |
-| 2003 | 8.040 | 4.034 | 7.562,0 |
-| 2004 | 9.116 | 4.513 | 8.686,1 |
-| 2005 | 13.804 | 6.955 | 13.116,0 |
-| 2006 | 5.932 | 3.084 | 6.843,5 |
-| 2007 | 13.033 | 6.369 | 9.349,8 |
-| 2008 | 9.049 | 4.541 | 7.938,1 |
-| 2009 | 1.907 | 1.065 | 3.134,8 |
-| 2010 | 16.304 | 7.635 | 11.219,9 |
-| 2011 | 1.928 | 1.062 | 1.872,9 |
-| 2012 | 33.484 | 9.351 | 5.281,6 |
-| 2013 | 8.494 | 2.678 | 2.466,4 |
-| 2014 | 36.598 | 9.791 | 5.817,2 |
-| 2015 | 22.285 | 7.010 | 4.698,4 |
-| 2016 | 21.664 | 6.217 | 4.735,7 |
-| 2017 | 15.401 | 4.974 | 3.955,8 |
-| 2018 | 12.106 | 3.121 | 1.514,0 |
-| 2019 | 38.751 | 8.764 | 4.299,6 |
-| 2020 | 46.112 | 10.446 | 3.945,8 |
-| 2021 | 69.450 | 13.537 | 5.144,6 |
-| 2022 | 119.492 | 23.196 | 12.166,0 |
-| 2023 | 45.718 | 9.686 | 4.206,4 |
-| 2024 | 112.405 | 19.542 | 4.942,4 |
-| 2025 | 20.029 | 3.780 | 1.124,1 |
+| 2001 | 3,364 | 1,800 | 8,586.9 |
+| 2002 | 15,280 | 7,573 | 19,453.0 |
+| 2003 | 8,040 | 4,034 | 7,562.0 |
+| 2004 | 9,116 | 4,513 | 8,686.1 |
+| 2005 | 13,804 | 6,955 | 13,116.0 |
+| 2006 | 5,932 | 3,084 | 6,843.5 |
+| 2007 | 13,033 | 6,369 | 9,349.8 |
+| 2008 | 9,049 | 4,541 | 7,938.1 |
+| 2009 | 1,907 | 1,065 | 3,134.8 |
+| 2010 | 16,304 | 7,635 | 11,219.9 |
+| 2011 | 1,928 | 1,062 | 1,872.9 |
+| 2012 | 33,484 | 9,351 | 5,281.6 |
+| 2013 | 8,494 | 2,678 | 2,466.4 |
+| 2014 | 36,598 | 9,791 | 5,817.2 |
+| 2015 | 22,285 | 7,010 | 4,698.4 |
+| 2016 | 21,664 | 6,217 | 4,735.7 |
+| 2017 | 15,401 | 4,974 | 3,955.8 |
+| 2018 | 12,106 | 3,121 | 1,514.0 |
+| 2019 | 38,751 | 8,764 | 4,299.6 |
+| 2020 | 46,112 | 10,446 | 3,945.8 |
+| 2021 | 69,450 | 13,537 | 5,144.6 |
+| 2022 | 119,492 | 23,196 | 12,166.0 |
+| 2023 | 45,718 | 9,686 | 4,206.4 |
+| 2024 | 112,405 | 19,542 | 4,942.4 |
+| 2025 | 20,029 | 3,780 | 1,124.1 |
 

@@ -203,7 +203,7 @@ class DocumentedClaimsConsistencyTest(unittest.TestCase):
                 doc,
                 "total FIRMS record count",
                 forms,
-                r"bản ghi|records|record count|điểm nóng|detections",
+                r"records|record count|detections",
             )
         for source in CLAIM_SOURCES:
             self.assertTrue(
@@ -235,7 +235,7 @@ class DocumentedClaimsConsistencyTest(unittest.TestCase):
                 doc,
                 "co-incident pair count N",
                 forms,
-                r"cặp|pairs|N\s*=",
+                r"pairs|N\s*=",
             )
 
     def test_kolmogorov_smirnov_distance_is_published(self) -> None:
@@ -267,8 +267,7 @@ class DocumentedClaimsConsistencyTest(unittest.TestCase):
             row = next(
                 line
                 for line in self.docs[doc].splitlines()
-                if ("Hệ số xác định" in line or "Coefficient of Determination" in line)
-                and "R^2" in line
+                if "Coefficient of Determination" in line and "R^2" in line
             )
             with self.subTest(doc=doc):
                 self.assertTrue(
@@ -408,7 +407,7 @@ class DocumentedClaimsConsistencyTest(unittest.TestCase):
                 doc,
                 "2024 multi-sensor step jump",
                 (vi(jump_2024, 1), en(jump_2024, 1)),
-                r"bước nhảy|step[- ]jump|artificial|ảo",
+                r"step[- ]jump|artificial",
             )
             self._assert_none_present(
                 doc,
@@ -434,7 +433,7 @@ class DocumentedClaimsConsistencyTest(unittest.TestCase):
                     doc,
                     "early-warning display threshold",
                     ("+2,2", "+2.2"),
-                    r"viền xanh|outline|ngưỡng hiển thị|display threshold",
+                    r"outline|display threshold",
                 )
 
     def test_sfai_thresholds_are_single_sourced_and_documented(self) -> None:
