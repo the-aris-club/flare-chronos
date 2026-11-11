@@ -10,7 +10,7 @@ Checks
      (.changeset/*.md) matches the fragment format (same, without hash).
   3. A change to a tracked document (a file submitted outside this repo)
      carries a fragment or a changelog update in the same change set.
-  4. The `Phiên bản` in the exported Markdown files equals the one inside
+  4. The version in the exported Markdown files equals the one inside
      their corresponding PDFs.
 
 Usage
@@ -43,17 +43,13 @@ VERSIONED_DOCS = [
     ("exports/REPORT.md", "exports/REPORT.pdf"),
 ]
 
-ACTIONS = "thay thế|thêm|sửa|xoá|cập nhật"
+ACTIONS = "added|fixed|removed|replaced|updated"
 ENTRY_RE = re.compile(
     rf"^(?:[0-9a-f]{{7,40}}: )?\d{{2}}/\d{{2}}/\d{{4}} — \S+ — ({ACTIONS}): .+$"
 )
 FRAGMENT_RE = re.compile(rf"^\d{{2}}/\d{{2}}/\d{{4}} — \S+ — ({ACTIONS}): .+$")
-MD_VERSION_RE = re.compile(
-    r"\*\*(?:Phiên bản|(?:Document )?Version):\*\*[^\n]*?(\d+\.\d+\.\d+)"
-)
-PDF_VERSION_RE = re.compile(
-    r"(?:Phiên bản|(?:Document )?Version)[^\n]{0,80}?(\d+\.\d+\.\d+)"
-)
+MD_VERSION_RE = re.compile(r"\*\*(?:Document )?Version:\*\*[^\n]*?(\d+\.\d+\.\d+)")
+PDF_VERSION_RE = re.compile(r"(?:Document )?Version[^\n]{0,80}?(\d+\.\d+\.\d+)")
 
 failures: list[str] = []
 warnings: list[str] = []
@@ -147,7 +143,7 @@ def check_version_match(require_tools: bool) -> None:
             continue
         md_match = MD_VERSION_RE.search(md_file.read_text("utf8"))
         if not md_match:
-            failures.append(f"{md_name} has no '**Phiên bản:**' line")
+            failures.append(f"{md_name} has no '**Document Version:**' line")
             continue
         pdftotext_bin = shutil.which("pdftotext")
         if pdftotext_bin is None:
@@ -158,11 +154,11 @@ def check_version_match(require_tools: bool) -> None:
             text=True,
             capture_output=True,
         ).stdout
-        # pdftotext may break a line mid-word (e.g. "Phiên\nbản") depending on
+        # pdftotext may break a line mid-word (e.g. "Document\nVersion") depending on
         # the poppler/weasyprint versions, so match on whitespace-normalized text.
         pdf_match = PDF_VERSION_RE.search(re.sub(r"\s+", " ", pdf_text))
         if not pdf_match:
-            failures.append(f"{pdf_name}: no 'Phiên bản' version found in the text")
+            failures.append(f"{pdf_name}: no document version found in the text")
             continue
         if md_match.group(1) != pdf_match.group(1):
             failures.append(
