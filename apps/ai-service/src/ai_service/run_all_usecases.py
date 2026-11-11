@@ -299,17 +299,17 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(
-        description="Chạy toàn bộ 15 Use Cases của Dual-System Harness."
+        description="Run all 15 use cases of the Dual-System Harness."
     )
     parser.add_argument(
         "--live",
         action="store_true",
-        help="Gọi mô hình thật (tốn credit). Mặc định chạy ngoại tuyến.",
+        help="Call the real model (uses credit). Runs offline by default.",
     )
     parser.add_argument(
         "--sign-off",
         action="store_true",
-        help="Bật cổng phê duyệt của con người (run sẽ dừng chờ).",
+        help="Enable the human sign-off gate (the run pauses and waits).",
     )
     args = parser.parse_args()
     results = run_all_benchmarks(

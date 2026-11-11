@@ -106,10 +106,9 @@ SUPERSEDED_DOCUMENT_CLAIMS: dict[str, tuple[str, ...]] = {
     "superseded co-incident pairs (11,553)": ("11.553", "11,553"),
     "typo step-jump (+1,351.8%)": ("+1.351,8%", "+1,351.8%"),
     "stale wireframe step-jump (+1324%)": ("+1324%", "+1,324%", "+1.324%"),
-    "wrong Mekong 2024 reduction (-5.8%)": ("giảm 5,8%", "5.8% below 2005"),
+    "wrong Mekong 2024 reduction (-5.8%)": ("5.8% below 2005",),
     "supersededUseCase ratio (20/15)": ("20/15 Use Cases", "20/15 use cases"),
     "superseded 20-use-case count": (
-        "hai mươi phân tích",
         "twenty analyses",
         "20 Use Cases",
         "20 Use Case",
@@ -118,9 +117,6 @@ SUPERSEDED_DOCUMENT_CLAIMS: dict[str, tuple[str, ...]] = {
     ),
     "superseded 23/24 tool count": (
         "23 tool",
-        "23 công cụ",
-        "24 hàm `@tool`",
-        "24 toán tử",
         "24 deterministic",
     ),
     "superseded stdlib port 8765": ("127.0.0.1:8765", "localhost:8765"),

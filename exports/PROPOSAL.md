@@ -42,7 +42,7 @@ The deliverables are the harmonization engine, a 26-year burning activity calend
 | Space Agency Data & Resources Used | NASA LANCE FIRMS archive, 1,609,182 detections across 134 cached CSV slices: MODIS Collection 6.1 (MCD14ML, MCD14DL), VIIRS Collection 2 (VNP14IMGML, VNP14IMGTDL_NRT, VJ114IMGML, VJ114IMGTDL_NRT, VJ214IMGTDL_NRT). NASA LANCE FIRMS REST API. ERA5 cloud climatology. |
 | Third-Party Materials & Open-Source Licenses | Scientific literature: Giglio et al. (2016), Schroeder et al. (2014), Wolfe et al. (2013), Wooster et al. (2005), Freeborn et al. (2014), Sofiev and Kouznetsov (2026). Open-source libraries: Python 3.11+, NumPy, SciPy, H3, LangGraph, LangChain Core, FastAPI, Pydantic, WeasyPrint, Next.js 16, React 19, Three.js, d3-geo, Tailwind CSS. Repository under the MIT License. |
 | Use of Artificial Intelligence Disclosure | Runtime AI uses a dual-system LangGraph harness over 18 registered deterministic tools. The live benchmark uses the configured hosted chat model (`beam`). The language model never computes a physical or statistical number. Every value is injected from the VerifiedFactsLedger and audited by the NumericGroundingVerifier. Operational alerts pause at a human sign-off gate. AI coding assistants supported engineering, testing and documentation review; all equations, data pulls and 192 automated tests are verified in the repository. |
-| Project Code, Demo and Media Index | Repository: https://github.com/the-aris-club/flare-chronos. Workbench: http://127.0.0.1:5900. Analysis service: http://127.0.0.1:5901. |
+| Project Code, Demo and Media Index | Repository: https://github.com/the-aris-club/flare-chronos. Workbench: https://flare-chronos.resonance.io.vn/. |
 
 ---
 
