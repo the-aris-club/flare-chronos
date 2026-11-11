@@ -1,6 +1,6 @@
 [project]
 name = "flare-chronos-core"
-version = "2.0.1"
+version = "2.0.2"
 description = "Deep scientific module for cross-sensor MODIS and VIIRS active fire physical harmonization"
 authors = [{name = "Xiro The Dev", email = "lethanhtrung.trungle@gmail.com"}]
 requires-python = ">=3.11"
