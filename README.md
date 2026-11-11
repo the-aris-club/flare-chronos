@@ -1,5 +1,7 @@
 <p align="center">
-  <img src="docs/figures/flare-chronos-logo.png" alt="Flare-Chronos Official Logo — 26-Year Harmonized Burning Activity Calendar" width="320" />
+  <a href="https://flare-chronos.resonance.io.vn/">
+    <img src="docs/figures/flare-chronos-logo.png" alt="Flare-Chronos Official Logo — 26-Year Harmonized Burning Activity Calendar" width="320" />
+  </a>
 </p>
 
 <h1 align="center">Flare-Chronos</h1>
