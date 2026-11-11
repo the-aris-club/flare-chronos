@@ -84,8 +84,8 @@ All five scientific benchmark charts below are deterministically rendered by `uv
 
 ## Name & Acronym Meaning
 
-- **FLARE** — evokes the image of a flame (ngọn lửa): the fire signal the system detects, harmonizes, and tracks.
-- **CHRONOS** — emphasizes the core deliverable, the *Burning Activity Calendar* (Lịch hoạt động cháy), spanning more than 25 years of active-fire history (2000–2026+).
+- **FLARE** — evokes the image of a flame: the fire signal the system detects, harmonizes, and tracks.
+- **CHRONOS** — emphasizes the core deliverable, the *Burning Activity Calendar*, spanning more than 25 years of active-fire history (2000–2026+).
 - The system connects and harmonizes data from the **NASA FIRMS** (Fire Information for Resource Management System) archive and near-real-time streams into one sensor-invariant, physics-calibrated record.
 
 See [`docs/00_Project_Name_and_Acronym.md`](docs/00_Project_Name_and_Acronym.md) and [`GLOSSARY.md`](GLOSSARY.md).

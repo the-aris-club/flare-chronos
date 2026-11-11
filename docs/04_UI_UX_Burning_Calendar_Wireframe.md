@@ -2,63 +2,63 @@
   <img src="figures/flare-chronos-logo.png" alt="Flare-Chronos Official Logo" width="220" />
 </p>
 
-# 04. Đặc Tả Giao Diện Người Dùng & Trực Quan Hóa Lịch Hoạt Động Cháy (UI/UX & Burning Activity Calendar Wireframe Specification)
+# 04. UI/UX & Burning Activity Calendar Wireframe Specification
 
-**Dự án:** **Flare-Chronos** — *26-Year Cross-Sensor Harmonized Active Fire Intelligence & Phenology Calendar*  
-**Cuộc thi:** 2026 NASA Space Apps Challenge — *Harmonization of MODIS and VIIRS Hot Spots*  
-**Tài liệu liên kết:** [GLOSSARY.md](../GLOSSARY.md) | [02_Cross_Sensor_Harmonization_Spec.md](02_Cross_Sensor_Harmonization_Spec.md) | [03_System_Architecture_and_Data_Pipeline.md](03_System_Architecture_and_Data_Pipeline.md)
-
----
-
-## 1. Mục Tiêu Trải Nghiệm Người Dùng (UX Objectives)
-
-Các nhà quản lý cháy rừng, lực lượng ứng phó khẩn cấp và nhà nghiên cứu sinh thái thường đứng trước hai rào cản trực quan hóa lớn khi dùng các bản đồ điểm nóng truyền thống:
-1. **Ảo giác điểm vô hướng (*Point-Buffer Illusion*)**: Các cổng bản đồ thông thường vẽ mọi điểm nóng bằng một chấm tròn kích thước cố định, che khuất thực tế vật lý rằng một điểm ảnh MODIS ở rìa dải quét ($\theta = 55^\circ$) có diện tích elip mặt đất lên tới **$9.69\text{ km}^2$** ($4.83 \times 2.01\text{ km}$), gấp **$\sim 70\text{ lần}$** diện tích một điểm ảnh VIIRS ở tâm dải quét ($0.138\text{ km}^2$).
-2. **Ảo giác bùng phát cháy do tăng số lượng vệ tinh (*Constellation Step-Jump Illusion*)**: Khi xem biểu đồ chuỗi thời gian thô từ năm 2000 đến 2026, việc đưa thêm Suomi-NPP vào năm 2012, NOAA-20 vào năm 2018/2020 và NOAA-21 vào năm 2024 làm số lượng điểm cháy nhảy vọt gấp $4\text{–}14\text{ lần}$, khiến người dùng không thể phân biệt đâu là một mùa cháy cực đoan thật sự (như hạn hán El Niño 2016 hay 2024) và đâu là hiệu ứng tăng mật độ cảm biến.
-
-Giao diện **Flare-Chronos Workbench** giải quyết triệt để hai ảo giác này thông qua bố cục **4 vùng tương tác đồng bộ (Synchronized Four-Pane Analytical Workspace)**.
+**Project:** **Flare-Chronos** — *26-Year Cross-Sensor Harmonized Active Fire Intelligence & Phenology Calendar*  
+**Challenge:** 2026 NASA Space Apps Challenge — *Harmonization of MODIS and VIIRS Hot Spots*  
+**Related documents:** [GLOSSARY.md](../GLOSSARY.md) | [02_Cross_Sensor_Harmonization_Spec.md](02_Cross_Sensor_Harmonization_Spec.md) | [03_System_Architecture_and_Data_Pipeline.md](03_System_Architecture_and_Data_Pipeline.md)
 
 ---
 
-## 2. Giao Diện Thực Thi & Bố Cục Wireframe Tổng Thể (Implemented Workbench & Full-Screen Wireframe)
+## 1. UX Objectives
 
-### 2.1. Ảnh Chụp Giao Diện Thực Tế (`apps/workbench`) & Biểu Đồ Chuẩn Hóa Thực Nghiệm
+Wildfire managers, emergency responders and ecologists face two major visualization barriers when they use conventional hotspot maps:
+1. **Point-Buffer Illusion**: Conventional map portals draw every hotspot as a fixed-size circular dot. This hides the physical fact that a MODIS pixel at the edge of the scan swath ($\theta = 55^\circ$) has a ground elliptical footprint of up to **$9.69\text{ km}^2$** ($4.83 \times 2.01\text{ km}$), which is **$\sim 70\text{ times}$** the area of a VIIRS pixel at the swath center ($0.138\text{ km}^2$).
+2. **Constellation Step-Jump Illusion**: In a raw time series from 2000 to 2026, adding Suomi-NPP in 2012, NOAA-20 in 2018/2020 and NOAA-21 in 2024 makes the fire count jump by $4\text{–}14\text{ times}$. The user cannot tell a truly extreme fire season (such as the 2016 or 2024 El Niño drought) from a sensor-density effect.
+
+The **Flare-Chronos Workbench** resolves both illusions through a **Synchronized Four-Pane Analytical Workspace**.
+
+---
+
+## 2. Implemented Workbench & Full-Screen Wireframe
+
+### 2.1. Live Interface Screenshot (`apps/workbench`) & Empirical Harmonization Charts
 
 ![Flare-Chronos Interactive 3D Region Globe & Workbench Preview](../apps/workbench/public/og.png)
 
-| Ma Trận Lịch Hoạt Động Cháy 26 Năm (`26 Năm × 73 Pentads`) | Triệt Tiêu Bước Nhảy Giả Tạo Đa Cảm Biến (`2001–2026`) |
+| 26-Year Burning Activity Calendar Matrix (`26 Years × 73 Pentads`) | Elimination of the Artificial Multi-Sensor Step Jump (`2001–2026`) |
 | :---: | :---: |
 | ![Figure 5 - Harmonized Burning Activity Calendar](figures/fig5_harmonized_burning_calendar.png) | ![Figure 4 - Regime Shift Elimination](figures/fig4_regime_shift_elimination.png) |
 
-### 2.2. Sơ Đồ Bố Cục 4 Khung Nhìn Đồng Bộ (Four-Pane Analytical Wireframe)
+### 2.2. Four-Pane Analytical Wireframe
 
 ```text
 +----------------------------------------------------------------------------------------------------------------------+
-| [🔥 FLARE-CHRONOS]  AOI: [ Tiểu vùng sông Mekong & Việt Nam v ]   Giai đoạn: [2000 - 2026]   Lưới: [H3 Res 7 (5km)] |
-| Bộ lọc Vật lý: [x] Chuẩn hóa SZA < 85°  [x] Lọc nhiễu SAA Đêm  [x] Tách Nguồn Nhiệt Tĩnh  [x] Khử Trùng Lặp (60m)   |
+| [🔥 FLARE-CHRONOS]  AOI: [ Mekong Subregion & Vietnam v ]   Period: [2000 - 2026]   Grid: [H3 Res 7 (5km)]            |
+| Physical Filters: [x] SZA < 85° Normalization  [x] Night SAA Noise Filter  [x] Static Heat Source Split  [x] Dedup (60m) |
 +-------------------------------------------------------+--------------------------------------------------------------+
-|                                                       |  [BẢNG ĐIỀU KHIỂN ĐỐI CHỨNG TRƯỚC / SAU ĐỒNG BỘ HÓA]         |
-|   [KHUNG BẢN ĐỒ KHÔNG GIAN ĐA TẦNG - DECK.GL/MAPLIBRE]|  +----------------+----------------+----------------+        |
-|                                                       |  | Raw Detections | Fire Episodes  | SFAI Z-Score   |        |
-|      _.-""""-._      (Elip MODIS Rìa Quét: 4.8x2.0km) |  |  44,336 (Thô)  |  23,500 (Chuẩn)|  +0.02 sigma   |        |
-|    .'          '.     o o (Cụm VIIRS 375m bên trong)  |  | (+1.110,7% ảo) |  (Khử trùng lặp|  [BASELINE]    |        |
-|   /   o  o  o    \                                    |  +----------------+----------------+----------------+        |
-|  |       o        |   / \ / \ / \ (Lưới Lục Giác     |                                                              |
-|   \              /   | H3| H3| H3|  Đẳng Diện Tích)   |  [ĐỒNG HỒ MÙA VỤ CHÁY - POLAR PHENOLOGY CLOCK (365 NGÀY)]    |
+|                                                       |  [BEFORE / AFTER HARMONIZATION CONTROL PANEL]                |
+|   [MULTI-LAYER SPATIAL MAP VIEW - DECK.GL/MAPLIBRE]   |  +-------------------+----------------+----------------+        |
+|                                                       |  | Raw Detections    | Fire Episodes  | SFAI Z-Score   |        |
+|      _.-""""-._      (MODIS Edge Ellipse: 4.8x2.0km)  |  |  44,336 (Raw)     |  23,500 (Harm.)|  +0.02 sigma   |        |
+|    .'          '.     o o (VIIRS 375m Cluster Inside) |  | (+1,110.7% artif.)| (Deduplicated) |  [BASELINE]    |        |
+|   /   o  o  o    \                                    |  +-------------------+----------------+----------------+        |
+|  |       o        |   / \ / \ / \ (Hexagonal Grid     |                                                              |
+|   \              /   | H3| H3| H3|  Equal-Area)       |  [POLAR PHENOLOGY CLOCK (365 DAYS)]                          |
 |    '._        _.'     \ / \ / \ /                     |              Pentad 1 (01/01)                                |
 |       `""""""`                                        |                 . - ~ ~ - .                                  |
-|                                                       |             . '    _..._    ' .   * Cao điểm mùa cháy:       |
-|   Chú giải Lớp Bản Đồ:                                |           /      .'     '.      \   Pentad 11 - 22           |
-|   [x] Elip Footprint Thực (Scan x Track, góc alpha)   |          |      |  2016   |      |  (20/02 - 20/04)          |
-|   [x] Lưới H3 Res 7/8 (Màu theo HRF MW/km^2)          |           \      '. ___ .'      / * Cảnh báo sớm ngoài mùa:  |
-|   [x] Tâm Sự Kiện Cháy Độc Lập (Fire Episode)         |             .     ' - - '     .     Pentad 8 (Giữa tháng 2)  |
-|   [x] Nguồn Nhiệt Tĩnh Đã Tách (Nhà máy/Khí đồng hành)|               ' - . _ _ . - '                                |
+|                                                       |             . '    _..._    ' .   * Peak fire season:        |
+|   Map Layer Legend:                                   |           /      .'     '.      \   Pentad 11 - 22           |
+|   [x] True Footprint Ellipse (Scan x Track, alpha)    |          |      |  2016   |      |  (20/02 - 20/04)          |
+|   [x] H3 Res 7/8 Grid (Color by HRF MW/km^2)          |           \      '. ___ .'      / * Out-of-season early warning: |
+|   [x] Independent Fire Episode Center                 |             .     ' - - '     .     Pentad 8 (Mid-February)  |
+|   [x] Detached Static Heat Source (Plants/Assoc. Gas) |               ' - . _ _ . - '                                |
 |                                                       |              Pentad 37 (02/07)                               |
 +-------------------------------------------------------+--------------------------------------------------------------+
-| [MA TRẬN LỊCH HOẠT ĐỘNG CHÁY THỐNG NHẤT 26 NĂM - HARMONIZED BURNING ACTIVITY CALENDAR (26 YEARS x 73 PENTADS)]       |
-| Chỉ số hiển thị: (•) HFD (Sự kiện/100km2/ngày)   ( ) HRF (MW/km2)   ( ) SFAI Anomaly Z-Score   [x] Viền xanh Severe Anomaly  |
+| [26-YEAR HARMONIZED BURNING ACTIVITY CALENDAR MATRIX (26 YEARS x 73 PENTADS)]                                        |
+| Metrics shown: (•) HFD (Events/100km2/day)   ( ) HRF (MW/km2)   ( ) SFAI Anomaly Z-Score   [x] Cyan Severe Anomaly   |
 |                                                                                                                      |
-| Năm   | Jan (P01-06) | Feb (P07-12) | Mar (P13-18) | Apr (P19-24) | May-Jul (P25-42) | Aug-Oct (P43-60) | Nov-Dec    |
+| Year  | Jan (P01-06) | Feb (P07-12) | Mar (P13-18) | Apr (P19-24) | May-Jul (P25-42) | Aug-Oct (P43-60) | Nov-Dec    |
 | ------+--------------+--------------+--------------+--------------+------------------+------------------+----------- |
 | 2001  | ░░░░░░░░░░░░ | ░░▒▒▓▓▓▓▒▒░░ | ▓▓████████▓▓ | ▒▒▓▓▒▒░░░░░░ | ░░░░░░░░░░░░░░░░ | ░░░░░░░░░░░░░░░░ | ░░░░░░░░░░ |
 | 2005  | ░░░░░░░░░░░░ | ░░▒▒▓▓▓▓▓▓░░ | ▓▓████████▓▓ | ▒▒▓▓▒▒░░░░░░ | ░░░░░░░░░░░░░░░░ | ░░░░░░░░░░░░░░░░ | ░░░░░░░░░░ |
@@ -69,71 +69,71 @@ Giao diện **Flare-Chronos Workbench** giải quyết triệt để hai ảo gi
 | 2024* | ░░░░░░░░░░░░ | ▒▒▓▓██████▓▓ | ████████████ | ▓▓████▒▒░░░░ | ░░░░░░░░░░░░░░░░ | ░░░░░░░░░░░░░░░░ | ░░░░░░░░░░ |
 | 2026  | ░░░░░░░░░░░░ | ░░▒▒▓▓██████ | ▓▓████████▓▓ | ▒▒▓▓▒▒░░░░░░ | ░░░░░░░░░░░░░░░░ | ░░░░░░░░░░░░░░░░ | [NRT LIVE] |
 +----------------------------------------------------------------------------------------------------------------------+
-| [ĐỐI CHỨNG CHUỖI THỜI GIAN 2000-2026: RAW UNHARMONIZED SUM (Đường Đỏ Đất - Nhảy bậc ảo) vs. FLARE-CHRONOS (Xanh Lá)] |
+| [2000-2026 TIME-SERIES COMPARISON: RAW UNHARMONIZED SUM (Brick-Red Line - Artificial Step) vs. FLARE-CHRONOS (Leaf Green)] |
 |   Index ^                                                                           .--- Raw Unharmonized (+1311.2%) |
 |   1200  |                                                                   .--------'                               |
 |    400  |                                         .------------------------'                                         |
 |    100  |================*================*=======*========*========*========*========*=== Flare-Chronos Physical    |
-|         +--------+-------+--------+-------+-------+--------+--------+--------+--------+---> Năm                      |
+|         +--------+-------+--------+-------+-------+--------+--------+--------+--------+---> Year                     |
 |        2000    2005    2010     2012    2016    2020     2022     2024     2025     2026                             |
 +----------------------------------------------------------------------------------------------------------------------+
 ```
 
 ---
 
-## 3. Đặc Tả Chi Tiết 4 Thành Phần Giao Diện Tương Tác (`apps/workbench`)
+## 3. Detailed Specification of the 4 Interactive Interface Components (`apps/workbench`)
 
-### 3.1. Bản Đồ Không Gian Đa Độ Phân Giải (`Three.js 3D Globe + d3-geo Equal-Area SVG + H3 Hex Map`)
-* **Lớp Đa giác Elip Dải quét Thực tế (`Instantaneous Footprint Layer`)**:
-  - Thay vì vẽ điểm tròn vô hướng, mỗi `ThermalDetection` được kết xuất thành một hình elip định hướng với trục lớn $\Delta S(\theta)$, trục nhỏ $\Delta T(\theta)$ và xoay theo góc phương vị quỹ đạo $\alpha_{\text{track}}(\phi, i)$.
-  - Người dùng quan sát trực tiếp hiện tượng một elip MODIS ở rìa dải quét ($\Delta S = 4.83\text{ km}, \Delta T = 2.01\text{ km}$) bao trùm lên $6\text{–}12$ điểm nóng VIIRS `375 m` bên trong cùng một đám cháy rừng tại cùng thời điểm bay qua `13:30 MLT`.
-* **Lớp Lưới Lục Giác Đẳng Diện Tích Uber H3 (`Dual-Resolution H3 Layer`)**:
-  - Ở mức thu phóng vùng (Zoom `5–9`), hiển thị lưới **Uber H3 Resolution 7** ($\bar{A}_7 = 5.161\text{ km}^2$).
-  - Khi phóng to vào hiện trường đám cháy (Zoom `10–15`), tự động chuyển mượt sang **Uber H3 Resolution 8** ($\bar{A}_8 = 0.737\text{ km}^2$) với tỷ trọng năng lượng bức xạ $w_{p,h}$ được phân bổ chính xác từ các elip giao cắt.
-* **Lớp Nguồn Nhiệt Tĩnh & Nhiễu Đã Tách (`Filtered Noise & Static Source Overlay`)**:
-  - Các nguồn nhiệt công nghiệp (nhà máy xi măng, thép, trạm đốt khí đồng hành dầu khí, núi lửa) và các điểm nhiễu bức xạ hạt ban đêm trong vùng **Dị thường Nam Đại Tây Dương (SAA)** được hiển thị bằng biểu tượng riêng biệt (màu tím/xám) và tự động loại khỏi phép tính lịch cháy sinh khối.
+### 3.1. Multi-Resolution Spatial Map (`Three.js 3D Globe + d3-geo Equal-Area SVG + H3 Hex Map`)
+* **Instantaneous Footprint Layer**:
+  - Instead of drawing scalar points, each `ThermalDetection` is rendered as an oriented ellipse with major axis $\Delta S(\theta)$, minor axis $\Delta T(\theta)$, rotated by the orbital track azimuth $\alpha_{\text{track}}(\phi, i)$.
+  - Users observe directly how one MODIS ellipse at the swath edge ($\Delta S = 4.83\text{ km}, \Delta T = 2.01\text{ km}$) covers $6\text{–}12$ VIIRS hotspots at `375 m` inside the same forest fire at the same overpass time `13:30 MLT`.
+* **Dual-Resolution H3 Layer**:
+  - At regional zoom (`5–9`), the map shows the **Uber H3 Resolution 7** grid ($\bar{A}_7 = 5.161\text{ km}^2$).
+  - When zooming into the fire scene (`10–15`), the map transitions smoothly to **Uber H3 Resolution 8** ($\bar{A}_8 = 0.737\text{ km}^2$), with radiative energy weight $w_{p,h}$ allocated exactly from the intersecting ellipses.
+* **Filtered Noise & Static Source Overlay**:
+  - Industrial heat sources (cement plants, steel plants, oil and gas flaring stations, volcanoes) and nighttime particle-radiation noise points in the **South Atlantic Anomaly (SAA)** are drawn with distinct icons (purple/gray) and are removed automatically from the biomass burning calendar computation.
 
-### 3.2. Ma Trận Lịch Hoạt Động Cháy 26 Năm (`Harmonized Burning Activity Calendar Matrix`)
-* **Cấu trúc Trục**:
-  - **Trục Tung (Rows)**: $26\text{ năm}$ liên tục từ `2001` đến `2026` (kèm dòng trung bình khí hậu 25 năm ở trên cùng).
-  - **Trục Hoành (Columns)**: $73\text{ Pentads}$ (mỗi Pentad đúng $5\text{ ngày}$ chuẩn khí hậu học, từ Pentad 1: `01/01–05/01` đến Pentad 73: `27/12–31/12`), loại bỏ hoàn toàn sai lệch độ dài tháng (28 vs. 31 ngày).
-* **3 Chế độ Chỉ số Chuyển đổi Tức thời**:
-  1. **$\text{HFD}$ (*Harmonized Fire Density*)**: Số sự kiện cháy chuẩn hóa trên mỗi $100\text{ km}^2$/ngày.
-  2. **$\text{HRF}$ (*Harmonized Radiative Flux*)**: Mật độ công suất bức xạ lửa chuẩn hóa ($\text{MW}/\text{km}^2$).
-  3. **$\text{SFAI}$ (*Standardized Fire Anomaly Index*)**: Chỉ số Z-score phi tham số đo độ lệch của Pentad hiện tại so với đường cơ sở 25 năm của chính Pentad đó:
+### 3.2. 26-Year Harmonized Burning Activity Calendar Matrix
+* **Axis Structure**:
+  - **Rows**: $26\text{ years}$ in a continuous series from `2001` to `2026` (with a 25-year climatological mean row at the top).
+  - **Columns**: $73\text{ Pentads}$ (each pentad exactly $5\text{ days}$ by climatological convention, from Pentad 1: `01/01–05/01` to Pentad 73: `27/12–31/12`), which removes the month-length bias (28 vs. 31 days).
+* **3 Instant-Switch Index Modes**:
+  1. **$\text{HFD}$ (*Harmonized Fire Density*)**: normalized fire events per $100\text{ km}^2$/day.
+  2. **$\text{HRF}$ (*Harmonized Radiative Flux*)**: normalized fire radiative power density ($\text{MW}/\text{km}^2$).
+  3. **$\text{SFAI}$ (*Standardized Fire Anomaly Index*)**: a non-parametric Z-score that measures the deviation of the current pentad from its own 25-year baseline:
      $$\text{SFAI}_{y,p} = \frac{\text{HRF}_{y,p} - \text{Median}_y(\text{HRF}_{\cdot, p})}{\sigma_{\text{robust}}(\text{HRF}_{\cdot, p})}$$
-* **Nhận diện Tự động "Giai đoạn Cao điểm" & "Dị thường Ngoài mùa vụ"**:
-  - Các ô có $\text{SFAI}_{y,p} \ge +2.2\sigma$ được đóng khung viền xanh lơ phát sáng (*Severe Anomaly Outline*), giúp chỉ huy cứu hỏa nhận ra ngay các đợt cháy rừng bùng phát sớm hơn quy luật mùa vụ (như đầu tháng 2 năm 2016 tại Tây Nguyên và Tiểu vùng Mekong). Ngưỡng này là **ngưỡng hiển thị** (khớp với chú thích của Hình 5), thấp hơn ngưỡng **báo động khủng hoảng** là $\text{SFAI} \ge +2.5\sigma$ (xem `docs/01` §6.1) — tức lịch cháy làm nổi bật dị thường nghiêm trọng *trước khi* báo động được kích hoạt.
+* **Automatic Detection of "Peak Season" and "Out-of-Season Anomaly"**:
+  - Cells with $\text{SFAI}_{y,p} \ge +2.2\sigma$ receive a glowing cyan outline (*Severe Anomaly Outline*), so fire commanders immediately see fire outbreaks that start earlier than the seasonal pattern (such as early February 2016 in the Central Highlands and the Mekong subregion). This threshold is a **display threshold** (consistent with the Figure 5 caption) and is lower than the **crisis alert** threshold of $\text{SFAI} \ge +2.5\sigma$ (see `docs/01` §6.1) — that is, the calendar highlights severe anomalies *before* the alert is triggered.
 
-### 3.3. Đồng Hồ Mùa Vụ Cháy Cực (`Polar Phenology Clock`)
-* Biểu diễn chu kỳ $365\text{ ngày}$ ($73\text{ Pentads}$) trên hệ tọa độ cực $\psi_p = \frac{2\pi(p - 0.5)}{73}$:
-  - Dải băng màu xám nhạt thể hiện khoảng tứ phân vị khí hậu 25 năm ($\text{IQR}: P_{25}\text{–}P_{75}$).
-  - Đường nét đứt màu vàng cam thể hiện năm El Niño lịch sử (`2010` hoặc `2016`).
-  - Đường liền nét màu xanh ngọc thể hiện diễn biến năm hiện tại (`2026`), cho phép so sánh trực quan độ lệch pha mùa cháy (*Phenological Phase Shift* — mùa cháy đến sớm hay kết thúc muộn bao nhiêu Pentad).
+### 3.3. Polar Phenology Clock
+* Represents the annual cycle of $365\text{ days}$ ($73\text{ Pentads}$) on the polar coordinate system $\psi_p = \frac{2\pi(p - 0.5)}{73}$:
+  - The light gray band shows the 25-year climatological interquartile range ($\text{IQR}: P_{25}\text{–}P_{75}$).
+  - The orange dashed line shows a historical El Niño year (`2010` or `2016`).
+  - The solid teal line shows the current year (`2026`), which allows a visual comparison of the phenological phase shift (*Phenological Phase Shift* — how many pentads early the fire season starts or how late it ends).
 
-### 3.4. Thanh Đối Chứng Khử Bước Nhảy Giả Tạo (`Before/After Harmonization Comparator`)
-* Hiển thị song song trên cùng một khung biểu đồ:
-  - **Đường Đỏ Cam (Raw Unharmonized Sum)**: Tổng điểm nóng thô khi cộng gộp MODIS + S-NPP + NOAA-20 + NOAA-21 (bị nhảy bậc giả tạo năm 2012, 2020, 2024).
-  - **Đường Xanh Ngọc (Flare-Chronos Harmonized Series)**: Đường xu thế vật lý sau khi qua bộ hiệu chuẩn hình học H3, toán tử quan sát góc quét, khử trùng lặp quỹ đạo 60 phút và chuẩn hóa nỗ lực quan sát $\Omega(y, \phi)$.
+### 3.4. Before/After Harmonization Comparator
+* Shows side by side in one chart frame:
+  - **Orange-Red Line (Raw Unharmonized Sum)**: the raw hotspot total when MODIS + S-NPP + NOAA-20 + NOAA-21 are summed (with artificial step jumps in 2012, 2020 and 2024).
+  - **Teal Line (Flare-Chronos Harmonized Series)**: the physical trend after the H3 geometric calibrator, the scan-angle observation operator, 60-minute overpass deduplication and observation effort normalization $\Omega(y, \phi)$.
 
-### 3.5. Bảng Báo Cáo Có Căn Cứ & Cổng Phê Duyệt (`Grounded Briefing & Human Sign-off Panel`)
-* Bảng báo cáo là **thành phần thứ năm**, nối trực tiếp với luồng sự kiện của tầng nhận thức (`GET /api/v1/analysis/stream`). Bảng có **ba trạng thái**, không phải một dòng thời gian đã hoàn tất:
-  - **Trạng thái đang chạy (`Run`)**: dòng tiến trình hiển thị từng sự kiện theo thứ tự — *phân loại* (vùng + mức khẩn cấp kèm **xác suất hiệu chuẩn**) → *gọi tool* → *suy luận* → *kiểm chứng* → *phê duyệt* → *báo cáo*. Mỗi mục **mở rộng được**: mục tool hiện tham số và đại lượng trả về; mục suy luận hiện toàn văn; mục kiểm chứng mở **Bảng Kiểm Chứng**. Người dùng thấy báo cáo **đang được kiểm chứng** chứ không phải bản văn bịa sẵn.
-  - **Trạng thái chờ quyết định (`Waiting`)**: dòng thời gian **dừng** tại mục *Phê duyệt — Đang chờ*, tuyệt đối không hiện mục *Phê duyệt — Done* khi chưa có quyết định. **Thẻ Quyết Định** nằm phía trên bản nháp báo cáo, gồm: câu hỏi uỷ quyền (`Authorize the operational action proposed by UC-S1.4?`), **Sign-off Principal** đang đăng nhập kèm vai trò, ô **lý do bắt buộc**, và hai nút **Duyệt / Từ chối**. Ngay trên hai nút là dải **Căn Cứ Quyết Định** nêu rõ reviewer đang kiểm tra gì: hành động được đề xuất, vùng và khoảng thời gian, số con số đã xác thực N/N, citation chưa phân giải (phải bằng 0), số chưa xác thực (phải bằng 0), số lần tự sửa, synthesis mode, nguồn độ tin cậy của classifier (calibrated hay self-reported) và cấp suy giảm. Lý do từ chối có **lý do có cấu trúc** (dữ liệu NRT cũ, cảnh báo trùng, bằng chứng xung đột, hành động ngoài thẩm quyền, dịch vụ suy giảm) kèm văn bản tự do; lý do được ghi vào audit record. Bản nháp báo cáo — đúng văn bản sẽ được phát hành — hiển thị read-only ngay dưới thẻ, kèm Bảng Kiểm Chứng một click, để reviewer **duyệt đúng nội dung**, không duyệt một bản tóm tắt.
-  - **Trạng thái kết quả (`Result`)**: sau quyết định (hoặc với run không cần phê duyệt), dòng thời gian thu gọn thành **Tóm Tắt Kết Quả** với nút chính **Xem báo cáo đầy đủ**. Nút mở **dialog toàn màn hình** (hoặc sheet bên phải trên desktop) chứa:
-    - toàn văn briefing, audience switch (**lực lượng kiểm lâm / lãnh đạo lâm nghiệp / nhà khoa học khí hậu**) và header (stakeholder tier, cognitive path, model System 1 / System 2, synthesis mode);
-    - **Bảng Kiểm Chứng**: mỗi con số một dòng — giá trị, đơn vị, tool nguồn, trường nguồn, trạng thái (`đã xác thực` / `đang sửa lại` / `không có nguồn`) và kết quả kiểm tra. Mỗi dòng mở **Citation Detail** gồm: câu chứa con số, giá trị hiển thị, fact key, tool nguồn, giá trị thô tool trả về, đơn vị, provenance tag và kết luận của verifier;
-    - **Bản ghi Sign-off Decision**: quyết định, principal, thời điểm UTC, lý do và trạng thái phát hành;
-    - **event log** của run và **audit id**.
-  - **Hiệu quả của quyết định**: **Duyệt** ⇒ báo cáo được phát hành, đóng dấu quyết định (`Published`). **Từ chối** ⇒ **không có báo cáo nào được phát hành** (`Withheld`), không hiển thị văn bản briefing, nhưng bản ghi quyết định vẫn còn và nêu rõ "quyết định đã được ghi lại". Run không cần chạy lại. Với run không cần phê duyệt ⇒ `Published`, không có bản ghi quyết định.
-  - Dialog kết quả **phải mở lại được** sau khi run kết thúc và sau khi tải lại trang; không có báo cáo nào được hiển thị như đã phát hành trước khi mọi con số được xác thực hoặc trước khi có quyết định phê duyệt.
-* **Trạng thái suy giảm hiển thị rõ**: nếu bất kỳ thành phần nào của tầng nhận thức không sẵn sàng, giao diện hiển thị đúng cấp suy giảm đang dùng, **không** trình bày như thể mọi thứ đều bình thường.
-* Các màn hình reviewer đầy đủ hơn (hàng chờ, xem xét run, chi tiết trích dẫn, nhật ký phê duyệt) được đặc tả trong [`docs/design/workbench-reviewer-ui-prompt.md`](./design/workbench-reviewer-ui-prompt.md).
+### 3.5. Grounded Briefing & Human Sign-off Panel
+* The briefing panel is the **fifth component** and connects directly to the cognitive tier event stream (`GET /api/v1/analysis/stream`). The panel has **three states**, not one completed timeline:
+  - **Run state**: the progress rail shows each event in order — *triage* (region + urgency level with **calibrated probability**) → *tool call* → *reasoning* → *verification* → *approval* → *briefing*. Each item is **expandable**: the tool item shows parameters and returned values; the reasoning item shows the full text; the verification item opens the **Verification Table**. The user watches the briefing **being verified**, not pre-written prose.
+  - **Waiting state**: the timeline **stops** at *Approval — Waiting* and never shows *Approval — Done* before a decision exists. The **Decision Card** sits above the briefing draft and contains: the authorization question (`Authorize the operational action proposed by UC-S1.4?`), the signed-in **Sign-off Principal** with role, a **required reason** field, and two buttons, **Approve / Reject**. Directly above the two buttons, the **Decision Basis** strip states what the reviewer is checking: the proposed action, the region and time range, verified numbers N/N, unresolved citations (must be 0), unverified numbers (must be 0), self-correction count, synthesis mode, classifier confidence provenance (calibrated or self-reported) and degradation level. A rejection carries **structured reasons** (stale NRT data, duplicate alert, conflicting evidence, action outside authority, degraded service) plus free text; the reason is written to the audit record. The briefing draft — the exact text that will be released — is shown read-only directly below the card, with a one-click Verification Table, so the reviewer **approves the actual content**, not a summary.
+  - **Result state**: after the decision (or for a run that needs no approval), the timeline collapses into a **Result Summary** with the primary button **View full briefing**. The button opens a **full-screen dialog** (or a right-side sheet on desktop) containing:
+    - the full briefing text, an audience switch (**rangers / forestry leaders / climate scientists**) and a header (stakeholder tier, cognitive path, System 1 / System 2 model, synthesis mode);
+    - **Verification Table**: one row per number — value, unit, source tool, source field, status (`Verified` / `Rewritten` / `No source`) and check result. Each row opens **Citation Detail** with: the sentence containing the number, displayed value, fact key, source tool, raw value returned by the tool, unit, provenance tag and verifier conclusion;
+    - **Sign-off Decision record**: decision, principal, UTC timestamp, reason and release status;
+    - the run **event log** and **audit id**.
+  - **Effect of the decision**: **Approve** ⇒ the briefing is released and the decision is stamped (`Published`). **Reject** ⇒ **no briefing is released** (`Withheld`), no briefing text is shown, but the decision record remains and states that "the decision was recorded". The run does not need to be re-run. For a run that needs no approval ⇒ `Published`, with no decision record.
+  - The result dialog **must reopen** after the run ends and after a page reload; no briefing is shown as published before every number is verified or before an approval decision exists.
+* **Visible degradation state**: if any component of the cognitive tier is unavailable, the interface shows the exact degradation level in use and does **not** present everything as normal.
+* The fuller reviewer screens (queue, run review, citation detail, approval log) are specified in [`docs/design/workbench-reviewer-ui-prompt.md`](./design/workbench-reviewer-ui-prompt.md).
 
 ---
 
-## 4. Minh Chứng Trực Quan Kết Xuất Thực Tế Từ Engine Python
+## 4. Visual Evidence Rendered by the Python Engine
 
-Hình ảnh dưới đây được kết xuất trực tiếp từ `apps/benchmark-cli/src/benchmark_cli/run_experiments.py` trên dữ liệu thực tế NASA FIRMS cho **Tiểu vùng sông Mekong & Việt Nam** và **Rừng Amazon**:
+The figure below is rendered directly from `apps/benchmark-cli/src/benchmark_cli/run_experiments.py` on real NASA FIRMS data for the **Mekong Subregion & Vietnam** and the **Amazon Rainforest**:
 
 ![Harmonized Burning Activity Calendar](figures/fig5_harmonized_burning_calendar.png)

@@ -2,109 +2,109 @@
   <img src="figures/flare-chronos-logo.png" alt="Flare-Chronos Official Logo" width="220" />
 </p>
 
-# 03. Kiến Trúc Hệ Thống & Đường Ống Dữ Liệu Không-Thời Gian (System Architecture & Spatio-Temporal Data Pipeline)
+# 03. System Architecture & Spatio-Temporal Data Pipeline
 
-**Dự án:** **Flare-Chronos** — *Fire Long-term Archive Resolution & Cross-sensor Harmonization for Operational Near-real-time Observation System* (*26-Year Cross-Sensor Harmonized Active Fire Intelligence & Phenology Calendar*)  
-**Cuộc thi:** 2026 NASA Space Apps Challenge — *Harmonization of MODIS and VIIRS Hot Spots*  
-**Tài liệu liên kết:** [GLOSSARY.md](../GLOSSARY.md) | [ADR-0001](adr/0001-dual-resolution-h3-fractional-allocation.md) | [ADR-0002](adr/0002-two-stage-physics-guided-frp-harmonization.md) | [ADR-0003](adr/0003-spatio-temporal-episode-deduplication-and-effort-normalization.md) | [ADR-0004](adr/0004-monorepo-deep-module-architecture.md)
+**Project:** **Flare-Chronos** — *Fire Long-term Archive Resolution & Cross-sensor Harmonization for Operational Near-real-time Observation System* (*26-Year Cross-Sensor Harmonized Active Fire Intelligence & Phenology Calendar*)  
+**Challenge:** 2026 NASA Space Apps Challenge — *Harmonization of MODIS and VIIRS Hot Spots*  
+**Related documents:** [GLOSSARY.md](../GLOSSARY.md) | [ADR-0001](adr/0001-dual-resolution-h3-fractional-allocation.md) | [ADR-0002](adr/0002-two-stage-physics-guided-frp-harmonization.md) | [ADR-0003](adr/0003-spatio-temporal-episode-deduplication-and-effort-normalization.md) | [ADR-0004](adr/0004-monorepo-deep-module-architecture.md)
 
 ---
 
-## 1. Triết Lý Thiết Kế: Deep Modules & Monorepo Architecture
+## 1. Design Philosophy: Deep Modules & Monorepo Architecture
 
-Hệ thống **Flare-Chronos** được thiết kế theo nguyên lý **Deep Modules** (*Ousterhout, 2018; Matt Pocock Codebase Design*): che giấu toàn bộ độ phức tạp của vật lý bức xạ hồng ngoại trung ($4\,\mu\text{m}$), hình học cầu dải quét (*Bow-Tie Distortion*), thiên văn học Mặt Trời ($\text{SZA}$), và thống kê hiệu chuẩn đa vệ tinh đằng sau một bề mặt giao diện (*Interface*) tinh gọn, bất biến và không phụ thuộc hiệu ứng phụ (*Side-Effect Free*).
+The **Flare-Chronos** system is designed on the **Deep Modules** principle (*Ousterhout, 2018; Matt Pocock Codebase Design*): it hides all the complexity of mid-infrared radiative physics ($4\,\mu\text{m}$), spherical scan-swath geometry (*Bow-Tie Distortion*), solar astronomy ($\text{SZA}$), and multi-satellite calibration statistics behind a lean, stable, side-effect-free interface.
 
-### 1.1. Cấu Trúc Monorepo Chuẩn (`packages/*`, `apps/*`, `docs/*`)
+### 1.1. Standard Monorepo Structure (`packages/*`, `apps/*`, `docs/*`)
 
 ```text
 flare-chronos/
-├── GLOSSARY.md                                   # Từ điển miền nghiệp vụ chuẩn hóa (Domain Ubiquitous Language)
-├── pyproject.toml                                # Cấu hình Workspace Monorepo (uv / PEP 621)
-├── .env.example                                  # Mẫu cấu hình biến môi trường (FIRMS_MAP_KEY)
+├── GLOSSARY.md                                   # Standardized domain ubiquitous language glossary
+├── pyproject.toml                                # Monorepo workspace configuration (uv / PEP 621)
+├── .env.example                                  # Environment variable configuration template (FIRMS_MAP_KEY)
 ├── docs/
-│   ├── adr/                                      # Hồ sơ Quyết định Kiến trúc (Architecture Decision Records)
+│   ├── adr/                                      # Architecture Decision Records
 │   │   ├── 0001-dual-resolution-h3-fractional-allocation.md
 │   │   ├── 0002-two-stage-physics-guided-frp-harmonization.md
 │   │   ├── 0003-spatio-temporal-episode-deduplication-and-effort-normalization.md
 │   │   └── 0004-monorepo-deep-module-architecture.md
-│   ├── figures/                                  # Bộ 5 biểu đồ khoa học xuất trực tiếp từ dữ liệu thực NASA FIRMS
-│   ├── 01_NASA_SpaceApps_Proposal.md             # Bản thuyết minh dự án toàn diện
-│   ├── 02_Cross_Sensor_Harmonization_Spec.md     # Đặc tả toán học & vật lý cảm biến MODIS - VIIRS
+│   ├── figures/                                  # 5 scientific figures exported directly from real NASA FIRMS data
+│   ├── 01_NASA_SpaceApps_Proposal.md             # Comprehensive project proposal
+│   ├── 02_Cross_Sensor_Harmonization_Spec.md     # MODIS-VIIRS sensor physics and mathematics specification
 │   ├── 03_System_Architecture_and_Data_Pipeline.md
-│   ├── 04_UI_UX_Burning_Calendar_Wireframe.md    # Thiết kế giao diện & Trực quan hóa Lịch Hoạt động Cháy
-│   └── 05_Pitch_Deck_and_Video_Script.md         # Kịch bản Pitch Deck 7 slides & Main Submission Video từng giây
+│   ├── 04_UI_UX_Burning_Calendar_Wireframe.md    # Interface design and Burning Activity Calendar visualization
+│   └── 05_Pitch_Deck_and_Video_Script.md         # 7-slide pitch deck and second-by-second main submission video script
 ├── packages/
-│   ├── harmonization-core/                       # [Deep Module] Lõi vật lý & toán học thuần túy (Zero I/O)
+│   ├── harmonization-core/                       # [Deep Module] Pure physics and mathematics core (zero I/O)
 │   │   ├── pyproject.toml
 │   │   └── src/flare_chronos_core/
-│   │       ├── domain.py                         # Thực thể miền: ThermalDetection, FireEpisode, BurningCalendarCell
-│   │       ├── geometry_h3.py                    # Giải ngược góc quét cầu MODIS/VIIRS & Phân bổ diện tích Uber H3
-│   │       ├── solar_sza.py                      # Phương trình thiên văn Spencer/NOAA tính SZA < 85°
-│   │       ├── confidence_filter.py              # Ánh xạ xác suất P(fire), lọc nhiễu SAA & Nguồn nhiệt tĩnh
-│   │       ├── deduplication.py                  # Gom cụm không-thời gian đa vệ tinh & Nỗ lực quan sát Omega(y, phi)
-│   │       ├── radiometric_calibrator.py         # Toán tử quan sát góc quét & Hiệu chuẩn chéo Aqua-SNPP (EQM)
-│   │       └── calendar_engine.py                # Động cơ tính ma trận 26 năm x 73 Pentads (HFD, HRF, SFAI Z-Score)
-│   └── firms-ingestion/                          # [Adapter Seam] Kết nối NASA LANCE FIRMS API & Open Archive
+│   │       ├── domain.py                         # Domain entities: ThermalDetection, FireEpisode, BurningCalendarCell
+│   │       ├── geometry_h3.py                    # MODIS/VIIRS spherical scan-angle inversion and Uber H3 area allocation
+│   │       ├── solar_sza.py                      # Spencer/NOAA astronomical equations for SZA < 85°
+│   │       ├── confidence_filter.py              # P(fire) probability mapping, SAA noise and static-source filtering
+│   │       ├── deduplication.py                  # Multi-satellite spatio-temporal clustering and observation effort Omega(y, phi)
+│   │       ├── radiometric_calibrator.py         # Scan-angle observation operator and Aqua-SNPP cross-calibration (EQM)
+│   │       └── calendar_engine.py                # 26-year x 73-Pentad matrix engine (HFD, HRF, SFAI Z-Score)
+│   └── firms-ingestion/                          # [Adapter Seam] NASA LANCE FIRMS API and Open Archive connector
 │       ├── pyproject.toml
 │       └── src/firms_ingestion/
-│           └── firms_client.py                   # Điều tiết tốc độ (Rate-limit pacing), phân trang & lưu đệm CSV
+│           └── firms_client.py                   # Rate-limit pacing, pagination and CSV caching
 ├── apps/
-│   └── benchmark-cli/                            # [Application] CLI thu thập dữ liệu, chạy kiểm chứng & vẽ biểu đồ
+│   └── benchmark-cli/                            # [Application] CLI for data collection, validation runs and figure rendering
 │       ├── pyproject.toml
 │       └── src/benchmark_cli/
-│           ├── fetch_real_firms.py               # Tiến trình tải dữ liệu lịch sử & NRT từ NASA FIRMS
-│           ├── run_experiments.py                # Thực thi kiểm chứng định lượng trên 1.609.182 điểm nóng thực tế
-│           └── figure_renderer.py                # Động cơ kết xuất đồ họa khoa học độ phân giải cao
+│           ├── fetch_real_firms.py               # Historical and NRT data download process from NASA FIRMS
+│           ├── run_experiments.py                # Runs quantitative validation on 1,609,182 real hot spots
+│           └── figure_renderer.py                # High-resolution scientific graphics rendering engine
 ├── src/
 │   └── harmonization/
-│       └── firms_harmonizer.py                   # [Compatibility Seam] Facade tương thích đặc tả chấm điểm tự động
+│       └── firms_harmonizer.py                   # [Compatibility Seam] Facade compatible with the automated scoring specification
 └── tests/
-    └── test_harmonization_suite.py               # Bộ kiểm thử đơn vị & bất biến vật lý (Unit & Invariant Tests)
+    └── test_harmonization_suite.py               # Unit and physical invariant test suite
 ```
 
 ---
 
-## 2. Sơ Đồ Kiến Trúc Tổng Thể (End-to-End Architecture)
+## 2. End-to-End Architecture
 
 ```mermaid
 flowchart TB
-    subgraph NASA_SOURCES["1. Nguồn Dữ Liệu Vệ Tinh NASA Earthdata & LANCE FIRMS"]
+    subgraph NASA_SOURCES["1. NASA Earthdata & LANCE FIRMS Satellite Data Sources"]
         MODIS_SP["MODIS Collection 6.1 Standard (MCD14ML)<br/>Terra (2000–2026) & Aqua (2002–2026) | 1 km Nadir"]
         VIIRS_SP["VIIRS 375m Collection 2 Standard<br/>Suomi-NPP (2012–2026) & NOAA-20 (2018–2026)"]
         NRT_STREAMS["Near-Real-Time / URT Streams (LANCE)<br/>MODIS_NRT, VIIRS_SNPP_NRT, NOAA-20_NRT, NOAA-21_NRT (2024–2026+)"]
         OPEN_FEEDS["Direct Open Regional 7-Day Feeds<br/>SouthEast Asia & South America CSVs"]
     end
 
-    subgraph INGESTION_SEAM["2. Tầng Thu Thập & Lưu Đệm (packages/firms-ingestion)"]
-        API_ADAPTER["FIRMSClient Adapter<br/>Quản lý hạn mức 5.000 tx / 10 phút & Pacing 0.35s"]
-        RAW_CACHE["Kho Lưu Trữ Dữ Liệu Thô (data/raw/*.csv & GeoParquet)<br/>1.609.182 bản ghi thực tế đã xác thực"]
+    subgraph INGESTION_SEAM["2. Ingestion & Caching Layer (packages/firms-ingestion)"]
+        API_ADAPTER["FIRMSClient Adapter<br/>5,000 tx / 10 min quota management & 0.35s pacing"]
+        RAW_CACHE["Raw Data Archive (data/raw/*.csv & GeoParquet)<br/>1,609,182 verified real records"]
     end
 
-    subgraph CORE_ENGINE["3. Lõi Đồng Bộ Hóa Vật Lý Liên Cảm Biến (packages/harmonization-core)"]
-        STEP1["Bước 1: Chuẩn Hóa Thiên Văn & Chế Độ Xử Lý<br/>Tính chính xác góc SZA(lat, lon, UTC) -> Chuẩn hóa DayNight (SZA < 85°)"]
-        STEP2["Bước 2: Ánh Xạ Xác Suất P(fire) & Khử Nhiễu Vật Lý<br/>Logistic/Thermal Mapping + Lọc vùng SAA (11°E–110°W, 7°N–55°S) + Nguồn tĩnh"]
-        STEP3["Bước 3: Khôi Phục Hình Học Dải Quét & Phân Bổ Uber H3<br/>Giải ngược góc quét θ -> Elip ΔS×ΔT -> Phân bổ trọng số H3 Res 7 & Res 8"]
-        STEP4["Bước 4: Hiệu Chuẩn Bức Xạ 2 Giai Đoạn (Two-Stage FRP Operator)<br/>Scan-Angle Observation Operator + Stratified Quantile Mapping (Aqua–SNPP)"]
-        STEP5["Bước 5: Khử Trùng Lặp Quỹ Đạo & Chuẩn Hóa Nỗ Lực Quan Sát<br/>Spatio-Temporal Clustering (τ = 60 phút) -> Fire Episode / Ω(y, φ)"]
+    subgraph CORE_ENGINE["3. Cross-Sensor Physical Harmonization Core (packages/harmonization-core)"]
+        STEP1["Step 1: Astronomical & Processing-Mode Normalization<br/>Exact SZA(lat, lon, UTC) -> DayNight normalization (SZA < 85°)"]
+        STEP2["Step 2: P(fire) Probability Mapping & Physical Noise Removal<br/>Logistic/Thermal Mapping + SAA region filter (11°E–110°W, 7°N–55°S) + Static sources"]
+        STEP3["Step 3: Scan-Swath Geometry Recovery & Uber H3 Allocation<br/>Scan-angle inversion θ -> ΔS×ΔT ellipse -> H3 Res 7 & Res 8 weight allocation"]
+        STEP4["Step 4: 2-Stage Radiometric Calibration (Two-Stage FRP Operator)<br/>Scan-Angle Observation Operator + Stratified Quantile Mapping (Aqua–SNPP)"]
+        STEP5["Step 5: Overpass Deduplication & Observation Effort Normalization<br/>Spatio-Temporal Clustering (τ = 60 minutes) -> Fire Episode / Ω(y, φ)"]
     end
 
-    subgraph CALENDAR_STORAGE["4. Tầng Lưu Trữ Phân Tích & Lịch Hoạt Động Cháy"]
-        DUCKDB["DuckDB / PostGIS Spatio-Temporal Store<br/>Bảng H3_Res7_Pentad_Cube & Episode_Catalog"]
-        CAL_ENGINE["Burning Activity Calendar Engine<br/>Ma trận 26 Năm × 73 Pentads: HFD, HRF & Chỉ số dị thường SFAI Z-Score"]
+    subgraph CALENDAR_STORAGE["4. Analytical Storage & Burning Activity Calendar Layer"]
+        DUCKDB["DuckDB / PostGIS Spatio-Temporal Store<br/>H3_Res7_Pentad_Cube & Episode_Catalog tables"]
+        CAL_ENGINE["Burning Activity Calendar Engine<br/>26-Year × 73-Pentad Matrix: HFD, HRF & SFAI Z-Score anomaly index"]
     end
 
-    subgraph PRESENTATION["5. Giao Diện Tương Tác & Cảnh Báo Sớm (Next.js 16 + FastAPI)"]
+    subgraph PRESENTATION["5. Interactive Interface & Early Warning (Next.js 16 + FastAPI)"]
         FASTAPI["FastAPI Harmonization & Analysis Service (:5901)<br/>/api/v1/analysis/stream & /api/v1/runs"]
-        DECKGL["Next.js 16 Workbench (:5900)<br/>Three.js 3D Globe, d3-geo Equal-Area SVG, H3 Res 7/8 & Lịch Nhiệt 26 Năm"]
+        DECKGL["Next.js 16 Workbench (:5900)<br/>Three.js 3D Globe, d3-geo Equal-Area SVG, H3 Res 7/8 & 26-Year Heat Calendar"]
     end
 
-    subgraph COGNITION["6. Tầng Nhận Thức Kép (apps/ai-service — LangGraph)"]
-        S1_LAYER["Tầng Phản Xạ — Decision Model<br/>Gán phân tích + vùng + khẩn cấp (xác suất hiệu chuẩn)"]
-        FAST_TIER["Tầng Báo Cáo<br/>1 Atomic Tool · 0 mô hình · ~5 ms"]
-        S2_LAYER["Tầng Suy Luận — Chat Model<br/>Tự chọn tool trong bề mặt 18 tool"]
-        GATE["Cổng Công Cụ Tất Định & Sổ Cái Số Liệu<br/>Mọi số trong báo cáo phải có trong ledger"]
-        SIGNOFF["Cổng Phê Duyệt Của Con Người<br/>Run dừng, chờ quyết định trước khi phát hành"]
-        STREAM["Luồng Sự Kiện SSE<br/>Typed events cho mọi lần chạy"]
+    subgraph COGNITION["6. Dual Cognitive Layer (apps/ai-service — LangGraph)"]
+        S1_LAYER["Reflexive Layer — Decision Model<br/>Assigns analysis + region + urgency (calibrated probability)"]
+        FAST_TIER["Briefing Layer<br/>1 Atomic Tool · 0 models · ~5 ms"]
+        S2_LAYER["Deliberative Layer — Chat Model<br/>Selects tools within an 18-tool surface"]
+        GATE["Deterministic Tool Gate & Numeric Ledger<br/>Every number in the briefing must exist in the ledger"]
+        SIGNOFF["Human Sign-Off Gate<br/>Run pauses, awaiting a decision before release"]
+        STREAM["SSE Event Stream<br/>Typed events for every run"]
     end
 
     MODIS_SP & VIIRS_SP & NRT_STREAMS & OPEN_FEEDS --> API_ADAPTER
@@ -120,67 +120,67 @@ flowchart TB
     STREAM --> DECKGL
 ```
 
-#### 2.1. Tầng Nhận Thức Kép (`apps/ai-service`)
+#### 2.1. Dual Cognitive Layer (`apps/ai-service`)
 
-Tầng nhận thức không tính toán vật lý — lõi đồng bộ hóa đã làm việc đó. Tầng nhận thức **trả lời câu hỏi vận hành** mà không để mô hình tự bịa số liệu:
+The cognitive layer does not compute physics — the harmonization core has already done so. The cognitive layer **answers operational questions** without letting the model invent numbers:
 
-| Thành phần | Trách nhiệm | Bất biến |
+| Component | Responsibility | Invariant |
 | :--- | :--- | :--- |
-| **Tầng phản xạ** | Gán phân tích (`1` trong `15` Use Cases: `5` System 1 + `10` System 2), định vùng, đánh giá khẩn cấp | Trả lời bằng xác suất **hiệu chuẩn**; chạy chuỗi *decision model → chat model → trích xuất tất định*; mỗi lần lùi bậc được ghi lại |
-| **Tầng báo cáo** | Tra cứu `1` bước, thẻ dữ kiện, cảnh báo khẩn | **Không** gọi mô hình · **không** chạm Domain Diagnostic Tool · **không** viết diễn giải |
-| **Tầng suy luận** | Chọn tool, suy luận nhiều bước, viết diễn giải | Bề mặt `18` tool tất định gắn cho mô hình (`9` Atomic + `9` Domain Diagnostic, trong tổng `19` hàm `@tool`; máy đọc CSV thô cố ý nằm ngoài registry để mô hình không chạm dữ liệu thô); mọi định lượng phải đến từ tool và được ghi vào `VerifiedFactsLedger` |
-| **Cổng công cụ tất định** | Đối chiếu từng con số trong bản thảo với sổ cái trước khi phát hành | Số không có nguồn ⇒ trả về mô hình viết lại; hết ngân sách ⇒ rơi về bộ sinh tất định |
-| **Cổng phê duyệt con người** | Run dừng chờ quyết định cho báo cáo có hành động hiện trường | Bị từ chối ⇒ **không phát hành** báo cáo nào; quyết định luôn được ghi lại |
+| **Reflexive layer** | Assigns the analysis (`1` of `15` Use Cases: `5` System 1 + `10` System 2), determines the region, assesses urgency | Answers with **calibrated** probabilities; runs the chain *decision model → chat model → deterministic extraction*; every fallback is recorded |
+| **Briefing layer** | `1`-step lookup, fact cards, urgent alerts | **Does not** call a model · **does not** touch the Domain Diagnostic Tool · **does not** write prose |
+| **Deliberative layer** | Selects tools, performs multi-step reasoning, writes explanations | An `18`-tool deterministic surface bound to the model (`9` Atomic + `9` Domain Diagnostic, out of `19` `@tool` functions in total; the raw CSV reader is deliberately outside the registry so the model never touches raw data); every quantity must come from a tool and be recorded in `VerifiedFactsLedger` |
+| **Deterministic tool gate** | Checks every number in the draft against the ledger before release | A number without provenance ⇒ returned to the model for rewrite; budget exhausted ⇒ fall back to the deterministic generator |
+| **Human sign-off gate** | The run pauses for a decision on briefings with field actions | If rejected ⇒ **no** briefing is released; the decision is always recorded |
 
-Mỗi tầng được gắn qua **Endpoint Profile** (giao thức, endpoint, model, khoá API, tuỳ chọn request) đọc từ cấu hình tường minh — **không** đọc cấu hình agent trên máy người dùng. Mô hình quyết định phục vụ tầng phản xạ chạy trên **node suy luận của chính dự án**, nên tầng này **không tốn credit đám mây** và vẫn hoạt động khi dịch vụ lưu trữ không sẵn sàng.
+Each layer is bound through an **Endpoint Profile** (protocol, endpoint, model, API key, request options) read from explicit configuration — **not** from the agent configuration on the user's machine. The decision model that serves the reflexive layer runs on the **project's own inference node**, so this layer **consumes no cloud credits** and keeps working when the hosted service is unavailable.
 
-Chi tiết mô hình luồng, số đo hiệu chuẩn và bảng chi phí: [`exports/MODEL_FLOW.md`](../exports/MODEL_FLOW.md).
+Model flow details, calibration measurements and the cost table: [`exports/REPORT.md`](../exports/REPORT.md).
 
 ---
 
-## 3. Thiết Kế Luồng Xử Lý Dữ Liệu Chi Tiết (Sequence Workflow)
+## 3. Detailed Data Processing Workflow (Sequence Workflow)
 
-Khi một nhà quản lý rừng, chỉ huy cứu hỏa hoặc nhà nghiên cứu khí hậu khoanh chọn một **Khu vực quan tâm (AOI)** trên bản đồ (hoặc chạy qua CLI), luồng xử lý diễn ra qua 5 giai đoạn chặt chẽ:
+When a forest manager, fire commander or climate researcher selects an **Area of Interest (AOI)** on the map (or runs the CLI), processing proceeds through 5 strict stages:
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor User as Nhà Quản Lý Cháy / Nhà Khoa Học
+    actor User as Fire Manager / Scientist
     participant API as FastAPI / Benchmark CLI
     participant Ingest as FIRMSClient (firms-ingestion)
     participant Core as Harmonization Core (flare_chronos_core)
     participant DB as DuckDB / GeoParquet Cube
 
-    User->>API: Chọn AOI (Bounding Box / Polygon) & Giai đoạn (2000–2026)
-    API->>Ingest: Truy vấn dữ liệu MODIS (SP/NRT) & VIIRS (SNPP/NOAA20/NOAA21)
-    alt Đã có trong bộ đệm cục bộ (Cache Hit)
-        Ingest-->>API: Trả về DataFrame từ GeoParquet / CSV Cache
-    else Chưa có trong bộ đệm (Cache Miss)
-        Ingest->>Ingest: Chia nhỏ cửa sổ thời gian & Điều tiết nhịp gọi (Pacing 0.35s)
-        Ingest-->>API: Tải từ NASA LANCE FIRMS API & Lưu cache bền vững
+    User->>API: Select AOI (Bounding Box / Polygon) & Period (2000–2026)
+    API->>Ingest: Query MODIS (SP/NRT) & VIIRS (SNPP/NOAA20/NOAA21) data
+    alt Present in local cache (Cache Hit)
+        Ingest-->>API: Return DataFrame from GeoParquet / CSV Cache
+    else Not present in cache (Cache Miss)
+        Ingest->>Ingest: Split time windows & pace requests (Pacing 0.35s)
+        Ingest-->>API: Download from NASA LANCE FIRMS API & persist cache
     end
 
     API->>Core: parse_firms_dataframe() -> List[ThermalDetection]
-    Core->>Core: 1. harmonize_daynight_flag() qua góc thiên đỉnh Mặt Trời SZA < 85°
-    Core->>Core: 2. compute_unified_detection_probability() & Lọc nhiễu SAA / Nguồn tĩnh
+    Core->>Core: 1. harmonize_daynight_flag() via solar zenith angle SZA < 85°
+    Core->>Core: 2. compute_unified_detection_probability() & SAA / static-source filtering
     Core->>Core: 3. reconstruct_instantaneous_footprint() & allocate_footprint_to_h3(Res 7, Res 8)
     Core->>Core: 4. apply_two_stage_frp_calibration() (Observation Operator + EQM)
-    Core->>Core: 5. cluster_fire_episodes(τ = 60 min) & Chia hệ số nỗ lực quan sát Ω(y, φ)
-    Core->>Core: 6. build_burning_activity_calendar() -> Ma trận 26 Năm × 73 Pentads
-    Core-->>DB: Lưu trữ FireEpisode & BurningCalendarCell
-    DB-->>User: Hiển thị Lịch Hoạt Động Cháy (HFD, HRF, SFAI) & Xuất GeoJSON/CSV
+    Core->>Core: 5. cluster_fire_episodes(τ = 60 min) & divide by observation effort Ω(y, φ)
+    Core->>Core: 6. build_burning_activity_calendar() -> 26-Year × 73-Pentad Matrix
+    Core-->>DB: Store FireEpisode & BurningCalendarCell
+    DB-->>User: Display Burning Activity Calendar (HFD, HRF, SFAI) & export GeoJSON/CSV
 ```
 
 ---
 
-## 4. Thiết Kế Cơ Sở Dữ Liệu Không-Thời Gian (DuckDB / PostGIS + Uber H3 Schema)
+## 4. Spatio-Temporal Database Design (DuckDB / PostGIS + Uber H3 Schema)
 
-Để truy vấn tức thời (dưới `50 ms`) lịch sử 26 năm trên bất kỳ vùng AOI nào mà không cần thực hiện phép giao cắt hình học đa giác (`ST_Intersects`) nặng nề lúc truy vấn, **Flare-Chronos** chuyển toàn bộ bài toán không gian sang phép kết nối khóa nguyên 64-bit (`UINT64 H3 Index`) trên **DuckDB / Apache Parquet**.
+To query 26 years of history for any AOI instantly (under `50 ms`) without expensive polygon geometry intersection (`ST_Intersects`) at query time, **Flare-Chronos** moves the entire spatial problem to 64-bit integer key joins (`UINT64 H3 Index`) on **DuckDB / Apache Parquet**.
 
-### 4.1. Lược Đồ Bảng Dữ Liệu Cốt Lõi (SQL DDL)
+### 4.1. Core Table Schema (SQL DDL)
 
 ```sql
--- 1. Bảng Điểm Nóng Đã Chuẩn Hóa Mức Cảm Biến (Harmonized Detections)
+-- 1. Sensor-Level Harmonized Hot Spot Table (Harmonized Detections)
 CREATE TABLE harmonized_detections (
     detection_id            VARCHAR PRIMARY KEY,
     acq_datetime_utc        TIMESTAMPTZ NOT NULL,
@@ -209,7 +209,7 @@ CREATE TABLE harmonized_detections (
     h3_res8_cell            VARCHAR(16) NOT NULL
 );
 
--- 2. Bảng Sự Kiện Cháy Độc Lập Sau Khử Trùng Lặp Đa Vệ Tinh (Deduplicated Fire Episodes)
+-- 2. Independent Fire Episode Table After Multi-Satellite Deduplication (Deduplicated Fire Episodes)
 CREATE TABLE fire_episodes (
     episode_id              VARCHAR PRIMARY KEY,
     start_utc               TIMESTAMPTZ NOT NULL,
@@ -230,7 +230,7 @@ CREATE TABLE fire_episodes (
     effort_norm_episodes    DOUBLE NOT NULL
 );
 
--- 3. Khối Dữ Liệu Lịch Hoạt Động Cháy (H3 Resolution 7 x Year x Pentad Cube)
+-- 3. Burning Activity Calendar Cube (H3 Resolution 7 x Year x Pentad Cube)
 CREATE TABLE h3_burning_calendar_cube (
     h3_res7_cell            VARCHAR(16) NOT NULL,
     year                    SMALLINT NOT NULL,
@@ -251,33 +251,33 @@ CREATE INDEX idx_episodes_h3_time ON fire_episodes (h3_res7_cell, start_utc);
 
 ---
 
-## 5. Đặc Tả REST API & Kết Nối NASA LANCE FIRMS
+## 5. REST API Specification & NASA LANCE FIRMS Integration
 
-### 5.1. Quản Lý Tích Hợp NASA FIRMS API (`firms_client.py`)
+### 5.1. NASA FIRMS API Integration Management (`firms_client.py`)
 
-Hệ thống kết nối trực tiếp với các endpoint chính thức của NASA LANCE FIRMS sử dụng `FIRMS_MAP_KEY`:
-1. **Kiểm tra phạm vi khả dụng của từng cảm biến (`Data Availability Endpoint`)**:
+The system connects directly to the official NASA LANCE FIRMS endpoints using `FIRMS_MAP_KEY`:
+1. **Check data availability for each sensor (`Data Availability Endpoint`)**:
    ```http
    GET https://firms.modaps.eosdis.nasa.gov/api/data_availability/csv/{MAP_KEY}/all
    ```
-   Bản ghi thực tế trả về từ khóa API của dự án xác nhận chính xác độ phủ thời gian:
+   The actual records returned by the project API key confirm the exact temporal coverage:
    - `MODIS_SP`: `2000-11-01` $\to$ `2026-07-31` | `MODIS_NRT`: `2026-08-01` $\to$ `2026-10-20+`
    - `VIIRS_SNPP_SP`: `2012-01-20` $\to$ `2026-06-30` | `VIIRS_SNPP_NRT`: `2026-07-01` $\to$ `2026-10-20+`
    - `VIIRS_NOAA20_SP`: `2018-04-01` $\to$ `2026-06-30` | `VIIRS_NOAA20_NRT`: `2026-07-01` $\to$ `2026-10-20+`
    - `VIIRS_NOAA21_SP`: `2023-03-01` $\to$ `2026-06-30` | `VIIRS_NOAA21_NRT`: `2024-01-17` $\to$ `2026-10-20+`
 
-2. **Truy vấn điểm nóng theo vùng và cửa sổ lịch sử (`Area CSV Endpoint`)**:
+2. **Query hot spots by region and historical window (`Area CSV Endpoint`)**:
    ```http
    GET https://firms.modaps.eosdis.nasa.gov/api/area/csv/{MAP_KEY}/{SOURCE}/{west,south,east,north}/{DAY_RANGE}/{YYYY-MM-DD}
    ```
 
-### 5.2. Đặc Tả Các Endpoint Của Dịch Vụ Flare-Chronos Backend
+### 5.2. Flare-Chronos Backend Service Endpoint Specification
 
-| Phương thức & Đường dẫn | Mô tả Chức năng | Tham số Đầu vào | Cấu trúc Phản hồi (JSON / GeoParquet) |
+| Method & Path | Function Description | Input Parameters | Response Structure (JSON / GeoParquet) |
 | :--- | :--- | :--- | :--- |
-| `POST /api/v1/harmonize/aoi` | Thực thi đồng bộ hóa toàn trình cho một vùng AOI và trả về danh sách `FireEpisode` đã khử trùng lặp kèm đa giác elip footprint. | `bbox` hoặc `geojson_polygon`, `start_date`, `end_date`, `h3_resolution` (`7` hoặc `8`) | Danh sách `FireEpisode`, trọng số phân bổ `h3_weights`, thống kê tỷ lệ nén trùng lặp và số điểm nhiễu SAA/Static đã lọc. |
-| `GET /api/v1/calendar/matrix` | Xuất ma trận **Harmonized Burning Activity Calendar** (`26 Năm × 73 Pentads`) cho vùng AOI. | `bbox` hoặc `h3_cells[]`, `metric` (`hfd`, `hrf`, `sfai`) | Ma trận 2 chiều `26 × 73`, đường cơ sở khí hậu theo từng Pentad, danh sách các kỳ dị thường cực đoan ($\text{SFAI} \ge 2.5$). |
-| `GET /api/v1/calibration/diagnostics` | Trả về bộ tham số hiệu chuẩn chéo Aqua–SNPP trên vùng AOI và chỉ số kiểm định ($R^2, \text{RMSE}, D_{\text{KS}}$). | `region_tag` hoặc `bbox` | Tham số `CrossSensorCalibrationModel`, đường cong Quantile Mapping và phân phối xác suất tích lũy (ECDF). |
-| `GET /api/v1/export/geojson` | Xuất dữ liệu điểm nóng & elip footprint `Scan × Track` chuẩn GeoJSON để nạp vào QGIS / ArcGIS / Deck.gl. | `bbox`, `date_window`, `include_footprints=true` | `FeatureCollection` gồm các đa giác elip định hướng theo góc phương vị quỹ đạo $\alpha_{\text{track}}$. |
-| `GET /api/v1/analysis/stream` | Chạy một Use Case của tầng nhận thức kép và **phát sự kiện trực tiếp** (Server-Sent Events) khi run tiến triển: phân loại, tool, suy luận, kiểm chứng, yêu cầu phê duyệt, báo cáo cuối. | `use_case_id`, `query`, `thread_id` | Chuỗi khung SSE `event: <loại sự kiện>` + `data: <JSON>`; các loại: `run_started`, `node_completed`, `tool_result`, `reasoning`, `message`, `clarification_requested`, `sign_off_required`, `verification`, `briefing`, `run_paused`, `run_completed`, `run_failed`. |
-| `POST /api/v1/analysis/resume` | Tiếp tục một run đang **dừng chờ** (chờ phê duyệt của con người hoặc chờ làm rõ) bằng câu trả lời của con người. | `thread_id`, `approved`, `reason` (người quyết định lấy từ token `Authorization: Bearer`, không nhận từ body) | Kết quả run đã tiếp tục: `sign_off_decision`, `final_briefing`, `verification_report`. |
+| `POST /api/v1/harmonize/aoi` | Runs the full harmonization pipeline for an AOI and returns the deduplicated `FireEpisode` list with footprint ellipses. | `bbox` or `geojson_polygon`, `start_date`, `end_date`, `h3_resolution` (`7` or `8`) | `FireEpisode` list, `h3_weights` allocation weights, deduplication compression statistics, and the count of filtered SAA/static noise points. |
+| `GET /api/v1/calendar/matrix` | Exports the **Harmonized Burning Activity Calendar** matrix (`26 Years × 73 Pentads`) for the AOI. | `bbox` or `h3_cells[]`, `metric` (`hfd`, `hrf`, `sfai`) | `26 × 73` 2-D matrix, per-pentad climate baseline, list of extreme anomaly periods ($\text{SFAI} \ge 2.5$). |
+| `GET /api/v1/calibration/diagnostics` | Returns the Aqua–SNPP cross-calibration parameter set for the AOI and the validation metrics ($R^2, \text{RMSE}, D_{\text{KS}}$). | `region_tag` or `bbox` | `CrossSensorCalibrationModel` parameters, Quantile Mapping curve and cumulative probability distribution (ECDF). |
+| `GET /api/v1/export/geojson` | Exports hot spot data and `Scan × Track` footprint ellipses as standard GeoJSON for QGIS / ArcGIS / Deck.gl. | `bbox`, `date_window`, `include_footprints=true` | `FeatureCollection` of ellipse polygons oriented by the orbital azimuth $\alpha_{\text{track}}$. |
+| `GET /api/v1/analysis/stream` | Runs a dual cognitive layer Use Case and **streams events live** (Server-Sent Events) as the run progresses: classification, tool, reasoning, verification, approval request, final briefing. | `use_case_id`, `query`, `thread_id` | SSE frame sequence `event: <event type>` + `data: <JSON>`; types: `run_started`, `node_completed`, `tool_result`, `reasoning`, `message`, `clarification_requested`, `sign_off_required`, `verification`, `briefing`, `run_paused`, `run_completed`, `run_failed`. |
+| `POST /api/v1/analysis/resume` | Resumes a run that is **paused** (awaiting human approval or clarification) with the human response. | `thread_id`, `approved`, `reason` (the deciding principal is taken from the `Authorization: Bearer` token, not from the body) | Result of the resumed run: `sign_off_decision`, `final_briefing`, `verification_report`. |
