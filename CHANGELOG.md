@@ -1,5 +1,11 @@
 # flare-chronos
 
+## 2.0.4
+
+### Patch Changes
+
+- 1d60cca: 12/11/2026 — .github/workflows/release.yml — updated: use a PAT for changesets so release tags trigger CD
+
 ## 2.0.3
 
 ### Patch Changes
