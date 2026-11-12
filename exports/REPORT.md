@@ -7,7 +7,7 @@ Codebase architecture, harmonization physics, empirical validation and the dual-
 
 Challenge: Harmonization of MODIS and VIIRS Hot Spots
 
-**Document Version:** 2.0.3 · English · 186 offline tests + 6 live tests across 23 files
+**Document Version:** 2.0.4 · English · 186 offline tests + 6 live tests across 23 files
 :::
 
 ---
