@@ -30,9 +30,11 @@ CD runs on a tag push matching `v*.*.*` (`.github/workflows/cd.yml`). It builds 
 ## Current production host
 
 - Host alias: `sang` (`node.sang0023.io.vn`), user `sang`.
-- Public IP: `163.227.231.153`. API on `:5901`, Workbench on `:5900`.
-- Other services on this host (Pterodactyl, Portainer, beszel) are untouched; the two
-  new containers use only ports `8765` and `3000`, which were verified free.
+- Public IP: `163.227.231.25`. API on `:5901`.
+- The Workbench is hosted on Vercel (project `flare-chronos-workbench`, root directory
+  `apps/workbench`). The VPS Workbench container stays for one release cycle as a
+  rollback and receives no traffic. See ADR-0018.
+- Other services on this host (Pterodactyl, Portainer, beszel) are untouched.
 
 ## Release procedure
 
@@ -43,15 +45,18 @@ CD runs on a tag push matching `v*.*.*` (`.github/workflows/cd.yml`). It builds 
 ## Reverse proxy (nginx)
 
 `/etc/nginx/sites-available/flare-chronos.resonance.io.vn` proxies `/` to the Workbench
-(`127.0.0.1:5900`) and `/api/` to the API (`127.0.0.1:5901`). DNS for the domain must
-point at the VPS IP before running Certbot:
+(`127.0.0.1:5900`) and `/api/` to the API (`127.0.0.1:5901`) on the VPS. After cutover,
+only the `api.flare-chronos.resonance.io.vn` record points at the VPS; the Vercel
+Workbench calls the API directly at that host. The `/` proxy remains for one release
+cycle as a rollback path.
 
-```
-sudo certbot --nginx -d flare-chronos.resonance.io.vn
-```
+The API requires `AI_SERVICE_CORS_ORIGINS=https://flare-chronos.resonance.io.vn` on the
+VPS so the Vercel origin can call it.
 
-The Workbench calls the API through the relative `/api` path, so it works on any host
-behind this proxy.
+The Workbench reads `data/processed/burning_calendar.json` and
+`data/processed/empirical_results.json` at request time. Copies live in
+`apps/workbench/data/processed` and are included in the Next.js server trace so the
+Vercel function ships them.
 
 ## Rollback
 

@@ -6,6 +6,11 @@ const nextConfig: NextConfig = {
   output: 'standalone',
   reactCompiler: true,
   devIndicators: false,
+  // The loaders read these two artifacts with `node:fs` at request time.
+  // Trace them so the Vercel server function ships them in its bundle.
+  outputFileTracingIncludes: {
+    '/*': ['data/processed/burning_calendar.json', 'data/processed/empirical_results.json'],
+  },
   async headers() {
     return [
       {
