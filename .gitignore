@@ -56,4 +56,7 @@ node_modules/
 *.srt
 *.vtt
 .vercel
-.env*
+.env
+.env.local
+.env.*.local
+!.env.example

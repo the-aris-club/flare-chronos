@@ -40,7 +40,8 @@ CD runs on a tag push matching `v*.*.*` (`.github/workflows/cd.yml`). It builds 
 
 1. Merge to `main`.
 2. Create a tag: `git tag vX.Y.Z && git push origin vX.Y.Z`.
-3. The CD workflow builds, pushes, and deploys. Smoke tests hit `/health` on the API and `/` on the Workbench.
+3. The CD workflow builds, pushes, and deploys the API image. Smoke tests hit `/health` on the API and `/` on the Workbench container. That container is a rollback copy and receives no public traffic.
+4. A push to `main` also deploys the Workbench on Vercel through Git integration. See the verification steps below.
 
 ## Reverse proxy (nginx)
 
@@ -58,9 +59,22 @@ The Workbench reads `data/processed/burning_calendar.json` and
 `apps/workbench/data/processed` and are included in the Next.js server trace so the
 Vercel function ships them.
 
+## Verification after cutover
+
+Run these checks after the DNS change. Results from the first cutover are in brackets.
+
+1. `vercel domains verify flare-chronos.resonance.io.vn` — expected `configured_correctly`.
+2. `curl -sS -o /dev/null -w '%{http_code}' https://flare-chronos.resonance.io.vn/workbench/mekong` — expected `200`. [200]
+3. Check the served JavaScript bundle for `api.flare-chronos.resonance.io.vn`. [found]
+4. `curl -sS -o /dev/null -w '%{http_code}' https://api.flare-chronos.resonance.io.vn/health` — expected `200`. [200]
+5. `curl -sS -o /dev/null -w '%{http_code}' https://api.flare-chronos.resonance.io.vn/api/v1/analysis/use-cases` — expected `401`. [401]
+6. From a browser on the frontend origin, fetch the use-cases URL. A `401` response with no CORS error means CORS is correct. [401, no CORS error]
+
+Do not use `/health` on the main domain. That path belongs to the API host now. Re-point uptime monitors to `https://api.flare-chronos.resonance.io.vn/health`.
+
 ## Rollback
 
-Edit `/opt/flare-chronos/docker-compose.yml` (or set `TAG=vX.Y.Z-1` in `.env`) and run `docker compose up -d`.
+To return the frontend to the VPS, edit the DNS record for `flare-chronos.resonance.io.vn` back to `A 163.227.231.25` with proxy on. Then run `docker compose up -d` in `/opt/flare-chronos` to start the Workbench container. To roll back the API only, edit `/opt/flare-chronos/docker-compose.yml` (or set `TAG=vX.Y.Z-1` in `.env`) and run `docker compose up -d`.
 
 ## Notes
 

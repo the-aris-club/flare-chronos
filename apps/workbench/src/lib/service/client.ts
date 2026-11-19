@@ -1,6 +1,19 @@
 import { createSseParser, type ServiceEvent } from './sse';
 
-export const SERVICE_URL = process.env.NEXT_PUBLIC_AI_SERVICE_URL ?? 'http://127.0.0.1:5901';
+export function resolveServiceUrl(
+  nodeEnv: string | undefined,
+  configured: string | undefined,
+): string {
+  if (configured) return configured;
+  return nodeEnv === 'production'
+    ? 'https://api.flare-chronos.resonance.io.vn'
+    : 'http://127.0.0.1:5901';
+}
+
+export const SERVICE_URL = resolveServiceUrl(
+  process.env.NODE_ENV,
+  process.env.NEXT_PUBLIC_AI_SERVICE_URL,
+);
 
 export type FailureReason = 'unauthorized' | 'forbidden' | 'not_found' | 'unavailable';
 export type ServiceResult<T> = { ok: true; data: T } | { ok: false; reason: FailureReason };

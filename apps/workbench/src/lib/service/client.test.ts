@@ -1,8 +1,26 @@
 import { describe, expect, test } from 'bun:test';
-import { callService } from './client';
+import { callService, resolveServiceUrl } from './client';
 
 const respond = (status: number, body: unknown = {}) =>
   (async () => new Response(JSON.stringify(body), { status })) as unknown as typeof fetch;
+
+describe('resolveServiceUrl', () => {
+  test('a configured URL wins in every environment', () => {
+    const expected = 'https://example.test/api';
+    expect(resolveServiceUrl('production', expected)).toBe(expected);
+    expect(resolveServiceUrl('development', expected)).toBe(expected);
+  });
+
+  test('production falls back to the API host, not localhost', () => {
+    expect(resolveServiceUrl('production', undefined)).toBe(
+      'https://api.flare-chronos.resonance.io.vn',
+    );
+  });
+
+  test('local development still uses the loopback service', () => {
+    expect(resolveServiceUrl('development', undefined)).toBe('http://127.0.0.1:5901');
+  });
+});
 
 describe('callService', () => {
   test('sends the bearer token and returns the parsed body', async () => {

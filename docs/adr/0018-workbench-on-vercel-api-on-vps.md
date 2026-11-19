@@ -6,21 +6,21 @@ status: accepted
 
 ## Context
 
-The `flare-chronos.resonance.io.vn` DNS record kept the old VPS IP after the host was re-IP'd. Cloudflare returned 522 while both containers were healthy; the application was not down. The deployment had one origin IP in Cloudflare DNS and no second frontend.
+The DNS record for `flare-chronos.resonance.io.vn` kept the old VPS address when we changed the host address. Cloudflare sent error 522 to users. Both containers ran normally. The application did not fail. The deployment had one origin address in Cloudflare DNS. It had no second frontend.
 
-Moving both parts off the VPS is not a config change. The AI service keeps two SQLite stores and a cross-request sign-off checkpoint, relies on a single in-process lock, loads the native `h3` library, and reads 151 MB of FIRMS CSVs at request time. Cloudflare Workers run Python in Pyodide and cannot load native `h3`. Vercel Hobby caps functions at 300 s, equal to the configured model timeout.
+Moving both parts away from the VPS needs more than a configuration change. The AI service stores two SQLite files and a sign-off checkpoint. It uses one lock in one process. It loads the native `h3` library. It reads 151 MB of FIRMS CSV files when it handles a request. Cloudflare Workers run Python in Pyodide. They cannot load native `h3`. Vercel Hobby limits a function to 300 seconds. This equals the configured model timeout.
 
 ## Decision
 
-Host the Next.js Workbench on Vercel as the primary frontend. Keep the FastAPI service on the VPS behind `api.flare-chronos.resonance.io.vn`. Split the host names instead of adding a Cloudflare Worker: there is no origin IP for the frontend to drift from.
+Host the Next.js Workbench on Vercel. Use it as the primary frontend. Keep the FastAPI service on the VPS. Use the host `api.flare-chronos.resonance.io.vn` for that service. Do not add a Cloudflare Worker. A split host name removes the origin address that can drift.
 
-The Vercel build sets `NEXT_PUBLIC_AI_SERVICE_URL=https://api.flare-chronos.resonance.io.vn`. The API sets `AI_SERVICE_CORS_ORIGINS=https://flare-chronos.resonance.io.vn`. The two processed JSON artifacts are copied into `apps/workbench/data/processed` and included in the Next.js server trace.
+The Vercel build sets `NEXT_PUBLIC_AI_SERVICE_URL=https://api.flare-chronos.resonance.io.vn`. The API sets `AI_SERVICE_CORS_ORIGINS=https://flare-chronos.resonance.io.vn`. We copy two processed JSON files into `apps/workbench/data/processed`. We add them to the Next.js server trace.
 
-We accept degraded mode when the VPS API is down: the Vercel pages still render from bundled data and the service connection shows `Unavailable` with retry.
+When the VPS API fails, the Vercel pages still show bundled data. The service connection shows `Unavailable` and retries. We accept this state.
 
 ## Consequences
 
-- A DNS or host failure on the VPS no longer takes the whole site down. It takes the API down only.
-- Briefing, sign-off, and the review queue still need the VPS. Full API resilience needs a separate migration to a durable external store and object storage (ADR-0011's Postgres upgrade path).
-- The VPS Workbench container and nginx `/` proxy stay for one release cycle as a rollback; no traffic is sent to them.
-- Frontend releases follow Vercel Git integration. API releases keep the tag-based GHCR/CD flow.
+- A DNS or host failure on the VPS no longer stops the whole site. It stops the API only.
+- Briefing, sign-off, and the review queue still need the VPS. Full API resilience needs a separate move to a durable external store and object storage. See ADR-0011.
+- The VPS Workbench container and the nginx `/` proxy stay for one release cycle. They are a rollback path. We send no traffic to them.
+- Frontend releases use Vercel Git integration. API releases keep the tag-based GHCR and CD flow.
